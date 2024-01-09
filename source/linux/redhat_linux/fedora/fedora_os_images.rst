@@ -11,7 +11,7 @@ Fedora社区提供了一系列Fedora Linux为基础的面向不同用户的操�
   - Fedora Workstation: 使用 :strike`Gnome3` Gnome4x 技术的全功能现代化桌面环境
   - Fedora :ref:`kde` Plasma Desktop：采用KDE的经典全功能桌面环境
   - Fedora :ref:`xfce` : 轻量级 Xfce 桌面环境 :strike:`这是我主要使用的桌面` 虽然更新缓慢但是非常稳定和轻量级
-  - Fedora Cinnamon: 非常有特色的基于 Gnome3 fork出来精美且轻量的现代化桌面(采用Gnome2设计)，设置简洁但默认已经非常调优，我准备作为后备操作系统(例如使用U盘运行)
+  - Fedora Cinnamon: 非常有特色的基于 Gnome3 fork出来精美且轻量的现代化桌面(采用Gnome2设计)，设置简洁但默认已经非常调优(参考 `Linux Mint Starts Working On Wayland For Cinnamon, Likely Not Fully Ready Until 2026 <https://www.phoronix.com/news/Linux-Mint-Wayland-Progress>`_ 目前尚未完全支持 :ref:`wayland` )
   - Fedora LXQT: 轻量级基于QT的桌面环境
   - Fedora LXDE: 轻量级传统设计的桌面环境
   - Fedora MATE-Compiz : 基于Gnome2并集成了3D窗口管理器，适合比较古老低配的硬件环境

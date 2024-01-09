@@ -150,7 +150,7 @@ Gentoo Linux在MacBook Air配置Wifi
 :ref:`wpa_supplicant`
 =======================
 
-接下来就是常规槽错，通过 :ref:`wpa_supplicant` 配置无线认证和接入WiFi
+接下来就是常规操作，通过 :ref:`wpa_supplicant` 配置无线认证和接入WiFi
 
 参考
 =======

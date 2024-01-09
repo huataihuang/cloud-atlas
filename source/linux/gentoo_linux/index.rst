@@ -14,6 +14,7 @@ Gentoo Linux
    gentoo_version_specifier.rst
    gentoo_makeconf.rst
    gentoo_emerge.rst
+   gentoo_overlays.rst
    upgrade_gentoo.rst
    gentoo_neovim.rst
    gentoo_dbus.rst

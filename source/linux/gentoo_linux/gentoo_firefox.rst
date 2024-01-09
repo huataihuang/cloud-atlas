@@ -21,6 +21,29 @@ Gentoo Firefox
 
 需要注意，由于Firefox使用了 :ref:`rust` 代码，所以天然的建议使用LLVM来最为编译后端，所以建议使用 Clang 而不是 GCC来完成编译。这里的USE参数默认有一个 ``clang`` 表示采用Clang完成软件编译。
 
+在 :ref:`wayland` 运行
+=========================
+
+.. note::
+
+   只要 ``wayland``  USE flag设置， ``www-client/firefox`` 和 ``www-client/firefox-bin`` 默认就会激活 **wayland** ，这段应该不用设置。不过，如果在Wayland环境运行还是失败，可以尝试
+
+从Firefox 65开始，就可以在 :ref:`wayland` 环境中原生运行Firefox，只需要启动时带上 ``GDK_BACKEND=wayland`` 环境变量(当然 :ref:`gentoo_emerge` 时要配置 ``walyand`` USE flag):
+
+.. literalinclude:: gentoo_firefox/wayland_firefox
+   :caption: 在wayland环境运行firefox
+
+此外，要确保通用Wayland环境变量，这样才能确保GDK和compositer通讯::
+
+   XDG_RUNTIME_DIR
+   WAYLAND_DISPLAY
+   XDG_SESSION_TYPE
+
+要设置firefox始终使用Wayland后端，可以在 ``~/.bashrc`` 中设置:
+
+.. literalinclude:: gentoo_firefox/wayland_firefox_profile
+   :caption: 在 ``~/.bashrc`` 中设置 firefox 使用Wayland
+
 初步使用
 ==========
 

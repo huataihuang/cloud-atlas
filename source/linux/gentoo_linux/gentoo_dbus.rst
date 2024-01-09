@@ -80,6 +80,11 @@ D-Bus session bus
    :language: bash
    :caption: 使用 ``dbus-launch`` 来加载窗口管理器，确保窗口管理器会话支持 session bus
 
+另外，在 :ref:`gentoo_sway` (参考官方 `gentoo wiki: Sway <https://wiki.gentoo.org/wiki/Sway>`_ )，采用 ``dbus-run-session`` 命令来运行 ``sway`` 应该也是确保 ``session bus`` 的方法:
+
+.. literalinclude:: gentoo_sway/start_sway
+   :caption: 使用 ``dbus-run-session`` 启动 sway 这样能够正确获得 :ref:`dbus_session_bus`
+
 使用dbus案例
 =============
 

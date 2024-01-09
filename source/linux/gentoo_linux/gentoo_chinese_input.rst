@@ -101,7 +101,7 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 .. literalinclude:: gentoo_use_flags/rebuild_world_after_change_use
    :caption: 在修改了全局 USE flag 之后对整个系统进行更新
 
-完成后检查，发现 ``fcitx5`` 运行报错依旧，这是窗口管理器 :ref:`dbus_session_bus` 没有创建，仔细看了 Gentoo Sway 文档，原来 ``sway`` 需要通过shell脚本包装 ``XDG_RUNTIME_DIR`` 变量，并且使用 ``dbus-run-session`` 命令来启动(方法一) 或者 采用 ``elogind`` 加入到启动服务中(方法二)，这样才能实现 :ref:`dbus_session_bus` (详见 :ref:`gentoo_sway` ):
+完成后检查，发现 ``fcitx5`` 运行报错依旧，这是窗口管理器 :ref:`dbus_session_bus` 没有创建，仔细看了 Gentoo Sway 文档，原来 ``sway`` 需要通过shell脚本包装 ``XDG_RUNTIME_DIR`` 变量，并且使用 ``dbus-run-session`` 命令来启动(方法一) 或者 采用 ``elogind`` 加入到启动服务中(来完成环境变量设置)，然后使用 ``dbus-run-session`` (方法二)，这样才能实现 :ref:`dbus_session_bus` (详见 :ref:`gentoo_sway` ):
 
 **我采用方法一** :
 
@@ -116,6 +116,11 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 .. literalinclude:: gentoo_sway/bashrc
    :language: bash
    :caption: 配置用户环境变量 ``~/.bashrc``
+
+最后使用 ``dbus-run-session`` 来启动 ``sway`` :
+
+.. literalinclude:: gentoo_sway/start_sway
+   :caption: 使用 ``dbus-run-session`` 启动 sway 这样能够正确获得 :ref:`dbus_session_bus`
 
 再次前台运行 ``fcitx5`` 可以看到连接成功，但是出现了新的关于DBus调用错误:
 
@@ -133,9 +138,58 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 .. literalinclude:: gentoo_xdg-desktop-portal/install_xdg-desktop-portal-wlr
    :caption: 安装面向 :ref:`wayland` 的 ``xdg-desktop-portal-wlr``
 
+
+还是没有解决 **控制台fcitx5启动时 DBus调用错误** 仔细看了报错信息::
+
+   portalsettingmonitor.cpp:115] DBus call error: org.freedesktop.DBus.Error.ServiceUnknown The name org.freedesktop.portal.Desktop was not provided by any .service files
+
+:strike:`看来这个配置确实缺乏，暂无头绪`
+
+这个报错信息看起来是获取 Desktop 名字的，但是 ``xdg-desktop-portal-wlr`` 似乎没有提供? 但是我突然注意到 :ref:`gentoo_xdg-desktop-portal` 安装了 ``xdg-desktop-portal-wlr`` 默认配置 ``/usr/share/xdg-desktop-portal/sway-portals.conf`` 
+
+.. literalinclude:: gentoo_xdg-desktop-portal/sway-portals.conf
+   :caption: ``/usr/share/xdg-desktop-portal/sway-portals.conf``
+   :emphasize-lines: 2,3
+
+原来 ``xdg-desktop-portal-wlr`` 默认依赖 ``xdg-desktop-portal-gtk`` 来提供 ``interface`` ，所以必须得安装 
+
+.. literalinclude:: gentoo_xdg-desktop-portal/install_xdg-desktop-portal-gtk
+   :caption: ``xdg-desktop-portal-wlr`` 默认使用 ``xdg-desktop-portal-gtk`` 提供portal接口，所以同时安装 ``sys-apps/xdg-desktop-portal-gtk``
+
+.. warning::
+
+   还是没有解决 fcitx5 调用 DBus 的报错，😷
+
+.. warning::
+
+   **文档中每一句话都可能隐藏深意** ``每一句话可能都是关键``
+
+   官方文档中提到 **Important** :
+
+   Starting Sway with dbus requires that XDG_RUNTIME_DIR is set. elogind or systemd will set this if used. 
+
+   **Omitting the dbus-run-session may cause runtime errors.**
+
 .. note::
 
-   尝试补充安装 :ref:`gentoo_xdg-desktop-portal` (结合 ``sys-apps/xdg-desktop-portal-wlr`` )
+   其他启用 :ref:`dbus_session_bus` 方法可以使用 ``dbus-launch`` (这个命令可以在shell环境中以session bus方式运行程序)
+
+   例如 `Sway 下到底怎么用输入法？ <https://emacs-china.org/t/sway/14189/4>`_ ::
+
+      dbus-launch --exit-with-session sway
+
+   "条条大路通罗马" 这也是确保 ``DBUS_SESSION_BUS_ADDRESS`` 方法，在 :ref:`gentoo_dbus` 官网文档 `gentoo wiki: D-Bus <https://wiki.gentoo.org/wiki/D-Bus>`_ : 为确保 X 或 Wayland 会话中具备了 D-Bus session，则可以通过 ``dbus-launch`` 来启动窗口管理器(例如 :ref:`i3` , bspwm 等)
+
+   .. literalinclude:: gentoo_dbus/dbus-launch
+      :language: bash
+      :caption: 使用 ``dbus-launch`` 来加载窗口管理器，确保窗口管理器会话支持 session bus
+
+   另外 `医学生折腾Gentoo Linux记 <https://zhuanlan.zhihu.com/p/462322143>`_  (有不少注意点)提到使用(realy?)::
+
+      exec --no-startup-id fcitx5 -d
+
+一点疑惑
+-----------
 
 :ref:`gentoo_dbus` 是重要的功能，在 fcitx 的官方文档中说明fcitx和im模块之间是通过 dbus 通讯。所以我推测 ``fcitx-rime`` 输入法和 ``fcitx`` 之间还是需要 ``dbus`` 来通讯的，并且我看到默认启动的 ``fcitx`` 进程显示::
 
@@ -151,6 +205,28 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
       :caption: Fedora Sway安装fctix5
 
    参考 `SWAY配置中文输入法 <https://zhuanlan.zhihu.com/p/379583988>`_ 提到的使用 ``gentoo-zh`` 社区overlay仓库，其中也依赖安装 ``x11-libs/xcb-imdkit`` 和 ``app-i18n/libime`` 等包
+
+使用 ``gentoo-zh`` :ref:`gentoo_overlays` 仓库
+==============================================
+
+实在难以解决，不想再折腾中文输入，改为参考 `SWAY配置中文输入法 <https://zhuanlan.zhihu.com/p/379583988>`_ 使用 ``gentoo-zh`` :ref:`gentoo_overlays` 仓库
+
+- 激活 ``gentoo-zh`` 仓库:
+
+.. literalinclude:: gentoo_overlays/enable_repository
+   :caption: 激活 ``gentoo-zh`` 仓库
+
+安装步骤参考了 `Gentoo 教程：系统完善 <https://blog.csdn.net/niuiic/article/details/109151402>`_
+
+- 配置 ``/etc/portage/package.accept_keywords/fcitx5`` :
+
+.. literalinclude:: gentoo_chinese_input/package.accept_keywords.fcitx5
+   :caption: 配置 ``/etc/portage/package.accept_keywords/fcitx5``
+
+- 执行安装:
+
+.. literalinclude:: gentoo_chinese_input/emerge_fcitx5_overlay
+   :caption: 安装overlay的fcitx5
 
 chromium
 ===========
