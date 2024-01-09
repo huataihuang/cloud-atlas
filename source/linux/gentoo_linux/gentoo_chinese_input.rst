@@ -184,7 +184,7 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
       :language: bash
       :caption: 使用 ``dbus-launch`` 来加载窗口管理器，确保窗口管理器会话支持 session bus
 
-   另外 `医学生折腾Gentoo Linux记 <https://zhuanlan.zhihu.com/p/462322143>`_  (有不少注意点)提到使用(realy?)::
+   另外 `医学生折腾Gentoo Linux记 <https://zhuanlan.zhihu.com/p/462322143>`_  (有不少注意点)提到使用以下方法(这个方法是 `archlinux wiki: Fcitx5 <https://wiki.archlinuxcn.org/wiki/Fcitx5>`_ 文档中记录的) ::
 
       exec --no-startup-id fcitx5 -d
 
@@ -211,12 +211,21 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 
 实在难以解决，不想再折腾中文输入，改为参考 `SWAY配置中文输入法 <https://zhuanlan.zhihu.com/p/379583988>`_ 使用 ``gentoo-zh`` :ref:`gentoo_overlays` 仓库
 
+.. note::
+
+   详细折腾请参考 `Bug 760501 - app-i18n/fcitx-5 version bump <https://bugs.gentoo.org/760501>`_ 在一些非常用软件维护上，Gentoo使用不如 :ref:`arch_linux`
+
 - 激活 ``gentoo-zh`` 仓库:
 
 .. literalinclude:: gentoo_overlays/enable_repository
    :caption: 激活 ``gentoo-zh`` 仓库
 
 安装步骤参考了 `Gentoo 教程：系统完善 <https://blog.csdn.net/niuiic/article/details/109151402>`_
+
+- 使用 ``emaint`` 对新添加Portage进行软件库同步:
+
+.. literalinclude:: gentoo_overlays/emaint_sync
+   :caption: 使用 ``emaint`` 同步新添加的软件库
 
 - 配置 ``/etc/portage/package.accept_keywords/fcitx5`` :
 
@@ -227,6 +236,11 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 
 .. literalinclude:: gentoo_chinese_input/emerge_fcitx5_overlay
    :caption: 安装overlay的fcitx5
+
+安装输出信息(依赖安装包)
+
+.. literalinclude:: gentoo_chinese_input/emerge_fcitx5_overlay_output
+   :caption: 安装overlay的fcitx5输出信息
 
 chromium
 ===========
@@ -243,3 +257,6 @@ chromium
 - `Using Fcitx 5 on Wayland <https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland>`_
 - `Bug 760501 - app-i18n/fcitx-5 version bump <https://bugs.gentoo.org/760501>`_ 关于fcitx5的讨论
 - `gentoo linux wiki: How to read and write in Chinese <https://wiki.gentoo.org/wiki/How_to_read_and_write_in_Chinese>`_ 推荐采用fcitx和fcitx-rime
+- `Use Plasma 5.24 to type in Alacritty (Or any other text-input-v3 client) with Fcitx 5 on Wayland <https://www.csslayer.info/wordpress/linux/use-plasma-5-24-to-type-in-alacritty-or-any-other-text-input-v3-client-with-fcitx-5-on-wayland/>`_ KDE环境使用Wayland时的fcitx5
+- `Chrome/Chromium 今日 Wayland 输入法支持现状 <https://www.csslayer.info/wordpress/fcitx-dev/chrome-state-of-input-method-on-wayland/>`_ fcitx开发者的blog，技术细节满满
+- `Gentoo設定Overlay，從第三方軟體庫安裝最新版Fcitx5中文輸入法 <https://ivonblog.com/posts/gentoo-overlay-setup/>`_

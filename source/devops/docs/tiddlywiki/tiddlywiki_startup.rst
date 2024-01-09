@@ -69,7 +69,7 @@ TiddlyWiki适合做什么
 
 互联网上能够找到一些很好地使用学习文档，我这里不再复述，建议参考:
 
-- `TiddlyWiki简易指南 <https://zhuanlan.zhihu.com/p/555893660>`_
+- `TiddlyWiki简易指南 <https://zhuanlan.zhihu.com/p/555893660>`_ 原文详尽，非常建议阅读学习
 
 平台
 ======

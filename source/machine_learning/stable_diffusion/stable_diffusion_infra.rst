@@ -79,6 +79,17 @@ Stable Diffusion 在某些情况下存在退化和不准确的问题。 该模�
 - “超网络”是一种小型预训练神经网络，应用于较大神经网络中的各个点，指的是 NovelAI 开发人员 Kurumuz 于 2021 年创建的技术，最初用于文本生成转换器模型。 超网络将结果导向特定方向，允许基于稳定扩散的模型模仿特定艺术家的艺术风格，即使艺术家未被原始模型识别； 他们通过寻找重要的关键区域（例如头发和眼睛）来处理图像，然后在次级潜在空间中修补这些区域。
 - DreamBooth 是一种深度学习生成模型，由 Google Research 和波士顿大学的研究人员于 2022 年开发，可以微调模型以生成描绘特定主题的精确、个性化的输出，通过一组描绘主题的图像进行训练
 
+在线Demo
+==========
+
+简单尝试了一下在线Demo，以我在 :ref:`life` 中选择的 `海子 <https://www.douban.com/personage/27564898/?subtype=person>`_ 的 `「面朝大海，春暖花开」 <https://baike.baidu.com/item/面朝大海，春暖花开/273>`_ 英文版生图:
+
+.. figure:: ../../_static/machine_learning/stable_diffusion/facing_the_sea.jpg
+
+可以看到 stable diffusion 会堆砌元素，按照一定风格组合成图片，但是说不上好看:
+
+- 训练数据影响风格
+- prompt产生一些差异
 
 参考
 =======
