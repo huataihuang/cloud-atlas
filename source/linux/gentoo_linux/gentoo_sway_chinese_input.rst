@@ -1,8 +1,21 @@
-.. _gentoo_chinese_input:
+.. _gentoo_sway_chinese_input:
 
-========================
-Gentoo Linux中文输入
-========================
+===========================
+Gentoo Linux Sway中文输入
+===========================
+
+.. note::
+
+   sway基于 :ref:`wayland` native程序，中文输入法选择 :ref:`fcitx` ，实践中有很多坑和挫折，远比
+
+   - :ref:`ubutnu_linux` 环境 :ref:`fcitx_sway`
+   - :ref:`archlinux_sway` 环境构建 :ref:`archlinux_chinese`
+
+   **困难很多**
+
+   Gentoo Linux在主流软件上非常稳健，但是实验性软件(非主流)则不如 :ref:`arch_linux` 和 :ref:`ubuntu_linux` 发行版。可能主要原因是使用者、维护者相对少一些，也缺乏商业支持。
+
+   不过，通过折腾Gentoo Linux，所有的报错和底层排障都会加深你对系统的认知，也提高你的解决能力。得失之间，需要你自己把控。
 
 版本选择
 ==========
@@ -249,6 +262,22 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 
 .. literalinclude:: gentoo_chinese_input/emerge_fcitx5_overlay_output
    :caption: 安装overlay的fcitx5输出信息
+
+解决线索
+=========
+
+使用 ``gentoo-zh`` :ref:`gentoo_overlays` 确实可以安装更多相关软件包，但是目前我还没有解决输入法唤起，所以还没有解决输入问题。
+
+仔细看了一下 `目前大家是怎样在 wayland 中使用中文输入法的？ <https://bbs.archlinuxcn.org/viewtopic.php?id=12660>`_ (原帖是针对 :ref:`arch_linux` )，发现还有一些底层原理需要学习(可能解决的线索):
+
+原帖问题有关 `can not show up input interface on arch linux sway wm #39 <https://github.com/fcitx/fcitx5/issues/39>`_
+
+``q234rty`` 提到: sway 下对于 wayland native 的程序来说，有两种可能
+
+- 通过 GTK_IM_MODULE/QT_IM_MODULE，目前来说不需要特殊配置，只需要设置环境变量就能工作。注意 chromium 对此的支持有一定问题（electron 则暂时不支持），见 `Chrome/Chromium 今日 Wayland 输入法支持现状 <https://www.csslayer.info/wordpress/fcitx-dev/chrome-state-of-input-method-on-wayland/>`_
+- 通过 wayland 的 text_input/input_method 系列协议，需要 `Implement input_method_v2 popups #5890 <https://github.com/swaywm/sway/pull/5890>`_ ，目前 archlinuxcn 有 sway-im 这个包提供打上此补丁的 sway，另 aur 也有 `sway-im-git <https://aur.archlinux.org/packages/sway-im-git>`_ 。目前来说 sway 下只有支持 text-input-v3 的程序（包括绝大部分 gtk 3/4 程序（这里同样不包括 chromium/electron）和一部分终端模拟器，如 kitty/foot）能通过这个方法进行输入。
+
+**学习ing**
 
 chromium
 ===========

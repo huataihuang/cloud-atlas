@@ -23,3 +23,4 @@ ZFS挂载
 =========
 
 - `Oracle Solaris ZFS Administration Guide  > Chapter 6 Managing Oracle Solaris ZFS File Systems  > Mounting and Sharing ZFS File Systems <https://docs.oracle.com/cd/E19253-01/819-5461/gaynd/index.html>`_
+- `opensolaris: Solaris ZFS Administration Guide >> Mounting and Sharing ZFS File Systems <https://dlc.openindiana.org/docs/20090715/ZFSADMIN/html/gaynd.html>`_

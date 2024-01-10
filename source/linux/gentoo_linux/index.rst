@@ -25,7 +25,7 @@ Gentoo Linux
    gentoo_chromium.rst
    gentoo_firefox.rst
    gentoo_chinese_view.rst
-   gentoo_chinese_input.rst
+   gentoo_sway_chinese_input.rst
    gentoo_ebuild_repository.rst
    gentoo_nvidia.rst
    gentoo_intel.rst
