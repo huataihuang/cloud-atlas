@@ -30,6 +30,9 @@ Gentoo Linux中文输入
 安装fcitx5
 ==============
 
+.. note::
+
+   参考 `gentoo linux wiki: Fcitx <https://wiki.gentoo.org/wiki/Fcitx>`_ 建议应用程序编译 :ref:`gentoo_use_flags` 启用 ``gtk2`` 或者 ``gtk3`` 
 
 - 采用 :ref:`gentoo_version_specifier` 才能通过 :ref:`version_by_slot` 安装fcitx5
 
@@ -214,6 +217,11 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 .. note::
 
    详细折腾请参考 `Bug 760501 - app-i18n/fcitx-5 version bump <https://bugs.gentoo.org/760501>`_ 在一些非常用软件维护上，Gentoo使用不如 :ref:`arch_linux`
+
+- :ref:`gentoo_emerge` 卸载之前已经安装的 ``SLOT 5`` 的 ``fcitx`` :
+
+.. literalinclude:: gentoo_overlays/uninstall_fcitx5
+   :caption: 卸载之前已经安装的 ``SLOT 5`` 的 ``fcitx``
 
 - 激活 ``gentoo-zh`` 仓库:
 

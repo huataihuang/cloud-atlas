@@ -9,6 +9,7 @@ VS Code
 
    vscode_linux.rst
    vscode_archlinux.rst
+   ../../gentoo_linux/gentoo_vscode.rst
    vscode_macos.rst
    vscode_lsp.rst
    vscode_extensions.rst

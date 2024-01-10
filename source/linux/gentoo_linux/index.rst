@@ -47,6 +47,7 @@ Gentoo Linux
    tlp.rst
    gentoo_mac_cpuidle.rst
    gentoo_pgsql.rst
+   gentoo_vscode.rst
    pentoo/index
    think_gentooserv.rst
 

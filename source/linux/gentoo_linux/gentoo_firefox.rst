@@ -19,6 +19,12 @@ Gentoo Firefox
 .. literalinclude:: gentoo_firefox/equery
    :caption: 通过 ``equery`` 查询 ``www-client/firefox`` 的USE参数
 
+输出信息:
+
+.. literalinclude:: gentoo_firefox/equery_output
+   :caption: 通过 ``equery`` 查询 ``www-client/firefox`` 的USE参数输出案例
+
+
 需要注意，由于Firefox使用了 :ref:`rust` 代码，所以天然的建议使用LLVM来最为编译后端，所以建议使用 Clang 而不是 GCC来完成编译。这里的USE参数默认有一个 ``clang`` 表示采用Clang完成软件编译。
 
 在 :ref:`wayland` 运行
