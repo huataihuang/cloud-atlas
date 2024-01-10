@@ -262,6 +262,11 @@ Gentoo的wiki中推荐 ``x11-terms/alacritty`` 是原生Wayland程序，而且�
 .. literalinclude:: gentoo_sway/waybar
    :caption: 安装waybar
 
+激活:
+
+.. literalinclude:: gentoo_sway/enable_waybar
+   :caption: 激活waybar
+
 高分辨率
 ==========
 

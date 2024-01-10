@@ -13,7 +13,7 @@ GPT 是 ``Generative pre-trained transformers`` 的缩写，中文意思是 ``�
 ChatGPT 的惊人能力来源
 =======================
 
-ChatGPT本质上是一个 ``大型语言模型`` **Large Language Models** ( :ref:`llm` )，通过 **革命性的自注意力机制** ( ``self-attention mechanism`` )进行训练，然后通过 :ref:``
+ChatGPT本质上是一个 ``大型语言模型`` **Large Language Models** ( :ref:`llm` )，通过 **革命性的自注意力机制** ( ``self-attention mechanism`` )进行训练，然后通过 :ref:`rlhf` 来
 
 参考
 ======
