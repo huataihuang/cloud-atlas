@@ -4,7 +4,7 @@
 Gentoo Chromium
 =================
 
-我在完成 :ref:`install_gentoo_on_mbp` 和 :ref:`sway_gentoo` 之后，首先安装的软件就是浏览器 chromium 
+我在完成 :ref:`install_gentoo_on_mbp` 和 :ref:`gentoo_sway` 之后，首先安装的软件就是浏览器 chromium 
 
 - 现代浏览器编译非常耗时，在我的 :ref:`mbp15_late_2013` 需要花费超过12小时以上才能完成编译
 - 而且 :ref:`mbp15_late_2013` 虽然内存有16GB，但是依然出现 :ref:`linux_oom` ，所以我最后采用为主机配置了 8GB :ref:`linux_swap` 才完成编译
