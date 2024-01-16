@@ -139,7 +139,7 @@ Sway有一些 USE flags 可以微调:
 
    然后我回滚前面的 解决方法一，尝试用解决方案二来设置 ``XDG`` 相关参数
 
-   也可能是解决 :ref:`gentoo_chinese_input` 的方法
+   也可能是解决 :ref:`gentoo_sway_chinese_input` 的方法
 
 ``elogind`` 需要添加到 boot 运行级别:
 

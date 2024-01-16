@@ -36,7 +36,7 @@ Gentoo Overlays 项目成员维护了独立仓库，之前采用 ``app-portage/l
 .. literalinclude:: gentoo_overlays/eselect_repository
    :caption: 列出所有repository
 
-输出有将近400个仓库，我选择 ``gentoo-zh`` (也就是 gentoo.cn)仓库，以便能够安装 :ref:`gentoo_chinese_input`
+输出有将近400个仓库，我选择 ``gentoo-zh`` (也就是 gentoo.cn)仓库，以便能够安装 :ref:`gentoo_sway_chinese_input`
 
 - 激活 ``gentoo-zh`` 仓库:
 

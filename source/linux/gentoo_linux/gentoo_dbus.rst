@@ -4,7 +4,7 @@
 Gentoo D-Bus
 =================
 
-:strike:`安装 firefox 时发现需要 dbus USE flag支持(现在默认不需要了)，不过 chromium 安装没有这个需求(我在考虑作为精简系统是否确实需要这个参数?)` ，在 :ref:`gentoo_chinese_input` 可以看到 ``fcitx`` 是通过 ``dbus`` 和应用通讯的，所以修订 :ref:`install_gentoo_on_mbp` 配置。
+:strike:`安装 firefox 时发现需要 dbus USE flag支持(现在默认不需要了)，不过 chromium 安装没有这个需求(我在考虑作为精简系统是否确实需要这个参数?)` ，在 :ref:`gentoo_sway_chinese_input` 可以看到 ``fcitx`` 是通过 ``dbus`` 和应用通讯的，所以修订 :ref:`install_gentoo_on_mbp` 配置。
 
 D-Bus
 =======

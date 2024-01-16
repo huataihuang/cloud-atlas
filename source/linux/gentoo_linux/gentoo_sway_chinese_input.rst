@@ -8,7 +8,7 @@ Gentoo Linux Sway中文输入
 
    sway基于 :ref:`wayland` native程序，中文输入法选择 :ref:`fcitx` ，实践中有很多坑和挫折，远比
 
-   - :ref:`ubutnu_linux` 环境 :ref:`fcitx_sway`
+   - :ref:`ubuntu_linux` 环境 :ref:`fcitx_sway`
    - :ref:`archlinux_sway` 环境构建 :ref:`archlinux_chinese`
 
    **困难很多**
@@ -29,7 +29,7 @@ Gentoo Linux Sway中文输入
 
 我选择 :ref:`fcitx` 以及比较轻巧的中州输入法:
 
-.. literalinclude:: gentoo_chinese_input/fcitx
+.. literalinclude:: gentoo_sway_chinese_input/fcitx
    :caption: 安装fcitx输入法以及中州输入
 
 .. note::
@@ -103,7 +103,7 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 
 我改为终端运行 ``fcitx5`` (杀掉后台进程，直接在终端执行 ``fcitx5`` ) ，看到 ``fcitx5`` 运行的终端显示报错信息似乎与 :ref:`gentoo_dbus` 有关:
 
-.. literalinclude:: gentoo_chinese_input/fcitx5_dbus
+.. literalinclude:: gentoo_sway_chinese_input/fcitx5_dbus
    :caption: 控制台fcitx5启动时 :ref:`gentoo_dbus` 相关错误
    :emphasize-lines: 6,7
 
@@ -140,7 +140,7 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 
 再次前台运行 ``fcitx5`` 可以看到连接成功，但是出现了新的关于DBus调用错误:
 
-.. literalinclude:: gentoo_chinese_input/fcitx5_dbus_call
+.. literalinclude:: gentoo_sway_chinese_input/fcitx5_dbus_call
    :caption: 控制台fcitx5启动时 DBus调用错误
    :emphasize-lines: 23
 
@@ -217,7 +217,7 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 
    我在2024年1月的实践中，采用了上述指定 ``SLOT 5`` 方式安装了 ``fcitx5`` ，但是发现一个问题，没有配套的软件包可以安装，例如，没有 ``fcitx5-data`` ，也没有 ``xcb-imkit`` ，我对比了以下 :ref:`fedora_os_images` 中 Fedora Sway (以LiveCD方式运行)，安装 ``fcitx5`` 时候会配套安装相应组件:
 
-   .. literalinclude:: gentoo_chinese_input/fedora_sway_install_fcitx5
+   .. literalinclude:: gentoo_sway_chinese_input/fedora_sway_install_fcitx5
       :caption: Fedora Sway安装fctix5
 
    参考 `SWAY配置中文输入法 <https://zhuanlan.zhihu.com/p/379583988>`_ 提到的使用 ``gentoo-zh`` 社区overlay仓库，其中也依赖安装 ``x11-libs/xcb-imdkit`` 和 ``app-i18n/libime`` 等包
@@ -250,18 +250,29 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 
 - 配置 ``/etc/portage/package.accept_keywords/fcitx5`` :
 
-.. literalinclude:: gentoo_chinese_input/package.accept_keywords.fcitx5
+.. literalinclude:: gentoo_sway_chinese_input/package.accept_keywords.fcitx5
    :caption: 配置 ``/etc/portage/package.accept_keywords/fcitx5``
 
 - 执行安装:
 
-.. literalinclude:: gentoo_chinese_input/emerge_fcitx5_overlay
+.. literalinclude:: gentoo_sway_chinese_input/emerge_fcitx5_overlay
    :caption: 安装overlay的fcitx5
 
 安装输出信息(依赖安装包)
 
-.. literalinclude:: gentoo_chinese_input/emerge_fcitx5_overlay_output
+.. literalinclude:: gentoo_sway_chinese_input/emerge_fcitx5_overlay_output
    :caption: 安装overlay的fcitx5输出信息
+
+Error with fcitx5-config-qt
+===============================
+
+.. literalinclude:: gentoo_sway_chinese_input/fcitx5-config-qt
+   :caption: could'nt found fcitx5-config-qt
+
+refer `安装fcitx5-chinese-addons遇到的问题 #512  <https://github.com/microcai/gentoo-zh/issues/512>`_ :
+
+- fcitx5 need KDE to run ``fcitx5-config-qt`` , else must use kcm-fcitx to config; I have try install ``kcm-fcitx`` but it not include in gentoo-zh overlay, so failed
+- ``kcmshell5 fcitx5`` maybe from ``kcm-fcitx5`` package? 
 
 解决线索
 =========
@@ -277,14 +288,35 @@ fcitx5的 :ref:`gentoo_dbus` 相关报错
 - 通过 GTK_IM_MODULE/QT_IM_MODULE，目前来说不需要特殊配置，只需要设置环境变量就能工作。注意 chromium 对此的支持有一定问题（electron 则暂时不支持），见 `Chrome/Chromium 今日 Wayland 输入法支持现状 <https://www.csslayer.info/wordpress/fcitx-dev/chrome-state-of-input-method-on-wayland/>`_
 - 通过 wayland 的 text_input/input_method 系列协议，需要 `Implement input_method_v2 popups #5890 <https://github.com/swaywm/sway/pull/5890>`_ ，目前 archlinuxcn 有 sway-im 这个包提供打上此补丁的 sway，另 aur 也有 `sway-im-git <https://aur.archlinux.org/packages/sway-im-git>`_ 。目前来说 sway 下只有支持 text-input-v3 的程序（包括绝大部分 gtk 3/4 程序（这里同样不包括 chromium/electron）和一部分终端模拟器，如 kitty/foot）能通过这个方法进行输入。
 
-**学习ing**
+refer `can not show up input interface on arch linux sway wm #39 <https://github.com/fcitx/fcitx5/issues/39>`_ :
+
+- maybe use Xwayland application can use input method
+- compositor <-> application is using text_input (v1 v2 v3...)
+- compositor <-> input method is using input method (v1 v2): v1 is included in wayland-protocols, and there is also input method v2 which contributed by prism inc, but fcitx don't support that yet
+- **sway is using the v2** so fcitx can't yet work with it, also since v2 remove the input panel positioning part, fcitx developer don't yet know where to move the input method window with the protocol.
+
+and say:
+
+.. literalinclude:: gentoo_sway_chinese_input/profile
+   :caption: environment for sway (but my try is failed)
+
+then ``exec --no-startup-id fcitx5 -d`` in sway config, and enable wayland in ``fcitx5-configtool``
+
+**Now fcitx is support sway** : `gentoo+sway无法在WPS、foot、dingtalk应用中显示输入法候选窗口 #455 <https://github.com/fcitx/fcitx5/issues/455>`_ :
+
+- same as me
+
+Sadly
+==========
+
+I will try another chinese input method to support sway (wayland)
 
 chromium
 ===========
 
 对于chromium/Electron，如果使用原生wayland，在需要向 ``chromium`` 传递参数 ``--enable-wayland-ime`` :
 
-.. literalinclude:: gentoo_chinese_input/chromium_wayland-ime
+.. literalinclude:: gentoo_sway_chinese_input/chromium_wayland-ime
    :caption: 在原生Wayland环境，chromium支持fcitx中文输入需要传递 ``--enable-wayland-ime`` 参数
 
 参考
