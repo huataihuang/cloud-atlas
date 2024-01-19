@@ -22,6 +22,7 @@ Gentoo Linux
    gentoo_sway.rst
    gentoo_sway_bcloud.rst
    gentoo_xdg-desktop-portal.rst
+   gentoo_kde.rst
    gentoo_chromium.rst
    gentoo_firefox.rst
    gentoo_chinese_view.rst
@@ -48,6 +49,7 @@ Gentoo Linux
    gentoo_mac_cpuidle.rst
    gentoo_pgsql.rst
    gentoo_vscode.rst
+   gentoo_virtualization.rst
    pentoo/index
    think_gentooserv.rst
 
