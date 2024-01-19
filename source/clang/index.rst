@@ -15,6 +15,7 @@ C Atlas
    upgrade_gcc_on_ubuntu22.04.rst
    parallel_make.rst
    parallel_make_oom.rst
+   c++/index
 
 .. only::  subproject and html
 

@@ -306,10 +306,27 @@ then ``exec --no-startup-id fcitx5 -d`` in sway config, and enable wayland in ``
 
 - same as me
 
-Sadly
-==========
+KDE
+============
 
-I will try another chinese input method to support sway (wayland)
+:ref:`gentoo_kde` bring interactive config tool:
+
+.. literalinclude:: gentoo_kde/install_plasma-desktop
+   :caption: ``kde-plasma/plasma-desktop``
+
+when use ``fcitx5-configtool`` :
+
+.. literalinclude:: gentoo_sway_chinese_input/fcitx5-configtool_kde_error
+   :caption: run fcitx5-configtool in kde, error
+
+``kcm-fcitx`` is a configuration tool that highly integrated with KDE, ``kcm`` means ``KDE configuration module`` , after install ``kcm-fcitx`` , you will see ``Input Method`` Configuration in KDE Setting:
+
+But ``kcm-fcitx`` :ref:`cmake` ( either in relase 0.5.6 , or in git version ) , will report errors:
+
+.. literalinclude:: gentoo_sway_chinese_input/kcm-fcitx_cmake_error
+   :caption: ``kcm-fcitx`` :ref:`cmake` errors
+
+In ``fcitx5-qt`` source, ``qt5/dbusaddons/Fcitx5Qt5DBusAddonsConfig.cmake.in`` provide this cmake config
 
 chromium
 ===========
