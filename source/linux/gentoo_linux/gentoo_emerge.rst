@@ -77,6 +77,11 @@ Gentoo emerge
 
    eix-test-obsolete
 
+``emerge`` 代理
+====================
+
+一些emerge使用了GitHub的git仓库，此时会遇到GFW的阻塞导致无法完成安装部署。解决的方法是使用 :ref:`proxychains` 来强制tcp连接通过代理服务器，例如 :ref:`ssh_tunneling_dynamic_port_forwarding` 构建的 ``socks5`` 代理
+
 参考
 =====
 
