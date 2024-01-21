@@ -35,6 +35,10 @@ USE flags
 :ref:`libvirt`
 ----------------
 
+.. note::
+
+   If policykit USE flag is not enabled for libvirt package, the libvirt group will not be created when app-emulation/libvirt is emerged. If this is the case, another group, such as wheel must be used for unix_sock_group.
+
 ``virt-manager``
 ------------------
 
@@ -56,6 +60,21 @@ USE flags
 
 .. literalinclude:: gentoo_virtualization/emerge_uninstall_netcat
    :caption: 删除 netcat
+
+启动
+=====
+
+- 用户添加到libvirt组:
+
+.. literalinclude:: gentoo_virtualization/usermod
+   :caption: 用户添加到libvirt组
+
+从 libvirtd 配置文件中取消注释以下行:
+
+.. literalinclude:: gentoo_virtualization/libvirtd.conf
+   :caption: /etc/libvirt/libvirtd.conf
+
+- Virt-manager 使用 libvirt 作为管理虚拟机的后端: 需要启动 libvirt 守护进程
 
 Refer
 ===============

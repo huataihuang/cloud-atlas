@@ -139,6 +139,10 @@ Systemd
    /var/tmp
    /usr/src
 
+:ref:`gentoo_virtualization` ``libvirt`` ::
+
+   /var/lib/libvirt
+
 - 将需要迁移的目录先重命名(添加 ``.bak`` 后缀)，然后创建对应的 ZFS 子卷 指定 :ref:`zfs_mount` 到对应目录下，最后使用 ``tar`` 命令迁移数据，并清理掉无用数据释放空间:
 
 .. literalinclude:: gentoo_zfs/migrate_rootfs_subdir_zfs

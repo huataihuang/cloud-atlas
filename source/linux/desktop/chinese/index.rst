@@ -10,10 +10,12 @@ Linux中文环境
    :maxdepth: 1
 
    linux_chinese_view.rst
+   ../../gentoo_linux/gentoo_chinese_view.rst
    fcitx.rst
    fcitx_dwm.rst
    fcitx_sway.rst
    compile_fcitx5.rst
+   ../../gentoo_linux/gentoo_sway_fcitx.rst
    fbterm.rst
    kmscon.rst
    ibus.rst

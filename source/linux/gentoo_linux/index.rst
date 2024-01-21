@@ -14,6 +14,7 @@ Gentoo Linux
    gentoo_version_specifier.rst
    gentoo_makeconf.rst
    gentoo_emerge.rst
+   proxychains.rst
    gentoo_overlays.rst
    upgrade_gentoo.rst
    gentoo_neovim.rst
@@ -26,7 +27,8 @@ Gentoo Linux
    gentoo_chromium.rst
    gentoo_firefox.rst
    gentoo_chinese_view.rst
-   gentoo_sway_chinese_input.rst
+   gentoo_sway_fcitx.rst
+   gentoo_kde_fcitx.rst
    gentoo_ebuild_repository.rst
    gentoo_nvidia.rst
    gentoo_intel.rst

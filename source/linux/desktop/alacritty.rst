@@ -67,10 +67,12 @@ Alacritty按照以下顺序查找配置文件:
 
    export LANG=zh_CN.UTF-8 #或者其他UTF-8，并且安装中文字体
 
-- 在 :ref:`wayland` 环境需要修订成X启动，也就是在 ``/usr/share/applications/Alacritty.desktop`` 中修改带 Exec的行为::
+- 在 :ref:`wayland` 环境需要 :strike:`修订成X启动` ，也就是在 ``/usr/share/applications/Alacritty.desktop`` 中修改带 Exec的行为::
 
    TryExec=env WINIT_UNIX_BACKEND=x11 alacritty
    Exec=env WINIT_UNIX_BACKEND=x11 alacritty
+
+2024年1月，我在 :ref:`gentoo_kde` 环境下
 
 参考
 ======
