@@ -12,6 +12,7 @@ Proxy代理服务
    varnish/index
    trafficserver/index
    privoxy/index
+   proxychains.rst
 
 .. only::  subproject and html
 
