@@ -19,21 +19,20 @@ Termux安装
 
 安装方法和其他APK没有什么两样，安装后运行 ``Termux`` 会出现一个终端界面，然后有一些提示信息指导我们下一步操作
 
-更新系统
+安装和更新
 ==========
 
-类似一个小型操作系统，我们首先来更新::
+类似一个小型 :ref:`ubuntu_linux` 操作系统(采用相同的 :ref:`apt` 软件包管理itong），我们首先来更新:
 
-   pkg update
+.. literalinclude:: ../../linux/ubuntu_linux/admin/apt/apt_update
+   :caption: 使用 ``apt`` 更新系统仓库索引以及需要更新的软件包
 
-软件安装
-==========
+所有软件安装都使用 ``pkg`` 或 ``apt`` 命令，非常类似 debian 系统。
 
-所有软件安装都使用 ``pkg`` 命令，非常类似 debian 系统。
+为了方便使用，首先我们安装 openssh :
 
-为了方便使用，首先我们安装 openssh ::
-
-   pkg install openssh iproute2
+.. literalinclude:: termux_install/openssh
+   :caption: termux中安装 openssh
 
 - 检查主机IP::
 

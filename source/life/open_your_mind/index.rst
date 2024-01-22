@@ -22,6 +22,7 @@ Open your mind
 .. toctree::
    :maxdepth: 1
 
+   across_the_great_wall.rst
    learn_english.rst
    english_news.rst
 

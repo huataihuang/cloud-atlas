@@ -96,9 +96,10 @@ proxy.conf
 
    sudo add-apt-repository ppa:apandada1/foliate
 
-然后更新仓库::
+然后更新仓库:
 
-   sudo apt update
+.. literalinclude:: apt/apt_update
+   :caption: apt更新系统
 
 此时可能报错::
 

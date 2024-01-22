@@ -15,7 +15,7 @@ Termux特点
 - 安全: 使用OpenSSH的ssh客户端访问远程服务器。Termux将标准包结合到一个精巧的终端模拟器来实现开放源码的解决方案
 - 按需安装: 可以自行选择喜欢的SHELL，如 :ref:`bash` , fish 或 zsh，也可以选择心仪的编辑器，如Emacs或Vim。通过使用curl访问API并使用rsync把联系人列表保存到远程服务器
 - 可定制: 通过 :ref:`apt` 来管理系统
-- 包含开发工具: 提供持续更新的开发软件工具，如Perl, :ref:`python` , Ruby 和 :ref:`nodejs`
+- 包含开发工具: 提供持续更新的开发软件工具，如Perl, :ref:`python` , :ref:`ruby` 和 :ref:`nodejs`
 - 可扩展: 通过蓝牙键盘可以连接Android设备并扩展显示，Termux支持键盘快捷键和完全的鼠标功能
 - 可折腾(Tinkerable): 可以编译Go, Rust, Swift, 或C 来开发自己的项目，并且提供了 lldb/GDB 工具来调试开发
 

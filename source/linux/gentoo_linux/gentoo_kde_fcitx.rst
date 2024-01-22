@@ -21,6 +21,12 @@ Gentoo Linux KDE fcitx中文输入
   
    - 仅安装核心 ``fcitx`` / ``fcitx-qt`` / ``fcitx-gtk`` / ``fcitx-rime`` 应该就能够满足中文输入需求
 
+.. note::
+
+   fcitx开发wengxt的博客 `Use Plasma 5.24 to type in Alacritty (Or any other text-input-v3 client) with Fcitx 5 on Wayland <https://www.csslayer.info/wordpress/linux/use-plasma-5-24-to-type-in-alacritty-or-any-other-text-input-v3-client-with-fcitx-5-on-wayland/>`_ 解释了 :ref:`wayland` 引擎Plasma(KDE)环境经下支持 ``text-input-v3`` 的客户端，如 :ref:`alacritty` 使用fcitx的原理:
+
+   Fcitx5的Wayland IM Frontend通过KWin Wayland发送输入给使用 ``text-input-v3`` 可以实现非常完美的输入候选词窗口显示
+
 输入引擎
 ===========
 
@@ -33,6 +39,10 @@ fcitx内置了非常简单的拼音输入法，所以通常会安装第三方输
 总之，第三方输入法的开发不是很活跃， **可能** 需要先自己构建 :ref:`gentoo_ebuild_repository` (自己定制ebuild) 以便通过 :ref:`gentoo_version_specifier` 指定 ``SLOT 5`` 进行安装。我在 :ref:`gentoo_ebuild_repository` 完整记录了如何针对 ``fcitx5`` 安装 ``fcitx-rime`` 。
 
 **经过简单对比，我最终采用Gentoo wiki中中文输入文档推荐的 fcitx-rime 输入法**
+
+.. note::
+
+   ``rime`` 输入法默认是繁体中文输入，调整方法是按下 ``F4`` 或者组合键 **Ctrl+`** ，就能看到输入选项，选择简体中文即可。 ( `GitHub: rime/wiki UserGuide <https://github.com/rime/home/wiki/UserGuide>`_ )
 
 USE flags
 ==============

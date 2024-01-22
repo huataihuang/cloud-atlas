@@ -60,6 +60,8 @@ Firefox浏览器支持通过 socks 代理访问internet，即可以通过上述s
 
 通过ssh动态端口转发可以让firefox这样的浏览器通过socket代理自由访问internet，但是并不是所有应用软件默认都会使用上述Socks代理，例如 ``npm`` 。解决这种问题，即让整个操作系统都使用 ``sockes`` 代理，需要使用第三方工具，如 ``dscoks`` (BSD/macOS) 或 ``tsocks`` (Linux)。
 
+我现在找到了一个非常好的工具 :ref:`proxychains` ，通过hooks网络相关的libc函数，能够实现Linux软件网络连接通过  Socks4a/5  或着 HTTP代理(如 :ref:`squid` )，非常实用。
+
 商业软件 `proxifiler <https://www.proxifier.com>`_ 提供了在Windows和Mac下的proxy client，提供了1个月试用期，每个访问代理的服务进程的监控，可以看到自己客户端每个访问连接和数据流量。此外，提供了一个规则编辑器，可以设置哪些需要代理，哪些不需要代理，确实非常方便使用。
 
 如果简单的WEB代理方式，可以使用 :ref:`macos` 内建代理设置（在网络设置中有个Proxy设置）。但是，这个代理设置通常只有应用程序使用系统代理才能工作，例如safari浏览器就使用系统代理配置，而很多应用程序，则不会使用系统代理，例如ssh等客户端。

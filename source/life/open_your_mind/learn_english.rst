@@ -6,7 +6,7 @@
 
 我目前英语水平仅限于阅读计算机类的技术文档和书籍。也就是说，脱离应试教育多年以后，日常英语只剩下词汇量有限的专业英语(IT类)。和很多人一样，我也希望提高自己的英语水平，做到日常无障碍交流，能够通过英语了解这个广阔的世界。
 
-最近，我在观看肉翻到德国的程序员Ferd的YouTube频道视频 `程序员面试 | 去德国当程序员，你需要一份怎样的简历？ <https://www.youtube.com/watch?v=165XnbQvzNg>` 提到 " `我是如何从哑巴英语到无障碍英文工作沟通的 <https://www.kenshinji.me/wo-shi-ru-he-cong-ya-ba-ying-yu-dao-wu-zhang-ai-ying-wen-gong-zuo-gou-tong-de/>`_ " ，确实有借鉴:
+最近，我在观看肉翻到德国的程序员Fred的YouTube频道视频 `程序员面试 | 去德国当程序员，你需要一份怎样的简历？ <https://www.youtube.com/watch?v=165XnbQvzNg>`_ 提到 " `我是如何从哑巴英语到无障碍英文工作沟通的 <https://www.kenshinji.me/wo-shi-ru-he-cong-ya-ba-ying-yu-dao-wu-zhang-ai-ying-wen-gong-zuo-gou-tong-de/>`_ " ，确实有借鉴:
 
 - 不死背单词，而是通过感兴趣的游戏、影视来学习
 
