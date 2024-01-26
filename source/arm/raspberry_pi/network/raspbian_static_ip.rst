@@ -8,9 +8,13 @@ Raspbian配置静态IP
 
    Raspberry Pi官方提供的Raspbian系统是基于Debian的定制系统，在配置网络上和常用的Ubuntu有一些差异，使用了dhcpcd服务来管理网络。
 
-Raspberry Pi使用 ``dhcpcd`` 配置所有网络接口的TCP/IP。这个 dhcpcd服务是倾向于配置all-in-one ZeroConf客户端，功能包括设置每个接口的IP地址，设置网络掩码，配置基于Name Service Switch(NSS)机制的DNS解析。
+Raspberry Pi使用 :ref:`dhcpcd` 配置所有网络接口的TCP/IP。这个 dhcpcd服务是倾向于配置all-in-one ZeroConf客户端，功能包括设置每个接口的IP地址，设置网络掩码，配置基于Name Service Switch(NSS)机制的DNS解析。
 
 默认情况下，Raspberry Pi OS尝试通过DHCP配置所有的网络接口，当DHCP失败时则回退到自动分配 169.254.0.0/16 的私有地址。这个特性和其他Linux发行版及Windows类似。
+
+.. note::
+
+   实际上，很多发行版都使用 :ref:`dhcpcd` 来为网络接口动态分配IP，特別是无线网络 :ref:`wpa_supplicant` 认证完成后，就会通过 :ref:`dhcpcd` 来完成IP地址分配。如果你需要静态分配IP地址(例如本文)，或者部分设置为静态配置(例如 :ref:`dhcpcd_set_static_dns` )
 
 静态IP地址
 ==========

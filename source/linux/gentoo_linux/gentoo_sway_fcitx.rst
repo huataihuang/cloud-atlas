@@ -58,7 +58,7 @@ Gentoo Linux Sway fcitx中文输入
 
 .. note::
 
-   对于非稳定版本，需要在 ``/etc/portage/make.conf`` 中添加 ``ACCEPT_KEYWORDS="~amd64"``
+   对于非稳定版本， :strike:`需要在 /etc/portage/make.conf 中添加 ACCEPT_KEYWORDS="~amd64"` (不建议全局添加 ``ACCEPT_KEYWORDS="~amd64"`` )采用在 ``/etc/portage/packages.use`` 针对特定软件包添加USE关键字 ``~amd64``
 
 安装输入引擎
 -------------

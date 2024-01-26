@@ -4,7 +4,7 @@
 Gentoo ebuild repository
 ================================
 
-在 :ref:`gentoo_sway_chinese_input` 安装了 :ref:`fcitx` ``5`` ，带来一个问题，就是相应的输入法引擎的 ``ebuild`` 都是采用了 :ref:`version_by_slot` ``4`` 。
+在 :ref:`gentoo_sway_fcitx` 安装了 :ref:`fcitx` ``5`` ，带来一个问题，就是相应的输入法引擎的 ``ebuild`` 都是采用了 :ref:`version_by_slot` ``4`` 。
 
 这样就需要自己修改 ``ebuild`` ，然后通过自建的 ebuild repository 来提供overlay仓库:
 
@@ -71,7 +71,7 @@ git维护ebuild仓库优点:
 添加ebuild到仓库
 ==================
 
-- 创建按照类别名和应用名的目录，例如我这里为 :ref:`gentoo_sway_chinese_input` 构建一个 :ref:`version_by_slot` ``5`` 的 ``app-i18n/fcitx-rime`` ebuild，则对应建立子目录 ``app-i18n/fcitx-rime`` ，然后在目录下复制好自己定制的 ``fcitx-rime-0.3.2.ebuild`` :
+- 创建按照类别名和应用名的目录，例如我这里为 :ref:`gentoo_sway_fcitx` 构建一个 :ref:`version_by_slot` ``5`` 的 ``app-i18n/fcitx-rime`` ebuild，则对应建立子目录 ``app-i18n/fcitx-rime`` ，然后在目录下复制好自己定制的 ``fcitx-rime-0.3.2.ebuild`` :
 
 .. literalinclude:: gentoo_ebuild_repository/put_ebuild_repos
    :caption: 将定制的 ebuild 复制到仓库目录下

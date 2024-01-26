@@ -32,10 +32,10 @@ Gentoo的 ``/etc/portage/make.conf`` 配置文件中 ``ACCEPT_KEYWORDS="~amd64"`
 
 ``ACCEPT_KEYWORDS="~amd64"`` 指定了系统使用的软件包关键字为波浪号关键字（tilde keyword），并且目标架构为 amd64。这意味着系统将接受安装和更新处于测试阶段的软件包，并且适用于 amd64 架构的处理器。
 
-- 方法二:  在 ``/etc/portage/package.accept_keywords`` 中添加你想安装的被mask的关键字
+- 方法二:  在 ``/etc/portage/package.accept_keywords/`` 目录下添加包含你想安装的被mask的关键字的配置文件，例如，在 :ref:`gentoo_sway_fcitx` 和 :ref:`gentoo_kde_fcitx` ，为了能够支持 :ref:`wayland` 环境下的中文输入，需要安装 :ref:`gentoo_overlays` 仓库提供的非稳定版本输入法，就需要为每个 :ref:`fcitx` 相关软件包配置 ``~amd64`` 关键字。即创建 ``/etc/portage/package.accept_keywords/fcitx5`` 内容如下:
 
-.. literalinclude:: gentoo_makeconf/package.accept_keywords
-   :caption: 创建 ``/etc/portage/package.accept_keywords`` 包含接受的软件包关键字
+.. literalinclude:: gentoo_sway_fcitx/package.accept_keywords.fcitx5
+   :caption: 创建 ``/etc/portage/package.accept_keywords/fcitx5`` 包含需要安装非稳定版本的fcitx相关软件
 
 参考
 =====
