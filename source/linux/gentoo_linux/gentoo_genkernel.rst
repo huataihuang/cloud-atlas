@@ -105,7 +105,7 @@ Gentoo genkernel
    :caption: 执行 ``eselect kernel`` 可以看到当前内核源代码切换到标准内核
    :emphasize-lines: 2
 
-此时可以手工删除 ``/usr/src/linux-6.1.67-gentoo-dist``
+:strike:`此时可以手工删除` 保留 ``/usr/src/linux-6.1.67-gentoo-dist`` (只要安装了 ``sys-kernel/gentoo-kernel`` 这个目录即使手工删除也会在 :ref:`upgrade_gentoo` 时重新编译 ``gentoo-kerenl`` 发行版kernel，再次生成)
 
 升级内核
 ============

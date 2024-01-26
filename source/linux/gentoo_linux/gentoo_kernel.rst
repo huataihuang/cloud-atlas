@@ -68,12 +68,20 @@ Gentoo为用户提供了 **两种** 内核配置、安装和升级的方式:
 内核源代码
 ===========
 
+.. note::
+
+   Gentoo也和其他发行版一样提供了直接可以运行的编译好的标准执行内核 ``gentoo-kernel-bin`` ，可以方便快速完成系统安装和启动。一旦系统安装和工作正常，就可以开始自定义编译内核，同时保留 ``sys-kernel/gentoo-kernel-bin`` 用于在自定义内核启动失败时应急修复。
+
 Gentoo 提供了以下几种支持的内核软件包:
 
-- ``genkernel`` 默认激活了通用选项和驱动，完全自动化，适合不熟悉手工编译内核的用户
 - ``gentoo-sources`` 推荐大多数Gentoo用户使用(既然已经选择了Gentoo)，能够最大化定制系统内核
-- ``gentoo-kernel`` 已经预先编译好的适合大多数系统的内核，适合对编译内核不感兴趣的用户
+- ``gentoo-kernel`` 适合大多数系统的内核，采用通用配置每次自动完成编译，适合对编译内核不感兴趣的用户
+
+  - ``gentoo-kernel-bin`` 是官方提供已经编译好的通用内核，直接安装无需每次 :ref:`upgrade_gentoo` 时编译
+
 - ``git-sources`` 这是从上游内核开发源代码上每天自动生成的软件包
+
+``genkernel`` 工具默认激活了通用选项和驱动，完全自动化，适合不熟悉手工编译内核的用户
 
 此外，还有一些不被(官方)支持的内核软件包
 
@@ -98,6 +106,17 @@ Gentoo 提供了以下几种支持的内核软件包:
 .. literalinclude:: gentoo_kernel/kernel_make_install
    :language: bash
    :caption: 编译内核并安装
+
+分发内核(Distribution kernels)
+=================================
+
+`distribution kernel project <https://wiki.gentoo.org/wiki/Project:Distribution_Kernel>`_ 提供了通过Portage安装和管理的内核。这些内核是已经编译过多(如果需要)并且就像其他软件包一样使用 :ref:`gentoo_emerge` 命令安装，可以减轻管理负担。内核更新可以在更新系统时候( ``emerge -avuDN @world`` )完成，并且只有配置bootloader使用新内核时候才需要手动步骤。
+
+不过， ``distribution kernels`` 使用了符合大多数系统的通用配置，所以可以视为 "仅能工作" 而已。那些对内核编译不感兴趣的用户可以使用 ``distribution kernels`` ，以避免自己配置编译内核的繁重工作。
+
+.. note::
+
+   ``virtual/dist-kernel`` 并不是一个实际的源代码软件包，而是为 ``sys-kernel/gentoo-kernel`` 提供了一个通用配置的编译选项。这样每次更新 ``sys-kernel/gentoo-kernel`` 就会自动编译一个通用的分发内核。这个内核可以作为应急救援使用，假设自己的定制内核无法正常工作，就可以切换到这个分发内核进行修复。
 
 更新boot loader
 =================

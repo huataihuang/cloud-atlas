@@ -138,22 +138,14 @@ Fedora
 Gentoo
 --------
 
-- (现在我采用 ``~/.bashrc`` ，跳过这步环境配置) 配置 ``/etc/environment`` :
-
-.. literalinclude:: ../desktop/chinese/fcitx/environment
-   :language: bash
-   :caption: 启用fcitx5环境变量配置 /etc/environment
-
 - 配置 ``~/.bashrc`` :
 
 .. literalinclude:: gentoo_kde_fcitx/bashrc
    :caption: ``~/.bashrc`` 配置环境变量
 
-- (KDE不需要配置)在个人配置定制文件 ``~/.config/sway/config`` 中添加一行:
+.. note::
 
-.. literalinclude:: ../desktop/chinese/fcitx_sway/config_add
-   :language: bash
-   :caption: 在 ~/.config/sway/config 中添加运行 fcitx5 的配置
+   在KDE环境中使用 ``fcitx`` 不需要配置 ``QT_IM_MODULE`` ， ``GTK_IM_MODULE`` 和 ``SDL_IM_MODULE`` 环境变量，虽然我配置了以后没有看出使用有什么不同。不过登录KDE环境时会提示不要设置这两个参数，所以我还是取消了。请参考 `Using Fcitx 5 on Wayland >> KDE Plasma <https://fcitx-im.org/wiki/Using_Fcitx_5_on_Wayland#KDE_Plasma>`_
 
 参考
 =======
