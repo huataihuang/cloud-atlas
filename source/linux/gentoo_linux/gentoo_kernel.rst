@@ -78,6 +78,10 @@ Gentoo 提供了以下几种支持的内核软件包:
 - ``gentoo-kernel`` 适合大多数系统的内核，采用通用配置每次自动完成编译，适合对编译内核不感兴趣的用户
 
   - ``gentoo-kernel-bin`` 是官方提供已经编译好的通用内核，直接安装无需每次 :ref:`upgrade_gentoo` 时编译
+  - **个人推荐** 安装 ``gentoo-kernel-bin`` :
+  
+    - 发行版提供的通用编译内核可以作为系统救援内核，一旦自己定制内核出现错误无法启动，则可以切换到官方内核进行修复
+    - 我们总是会使用自己编译的内核(使用Gentoo的目标之一)，所以再安装一个官方通用内核源代码编译意义不大：安装了 ``gentoo-kernel`` 源代码包会导致每次 :ref:`upgrade_gentoo` 都会花费一两个小时编译内核，浪费时间
 
 - ``git-sources`` 这是从上游内核开发源代码上每天自动生成的软件包
 
@@ -117,6 +121,37 @@ Gentoo 提供了以下几种支持的内核软件包:
 .. note::
 
    ``virtual/dist-kernel`` 并不是一个实际的源代码软件包，而是为 ``sys-kernel/gentoo-kernel`` 提供了一个通用配置的编译选项。这样每次更新 ``sys-kernel/gentoo-kernel`` 就会自动编译一个通用的分发内核。这个内核可以作为应急救援使用，假设自己的定制内核无法正常工作，就可以切换到这个分发内核进行修复。
+   
+``unstable`` 切换 ``stable`` 后对 ``dist-kernel`` 切换
+-------------------------------------------------------
+
+我在解决 :ref:`gentoo_sway_fcitx` 和 :ref:`gentoo_kde_fcitx` 时，为了安装 :ref:`gentoo_overlays` 的第三方仓库软件，启用了 :ref:`gentoo_makeconf` 的 ``unstable`` 全局参数 ``~amd64`` 。但是，系统去除了 ``~amd64`` 之后，执行 :ref:`upgrade_gentoo` 之后，出现了同时安装 ``
+
+.. literalinclude:: gentoo_kernel/multi_kernel
+   :caption: 系统同时安装了多个kernel版本，且 ``gentoo-kernel`` 和 ``gentoo-kernel-bin`` 冲突
+   :emphasize-lines: 1,3
+
+我想将系统内核降级到 6.6.13，但是 ``virtual/dist-kernel`` 指向 ``gentoo-kernel-6.7.1`` 导致我无法 ``emerge -acv sys-kernel/gentoo-kernel`` (卸载)，始终报错: 提示 ``virtual/dist-kernel`` 依赖 ``sys-kernel/gentoo-kernel``
+
+参考 `Dist Kernel 6.1.69 <https://forums.gentoo.org/viewtopic-p-8812316.html?sid=32207a34bf01e1e2c3c96d8d95027573>`_ 案例:
+
+- 首先需要 ``emerge --deselect`` :
+
+.. literalinclude:: gentoo_kernel/emerge_deselect
+   :caption: ``emerge --deselect`` 掉 ``gentoo-kernel``
+
+此时输出显示:
+
+.. literalinclude:: gentoo_kernel/emerge_deselect_output
+   :caption: ``emerge --deselect`` 掉 ``gentoo-kernel`` 输出显示 ``gentoo-kernel`` 以及从world favorites文件中remove
+
+- 然后完成一次完整的 :ref:`upgrade_gentoo` :
+
+.. literalinclude:: upgrade_gentoo/emerge_world_short
+   :language: bash
+   :caption: 使用emerge升级整个系统(简化参数)
+
+此时由于去除了 ``~amd64`` 全局参数之后，整个系统软件包回归到 ``stable`` 状态，并修正了依赖关系。再次执行 ``emerge -acv sys-kernel/gentoo-kernel`` 就可以顺利完成。
 
 更新boot loader
 =================
