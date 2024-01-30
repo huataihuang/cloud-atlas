@@ -16,6 +16,7 @@ Gentoo Linux
    gentoo_emerge.rst
    gentoo_overlays.rst
    upgrade_gentoo.rst
+   gentoo_grub.rst
    gentoo_neovim.rst
    gentoo_dbus.rst
    gentoo_wayland.rst
@@ -51,6 +52,7 @@ Gentoo Linux
    gentoo_pgsql.rst
    gentoo_vscode.rst
    gentoo_virtualization.rst
+   gentoo_keepassxc.rst
    pentoo/index
    think_gentooserv.rst
 

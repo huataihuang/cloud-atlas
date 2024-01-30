@@ -37,7 +37,27 @@ Gentoo的 ``/etc/portage/make.conf`` 配置文件中 ``ACCEPT_KEYWORDS="~amd64"`
 .. literalinclude:: gentoo_sway_fcitx/package.accept_keywords.fcitx5
    :caption: 创建 ``/etc/portage/package.accept_keywords/fcitx5`` 包含需要安装非稳定版本的fcitx相关软件
 
+``mask`` 和 ``unmask``
+========================
+
+在遇到特定需要解决mask的时候，例如 :ref:`gentoo_sway_fcitx` 时候启用了 ``~amd64`` ，但是发现全局启用 ``unstable`` 带来系统问题(内核版本过于追新，firefox版本过高无法完成编译等)，所以我手工调整关闭全局 ``unstable`` ，改为上文的针对单个应用配置 ``~amd64`` 。不过，也发现一个问题， 部分依赖已经使用的高版本被mask掉了。 :strike:`所以，再次配置部分应用unmask。` 根据提示，实际采用了上文针对单个被mask掉的应用重新添加 ``~amd64`` 配置。所以，这里案例是一个举例，并非我最后的实际配置
+
+和上文 ``软件包关键字`` 相同，有两种方法:
+
+- 方法一: ``/etc/portage/package.unmask`` 配置文件(举例)
+
+.. literalinclude:: gentoo_makeconf/package.unmask
+   :caption: 通过 ``/etc/portage/package.unmask`` 配置unmask案例
+
+- 方法二: 在 ``/etc/portage/package.unmask`` 目录下独立为不同应用分别创建配置文件(举例)
+
+.. literalinclude:: gentoo_makeconf/package.unmask_files
+   :caption: 在 ``/etc/portage/package.unmask`` 目录下创建独立配置文件
+
+``mask`` 掉某个软件包配置方法其实和 ``unmask`` 类似，只不过命名是 ``/etc/portage/package.mask`` (文件或目录下独立配置文件)，所以不再重复说明。
+
 参考
 =====
 
 - `gentoo linux wiki: /etc/portage/make.conf <https://wiki.gentoo.org/wiki//etc/portage/make.conf>`_
+- `gentoo linux wiki: Knowledge Base:Unmasking a package <https://wiki.gentoo.org/wiki/Knowledge_Base:Unmasking_a_package>`_
