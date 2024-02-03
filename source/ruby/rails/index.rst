@@ -7,10 +7,9 @@ Ruby on Rails
 .. toctree::
    :maxdepth: 1
 
-   intro_rails.rst
+   think_rails.rst
+   startup/index
    microservice_vs_monolith.rst
-   gentoo_install_rails.rst
-   rails_startup.rst
    kamal/index
 
 .. only::  subproject and html

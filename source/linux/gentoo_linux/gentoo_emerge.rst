@@ -70,6 +70,46 @@ Gentoo emerge
 
    emerge --noreplace <atom>
 
+解决冲突文件
+==============
+
+在执行 :ref:`upgrade_gentoo` 时候，有时候会遇到ebuild更新包和现有安装包的文件冲突，例如执行:
+
+.. literalinclude:: upgrade_gentoo/emerge_world_short
+   :language: bash
+   :caption: 使用emerge升级整个系统(简化参数)
+
+报错显示冲突:
+
+.. literalinclude:: gentoo_emerge/emerge_world_collisions
+   :caption: emerge World文件冲突
+
+解决方法是针对文件冲突的软件包进行独立 ``emerge`` 使用如下参数:
+
+.. literalinclude:: gentoo_emerge/emerge_world_collisions_protect-owned
+   :caption: emerge World文件冲突处理
+
+之后就可以重新进行 :ref:`upgrade_gentoo`
+
+检查已经安装的软件包
+=====================
+
+有时候需要知道自己系统上已经安装了那些软件包(及版本)，比较简单的方法:
+
+.. literalinclude:: gentoo_emerge/list_installed
+   :caption: 检查系统已经安装的软件包版本
+
+例如，我需要找出系统中哪个软件包的版本是 ``1.7.2`` 以排查 :ref:`gentoo_sway_fcitx` 报错的软件包版本:
+
+.. literalinclude:: gentoo_emerge/list_installed_1.7.2
+   :caption: 检查系统已经安装的软件包版本包含 ``1.7.2`` 版本信息
+
+输出显示:
+
+.. literalinclude:: gentoo_emerge/list_installed_1.7.2_output
+   :caption: 检查系统已经安装的软件包版本包含 ``1.7.2`` 版本信息输出内容
+   :emphasize-lines: 3
+
 检查"孤儿"软件包
 ===================
 
@@ -86,3 +126,4 @@ Gentoo emerge
 =====
 
 - `gentoo linux wiki: emerge <https://wiki.gentoo.org/wiki/Emerge>`_
+- `File collision, unable to update <https://forums.funtoo.org/topic/893-file-collision-unable-to-update/>`_
