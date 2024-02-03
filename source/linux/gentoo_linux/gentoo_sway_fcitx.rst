@@ -324,24 +324,54 @@ then ``exec --no-startup-id fcitx5 -d`` in sway config, and enable wayland in ``
 KDE
 ============
 
-:ref:`gentoo_kde` bring interactive config tool:
+:ref:`gentoo_kde` 提供了交互配置工具运行的环境，所以我尝试先安装KDE基本运行环境:
 
 .. literalinclude:: gentoo_kde/install_plasma-desktop
    :caption: ``kde-plasma/plasma-desktop``
 
-when use ``fcitx5-configtool`` :
+当运行 ``fcitx5-configtool`` 提示以下错误 :
 
 .. literalinclude:: gentoo_sway_fcitx/fcitx5-configtool_kde_error
    :caption: run fcitx5-configtool in kde, error
 
-``kcm-fcitx`` is a configuration tool that highly integrated with KDE, ``kcm`` means ``KDE configuration module`` , after install ``kcm-fcitx`` , you will see ``Input Method`` Configuration in KDE Setting:
+``kcm-fcitx`` 是一个和KDE高度集成的配置工具, ``kcm`` 意思是 ``KDE configuration module`` , 在安装了 ``kcm-fcitx`` 之后, 可以在KDE谁知中看到 ``Input Method`` 配置:
 
-But ``kcm-fcitx`` :ref:`cmake` ( either in relase 0.5.6 , or in git version ) , will report errors:
+但是 ``kcm-fcitx`` :ref:`cmake` ( either in relase 0.5.6 , or in git version ) 报错:
 
 .. literalinclude:: gentoo_sway_fcitx/kcm-fcitx_cmake_error
    :caption: ``kcm-fcitx`` :ref:`cmake` errors
 
-In ``fcitx5-qt`` source, ``qt5/dbusaddons/Fcitx5Qt5DBusAddonsConfig.cmake.in`` provide this cmake config
+在 ``fcitx5-qt`` 源代码中, ``qt5/dbusaddons/Fcitx5Qt5DBusAddonsConfig.cmake.in`` 提供了这个cmake配置。
+
+.. warning::
+
+   我最终没有解决这个编译问题，似乎是 ``kcm-fcitx``  长时间不活跃开发，已经无法在最新的KDE环境编译。所以我采用了上文所述的取巧方法，在一个运行KDE的虚拟机中生成配置文件复制到 sway 环境使用。验证是可行的。
+
+编译 ``librime-octagram`` 依赖报错处理
+=======================================
+
+2024年1月 :ref:`upgrade_gentoo` 遇到 ``librime-octagram`` 依赖编译报错:
+
+.. literalinclude:: gentoo_sway_fcitx/librime-octagram_error
+   :caption: 编译 ``app-i18n/librime-octagram`` 报错
+   :emphasize-lines: 3,4
+
+搜索关键字 ``1.7.2`` 以排查 :ref:`gentoo_sway_fcitx` 报错的软件包版本:
+
+.. literalinclude:: gentoo_emerge/list_installed_1.7.2
+   :caption: 检查系统已经安装的软件包版本包含 ``1.7.2`` 版本信息
+
+输出显示:
+
+.. literalinclude:: gentoo_emerge/list_installed_1.7.2_output
+   :caption: 检查系统已经安装的软件包版本包含 ``1.7.2`` 版本信息输出内容
+   :emphasize-lines: 3
+
+- 配置 ``/etc/portage/package.accept_keywords/fcitx5`` 添加对应 ``~amd64`` :
+
+.. literalinclude:: gentoo_sway_fcitx/package.accept_keywords.fcitx5
+   :caption: 配置 ``/etc/portage/package.accept_keywords/fcitx5``
+   :emphasize-lines: 15,16
 
 chromium
 ===========
@@ -350,6 +380,16 @@ chromium
 
 .. literalinclude:: gentoo_sway_fcitx/chromium_wayland-ime
    :caption: 在原生Wayland环境，chromium支持fcitx中文输入需要传递 ``--enable-wayland-ime`` 参数
+
+奇怪，究竟 ``unwind`` 版本 ``1.7.2`` 不符合 ``1.8.0`` 要求是哪个软件包？
+
+通过 :ref:`gentoo_emerge` 方法 ``equery`` 查询:
+
+.. literalinclude:: gentoo_emerge/list_installed_1.7.2_output
+   :caption: 检查系统已经安装的软件包版本包含 ``1.7.2`` 版本信息输出内容
+   :emphasize-lines: 3
+
+通过 ``| grep 1.7.2`` 可以找到 ``sys-libs/libunwind-1.7.2`` ，也就是需要添加 ``sys-libs/libunwind`` 的 ``~amd64`` unstable标记来安装必要的对应 1.8.0 版本
 
 参考
 =======
