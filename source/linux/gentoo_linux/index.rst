@@ -24,6 +24,9 @@ Gentoo Linux
    gentoo_sway_bcloud.rst
    gentoo_xdg-desktop-portal.rst
    gentoo_kde.rst
+   gentoo_gtk.rst
+   gentoo_flatpak.rst
+   gentoo_alsa.rst
    gentoo_chromium.rst
    gentoo_firefox.rst
    gentoo_chinese_view.rst

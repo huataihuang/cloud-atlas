@@ -11,6 +11,7 @@ neovim
 
    vim_vs_neovim.rst
    coc.nvim.rst
+   ../../gentoo_linux/gentoo_neovim.rst
 
 
 .. only::  subproject and html

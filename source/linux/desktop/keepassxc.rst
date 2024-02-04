@@ -10,7 +10,7 @@ KeepassXC是KeePass的跨平台实现，支持多种操作系统平台:  :ref:`l
 
    由于KeepassXC是基于QT运行，如果主要核心程序采用GTK，则可以改为采用GNOME平台的 `GNOME Secrect <https://apps.gnome.org/Secrets/>`_
 
-   不过， :ref:`gentoo_linux` 没有提供 Secrets , flathub?
+   不过， :ref:`gentoo_linux` 没有提供 Secrets ，所以可以尝试使用 :ref:`gentoo_flatpak` 来安装使用
    
 安装
 ========================
