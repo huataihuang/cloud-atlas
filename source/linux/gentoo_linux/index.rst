@@ -27,6 +27,7 @@ Gentoo Linux
    gentoo_gtk.rst
    gentoo_flatpak.rst
    gentoo_alsa.rst
+   gentoo_pulseaudio.rst
    gentoo_chromium.rst
    gentoo_firefox.rst
    gentoo_chinese_view.rst
