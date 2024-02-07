@@ -267,6 +267,15 @@ Gentoo的wiki中推荐 ``x11-terms/alacritty`` 是原生Wayland程序，而且�
 .. literalinclude:: gentoo_sway/enable_waybar
    :caption: 激活waybar
 
+.. note::
+
+   ``waybar`` 使用了特定字体来显示一些图标，例如 wifi 图标，电池图标。如果没有安装字体，会导致显示框中显示的是一个乱码。检查 ``/etc/xdg/waybar/style.css`` 可以看到配置注释中说明 ``otf-font-awesome`` 字体是图标显示所必须的:
+
+   .. literalinclude:: gentoo_sway/fontawesome
+      :caption: 安装 ``otf-font-awesome`` (这个字体具有 `Global USE Flag otf <https://packages.gentoo.org/useflags/otf>`_ )
+
+   奇怪，还有一个图标没有显示出来
+
 高分辨率
 ==========
 

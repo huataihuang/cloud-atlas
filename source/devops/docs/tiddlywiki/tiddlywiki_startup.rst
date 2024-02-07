@@ -50,9 +50,11 @@ TiddlyWiki适合做什么
   - 对于大量内容的单一文件运行会逐渐缓慢(我印象中是这样的)
   - 默认使用了自己的wiki格式，使用有些复杂
 
-   我目前还没有完全确定使用tiddlywiki，不过我感觉如果个人数据有限，并且是精心整理记录的私有文档，采用tiddlywiki会比较合适。
+我目前 :strike:`还没有完全确定` 使用tiddlywiki记录个人快速笔记，然后不断修订。由于是自己的个人笔记，以纯文字为主，数据量有限，也就避免了单一文件过大导致TiddlyWiki运行缓慢的潜在风险。
 
-   大规模的文档，则建议使用 :ref:`sphinx_doc` ；中等规模则建议 :ref:`mkdocs`
+我感觉如果个人数据有限，并且是精心整理记录的私有文档，采用tiddlywiki会比较合适。
+
+大规模的文档，则建议使用 :ref:`sphinx_doc` ；中等规模则建议 :ref:`mkdocs`
 
 快速起步
 ===========
@@ -64,12 +66,27 @@ TiddlyWiki适合做什么
   - 简单的方法: :ref:`tiddlywiki_on_ruby_webrick`
   - 完整的方法: :ref:`tiddlywiki_on_nodejs`
 
+Markdown支持
+==============
+
+TiddlyWiki默认使用了自己独有的wiki语法，我在早期使用时特意学习过，但是时隔多年之后，已经忘记怎么使用了。然而，Markdown作为最流行的撰写文档格式，通用性和易学性要好很多，我也不想再使用其他标记语言，所以考虑在Tiddlywiki中也配置支持Markdown。
+
+TiddlyWik 5在2023年1月23官宣了 `TiddlyWiki: New Markdown Plugin Merged <https://talk.tiddlywiki.org/t/new-markdown-plugin-merged/5894>`_ ，使用新版本markdown插件取代了旧版 ``markdown-legacy`` 。
+
+安装 ``markdown`` 插件
+-----------------------
+
+访问 `markdowndemo <https://tiddlywiki.com/prerelease/plugins/tiddlywiki/markdown/>`_ 将其中的 ``markdown`` 插件链接拖放到现有的 TiddlyWiki 页面上，按照提示进行安装即可。
+
+安装以后，创建文档选择Markdown格式即可采用markdown方式撰写，非常简便。
+
 学习资料
 =========
 
 互联网上能够找到一些很好地使用学习文档，我这里不再复述，建议参考:
 
 - `TiddlyWiki简易指南 <https://zhuanlan.zhihu.com/p/555893660>`_ 原文详尽，非常建议阅读学习
+- `Markdown 官方教程 <https://markdown.com.cn/>`_ 中文版，非常详尽简洁，简单浏览一下就能流畅撰写(安装 ``markdown`` 插件之后)
 
 平台
 ======

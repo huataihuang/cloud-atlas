@@ -1,0 +1,1 @@
+lspci | grep -i audio
