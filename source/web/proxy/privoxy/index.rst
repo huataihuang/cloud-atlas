@@ -9,6 +9,7 @@ Privoxy代理服务
 
    intro_privoxy.rst
    privoxy_android_ssh_tunneling.rst
+   privoxy_docker_ssh_tunneling.rst
    privoxy_transparent_proxy_alpine.rst
 
 .. only::  subproject and html

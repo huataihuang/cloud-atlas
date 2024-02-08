@@ -25,6 +25,7 @@ Shell 实用工具
    grep.rst
    time.rst
    sponge.rst
+   update-alternatives.rst
 
 .. only::  subproject and html
 
