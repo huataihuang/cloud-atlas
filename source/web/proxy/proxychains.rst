@@ -17,8 +17,8 @@ proxychains
 
    另外一个简洁的方法(可以适用于任何Linux或类似系统，如Android手机)，是采用 :ref:`privoxy_android_ssh_tunneling` 
 
-简介
-======
+安装,配置和使用
+================
 
 ``proxychains`` 可以强制任何tcp连接流向通过一个代理服务器(或代理链路)，这个工具通常用于加强internet连接安全性。
 
@@ -26,6 +26,14 @@ proxychains
 
 .. literalinclude:: proxychains/gentoo_install
    :caption: 在gentoo中安装proxychains
+
+- 配置文件是 ``/etc/proxychains.conf`` 只需要配置上游代理服务器即可:
+
+.. literalinclude:: proxychains/proxychains.conf
+   :caption: 修订 ``/etc/proxychains.conf`` 添加上游socks5代理
+   :emphasize-lines: 7
+
+这里的案例是使用 :ref:`ssh_tunneling_dynamic_port_forwarding` 中构建的socks5代理，所以如上配置。
 
 - 使用非常简便，就是在常规命令前面加上 ``proxychains`` 就能为应用带来代理引导。以我自己的实践案例，当GFW阻塞了GitHub导致 :ref:`gentoo_emerge` 无法完成源码下载 :ref:`upgrade_gentoo` 时，通过以下命令完成 :ref:`across_the_great_wall` :
 
