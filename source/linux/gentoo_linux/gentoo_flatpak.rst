@@ -87,8 +87,11 @@ Wayland桌面集成
 .. literalinclude:: gentoo_xdg-desktop-portal/install_xdg-desktop-portal-gtk
    :caption: ``xdg-desktop-portal-wlr`` 默认使用 ``xdg-desktop-portal-gtk`` 提供portal接口，所以同时安装 ``sys-apps/xdg-desktop-portal-gtk``
 
-安装应用
-------------
+Flathub安装应用
+==================
+
+KeepassXC
+--------------
 
 在 `Flathub <https://flathub.org/>`_ 官网上可以搜索到应用，按照安装指南进行安装。以 :ref:`keepassxc` 为例，安装如下:
 
@@ -121,7 +124,21 @@ Wayland桌面集成
   - 由于我使用的图形软件极少，完全可以不用安装部署GTK/QT/Gnome/KDE就能够运行 `Flathub <https://flathub.org/>`_ 官网提供的图形软件，大大减轻了我的桌面部署心智负担
   - 可以专注与服务器端技术，将有限的精力投入到开发和AI
 
+Chrome
+---------
+
+Flatpak应用的配置文件
+=======================
+
+Flatpak应用的配置位于个人的 ``~/.var/app/`` 目录下，分别按照不同的应用分开。例如 chromium 和 :ref:`keepassxc`` 则是::
+
+   org.chromium.Chromium
+   org.keepassxc.KeePassXC
+
+目录下包含了应用各自的配置和缓存以及用户数据
+
 参考
 =======
 
 - `gentoo linux: Flatpak <https://wiki.gentoo.org/wiki/Flatpak>`_
+- `Can't find where Chromium flatpak keeps config files <https://forums.gentoo.org/viewtopic-p-8793427.html>`_

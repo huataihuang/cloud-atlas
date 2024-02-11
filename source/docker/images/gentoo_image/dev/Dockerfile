@@ -35,8 +35,9 @@ RUN emerge -qv sys-apps/openrc
 RUN emerge -qv sys-apps/mlocate
 RUN emerge -qv net-dns/bind-tools
 RUN emerge -qv net-analyzer/netcat
-RUN emerge -qv app-editors/vim
+RUN emerge -qv app-editors/neovim
 RUN emerge -qv app-admin/sudo
+RUN emerge -qv app-misc/tmux
 
 # sshd
 RUN rc-update add sshd default

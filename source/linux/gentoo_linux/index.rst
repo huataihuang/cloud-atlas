@@ -28,8 +28,9 @@ Gentoo Linux
    gentoo_flatpak.rst
    gentoo_alsa.rst
    gentoo_pulseaudio.rst
-   gentoo_chromium.rst
    gentoo_firefox.rst
+   gentoo_chromium.rst
+   gentoo_chrome.rst
    gentoo_chinese_view.rst
    gentoo_sway_fcitx.rst
    gentoo_kde_fcitx.rst
