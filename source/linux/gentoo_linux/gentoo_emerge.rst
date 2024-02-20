@@ -94,7 +94,7 @@ Gentoo emerge
 检查已经安装的软件包
 =====================
 
-有时候需要知道自己系统上已经安装了那些软件包(及版本)，比较简单的方法:
+有时候需要知道自己系统上已经安装了那些软件包(及版本)，比较简单的方法是使用 ``equery`` (通过 ``app-portage/gentoolkit`` 提供):
 
 .. literalinclude:: gentoo_emerge/list_installed
    :caption: 检查系统已经安装的软件包版本
@@ -110,12 +110,41 @@ Gentoo emerge
    :caption: 检查系统已经安装的软件包版本包含 ``1.7.2`` 版本信息输出内容
    :emphasize-lines: 3
 
+.. _pin_gentoo_package_version:
+
+pin住Gentoo安装软件包版本不升级
+================================
+
+有时候因为兼容性问题，不能升级系统的某个软件包版本，例如我在 :ref:`gentoo_image` 最初没有指定64位镜像版本，导致glibc升级时出现 ``multilib glibc`` 冲突报错，所以我暂时pin住glibc不升级
+
+- 使用 :ref:`gentoo_equery` 检查当前系统的glibc版本
+
+.. literalinclude:: gentoo_equery/equery_glibc
+   :caption: 检查主机安装的 ``glibc`` 版本
+
+输出信息:
+
+.. literalinclude:: gentoo_equery/equery_glibc_output
+   :caption: 检查主机安装的 ``glibc`` 版本，显示是 2.37-r7
+
+
+- 配置 ``mask`` 将 ``>=`` 当前系统安装glibc版本mask掉，这样就不会在 :ref:`upgrade_gentoo` 时候出现升级glibc:
+
+.. literalinclude:: gentoo_emerge/mask
+   :caption: mask掉所有 ``>=`` 当前系统安装的glibc扳本可以避免glbc特定版本被升级
+
 检查"孤儿"软件包
 ===================
 
 ``eix`` ( ``app-portage/eix`` )工具可以检查孤儿软件包::
 
    eix-test-obsolete
+
+在修改了USE之后需要对系统重构
+==============================
+
+.. literalinclude:: gentoo_use_flags/rebuild_world_after_change_use
+   :caption: 在修改了全局 USE flag 之后对整个系统进行更新
 
 ``emerge`` 代理
 ====================

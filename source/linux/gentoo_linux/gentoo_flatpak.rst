@@ -130,7 +130,7 @@ Chrome
 Flatpak应用的配置文件
 =======================
 
-Flatpak应用的配置位于个人的 ``~/.var/app/`` 目录下，分别按照不同的应用分开。例如 chromium 和 :ref:`keepassxc`` 则是::
+Flatpak应用的配置位于个人的 ``~/.var/app/`` 目录下，分别按照不同的应用分开。例如 chromium 和 :ref:`keepassxc` 则是::
 
    org.chromium.Chromium
    org.keepassxc.KeePassXC

@@ -19,6 +19,7 @@ Vim
    light_vim.rst
    vim_native_package_loading.rst
    vim_basic.rst
+   vim_gz.rst
 
 .. only::  subproject and html
 

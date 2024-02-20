@@ -26,6 +26,7 @@ Shell 实用工具
    time.rst
    sponge.rst
    update-alternatives.rst
+   qrencode.rst
 
 .. only::  subproject and html
 

@@ -190,7 +190,7 @@ Gentoo Linux提供了 Multilib (32和64位)，也提供了纯64位的 No-Multili
 
    Gentoo Linux默认使用 ``OpenRC`` 作为init，而不是复杂的 :ref:`systemd` (可选)
 
-   此外stage还区分LLVM版本，这个版本是使用Clang编译的，并且Gentoo也支持将主编译器切换为Clang。但是由于gcc是事实标准，有些软件使用Clang编译会出错，所以Clang提供了fallback到gcc的方式。并且Clang不能编译glibc，所以实际上系统还是会保留gcc。此外，Clang编译的软件并没有比Gcc编译的软件更快，且通常会占用更多内存。不过，Clang采用了BSD协议，比较宽松，所以在BSD系统以及商业公司支持上通常会选择Clang，对于个人而言(散兵游勇)通常会选择Gcc。请参考 `为什么Clang不能取代GCC？ <https://www.zhihu.com/question/602844208>`_ 讨论，其中 <为什么Clang不能取代GCC？ - 韩朴宇的回答 - 知乎 <https://www.zhihu.com/question/602844208/answer/3044304429>`_ 有很多人讨论了这个问题，可以参考
+   此外stage还区分LLVM版本，这个版本是使用Clang编译的，并且Gentoo也支持将主编译器切换为Clang。但是由于gcc是事实标准，有些软件使用Clang编译会出错，所以Clang提供了fallback到gcc的方式。并且Clang不能编译glibc，所以实际上系统还是会保留gcc。此外，Clang编译的软件并没有比Gcc编译的软件更快，且通常会占用更多内存。不过，Clang采用了BSD协议，比较宽松，所以在BSD系统以及商业公司支持上通常会选择Clang，对于个人而言(散兵游勇)通常会选择Gcc。请参考 `为什么Clang不能取代GCC？ <https://www.zhihu.com/question/602844208>`_ 讨论，其中 `为什么Clang不能取代GCC？ - 韩朴宇的回答 - 知乎 <https://www.zhihu.com/question/602844208/answer/3044304429>`_ 有很多人讨论了这个问题，可以参考
 
 - 下载 ``stage tarball`` 并解压缩:
 

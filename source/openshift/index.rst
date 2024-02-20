@@ -13,6 +13,7 @@ OpenShift是由Red Hat开发的容器化软件结合，围绕Docker容器编排�
    openshift_architecture.rst
    codeready_containers.rst
    deploy_app/index
+   develop/index
 
 .. only::  subproject and html
 
