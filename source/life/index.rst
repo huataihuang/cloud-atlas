@@ -40,6 +40,7 @@ Life Balance
 .. toctree::
    :maxdepth: 1
 
+   whats_past_is_prologue.rst
    future_experience_technologies.rst
    open_your_mind/index
    sport/index

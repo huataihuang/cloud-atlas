@@ -217,3 +217,4 @@ Gentoo 提供了以下几种支持的内核软件包:
 - `Kernel/Gentoo Kernel Configuration Guide <https://wiki.gentoo.org/wiki/Kernel/Gentoo_Kernel_Configuration_Guide>`_
 - `Kernel/Overview <https://wiki.gentoo.org/wiki/Kernel/Overview>`_
 - `Kernel/Rebuild <https://wiki.gentoo.org/wiki/Kernel/Rebuild>`_
+- `gentoo wiki: Handbook:AMD64/Blocks/Kernel <https://wiki.gentoo.org/wiki/Handbook:AMD64/Blocks/Kernel>`_

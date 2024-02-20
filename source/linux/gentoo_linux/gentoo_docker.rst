@@ -100,6 +100,21 @@ Systemd
 .. literalinclude:: gentoo_docker/sysctl_local.conf
    :caption: 配置sysctl的启动参数允许IP转发 配置文件 ``/etc/sysctl.d/local.conf``
 
+镜像
+========
+
+在完成了上述主机配置之后，就可以继续执行 :ref:`gentoo_image` 
+
+但是，我在后续容器内部 :ref:`upgrade_gentoo` 时遇到了 ``glibc`` 升级错误:
+
+.. literalinclude:: gentoo_docker/glibc_ia32_error
+   :caption: 由于物理主机内核没有配置32位兼容，导致Gentoo Linux镜像中glibc无法升级的报错
+   :emphasize-lines: 2,9
+
+实际上，我在 :ref:`install_gentoo_on_mbp` 特别采用了纯64位系统，所以内核配置去除了32位兼容。而Gentoo Linux官方提供的镜像默认是采用 ``multilib glibc`` ，需要32位内核兼容。
+
+切换 multilib 和 no-multilib 是一个折腾的操作
+
 参考
 ======
 

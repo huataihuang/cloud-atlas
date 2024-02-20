@@ -14,6 +14,7 @@ Gentoo Linux
    gentoo_version_specifier.rst
    gentoo_makeconf.rst
    gentoo_emerge.rst
+   gentoo_equery.rst
    gentoo_overlays.rst
    upgrade_gentoo.rst
    gentoo_grub.rst
@@ -42,6 +43,7 @@ Gentoo Linux
    usb_modeswitch.rst
    gentoo_brcmfmac_wifi.rst
    gentoo_kernel.rst
+   gentoo_ia32.rst
    gentoo_genkernel.rst
    gentoo_mbp_kernel.rst
    initramfs.rst
@@ -57,6 +59,7 @@ Gentoo Linux
    gentoo_pgsql.rst
    gentoo_vscode.rst
    gentoo_virtualization.rst
+   gentoo_wine.rst
    gentoo_keepassxc.rst
    pentoo/index
    think_gentooserv.rst
