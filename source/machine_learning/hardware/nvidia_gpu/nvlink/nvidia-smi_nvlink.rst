@@ -6,7 +6,7 @@
 
 :ref:`nvidia_nvlink` 是NVIDIA公司开发的GPU卡通讯互联接口(协议)，在高端数据中心GPU卡中使用。
 
-- 查看 ``nvdia-smi nvlink -h`` 帮助:
+- 查看 ``nvidia-smi nvlink -h`` 帮助:
 
 .. literalinclude:: nvidia-smi_nvlink/nvidia-smi_nvlink_help
    :language: bash
