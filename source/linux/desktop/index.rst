@@ -15,6 +15,7 @@ Linux桌面
    suckless/index
    xfce/index
    lxqt/index
+   enlightment/index
    kde/index
    xpra/index
    vim/index

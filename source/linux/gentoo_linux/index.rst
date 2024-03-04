@@ -35,6 +35,8 @@ Gentoo Linux
    gentoo_chinese_view.rst
    gentoo_sway_fcitx.rst
    gentoo_kde_fcitx.rst
+   gentoo_sway_fcitx_native_wayland.rst
+   gentoo_sway_fcitx_x.rst
    gentoo_ebuild_repository.rst
    gentoo_nvidia.rst
    gentoo_intel.rst

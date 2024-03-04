@@ -33,7 +33,7 @@ gentoo卸载keepassxc
 也就是说要么依赖 ``gnome-keyring`` 要么依赖 ``keepassxc`` ，所以执行 ``oneshot`` 替换安装:
 
 .. literalinclude:: gentoo_keepassxc/oneshot
-   :caption: 通过 ``--oneshot`` 参数安装 ``gnome-keyring`
+   :caption: 通过 ``--oneshot`` 参数安装 ``gnome-keyring``
    
 这样 ``gnome-keyring`` 就能取代 ``keepassxc`` ，此时再次执行卸载 ``keepassxc`` 就能成功
 
