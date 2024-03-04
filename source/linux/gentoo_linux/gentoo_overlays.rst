@@ -68,6 +68,12 @@ Gentoo Overlays 项目成员维护了独立仓库，之前采用 ``app-portage/l
 .. literalinclude:: gentoo_overlays/emaint_sync
    :caption: 使用 ``emaint`` 同步新添加的软件库
 
+output:
+
+.. literalinclude:: gentoo_overlays/emaint_sync_output
+   :caption: 使用 ``emaint`` 同步新添加的软件库 some prompt
+
+
 然后就可以按照正常方式进行 :ref:`gentoo_emerge` 安装了
 
 参考

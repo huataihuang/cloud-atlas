@@ -17,6 +17,9 @@ Gentoo Equery
 使用
 ========
 
+已安裝軟件包版本查詢
+---------------------
+
 - 检查已经安装的软件包版本:
 
 .. literalinclude:: gentoo_emerge/list_installed
@@ -28,6 +31,14 @@ Gentoo Equery
    :caption: 检查主机安装的 ``glibc`` 版本
 
 然后就能够对应 :ref:`pin_gentoo_package_version`
+
+軟件包USE參數查詢
+------------------
+
+- Firefox的 ``ebuild`` 有大量的USE参数，可以通过如下命令检查:
+
+.. literalinclude:: gentoo_firefox/equery
+   :caption: 通过 ``equery`` 查询 ``www-client/firefox`` 的USE参数
 
 参考
 =======
