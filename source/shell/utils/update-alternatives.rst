@@ -6,6 +6,10 @@ update-alternatives
 
 在安装了 :ref:`neovim` 之后(同时卸载了 :ref:`vim` )，遇到的问题是，系统没有了默认的 ``vim`` 或 ``vi`` ，而只有 ``nvim`` 。这对于习惯于使用 ``vi`` 命令有一点点不便。
 
+.. note::
+
+   :ref:`gentoo_linux` 没有提供 ``update-alternative`` ，而是采用了 :ref:`eselect` 来实现 ``update-alternative`` 相似的功能。
+
 通常我们会想到使用 ``alias`` 命令，例如:
 
 .. literalinclude:: update-alternatives/alias_nvim

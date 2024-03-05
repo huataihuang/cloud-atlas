@@ -15,6 +15,7 @@ Gentoo Linux
    gentoo_makeconf.rst
    gentoo_emerge.rst
    gentoo_equery.rst
+   eselect.rst
    gentoo_overlays.rst
    upgrade_gentoo.rst
    gentoo_grub.rst
