@@ -4,7 +4,7 @@
 eselect
 ==================
 
-类似 :ref:`update-alternative` ，gentoo 提供了采用 ``eselect`` 来构建软链接的方法:
+类似 :ref:`update-alternatives` ，gentoo 提供了采用 ``eselect`` 来构建软链接的方法:
 
 - 检查当前 ``vi`` 对应的编辑器
 
@@ -16,10 +16,10 @@ eselect
 .. literalinclude:: eselect/vi_show_output_unset
    :caption: 没有设置vi的时候显示是unset
 
-- 执行以下命令创建 :ref:`nvim` 映射到 ``vi`` :
+- 执行以下命令创建 :ref:`neovim` 映射到 ``vi`` :
 
 .. literalinclude:: eselect/vi_set
-   :caption: 设置 :ref:`nvim` 映射到 ``vi``
+   :caption: 设置 :ref:`neovim` 映射到 ``vi``
 
 然后检查 ``/usr/bin/vi`` 可以看到是一个软链接
 
@@ -34,12 +34,12 @@ eselect
 - 设置默认 ``editor`` 编辑器:
 
 .. literalinclude:: eselect/editor_set
-   :catption: 设置 ``EDITOR``
+   :caption: 设置 ``EDITOR``
 
 注意输出信息:
 
 .. literalinclude:: eselect/editor_set_output
-   :catption: 设置 ``EDITOR`` 输出信息
+   :caption: 设置 ``EDITOR`` 输出信息
 
 可以看到这里的 ``EDITOR`` 是一个环境变量。实际检查 ``/etc/profile.env`` 就可以看到以下配置行:
 

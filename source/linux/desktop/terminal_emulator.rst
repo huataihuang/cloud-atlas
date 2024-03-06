@@ -12,7 +12,9 @@ Linux终端模拟器
 
 .. note::
 
-   通过文档信息对比，目前我比较倾向于Alacriotty(GPU硬件加速，但需要编译安装)和uxvrt(轻量级性能最优，但需要解决 :ref:`uxvrt_ch_font` )。
+   :strike:`通过文档信息对比，目前我比较倾向于Alacriotty(GPU硬件加速，但需要编译安装)和uxvrt(轻量级性能最优)`  (需要解决 :ref:`uxvrt_ch_font` )。
+
+   2024年我的工作平台完全迁移到 :ref:`gentoo_linux` ，并却追求极致轻量级。在Gentoo发行版提供的 `Gentoo Terminal emulator <https://wiki.gentoo.org/wiki/Terminal_emulator>`_ 数量有限，最后我对比了 `Gentoo x11-terms <https://packages.gentoo.org/categories/x11-terms>`_ 选择使用 :ref:`sakura`
 
 Alacriotty
 ===============
@@ -27,7 +29,7 @@ Alacritty是一个比较新的开源软件，很可能没有提供二进制安�
 
 .. note::
 
-   待实践
+   在 :ref:`gentoo_sway_fcitx_x` 环境中，Alacriotty和foot一样，没有sway补丁之间是无法实现中文候选字框显示的。此外Alacriotty需要基于Rust环境进行构建，源代码依赖非常巨大。我放弃使用
 
 Terminus和Hyper
 ===================
@@ -50,7 +52,17 @@ urxvt
 Tilix
 ========
 
-Tilix是一个平铺式终端模拟器，有些类似结合了 :ref:`i3` 的终端模拟器。不过，通过资料了解，我暂时看不出优势。毕竟我使用 :ref:`i3` 可以完全实现平铺，而 :ref:`xfce` 也可以配置使用平铺。
+Tilix是一个平铺式终端模拟器，有些类似结合了 :ref:`i3` 的终端模拟器。 :strike:`不过，通过资料了解，我暂时看不出优势。` 毕竟我使用 :ref:`i3` 可以完全实现平铺，而 :ref:`xfce` 也可以配置使用平铺。
+
+Tilix的优点:
+
+- 类似 :ref:`sakura` ，使用GTK3来实现图形，依赖较少。
+- 提供了平铺终端窗口，通过导航切换，或许适合比较大的桌面显示器
+
+缺点(我个人认为):
+
+- 提供了一些我认为并非必要的功能
+- 没有集成在 :ref:`gentoo_linux` 发行版(这倒不怪Tilix)，对我而言安装运维不便
 
 kitty
 ==========

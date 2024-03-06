@@ -27,6 +27,7 @@ Linux桌面
    oh_my_zsh.rst
    tmux.rst
    alacritty.rst
+   sakura.rst
    read_ebook_in_linux.rst
    mupdf.rst
    remote_linux_desktop.rst
