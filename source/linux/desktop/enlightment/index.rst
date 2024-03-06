@@ -1,13 +1,13 @@
-.. _enlightment:
+.. _enlightenment:
 
 =================================
-Enlightment
+Enlightenment
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_enlightment.rst
+   intro_enlightenment.rst
 
 .. only::  subproject and html
 
