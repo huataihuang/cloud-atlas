@@ -25,6 +25,14 @@ Gentoo Docker
 .. literalinclude:: gentoo_docker/docker_check_kernel
    :caption: Docker提供了一个检查内核配置兼容性工具
 
+安装
+=======
+
+- 安装docker和docker-cli:
+
+.. literalinclude:: gentoo_docker/install_docker
+   :caption: 安装docker和docker-cli
+
 配置
 ========
 
