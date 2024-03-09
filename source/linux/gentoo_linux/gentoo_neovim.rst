@@ -24,15 +24,15 @@ Gentoo neovim
 
 为了方便使用，例如 ``vi`` 能够直接使用 ``nvim`` 并且默认编辑器设置为 ``nvim`` 执行以下命令(见 :ref:`eselect` )
 
-- 执行以下命令创建 :ref:`nvim` 映射到 ``vi`` :
+- 执行以下命令创建 :ref:`neovim` 映射到 ``vi`` :
 
 .. literalinclude:: eselect/vi_set
-   :caption: 设置 :ref:`nvim` 映射到 ``vi``
+   :caption: 设置 :ref:`neovim` 映射到 ``vi``
 
 - 设置默认 ``editor`` 编辑器:
 
 .. literalinclude:: eselect/editor_set
-   :catption: 设置 ``EDITOR``
+   :caption: 设置 ``EDITOR``
 
 参考
 =======
