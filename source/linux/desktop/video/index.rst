@@ -1,14 +1,13 @@
-.. _xfce:
+.. _linux_video:
 
 =================================
-xfce
+Linux视频
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   xfce_startup.rst
-   thunar.rst
+   mpv.rst
 
 .. only::  subproject and html
 

@@ -22,6 +22,7 @@ Linux桌面
    neovim/index
    vscode/index
    audio/index
+   video/index
    xorg_dpi_fix.rst
    i3.rst
    oh_my_zsh.rst
