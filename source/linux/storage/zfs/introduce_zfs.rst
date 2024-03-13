@@ -68,6 +68,15 @@ ZFS是 128 位文件系统，这个设计如此超前，以至于理论极限可
   - 构建 :ref:`libvirt_zfs_pool` ，扩展本地 libvirt 存储，以便能够运行较大存储规格的KVM虚拟机
   - 构建 :ref:`deploy_gluster_ubuntu_zfs` ，通过3个Ubuntu虚拟机来实现测试环境的GlusterFS集群，模拟一些有趣的案例
 
+2024年3月:
+
+- :ref:`whats_past_is_prologue` : 作为数字游牧的 :ref:`studio` ，重新构建基于 ZFS 存储的 ``xcloud`` (硬件使用 :ref:`mbp15_late_2013` )
+- 在ZFS上运行 :ref:`kvm` 和 :ref:`docker`  实现大规模模拟集群
+
+  - ZFS的卷管理功能赋予了灵活的虚拟机和容器存储隔离
+  - 使用 :ref:`zfs_clone` 和 :ref:`zfs_snapshot` 实现虚拟机镜像复制以及容器复制，同时实现数据备份和恢复
+  - 通过透明的 :ref:`zfs_compression` 实现存储节约
+
 参考
 =======
 
