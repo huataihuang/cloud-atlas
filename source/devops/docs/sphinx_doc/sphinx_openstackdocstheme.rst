@@ -6,22 +6,23 @@ Sphinx使用OpenStackDosTheme风格
 
 我在 :ref:`think_write_doc` 时，非常想采用OpenStack Documentations的文档风格。也是偶然发现， `OpenStack Sphinx themes <https://docs.openstack.org/openstackdocstheme/latest/>`_ 就是关键，通过简单配置，我尝试了将自己网站转换风格。
 
+.. note::
+
+   `Sphinx Themes Gallery <https://sphinx-themes.org/>`_ 提供了常用的Sphinx Themes展示和说明，可以参考配置风格。一些themes和Markdown网站的用例相似，例如 `Conestack theme <https://sphinx-themes.org/sample-sites/sphinx-conestack-theme/>`_
+
 安装和简单使用
 ================
 
-- 同样类似 :ref:`write_doc` 方法，在 :ref:`virtualenv` 中安装pip模块::
+- 同样类似 :ref:`write_doc` 方法，在 :ref:`virtualenv` 中安装pip模块:
 
-   pip install openstackdocstheme
+.. literalinclude:: sphinx_openstackdocstheme/install
+   :caption: 安装 ``openstackdocstheme`` 风格
 
-- 修订项目文档 ``conf.py`` ::
+- 修订项目文档 ``conf.py`` :
 
-   extensions = [
-       # ...
-       'openstackdocstheme',
-       # ...
-   ]
-   
-   html_theme = 'openstackdocs'
+.. literalinclude:: sphinx_openstackdocstheme/conf.py
+   :caption: 修订 ``conf.py`` 启用 ``openstackdocstheme``
+   :language: python
 
 - 构建文档::
 

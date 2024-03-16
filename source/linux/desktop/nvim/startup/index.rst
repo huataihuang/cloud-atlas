@@ -1,18 +1,13 @@
-.. _neovim:
+.. _nvim_startup:
 
 =================================
-neovim
+neovim起步
 =================================
-
-``neovim`` 是从 :ref:`vim` 7 fork出来的增强型vi编辑器
 
 .. toctree::
    :maxdepth: 1
 
-   vim_vs_neovim.rst
-   coc.nvim.rst
-   ../../gentoo_linux/gentoo_neovim.rst
-
+   nvim_base_config.rst
 
 .. only::  subproject and html
 

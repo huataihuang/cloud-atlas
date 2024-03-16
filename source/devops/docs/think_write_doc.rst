@@ -10,6 +10,17 @@
 我在十几年前，在一家小公司做运维的时候，就曾经尝试过不同的CMS，想要作为个人以及部门的知识管理平台。那个时期，iPhone 1st尚未发布，软件行业还没有现在这么流行的各种静态网站工具，很多CMS(内容管理系统)是基于PHP开发（Wordpress, Joomla, Drupal)或者基于Python的 `Plone <https://plone.org>`_
 。那时候，我就一直在尝试不同的CMS/Wiki系统，而且每当看到精美的CMS网站(或者文档)，就想要了解是基于哪个平台实现的，自己是不是能构建出同样简洁美观的知识库。
 
+如何借鉴CMS网站
+-------------------
+
+既然说到CMS借鉴，如何分辨和找到某个心仪网站的CMS本源？
+
+如果网站确实使用了某个CMS系统，那么 `What CMS <https://whatcms.org/>`_ 提供了非常简单的检查方法: 输入网址就能够侦测该网站使用了哪个CMS平台。不过，如果网站是静态生成，例如 :ref:`sphinx_doc` ，那么这个标准的CMS检测工具就无能为力。
+
+.. note::
+
+   参考 `How to Tell What Website Builder Was Used  <https://dorik.com/blog/how-to-tell-what-website-builder-was-used>`_
+
 倾向
 =======
 
@@ -30,7 +41,7 @@
    好的文档规范能够增强协作， OpenStack 组织撰写了详细的 `OpenStack Documentation Contributor Guide <https://docs.openstack.org/doc-contrib-guide/>`_ ，提供详细的文档撰写实践指南。非常值得在构建大型项目时参考。
 
    同样 `OpenShift Documentation guidelines <https://github.com/openshift/openshift-docs/blob/main/contributing_to_docs/doc_guidelines.adoc>`_ 提供了良好建议。不过，需要注意的是，虽然OpenShift文档风格非常类似OpenStack，但是OpenShift文档是采用 `asiidoc <https://asciidoc.org/>`_ 完成的。所谓 ``asiidoc`` 采用了独特的MARK_UP方式撰写，语法结构不同于 MarkDown
-   但是采用了一种变体文档格式，可能又比较大的学习成本。我并没有实践。
+   但是采用了一种变体文档格式，可能有比较大的学习成本。我并没有实践。
 
 .. note::
 

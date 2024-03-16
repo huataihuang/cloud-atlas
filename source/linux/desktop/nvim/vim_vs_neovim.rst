@@ -95,3 +95,4 @@ neovim 不是重头开始的项目，是从 vim 7 fork出来进行重构，大�
 - `Comparing Vim and Neovim for Python Developer <https://denisrasulev.medium.com/comparing-vim-and-neovim-for-python-developer-3baa1b4dbd8f>`_
 - `How is NeoVim Different From Vim? <https://www.baeldung.com/linux/vim-vs-neovim>`_
 - `7 Reasons Why Developers Prefer NeoVim Over Vim <https://linuxhandbook.com/neovim-vs-vim/>`_
+- `I need a guide to configure everything from scratch.  <https://www.reddit.com/r/neovim/comments/15q0a4g/i_need_a_guide_to_configure_everything_from/>`_ 讨论如何配置neovim，可以作为信息参考起点

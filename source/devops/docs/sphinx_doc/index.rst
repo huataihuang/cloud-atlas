@@ -18,7 +18,9 @@ Sphinx文档
 .. toctree::
    :maxdepth: 1
 
+   sphinx_docs-cloud-atlas-io.rst
    sphinx_openstackdocstheme.rst
+   sphinx-intl.rst
    sphinx_show_code.rst
    sphinx_table.rst
    sphinx_image.rst

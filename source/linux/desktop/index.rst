@@ -19,7 +19,7 @@ Linux桌面
    kde/index
    xpra/index
    vim/index
-   neovim/index
+   nvim/index
    vscode/index
    audio/index
    video/index
