@@ -13,6 +13,7 @@ DevOps 文档
 
    think_write_doc.rst
    write_doc.rst
+   static_website.rst
    obsidian.rst
    sphinx_doc/index
    tiddlywiki/index

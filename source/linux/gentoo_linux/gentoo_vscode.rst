@@ -30,7 +30,7 @@ Gentoo VSCode
 
 .. note::
 
-   对于纯终端用户，当前中文环境使用 :ref:`fcitx` 还无法实现 :ref:`gentoo_sway_fcitx_native_wayland` 。则在 :ref:`sway` 中终端使用 :ref:`neovim` 不能直接使用 ``foot`` ，可以采用轻量级的 :ref:`sakura` 解决轻量级终端中文输入。
+   对于纯终端用户，当前中文环境使用 :ref:`fcitx` 还无法实现 :ref:`gentoo_sway_fcitx_native_wayland` 。则在 :ref:`sway` 中终端使用 :ref:`nvim` 不能直接使用 ``foot`` ，可以采用轻量级的 :ref:`sakura` 解决轻量级终端中文输入。
 
 参考
 =======

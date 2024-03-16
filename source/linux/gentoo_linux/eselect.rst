@@ -16,10 +16,10 @@ eselect
 .. literalinclude:: eselect/vi_show_output_unset
    :caption: 没有设置vi的时候显示是unset
 
-- 执行以下命令创建 :ref:`neovim` 映射到 ``vi`` :
+- 执行以下命令创建 :ref:`nvim` 映射到 ``vi`` :
 
 .. literalinclude:: eselect/vi_set
-   :caption: 设置 :ref:`neovim` 映射到 ``vi``
+   :caption: 设置 :ref:`nvim` 映射到 ``vi``
 
 然后检查 ``/usr/bin/vi`` 可以看到是一个软链接
 

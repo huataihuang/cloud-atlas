@@ -29,7 +29,7 @@ Sakura终端模拟器的上述特性，使得它可以用于任何图形桌面�
 
 - 终端色彩: 可以通过上下文菜单来选择终端色彩配置，不过我没有尝试，默认配置我觉得够用
 
-- 对于 :ref:`linux_chinese_view` 安装的中文字体 ``fonts-wqy-microhei`` ，非常适合选择作为Sakura终端字体，方便在 :ref:`neovim` 这样编辑器中用于代码开发(中文注释)
+- 对于 :ref:`linux_chinese_view` 安装的中文字体 ``fonts-wqy-microhei`` ，非常适合选择作为Sakura终端字体，方便在 :ref:`nvim` 这样编辑器中用于代码开发(中文注释)
 
 - Sakura终端模拟器通过上下文菜单修改的配置会自动保存到 ``~/.config/sakura/sakura.conf`` ，所以通常不需要手工编辑配置
 
