@@ -36,3 +36,8 @@ docs.cloud-atlas.io 文档的sphinx
 .. literalinclude:: sphinx_openstackdocstheme/conf.py
    :caption: 修订 ``conf.py`` 启用 ``openstackdocstheme``
    :language: python
+
+- build初始文档
+
+.. literalinclude:: ../write_doc/make
+   :caption: 执行build出html和epub
