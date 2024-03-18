@@ -134,10 +134,10 @@ Sphinx Doc
 
    Sphinx撰写时经常需要引用代码片段，请参考 `sphinx插入代码 <https://www.cnblogs.com/youxin/p/3653027.html>`_ 和 `展示示例代码 <https://zh-sphinx-doc.readthedocs.io/en/latest/markup/code.html>`_
 
-- 撰写文档之后，通过以下命令生成html和epub最终文档(使用epub方便分发和移动设备阅读)::
+- 撰写文档之后，通过以下命令生成html和epub最终文档(使用epub方便分发和移动设备阅读):
 
-   make html
-   make epub
+.. literalinclude:: write_doc/make
+   :caption: 执行build出html和epub
 
 .. note::
 

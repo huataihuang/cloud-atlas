@@ -8,7 +8,11 @@ Sphinx使用OpenStackDosTheme风格
 
 .. note::
 
-   `Sphinx Themes Gallery <https://sphinx-themes.org/>`_ 提供了常用的Sphinx Themes展示和说明，可以参考配置风格。一些themes和Markdown网站的用例相似，例如 `Conestack theme <https://sphinx-themes.org/sample-sites/sphinx-conestack-theme/>`_
+   `Sphinx Themes Gallery <https://sphinx-themes.org/>`_ 提供了常用的Sphinx Themes展示和说明，可以参考配置风格。
+
+   `Conestack theme <https://sphinx-themes.org/sample-sites/sphinx-conestack-theme/>`_ 风格非常类似 :ref:`mkdocs` ，基于 Bootstrap 5，对移动设备兼容较好，也比较清新。不过，这个 ``Conestack theme`` 似乎在 ``make html`` 时非常缓慢。
+
+   目前我计划在 :ref:`sphinx_docs-cloud-atlas-io` 依然采用 ``openstackdocs`` theme，尝试逐步修订和改进。
 
 安装和简单使用
 ================

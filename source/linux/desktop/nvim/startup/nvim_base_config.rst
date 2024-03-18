@@ -12,6 +12,10 @@ init.lua
 .. literalinclude:: nvim_base_config/init.lua
    :caption: 在 ``~/.config/nvim/init.lua`` 中配置初始设置
 
+上述初始配置设置了一些neovim的常用编辑特性，例如tab默认4个空格等
+
+要进一步配置 neovim ，需要安装插件，我将采用 :ref:`lazy.nvim` 来实现插件管理，请参考 :ref:`lazy.nvim_startup` 安装插件案例
+
 vim内部变量
 -------------
 

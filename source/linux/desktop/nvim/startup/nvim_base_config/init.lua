@@ -40,8 +40,8 @@ vim.o.cmdheight = 1
 -- 自动加载外部修改
 vim.o.autoread = true
 vim.bo.autoread = true
--- 禁止折行
-vim.wo.wrap = false
+-- 自动折行
+vim.wo.wrap = true
 -- 光标在行首尾时<Left><Right>可以跳到下一行
 vim.o.whichwrap = "<,>,[,]"
 -- 允许隐藏被修改过的buffer
@@ -71,3 +71,4 @@ vim.o.shortmess = vim.o.shortmess .. "c"
 -- 补全显示10行
 vim.o.pumheight = 10
 vim.o.clipboard = "unnamedplus"
+
