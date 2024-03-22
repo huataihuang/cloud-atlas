@@ -1,16 +1,13 @@
-.. _kodi:
+.. _video_cms:
 
 =================================
-Kodi - 媒体播放
+Video CMS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_kodi.rst
-   install/index
-   kodi_remote_control.rst
-   kodi_soft_remote_control.rst
+   intro_video_cms.rst
 
 .. only::  subproject and html
 

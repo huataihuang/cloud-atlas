@@ -14,9 +14,14 @@ Gentoo上运行ZFS
 .. literalinclude:: gentoo_zfs/install_zfs
    :caption: ``emerge`` 安装 zfs
 
+安装完成后提示信息:
+
+.. literalinclude:: gentoo_zfs/install_zfs_output
+   :caption: ``emerge`` 安装 zfs 后提示信息
+
 .. warning::
 
-   每次内核编译之后，都需要重新 emerge ``sys-fs/zfs-kmod`` ，即使内核修改是微不足道的。如果你在merge了内核模块之后重新编译内核，则可能会是的zpool进入不可终端的睡眠(也就是不能杀死的进程)或者直接crash。
+   每次内核编译之后，都需要重新 emerge ``sys-fs/zfs-kmod`` ，即使内核修改是微不足道的。如果你在merge了内核模块之后重新编译内核，则可能会是的zpool进入不可中断的睡眠(也就是不能杀死的进程)或者直接crash。
 
 - 在内核变更之后，执行以下命令重新 remerge zfs-kmod :
 

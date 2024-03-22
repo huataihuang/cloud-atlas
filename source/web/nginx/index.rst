@@ -16,6 +16,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    get_nginx_default_config.rst
    nginx_virtual_host.rst
    self_signed_ssl_nginx.rst
+   nginx_autoindex.rst
    nginx_root_alias.rst
    nginx_wpad.rst
    change_nginx_user.rst

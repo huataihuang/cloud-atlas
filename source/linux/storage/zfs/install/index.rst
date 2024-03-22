@@ -14,6 +14,7 @@ ZFS安装
    fedora_zfs.rst
    ubuntu_zfs.rst
    gentoo_zfs.rst
+   gentoo_zfs_xcloud.rst
 
 .. only::  subproject and html
 

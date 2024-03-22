@@ -14,6 +14,8 @@ Gentoo ``brcmfmac`` 无线
 硬件
 =====
 
+- 外观(淘宝)
+
 - 启动Linux之后执行 ``lspci`` 检查，原来苹果笔记本的 :ref:`bcm943602cs` 配件的Broadcom芯片是 ``BCM43602``
 
 .. literalinclude:: gentoo_brcmfmac_wifi/bcm943602cs
@@ -63,6 +65,31 @@ Gentoo ``brcmfmac`` 无线
    :caption: 设置 ``openrc`` 启动 ``wpa_supplicant`` 服务
 
 非常丝滑，这款 MacBook Pro 2015 的无线配件 :ref:`bcm943602cs` 确实非常适合Linux使用，完全适配我的 :ref:`mbp15_late_2013`
+
+问题排查
+===============
+
+我遇到一个奇怪的问题，连接到家里的5G wifi路由器总是失败:
+
+- 启动 :ref:`wpa_supplicant` 服务之后，再执行 ``ifconfig`` 观察可以看到无线网卡没有任何进出包
+- 但是也不是所有无线连接都有问题，有些无线路由器可以正常连接，连接以后 ``ifconfig`` 可以看到正常的包计数
+
+  - 我的 :ref:`pixel_4` 启用 :ref:`vpn_hotspot` 共享无线是能够正常连接和访问的
+
+- 在外旅行时，连接旅店的无线wifi也是部分正常，部分不能连接(现象相同)
+
+似乎是某些无线AP不能兼容？
+
+所使命令行方式运行 ``wpa_supplicant`` (前台运行)观察输出:
+
+.. literalinclude:: ../ubuntu_linux/network/wpa_supplicant/wpa_supplicant_connect
+   :caption: 前台运行 ``wpa_supplicant`` 观察
+
+输出信息
+
+.. literalinclude:: gentoo_brcmfmac_wifi/wpa_supplicant_connect_output
+   :caption: 前台运行 ``wpa_supplicant`` 输出的错误信息
+
 
 参考
 =====
