@@ -14,6 +14,7 @@ neovim
    nvim_lua.rst
    coc.nvim.rst
    lazy.nvim/index
+   nvim_ide.rst
    ../../gentoo_linux/gentoo_neovim.rst
    nvim_mouse.rst
 

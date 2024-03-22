@@ -10,7 +10,7 @@ Info-Service Atlas
 
 规划构建应用服务:
 
-- 视频服务: :ref:`kodi`
+- 视频服务
 - 邮件服务
 - 即时消息服务
 - 协作服务
@@ -18,6 +18,8 @@ Info-Service Atlas
 .. toctree::
    :maxdepth: 1
 
+   streaming_media/index
+   video_cms/index
    kodi/index
    matrix/index
 

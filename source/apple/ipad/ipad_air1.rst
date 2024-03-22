@@ -1,4 +1,4 @@
-.. _iphone_air1:
+.. _ipad_air1:
 
 ==================
 iPad Air一代

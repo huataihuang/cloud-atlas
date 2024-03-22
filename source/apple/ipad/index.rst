@@ -7,7 +7,8 @@ iPad
 .. toctree::
    :maxdepth: 1
 
-   iphone_air1.rst
+   ipad_air1.rst
+   ipad_pro1.rst
 
 .. only::  subproject and html
 

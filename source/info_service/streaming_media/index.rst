@@ -1,16 +1,19 @@
-.. _kodi:
+.. _streaming_media:
 
 =================================
-Kodi - 媒体播放
+流媒体(Streaming Media)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_kodi.rst
-   install/index
-   kodi_remote_control.rst
-   kodi_soft_remote_control.rst
+   streaming_protocol.rst
+   hls.rst
+   rtmp.rst
+   webrtc.rst
+   srt.rst
+   rtsp.rst
+   mpeg-dash.rst
 
 .. only::  subproject and html
 

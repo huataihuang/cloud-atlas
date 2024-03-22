@@ -1,16 +1,13 @@
-.. _kodi:
+.. _kodi_install:
 
 =================================
-Kodi - 媒体播放
+Kodi 安装
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_kodi.rst
-   install/index
-   kodi_remote_control.rst
-   kodi_soft_remote_control.rst
+   install_kodi_android.rst
 
 .. only::  subproject and html
 
