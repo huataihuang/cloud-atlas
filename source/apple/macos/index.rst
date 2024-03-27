@@ -38,6 +38,8 @@ macOS
    macos_apfs_case-sensitive.rst
    extfs.rst
    vlc_play_bluray.rst
+   macos_recovery.rst
+   reset_mac.rst
 
 .. only::  subproject and html
 

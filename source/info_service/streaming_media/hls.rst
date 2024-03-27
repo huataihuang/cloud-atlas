@@ -12,6 +12,8 @@ HTTP Live Streaming(HLS)
 .. literalinclude:: hls/nginx_206.log
    :caption: nginx日志中记录206返回码为客户端提供分片文件流化下载
 
+HTTP 206返回码表示 ``Partial Content success`` ，也就是表明成功返回请求数据范围的内容，这个数据请求的范围在HTTP头部Range部分描述。
+
 参考
 ===========
 

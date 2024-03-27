@@ -42,7 +42,7 @@
 
 我将 3个 :ref:`pi_4` 和 3 个 :ref:`pi_3` 堆叠起来，构建一个mini的树莓派集群:
 
-.. figure:: ../../_static/arm/raspberry_pi/pi_cluster/edge_cloud_pi.jpg
+.. figure:: ../../_static/raspberry_pi/pi_cluster/edge_cloud_pi.jpg
    :scale: 60
 
 ARM服务器分布

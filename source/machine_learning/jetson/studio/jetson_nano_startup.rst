@@ -13,10 +13,32 @@ NVIDIA :ref:`jetson_nano` Developer Kit是一个小型AI计算机，面向创客
 下载和准备启动
 =================
 
-从 `Jetson Download Center <https://developer.nvidia.com/embedded/downloads>`_ 下载 ``Jetson Nano Developer Kit SD Card Image`` ，然后使用如下命令刻录到SD Card::
+从 `Jetson Download Center <https://developer.nvidia.com/embedded/downloads>`_ 下载
+
+- :strike:`Jetson Nano Developer Kit SD Card Image` 现已改名为 ``NVIDIA JetPack SDK`` ，然后使用如下命令刻录到SD Card:
+
+早期实践记录::
 
    unzip nv-jetson-nano-sd-card-image-r32.3.1.zip
    sudo dd if=sd-blob-b01.img of=/dev/rdisk2 bs=100m
+
+2024年3月实践:
+
+- ``NVIDIA JetPack SDK`` `JetPack 5.0.2 <https://developer.download.nvidia.cn/embedded/L4T/r35_Release_v1.0/JP_SD_5.0.2_b231/Jetson_SD_Xavier_NX/JP502-xnx-sd-card-image-b231.zip>`_ : JetPack 5.0.2 是生产级质量版本，包括搭载 Linux 内核 5.10 的 Jetson Linux 35.1 BSP、基于 Ubuntu 20.04 的根文件系统、基于 UEFI 的引导加载程序以及作为可信执行环境的 OP-TEE。新版计算栈，配备了 CUDA 11.4、TensorRT 8.4.1 和 cuDNN 8.4.1
+
+- ``NVIDIA JetPack SDK`` `JetPack 6 Preview <https://developer.download.nvidia.cn/embedded/L4T/r36_Release_v2.0/jp60dp-orin-nano-sd-card-image.zip>`_ ，操作系统版本和相应软件堆栈有进一步提升:  Linux Kernel 5.15, UEFI based bootloader, Ubuntu 22.04 based root file system, NVIDIA drivers, necessary firmwares, toolchain and more.
+
+.. note::
+
+   由于NVIDIA不支持 JetPack 5 升级到 6，并且我也为了能够体验最新技术，我实践安装了 ``JetPack 6 Preview``
+
+.. literalinclude:: jetson_nano_startup/mkimg
+   :caption: 制作JetPack启动U盘
+
+JetPack使用了很多分区，执行 ``fdisk -l /dev/sdb`` 可以看到:
+
+.. literalinclude:: jetson_nano_startup/fdisk_outpus
+   :caption: JetPack的分需众多，初始显示如下
 
 电源跳线
 ===========

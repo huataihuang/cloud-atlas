@@ -24,6 +24,7 @@ Android 设备
    samsung_galaxy_watch_4_classic_lte.rst
    samsung_galaxy_watch_3.rst
    sony_wf-1000xm3.rst
+   ms_universal_foldable_kb.rst
 
 .. only::  subproject and html
 

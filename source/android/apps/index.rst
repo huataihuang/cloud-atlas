@@ -15,6 +15,7 @@ Android 应用
    termux_install.rst
    termux_zsh.rst
    termux_dev.rst
+   termux_chinese_input.rst
    termux_nginx.rst
    termux_background_running.rst
    android_12_background_limit_termux.rst
