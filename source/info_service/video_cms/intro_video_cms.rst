@@ -24,6 +24,15 @@ Video CMS简介
 
    此外，需要学习和理解 :ref:`streaming_media` 所使用的不同 :ref:`streaming_protocol` ，以便能够更好实现播放
 
+.. note::
+
+   为了后续能够更为方便稳定观看视频，我准备构建一个基于 :ref:`raspberry_pi` 集群来实现7x24小时视频服务，待实践
+
+开源项目参考
+============
+
+- 
+
 参考
 =========
 
