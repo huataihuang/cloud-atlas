@@ -14,6 +14,10 @@
 
 我将树莓派组建成一个微型集群，运行 :ref:`k3s` 并通过 :ref:`rancher` 实现一个PaaS环境。这是一个个人开发和实践环境，通过完整的CI/CD来实现个人工作室。
 
+.. note::
+
+   2024年3月，重新部署 :ref:`raspberry_pi` 集群，采用了树莓派官方 :ref:`raspberry_pi_os` 操作系统，原因是官方系统现已完美支持64位，并且由于使用广泛，可以通过社区获得较好的支持。我计划重新部署 :ref:`kubernetes` 集群，构建完整的模拟Cloud Atlas集群
+
 硬件环境
 =========
 
@@ -38,7 +42,7 @@
     - ``8G`` 节点内存，部署 :ref:`jenkins` (集成在 :ref:`rancher` 中作为 pipeline)
 
 - :ref:`jetson_nano` - 构建边缘云计算( :ref:`machine_learning` )
-- :ref:`pi_400` - 作为管理和操作
+- :ref:`pi_400` - 作为管理和操作(悲剧: 已损坏)
 
 我将 3个 :ref:`pi_4` 和 3 个 :ref:`pi_3` 堆叠起来，构建一个mini的树莓派集群:
 
@@ -53,7 +57,7 @@ ARM服务器分布
    :widths: 20, 10, 10, 10, 20, 30
    :header-rows: 1
 
-ARM架构的边缘计算采用了 ``192.168.7.x`` 作为网络IP段，和 :ref:`priv_cloud_infra` 的 ``192.168.6.x`` 隔离，中间采用 3层 :ref:`cisco` 路由
+ARM架构的边缘计算采用了 ``192.168.7.x`` 作为网络IP段(融入到我的家庭网络)，和 :ref:`priv_cloud_infra` 的 ``192.168.6.x`` 隔离，中间采用 3层 :ref:`cisco` 路由
 
 虽然也可以在树莓派上实现 :ref:`arm_kvm` ，但是考虑到边缘计算硬件性能有限，所以采用轻量级 :ref:`kubernetes` 实现 :ref:`k3s` 来构建mini集群，目标是实现:
 

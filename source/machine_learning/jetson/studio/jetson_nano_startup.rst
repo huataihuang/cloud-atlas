@@ -53,6 +53,8 @@ Jetson Nano有3种供电方式：
 
    主板上 J48 跳线是用来切换外接电源还是Micro-USB供电。默认是使用Micro-USB供电(跳线没有使用)，如果要使用外接电源，务必将该跳线连接上。
 
+   详情参考 `Power supply considerations for Jetson Nano Developer Kit <https://forums.developer.nvidia.com/t/power-supply-considerations-for-jetson-nano-developer-kit/71637>`_
+
 初始化
 ========
 

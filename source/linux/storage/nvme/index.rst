@@ -10,6 +10,7 @@ Linux NVMe
    nvme.rst
    u2_m2.rst
    samsung_pm9a1.rst
+   samsung_pm9a1_rtl9210b.rst
    nvme-cli.rst
    nvme_ssd_management.rst
    nvme_passthru.rst
