@@ -9,15 +9,18 @@
 下载
 ========
 
-从 `树莓派官网 <https://www.raspberrypi.org/>`_ 可以下载镜像文件，通常推荐基于Debian的发行版 Raspbian 。然后将镜像文件通过 ``dd`` 命令写入到U盘中::
+从 `树莓派官网 <https://www.raspberrypi.org/>`_ 可以下载镜像文件，通常推荐基于Debian的发行版 :strike:`Raspbian` :ref:`raspberry_pi_os` (新版命名) 。然后将镜像文件通过 ``dd`` 命令写入到U盘中:
 
-   sudo dd if=2020-08-20-raspios-buster-armhf-lite.img of=/dev/sdb bs=100M
+.. literalinclude:: pi_quick_start/mkimg
+   :caption: 将树莓派镜像写入U盘
 
 .. note::
 
    这里写入磁盘的工具 ``dd`` 是Linux平台常用工具，上述写入设备是 ``/dev/sdb`` ，是U盘插入Linux电脑识别的磁盘设备。如果你使用其他操作系统，或者Linux电脑中安装的磁盘数量不同，则设备明会不相同。请按照实际设备设备处理。
 
-现在 :ref:`pi_4` 官方推荐使用 `NOOBS (New Out Of Box Software) <https://www.raspberrypi.org/documentation/installation/noobs.md>`_ ，不过，由于早期的树莓派都是32为处理器，并且内存都不超过4GB，所以默认官方提供都树莓派操作系统都是32位的。2020年树莓派4B增加了8G规格，也就需要操作系统改用64位以支持超过4G内存。但当前(2020年9月)树莓派官方尚未提供64位正式版，所以推荐采用 `Ubuntu Server for Raspberry Pi <https://ubuntu.com/download/raspberry-pi>`_ 的64位系统。
+( **这段已过时废弃** )现在 :ref:`pi_4` 官方推荐使用 `NOOBS (New Out Of Box Software) <https://www.raspberrypi.org/documentation/installation/noobs.md>`_ ，不过，由于早期的树莓派都是32为处理器，并且内存都不超过4GB，所以默认官方提供都树莓派操作系统都是32位的。2020年树莓派4B增加了8G规格，也就需要操作系统改用64位以支持超过4G内存。但当前(2020年9月)树莓派官方尚未提供64位正式版，所以推荐采用 `Ubuntu Server for Raspberry Pi <https://ubuntu.com/download/raspberry-pi>`_ 的64位系统。
+
+当前(2024年)树莓派官方已经推出来基于Debian 12的64位稳定版操作系统，所以现在通常不需要第三方64位系统，直接采用官方Raspberry Pi OS的64位版本就能够充分发挥硬件性能。
 
 创建树莓派镜像
 ===============
@@ -39,6 +42,10 @@
    树莓派启动以后，如果采用的是官方镜像，会有一个引导过程方便你设置，这里不再详述。
 
    不过，2020年9月，我购买的新版64位树莓派4b，为了能够学习和实践64位ARM系统，我选择 :ref:`ubuntu64bit_pi` 。
+
+.. note::
+
+   2024年3月，我重新开始部署基于树莓派的 :ref:`kubernetes` 集群，已经转为采用官方Raspberry Pi OS 64位系统
 
 配置树莓派初始环境
 ===================
@@ -79,29 +86,27 @@
 设置有线网卡静态IP
 ------------------
 
-- 配置 ``/etc/network/interfaces`` ::
+- (之前实践的早期版本)配置 ``/etc/network/interfaces`` (按照 :ref:`debian` 标准配置网络方法)
 
-   iface eth0 inet static
-        address 192.168.7.10
-        netmask 255.255.255.0
-        network 192.168.7.0
-        broadcast 192.168.7.255
-        gateway 192.168.7.1
-        dns-nameservers 192.168.7.1
+.. literalinclude:: pi_quick_start/interfaces
+   :caption: 按照 :ref:`debian` 标准配置网络
 
 .. note::
 
    网卡接口可能随系统识别硬件而不同命名，例如在 :ref:`run_kali_on_pi_zero` 系统识别的有线网卡可能命名为 ``usb0`` 。
 
+- 现在(2024年)最新的Raspberry Pi OS基于 :ref:`debian` 12 构建，默认采用 :ref:`networkmanager` 管理网络，所以配置较为复杂。Raspberry Pi OS提供了一个终端交互设置程序 :ref:`nmtui` ，可以交互完成设置。实际配置文件存储在 :ref:`networkmanager` 管理配置中
+
+.. literalinclude:: ../../linux/ubuntu_linux/network/networkmanager/eth0.config
+   :caption: 通过 ``nmtui`` 交互生成的树莓派静态IP地址配置文件 ``/etc/NetworkManager/system-connections/'Wired connection 1.nmconnection'``
+   :emphasize-lines: 10-14
+
 设置ssh默认启动
 ----------------
 
-- 激活ssh服务默认启动::
+- 激活ssh服务默认启动，并启动ssh服务::
 
    sudo systemctl enable ssh
-
-- 启动ssh服务::
-
    sudo systemctl start ssh
 
 设置pi用户帐号密码和root密码
@@ -109,9 +114,11 @@
 
 .. note::
 
-   对于树莓派使用的Raspbian系统，默认用户帐号是 ``pi`` ，密码是 ``raspberry`` ，一定要第一时间修改成复杂密码，避免安全漏洞。此外，还要设置root用户密码。
+   之前旧版本Raspbian系统，默认用户帐号是 ``pi`` ，密码是 ``raspberry`` ，一定要第一时间修改成复杂密码，避免安全漏洞。此外，还要设置root用户密码。
 
-- 切换到超级用户 ``root`` 帐号下，然后分别为 ``pi`` 用户设置密码，以及为自己（ ``root`` ）设置密码::
+   不过，目前最新的Raspberry Pi OS已经去除了默认的 ``pi`` 帐号，而是改成首次启动时通过交互界面让用户输入一个自定义的帐号以及设置密码。而且这个帐号是无需密码就能够 ``sudo`` 成root用户，这个管理员帐号非常重要，通常就是以这个自定义帐号登录系统。
+
+- ( **新版本已经不再需要此步骤** )切换到超级用户 ``root`` 帐号下，然后分别为 ``pi`` 用户设置密码，以及为自己（ ``root`` ）设置密码::
 
    sudo su -
    passwd pi
@@ -124,10 +131,14 @@
 
 - 在笔记本上输入如下命令通过ssh登录树莓派::
 
-   ssh pi@192.168.7.10
+   ssh pi@192.168.7.11
 
 物理主机IP masquerade
 =======================
+
+.. note::
+
+   本步骤非必须，只是我临时采用的方便树莓派通过我的笔记本连接互联网。实际实际上更为方便的方法是使用Android手机提供的 :ref:`vpn_hotspot`
 
 上述通过网线直接连接树莓派和笔记本电脑虽然非常方便（无需交换机），也便于移动办公。但是此时树莓派尚未连接因特网，对于在线安装和更新软件非常不便。
 
@@ -141,7 +152,11 @@
    对于现代的Fedora系统，已经使用 ``firewalld`` 来管理防火墙，可以不使用iptables米ing领。
 
 设置firewalld
----------------
+================
+
+.. note::
+
+   本步骤非必须，我发现最新 :ref:`raspberry_pi_os` 默认没有启用防火墙，所以这段是以前的实践记录，可以跳过。
 
 - 首先检查有哪些激活的zone::
 

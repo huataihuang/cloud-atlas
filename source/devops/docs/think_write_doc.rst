@@ -45,7 +45,7 @@
 
 .. note::
 
-   Red Hat官方文档也非常类似，但是不是采用 :ref:`sphinx_doc` 
+   Red Hat官方文档风格也非常类似，但是不是采用 :ref:`sphinx_doc` ，而是类似WordPress的较为小众的 `Drupal <https://www.drupal.org/>`_
 
 我的实践
 =========
