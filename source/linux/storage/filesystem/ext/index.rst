@@ -9,7 +9,8 @@ EXT文件系统
 
    dropbox_ext4.rst
    mount_ext4_on_macos.rst
-   resize_ext4_rootfs.rst
+   expend_ext4_rootfs_online.rst
+   shrink_ext4_fs.rst
    ext4_fsck.rst
 
 .. only::  subproject and html
