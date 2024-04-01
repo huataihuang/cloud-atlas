@@ -144,6 +144,16 @@ Gentoo genkernel
    :caption: 配置 ``/etc/genkernel.conf`` 设置 MICROCODE="none"
    :emphasize-lines: 4
 
+.. _genkernel_initramfs:
+
+``genkernel`` 生成 :ref:`initramfs`
+=======================================
+
+使用 ``genkernel`` 还可以用来构建 :ref:`initramfs` :
+
+.. literalinclude:: gentoo_genkernel/genkernel_initramfs
+   :caption: 使用 ``genkernel`` 工具构建 :ref:`initramfs`
+
 参考
 ======
 
