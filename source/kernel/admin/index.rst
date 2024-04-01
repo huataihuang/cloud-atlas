@@ -8,7 +8,9 @@ Linux内核管理
    :maxdepth: 1
 
    device_mapper.rst
+   initramfs.rst
    dkms.rst
+   dracut.rst
 
 .. only::  subproject and html
 

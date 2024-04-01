@@ -71,7 +71,7 @@
    
    如果你没有使用 ``chroot`` 切换到树莓派操作系统环境。则下文中所有编辑配置文件都是在 ``/mnt`` 目录下的子目录，例如 ``/mnt/etc/dhcpcd.conf`` 配置文件就是树莓派的配置文件 ``/etc/dhcpcd.conf`` ； ``/mnt/etc/network/interfaces`` 对应树莓派配置文件 ``/mnt/etc/network/interfaces`` 。
 
-- 采用chroot方式切换到树莓派操作系统::
+- 采用chroot方式切换到树莓派操作系统:
 
    mount -t proc proc /mnt/proc
    mount --rbind /sys /mnt/sys

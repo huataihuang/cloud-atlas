@@ -49,7 +49,7 @@ Gentoo Linux
    gentoo_ia32.rst
    gentoo_genkernel.rst
    gentoo_mbp_kernel.rst
-   initramfs.rst
+   ../../kernel/admin/initramfs.rst
    gentoo_ccache.rst
    gentoo_distcc.rst
    gentoo_docker.rst

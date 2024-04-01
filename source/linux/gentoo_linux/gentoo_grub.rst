@@ -220,6 +220,11 @@ BIOS with GPT
 .. literalinclude:: gentoo_grub/grub-mkconfig_output
    :caption: 输出信息举例
 
+生成的 ``/boot/grub/grub.cfg`` 配置案例如下:
+
+.. literalinclude:: gentoo_grub/grub.cfg
+   :caption: Gentoo Linux ``mkconfig`` 生成配置片段举例
+   :emphasize-lines: 12,14
 
 参考
 ======
