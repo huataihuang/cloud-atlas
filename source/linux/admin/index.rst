@@ -7,6 +7,7 @@ Linux系统管理
 .. toctree::
    :maxdepth: 1
 
+   linux_rename_user.rst
    btop.rst
    locale_env.rst
    linux_swap.rst

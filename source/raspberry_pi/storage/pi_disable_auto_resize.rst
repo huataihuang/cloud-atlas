@@ -14,6 +14,14 @@
 
 在 Ubuntu for Raspbery Pi 系统中，采用 :ref:`disable_cloud_init` 方法禁止 :ref:`cloud_init` 就可以关闭自动扩展，或者修改 ``cloud-init`` 配置关闭自动扩展。
 
+注意，本文实践是在 :ref:`pi_quick_start` 基础上完成，也就是说，我是将磁盘挂载到一个已经运行 :ref:`raspberry_pi_os` 的树莓派上，通过 ``chroot`` 实现切换到磁盘上操作系统进行修订的(以便能够修改磁盘的系统 :ref:`initramfs` ):
+
+.. literalinclude:: ../startup/pi_quick_start/mount
+   :caption: 挂载树莓派Linux分区
+
+.. literalinclude:: ../startup/pi_quick_start/chroot
+   :caption: 采用 chroot 方式切换到树莓派系统
+
 resize逻辑
 =============
 
@@ -58,6 +66,29 @@ resize文件系统
 - 剩余空间(大约850G)用于构建 :ref:`ceph` 存储，并作为部署 :ref:`kubernetes` 的底层分布式存储
 
 按照计划，修订分区调整脚本，将 ``TARGET_END`` 设定为固定值
+
+那么这个固定值该设置为多少呢？
+
+嘿嘿，我实际上是使用 :ref:`parted` 工具，实际为磁盘划分了一个大约128GB空间分区，然后记录下 ``/sys/block/sda/sda3/size`` 来获得这个数值的。
+
+实践的脚本修改如下:
+
+.. literalinclude:: pi_disable_auto_resize/firstboot_changed
+   :caption: 修改分区调整大小为固定128GB
+   :emphasize-lines: 6,8
+
+- 执行 ``update-initramfs`` (系统默认没有安装 :ref:`dracut` ) :
+
+.. literalinclude:: pi_disable_auto_resize/update-initramfs
+   :caption: 执行 ``update-initramfs`` 创建新的 :ref:`initramfs`
+
+.. note::
+
+   参考 `How can I use an init ramdisk (initramfs) on boot up Raspberry Pi? <https://raspberrypi.stackexchange.com/questions/92557/how-can-i-use-an-init-ramdisk-initramfs-on-boot-up-raspberry-pi>`_ ，我使用 ``update-initramfs`` 生成新的 :ref:`initramfs` 。
+
+   此外， `Using an initramfs on the RPi <https://forums.raspberrypi.com/viewtopic.php?t=100609&sid=cdf34ea188594e4510d859b0205699e3>`_ 也可以采用 ``mkinitramfs`` ::
+
+      mkinitramfs -o /boot/initramfs-$(uname -r)
 
 参考
 ======
