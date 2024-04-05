@@ -50,6 +50,10 @@
 配置树莓派初始环境
 ===================
 
+.. warning::
+
+   本段实践还存在缺陷，仅供参考。为了快速推进，我目前仅仅采用 :ref:`pi_disable_auto_resize` ，其他采用系统默认交互设置。
+
 使用chroot方式切换到树莓派系统
 --------------------------------------
 
@@ -61,9 +65,10 @@
 
 - 将前面通过 ``dd`` 命令复制好镜像的TF卡通过USB转接器连接到笔记本的USB接口，识别成 ``/dev/sdb`` 。
 
-- 挂载 ``/dev/sdb2``（Linux分区）到 ``/mnt`` 分区，然后就可以修改配置::
+- 挂载 ``/dev/sdb2``（Linux分区）到 ``/mnt`` 分区，然后就可以修改配置:
 
-   mount /dev/sdb2 /mnt
+.. literalinclude:: pi_quick_start/mount
+   :caption: 挂载树莓派Linux分区
 
 .. note::
 
@@ -71,17 +76,16 @@
    
    如果你没有使用 ``chroot`` 切换到树莓派操作系统环境。则下文中所有编辑配置文件都是在 ``/mnt`` 目录下的子目录，例如 ``/mnt/etc/dhcpcd.conf`` 配置文件就是树莓派的配置文件 ``/etc/dhcpcd.conf`` ； ``/mnt/etc/network/interfaces`` 对应树莓派配置文件 ``/mnt/etc/network/interfaces`` 。
 
+   注意，这里主机系统必须同样运行ARM架构的Linux操作系统，否则跨架构chroot会出现提示错误 ``/bin/bash command not found`` (实际执行程序存在，但是因为跨架构无法运行)
+
 - 采用chroot方式切换到树莓派操作系统:
 
-   mount -t proc proc /mnt/proc
-   mount --rbind /sys /mnt/sys
-   mount --make-rslave /mnt/sys
-   mount --rbind /dev /mnt/dev
-   mount --make-rslave /mnt/dev
-   
-   chroot /mnt /bin/bash
-   source /etc/profile
-   export PS1="(chroot) $PS1"
+.. literalinclude:: pi_quick_start/chroot
+   :caption: 采用 chroot 方式切换到树莓派系统
+
+.. warning::
+
+   以下的后续步骤都是我采用 ``chroot`` 模式进入树莓派系统完成的，因为可以命令行操作，可以避免一些交互。如果你是连接显示器以及键盘交互操作，需要做一些简单调整。
 
 设置有线网卡静态IP
 ------------------
@@ -101,13 +105,20 @@
    :caption: 通过 ``nmtui`` 交互生成的树莓派静态IP地址配置文件 ``/etc/NetworkManager/system-connections/'Wired connection 1.nmconnection'``
    :emphasize-lines: 10-14
 
+.. warning::
+
+   这里直接手工添加配置文件存在问题，看起来 :ref:`networkmanager` 还有其他配置，单纯配置上述文件提示找不到对应连接的配置。看来还是要使用标准的 :ref:`nmcli` 来完成设置，待后续改进。目前我还是跳过这步，改为启动后用 ``nmtui`` 设置
+
 设置ssh默认启动
 ----------------
 
 - 激活ssh服务默认启动，并启动ssh服务::
 
-   sudo systemctl enable ssh
-   sudo systemctl start ssh
+   # 激活ssh
+   ssh-keygen -A
+   systemctl enable ssh
+   # 在chroot模式下，不需要执行启动ssh，后续启动树莓派会自动启动就行
+   # systemctl start ssh
 
 设置pi用户帐号密码和root密码
 -------------------------------------
@@ -116,13 +127,23 @@
 
    之前旧版本Raspbian系统，默认用户帐号是 ``pi`` ，密码是 ``raspberry`` ，一定要第一时间修改成复杂密码，避免安全漏洞。此外，还要设置root用户密码。
 
-   不过，目前最新的Raspberry Pi OS已经去除了默认的 ``pi`` 帐号，而是改成首次启动时通过交互界面让用户输入一个自定义的帐号以及设置密码。而且这个帐号是无需密码就能够 ``sudo`` 成root用户，这个管理员帐号非常重要，通常就是以这个自定义帐号登录系统。
+   不过，目前最新的Raspberry Pi OS 首次启动时通过交互界面让用户输入一个自定义的帐号以及设置密码。而且这个帐号是无需密码就能够 ``sudo`` 成root用户，这个管理员帐号非常重要，通常就是以这个自定义帐号登录系统。
 
-- ( **新版本已经不再需要此步骤** )切换到超级用户 ``root`` 帐号下，然后分别为 ``pi`` 用户设置密码，以及为自己（ ``root`` ）设置密码::
+- :strike:`新版本已经不再需要此步骤` 切换到超级用户 ``root`` 帐号下，然后分别为 ``pi`` 用户设置密码，以及为自己（ ``root`` ）设置密码(依然建议给pi设置一个强密码)。需要注意的是，新版的首次启动脚本提供了一个将 ``pi`` 用户切换成指定用户名的方法，所以本段将原先 ``pi`` 用户密码修订 **改成** 了脚本方式修改成 ``pi`` 帐号名到 ``huatai`` 帐号名:
 
-   sudo su -
-   passwd pi
-   passwd
+.. literalinclude:: pi_quick_start/change_pi_account
+   :caption: 修订 ``pi`` 用户名成 ``huatai`` 方便使用
+
+.. note::
+
+   上述脚本方式修改 ``pi`` 用户帐号名为 ``huatai`` 用户帐号名之后，就不再需要默认启动时候自动执行的用户名更改交互程序。也就是停用 ``userconfig.service`` :
+
+   .. literalinclude:: pi_quick_start/disable_userconfig
+      :caption: 关闭 ``userconfig.service`` 跳过交互配置修改用户名
+
+.. note::
+
+   我的实践还结合了 :ref:`pi_disable_auto_resize` ，原因是我需要定制自动扩展磁盘的大小，以便能够空出足够空间来部署 :ref:`ceph`
 
 启动
 ------
