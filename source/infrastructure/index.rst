@@ -22,6 +22,7 @@ Infrastructure Atlas
    live_streaming/index
    akraino/index
    starlingx/index
+   zero_trust/index
 
 .. only::  subproject and html
 

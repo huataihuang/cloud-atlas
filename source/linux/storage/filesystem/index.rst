@@ -19,6 +19,7 @@ Linux文件系统
    xfs/index
    ext/index
    quota/index
+   exfat.rst
 
 .. only::  subproject and html
 
