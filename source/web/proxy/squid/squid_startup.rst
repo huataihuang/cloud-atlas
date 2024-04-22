@@ -7,10 +7,15 @@ Squid快速起步
 安装
 ========
 
-- arch linux安装:
+- :ref:`arch_linux` 安装:
 
 .. literalinclude:: squid_startup/pacman_install_squid
    :caption: 在 :ref:`arch_linux` 系统安装squid
+
+- :ref:`redhat_linux` 安装:
+
+.. literalinclude:: squid_startup/dnf_install_squid
+   :caption: 在 :ref:`redhat_linux` 系统安装squid
 
 默认配置的缓存目录是 ``/var/cache/squid`` ，配置文件是 ``/etc/squid/squid.conf`` 。
 
