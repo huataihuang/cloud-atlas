@@ -31,6 +31,12 @@ socks5代理
 http/https代理
 ---------------------
 
+- 环境设置，注意配置去除本地回环地址过滤，避免一些特殊的访问失败( :ref:`homebrew` 安装openssl组件测试回环地址端口会失败)
+
+.. literalinclude:: curl_proxy/http_env
+   :caption: 配置curl的http/https代理环境变量
+
+
 - 环境变量设置:
 
 .. literalinclude:: curl_proxy/socks5_http_env

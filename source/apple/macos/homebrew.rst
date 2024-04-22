@@ -35,16 +35,25 @@ Homebrew
       fatal: RPC failed; curl 56 LibreSSL SSL_read: SSL_ERROR_SYSCALL, errno 60
       fatal: the remote end hung up unexpectedly
 
+.. warning::
+
+   实际上在墙内，执行第一步在线安装命令就会出错，原因是GFW屏蔽了 ``raw.githubusercontent.com`` 。不过，这个脚本实际上可以下载到本地执行(通过墙外VPS搬运回来)。这样只要开始执行安装脚本，接下来就是如何让 :ref:`git` 和 :ref:`curl` :ref:`across_the_great_wall` 了，我在下文提供了解决方法。
+
 安装网络阻塞问题的解决方法
 ------------------------------
 
-安装Homebrew的最大麻烦是 GFW 对GitHub的干扰(并不是完全不通，但是不断间歇阻塞会浪费大量的时间精力)，解决的方法是使用代理。安装脚本中涉及到 ``curl`` 和 ``git`` 都需要配置代理。我采用的方法是: :ref:`ssh_tunneling_dynamic_port_forwarding` :
+安装Homebrew的最大麻烦是 GFW 对GitHub的干扰(并不是完全不通，但是不断间歇阻塞会浪费大量的时间精力)，解决的方法是使用代理。安装脚本中涉及到 ``curl`` 和 ``git`` 都需要配置代理。我采用的方法是: 
+
+socks代理
+~~~~~~~~~~
+
+采用 :ref:`ssh_tunneling_dynamic_port_forwarding` 构建本地socks代理，然后结合简单的 :ref:`curl_proxy`
+
+- 我最初采用socks结合squid代理 ( :ref:`squid_socks_peer` 方案可以在本地构建一个squid代理，通过墙外到二级代理实现无障碍访问)，不过感觉对桌面来说有点复杂，所以改为更为简单的 :ref:`curl_proxy`
 
 .. literalinclude:: ../../infra_service/ssh/ssh_tunneling_dynamic_port_forwarding/ssh_tunnel_dynamic
    :caption: 执行一条命令建立起动态端口转发的翻墙ssh tunnel
 
-- 我最初采用socks结合squid代理 ( :ref:`squid_socks_peer` 方案可以在本地构建一个squid代理，通过墙外到二级代理实现无障碍访问)，不过感觉对桌面来说有点复杂，所以改为更为简单的 :ref:``
-- :ref:`curl_proxy`
 
 .. literalinclude:: ../../web/curl/curl_proxy/socks5_proxy_env
    :caption: 配置curl的socks5代理环境变量
@@ -55,11 +64,19 @@ Homebrew
    :language: bash
    :caption: 全局配置git使用socks5代理
 
+squid代理 :ref:`squid_socks_peer`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+由于墙内访问VPS阻塞严重，所以我改进为采用阿里云墙内服务器转跳方式的 squid代理 :ref:`squid_socks_peer` 也就是对于本地客户端而言，实际上是通过HTTP代理完成访问的
+
 此外，参考 `How to install an homebrew package behind a proxy? <https://apple.stackexchange.com/questions/228865/how-to-install-an-homebrew-package-behind-a-proxy>`_ 有一个简单设置方法:
 
 .. literalinclude:: homebrew/homebrew_proxy
    :language: bash
    :caption: 配置brew使用代理服务器 192.168.6.200 端口 3128 (案例采用局域网部署的 :ref:`squid` )
+
+:ref:`vpn_hotspot`
+~~~~~~~~~~~~~~~~~~~
 
 我还采用了一种方法是借助 :ref:`vpn_hotspot` ，通过手机VPN共享给局域网使用，使得自己的桌面电脑能够翻墙直接访问Homebrew的软件仓库，才能顺利完成Homebrew安装。
 
@@ -218,15 +235,89 @@ brew很好地弥补了 macOS 的开源软件版本滞后的短板，强烈建议
 
 .. note::
 
-   - macOS内置的vim不支持python3，会导致类似 :ref:`jedi-vim` 缺失错误(即使 :ref:`virtualenv` 安装了 ``jedi`` 模块也无效)，所以强烈推荐Homebrew的vim with-python3。
+   - (现在我改为使用 :ref:`nvim` ))macOS内置的vim不支持python3，会导致类似 :ref:`jedi-vim` 缺失错误(即使 :ref:`virtualenv` 安装了 ``jedi`` 模块也无效)，所以强烈推荐Homebrew的vim with-python3。
+   - :ref:`nvim` 是现代化vim的实现，目前我采用 :ref:`nvim` 代替 :ref:`vim` 以便实现快速的IDE构建
    - :ref:`tmux` 是常用的多路会话软件，虽然从iterm2官网下载安装包也内置了安装 :ref:`tmux` 功能，但是为了方便升级并使用最新版本，采用 ``homebrew`` 来安装 ``iterm2``
    - macOS内置awk和sed，但是语法和GNU版本有差异，编写Linux上运行脚本采用较为通用的GNU版本
    - :ref:`openconnect_vpn` 客户端方便翻越GFW
    - iterm2提供了最佳终端，可以采用 :ref:`vim_tmux_iterm_zsh`
-
-安装了homebrew vim 之后，会依赖安装多种开发语言，其中包括 :ref:`python` 3的最新版本，比macOS内置版本更好，所以建议切换到homebrew版本:
+   - Homebrew提供了 :ref:`docker_desktop` 集成安装，可以方便实现Docker官方版本安装部署
+   
+安装了homebrew :ref:`vim` 或 :ref:`nvim` 之后，会依赖安装多种开发语言，其中包括 :ref:`python` 3的最新版本，比macOS内置版本更好，所以建议切换到homebrew版本:
 
 .. literalinclude:: homebrew/switch_python3_to_homebrew_version
    :language: bash
    :caption: 切换macOS的python3版本到homebrew提供的版本
 
+Big Sur安装homebrew
+====================
+
+.. note::
+
+   参考 `Homebrew Documentation: Installation <https://docs.brew.sh/Installation>`_ 说明，当前（2024年初)要求操作系统是 macOS Monterey(12)或更高版本。更早的10.11(EI Capitan) - 11(Big Sur)不被官方支持，仅提示可能工作，更早的10.10(Yosemite)及之前版本已明确不支持。
+
+   早期的10.4(Tiger)-10.6(Snow Leopard)以及PPC支持则需要采用fork出来的 `Tigerbrew <https://github.com/mistydemeo/tigerbrew>`_  
+
+   由于我的笔记本非常古老，只能安装 Big Sur (11)，所以安装非常折腾。
+
+Command Line Tools版本过低
+---------------------------
+
+我现在使用的笔记本电脑都是10年前的古旧硬件，无法安装最新的macOS，最高只能支持Big Sur，也就是 macOS 11.7.10 。这带来一个问题，就是默认初始安装的 Command Line Tools 版本比较旧。此时Homebrew安装应用会提示报错:
+
+.. literalinclude:: homebrew/command_line_tools_error
+   :caption: 由于Command Line Tools版本过低导致Homebrew安装应用报错
+   :emphasize-lines: 1,14,23
+
+需要注意安装Command Line Tools后等待升级提示并完成升级到 13.2 版本之后再安装Homebrew才能避免错误。如果系统没有提升升级(例如我的实践)，则可以按照上面输出提示尝试删除掉已经安装的Command Line Tools之后再次安装。过一会就有提示升级，可以升级Command Line Tools 到 13.2
+
+pip安装失败
+-------------
+
+另一个问题是安装过程出现pip错误:
+
+.. literalinclude:: homebrew/pip_error
+   :caption: 安装过程pip报错
+
+既然是执行 ``pip`` 报错，那么完整执行命令:
+
+.. literalinclude:: homebrew/pip_command
+   :caption: 完整执行pip命令
+
+报错信息如下:
+
+.. literalinclude:: homebrew/pip_command_output
+   :caption: 完整执行pip命令报错信息
+
+这个问题比较尴尬，之所以会启用socks代理，是为了解决 :ref:`across_the_great_wall` ，但是网络看来欠佳。我最后是通过改进为通过墙内部署 :ref:`ssh_tunneling` 转发端口来加速网络，最终完成安装
+
+openssl卡在make test
+---------------------
+
+一个奇怪的问题，openssl编译成功，但是 ``make test`` 会卡住:
+
+.. literalinclude:: homebrew/openssl_make_test
+   :caption: 卡在make test的openssl安装
+
+我尝试单独安装
+
+.. literalinclude:: homebrew/openssl_install
+   :caption: 单独安装openssl 3
+
+输出显示 
+
+.. literalinclude:: homebrew/openssl_install_output
+   :caption: 单独安装openssl 3输出显示
+
+然后检查 ``~/Library/Logs/Homebrew/`` 目录下日志 ``tail -f openssl@3/04.make`` 可以看到进展情况
+
+.. literalinclude:: homebrew/openssl_make_test_error
+   :caption: openssl make test错误日志输出
+   :emphasize-lines: 7,11,13,32
+
+观察看到 ``make test`` 会请求本地回环地址端口进行测试，但是我为了解决网络连接问题，特意使用了代理，似乎存在冲突。所以添加去除本地回环地址代理
+
+参考
+===========
+
+- `How to use pip with socks proxy? <https://stackoverflow.com/questions/22915705/how-to-use-pip-with-socks-proxy>`_

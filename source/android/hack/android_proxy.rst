@@ -81,3 +81,4 @@ Mobile Data Proxy
 
 - `How to Configure a Proxy Server on Android <https://www.howtogeek.com/295048/how-to-configure-a-proxy-server-on-android/>`_
 - `How to see mobile operator proxy settings <https://android.stackexchange.com/questions/47040/how-to-see-mobile-operator-proxy-settings>`_
+- `How to Configure Proxy Settings on Your Android Device <https://oxylabs.io/resources/integrations/android>`_
