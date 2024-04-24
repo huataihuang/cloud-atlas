@@ -62,3 +62,4 @@ socks5代理
 - `performing HTTP requests with cURL (using PROXY) <https://stackoverflow.com/questions/9445489/performing-http-requests-with-curl-using-proxy>`_
 - `How to use curl command with proxy username/password on Linux/ Unix <https://www.cyberciti.biz/faq/linux-unix-curl-command-with-proxy-username-password-http-options/>`_
 - `How to Use Socks5 Proxy in Curl <https://blog.emacsos.com/use-socks5-proxy-in-curl.html>`_
+- `Proxy exceptions when using $http_proxy env var? [closed] <https://serverfault.com/questions/42426/proxy-exceptions-when-using-http-proxy-env-var>`_

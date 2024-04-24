@@ -54,7 +54,6 @@ socks代理
 .. literalinclude:: ../../infra_service/ssh/ssh_tunneling_dynamic_port_forwarding/ssh_tunnel_dynamic
    :caption: 执行一条命令建立起动态端口转发的翻墙ssh tunnel
 
-
 .. literalinclude:: ../../web/curl/curl_proxy/socks5_proxy_env
    :caption: 配置curl的socks5代理环境变量
 
@@ -73,7 +72,12 @@ squid代理 :ref:`squid_socks_peer`
 
 .. literalinclude:: homebrew/homebrew_proxy
    :language: bash
-   :caption: 配置brew使用代理服务器 192.168.6.200 端口 3128 (案例采用局域网部署的 :ref:`squid` )
+   :caption: 配置brew使用代理服务器
+
+或者类似 :ref:`curl_proxy` 配置环境变量:
+
+.. literalinclude:: ../../web/curl/curl_proxy/http_env
+   :caption: 配置curl的http/https代理环境变量
 
 :ref:`vpn_hotspot`
 ~~~~~~~~~~~~~~~~~~~
@@ -198,6 +202,20 @@ macOS升级系统，可能会导致brew的软件无法正常工作。例如，�
 
    brew upgrade macvim
 
+软件版本检查
+===============
+
+- 使用 ``brew info`` 可以检查仓库提供的软件版本以及本地已经安装版本:
+
+.. literalinclude:: homebrew/brew_info
+   :caption: 检查仓库和本地安装的openssl版本
+
+输出显示 
+
+.. literalinclude:: homebrew/brew_info_output
+   :caption: 可以看到仓库提供了3.3.0版本，本地是3.2.1
+   :emphasize-lines: 1,5
+
 服务起停
 ============
 
@@ -315,9 +333,18 @@ openssl卡在make test
    :caption: openssl make test错误日志输出
    :emphasize-lines: 7,11,13,32
 
-观察看到 ``make test`` 会请求本地回环地址端口进行测试，但是我为了解决网络连接问题，特意使用了代理，似乎存在冲突。所以添加去除本地回环地址代理
+观察看到 ``make test`` 会请求本地回环地址端口进行测试，但是我为了解决网络连接问题，特意使用了代理，似乎存在冲突。
+
+我最初想采用类似curl的 ``no_proxy`` 环境配置，但是发现无效。看来 ``make test`` 访问http/https没有采用curl的方式。要么就安装openconnect执行完整VPN，要么跳过升级(本地已经有openssl 3.2.1)
+
+.. note::
+
+   ``brew install openconnect`` 也是需要依赖安装 ``openssl@3`` ，所以我没有办法绕开这个版本升级(当使用 ``brew pin openssl@3`` 锁定版本不升级时，安装 :ref:`nvim` 会提示必须 ``brew unpin openssl@3`` 一安装最新的依赖版本。
+
+   所以这里的解决方案依然是采用Android手机安装 ``openconnect`` 来实现 :ref:`openconnect_vpn` 连接
 
 参考
 ===========
 
 - `How to use pip with socks proxy? <https://stackoverflow.com/questions/22915705/how-to-use-pip-with-socks-proxy>`_
+- `How can I check the version of a package online before installing? <https://apple.stackexchange.com/questions/224276/how-can-i-check-the-version-of-a-package-online-before-installing>`_

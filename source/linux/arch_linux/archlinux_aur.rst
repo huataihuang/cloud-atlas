@@ -30,12 +30,10 @@ yay是使用Go编写的Arch Linux AUR helper，基于 yaourt, apacman 和 pacaur
 - 最小化用户输入
 - 在升级中能够使用git包
 
-- 下载yay源代码并编译::
+- 下载yay源代码并编译:
 
-   pacman -S --needed git base-devel
-   git clone https://aur.archlinux.org/yay.git
-   cd yay
-   makepkg -si
+.. literalinclude:: archlinux_aur/install_yay
+   :caption: 编译安装yay
 
 .. note::
 
