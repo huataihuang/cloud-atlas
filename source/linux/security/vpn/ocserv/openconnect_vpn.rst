@@ -116,47 +116,25 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 
 - 激活IP Forwarding （重要步骤）
 
-修改 ``/etc/sysctl.conf`` 添加::
+修改 ``/etc/sysctl.conf`` 添加配置并激活:
 
-   net.ipv4.ip_forward = 1
+.. literalinclude:: openconnect_vpn/ip_forwarding
+   :caption: 激活IP Forwarding
 
-然后执行::
+- 配置防火墙的IP Masquerading (这里假设网卡接口是 ``ens3`` ）以及允许端口访问,配置好以后保存配置(以便后续通过 :ref:`systemd` 启动恢复 :
 
-   sudo sysctl -p
+.. literalinclude:: openconnect_vpn/iptables
+   :caption: iptables激活IP MASQUERATE
 
-- 配置防火墙的IP Masquerading (这里加设网卡接口是 ``ens3`` ） ::
+- 创建一个systemd服务来启动时恢复iptables规则，编辑 ``/etc/systemd/system/iptables-restore.service`` :
 
-   sudo iptables -t nat -A POSTROUTING -o ens3 -j MASQUERADE
+.. literalinclude:: openconnect_vpn/iptables_systemd
+   :caption: 配置systemd服务在启动时恢复iptables规则
 
-- 在防火墙上开启端口443::
+- 激活 ``iptables-restore`` 服务:
 
-   sudo iptables -I INPUT -p tcp --dport 443 -j ACCEPT
-   sudo iptables -I INPUT -p udp --dport 443 -j ACCEPT
-
-保存防火墙配置::
-
-   sudo iptables-save > /etc/iptables.rules
-
-- 创建一个systemd服务来启动时恢复iptables规则，编辑 ``/etc/systemd/system/iptables-restore.service`` ::
-
-   [Unit]
-   Description=Packet Filtering Framework
-   Before=network-pre.target
-   Wants=network-pre.target
-   
-   [Service]
-   Type=oneshot
-   ExecStart=/sbin/iptables-restore /etc/iptables.rules
-   ExecReload=/sbin/iptables-restore /etc/iptables.rules
-   RemainAfterExit=yes
-   
-   [Install]
-   WantedBy=multi-user.target
-
-- 激活 ``iptables-restore`` 服务::
-
-   sudo systemctl daemon-reload
-   sudo systemctl enable iptables-restore
+.. literalinclude:: openconnect_vpn/enable_iptables_systemd
+   :caption: 激活systemd服务在启动时恢复iptables规则
 
 使用OpenConnect VPN Client
 =============================
