@@ -33,7 +33,7 @@
 
 .. note::
 
-   Ubuntu镜像刷到TF卡或者USB外接存储磁盘以后，首次启动会把 ``/dev/sda2`` 挂载的根目录自动扩展到整个磁盘空间。对于我部署 :ref:`ceph` 和 :ref:`gluster` 并构建 :ref:`kubernetes` 来说，存储分区不合理。所以，我采用 :ref:`resize_ext4_rootfs` 调整文件系统分区。
+   Ubuntu镜像刷到TF卡或者USB外接存储磁盘以后，首次启动会把 ``/dev/sda2`` 挂载的根目录自动扩展到整个磁盘空间。对于我部署 :ref:`ceph` 和 :ref:`gluster` 并构建 :ref:`kubernetes` 来说，存储分区不合理。所以，我采用 :ref:`expend_ext4_rootfs_online` 调整文件系统分区。
 
 存储磁盘
 ==========

@@ -12,6 +12,7 @@ ocserv VPN
    :maxdepth: 1
 
    openconnect_vpn.rst
+   openconnect_vpn_arch_linux.rst
    client_certificate_ocserv.rst
    acme.rst
    cron_certbot_renew.rst
