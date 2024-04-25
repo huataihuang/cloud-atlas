@@ -255,6 +255,9 @@ brew很好地弥补了 macOS 的开源软件版本滞后的短板，强烈建议
 
    - (现在我改为使用 :ref:`nvim` ))macOS内置的vim不支持python3，会导致类似 :ref:`jedi-vim` 缺失错误(即使 :ref:`virtualenv` 安装了 ``jedi`` 模块也无效)，所以强烈推荐Homebrew的vim with-python3。
    - :ref:`nvim` 是现代化vim的实现，目前我采用 :ref:`nvim` 代替 :ref:`vim` 以便实现快速的IDE构建
+
+     - 安装以后构建 :ref:`nvim_ide` 
+      
    - :ref:`tmux` 是常用的多路会话软件，虽然从iterm2官网下载安装包也内置了安装 :ref:`tmux` 功能，但是为了方便升级并使用最新版本，采用 ``homebrew`` 来安装 ``iterm2``
    - macOS内置awk和sed，但是语法和GNU版本有差异，编写Linux上运行脚本采用较为通用的GNU版本
    - :ref:`openconnect_vpn` 客户端方便翻越GFW
@@ -265,7 +268,14 @@ brew很好地弥补了 macOS 的开源软件版本滞后的短板，强烈建议
 
 .. literalinclude:: homebrew/switch_python3_to_homebrew_version
    :language: bash
-   :caption: 切换macOS的python3版本到homebrew提供的版本
+   :caption: 切换macOS(Apple Silicon版本)的python3版本到homebrew提供的版本
+
+.. note::
+
+   - ARM版本的macOS安装目录是 ``/opt/homebrew/bin``
+   - Intel版本的macOS安装目录是 ``/usr/local/bin``
+
+   默认情况下 ``/usr/local/bin`` 的PATH优先级较高，所以通常会找到homebrew的对应应用程序，例如 ``python3`` ``pip3`` 等
 
 Big Sur安装homebrew
 ====================
@@ -277,6 +287,12 @@ Big Sur安装homebrew
    早期的10.4(Tiger)-10.6(Snow Leopard)以及PPC支持则需要采用fork出来的 `Tigerbrew <https://github.com/mistydemeo/tigerbrew>`_  
 
    由于我的笔记本非常古老，只能安装 Big Sur (11)，所以安装非常折腾。
+
+.. warning::
+
+   我的实践证实， 2024年4月时期的macOS 11(Big Sur)可以正确安装运行Homebrew。虽然官方没有明确支持。
+
+   我的安装花费了断断续续数天时间，但是并不是homebrew问题，而是GFW的阻挡导致的。大部分精力都在和GFW缠斗，非常令人沮丧。
 
 Command Line Tools版本过低
 ---------------------------
@@ -341,7 +357,7 @@ openssl卡在make test
 
    ``brew install openconnect`` 也是需要依赖安装 ``openssl@3`` ，所以我没有办法绕开这个版本升级(当使用 ``brew pin openssl@3`` 锁定版本不升级时，安装 :ref:`nvim` 会提示必须 ``brew unpin openssl@3`` 一安装最新的依赖版本。
 
-   所以这里的解决方案依然是采用Android手机安装 ``openconnect`` 来实现 :ref:`openconnect_vpn` 连接
+   所以这里的解决方案 **依然是采用** Android手机安装 ``openconnect`` 来实现 :ref:`openconnect_vpn` 连接
 
 参考
 ===========

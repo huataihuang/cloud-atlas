@@ -38,7 +38,7 @@ Asahi Linux磁盘分区
 规划
 =======
 
-由于EXT4文件系统 **不支持在线收缩** :ref:`resize_ext4_rootfs` ，所以对于上述根文件系统，我准备:
+由于EXT4文件系统 **不支持在线收缩** :ref:`shrink_ext4_fs` ，所以对于上述根文件系统，我准备:
 
 - 采用 :ref:`recover_system_by_tar` ，先对整个系统tar包备份并复制到其他主机上保存
 - 采用外接U盘启动一个Linux系统，然后将Asahi Linux的根分区 ``/dev/nvme0n1p5`` 删除，再重新划分为3个分区(分别用于 恢复Asahi Linux系统分区 / :ref:`docker` / :ref:`libvirt` )

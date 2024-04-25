@@ -229,7 +229,7 @@ Ubuntu for Raspberry Pi
    /dev/sda1  *      2048  526335  524288  256M  c W95 FAT32 (LBA)
    /dev/sda2       526336 6349231 5822896  2.8G 83 Linux
 
-可以看到外接SSD磁盘1T空间，当前系统目录仅使用里2.8G。通常首次启动系统时会自动展开根文件系统，占据整块磁盘。但是，我希望的部署方式是仅让根目录使用30G空间，以便将剩余磁盘空间用于 :ref:`ceph` 和 :ref:`gluster` 以及部署 :ref:`kubernetes` ，所以采用 :ref:`resize_ext4_rootfs` 修改根目录空间。
+可以看到外接SSD磁盘1T空间，当前系统目录仅使用里2.8G。通常首次启动系统时会自动展开根文件系统，占据整块磁盘。但是，我希望的部署方式是仅让根目录使用30G空间，以便将剩余磁盘空间用于 :ref:`ceph` 和 :ref:`gluster` 以及部署 :ref:`kubernetes` ，所以采用 :ref:`expend_ext4_rootfs_online` 修改根目录空间。
 
 - 删除 ``/dev/sda2`` 分区，然后重建分区，确保起始扇区和原先一致，然后将结束位置扩展到30G大小::
 
