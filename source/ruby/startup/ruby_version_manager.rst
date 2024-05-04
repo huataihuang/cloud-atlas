@@ -17,9 +17,9 @@ Ruby版本管理器
 
 这两个Ruby版本管理器工作原理不同，但是结果是相同的。
 
-在Linux平台， ``RVM`` 被广泛接受为标准，很大程度上是因为它提供了广泛的toolkit(工具包)；但是， ``rbenv`` 凭借其轻量级的方法成为强有力的竞争者。
+在Linux平台， ``RVM`` 被广泛接受为标准，很大程度上是因为它提供了广泛的toolkit(工具包)；但是， :ref:`rbenv` 凭借其轻量级的方法成为强有力的竞争者。
 
-此外，在 :ref:`macos` 平台，由于系统内置了旧版本Ruby，会导致RVM存在一些问题，所以更推荐通过 :ref:`homebrew` 安装 ``rbenv`` 来管理Ruby版本。
+此外，在 :ref:`macos` 平台，由于系统内置了旧版本Ruby，会导致RVM存在一些问题，所以更推荐通过 :ref:`homebrew` 安装 :ref:`rbenv` 来管理Ruby版本。
 
 Under the Hood(工作原理)
 ===========================
@@ -163,7 +163,7 @@ RVM的困扰
 
 ``RVM`` 实际上比较复杂(shell函数代替了shell命令)，有时候会出现异常:
 
-- 需要 **确保目录名称不包含任何空格** ，也包括上级目录: ``RVM`` 当前不支持待空格的目录名称
+- 需要 **确保目录名称不包含任何空格** ，也包括上级目录: ``RVM`` 当前不支持带空格的目录名称
 - ``type cd | head -1 ; type rvm | head -1``  可以看到 ``cd`` 和 ``rvm`` 都是shell函数 **如果输出不是如下内容，则表明RVM的shell设置出现了问题** ::
 
    cd is a function
@@ -227,7 +227,25 @@ rbenv
 .. literalinclude:: ruby_version_manager/rbenv_install
    :caption: 在 :ref:`macos` 中使用 :ref:`homebrew` 安装 ``rbenv``
 
+根据安装执行的 ``rbenv init`` 输出信息(以下是macOS Big Sur环境的zsh SHELL实行输出案例:
+
+.. literalinclude:: ruby_version_manager/rbenv_install_output
+   :caption: 在 :ref:`macos` zsh环境中中执行 ``rbenv init`` 输出提示
+
+按提示在 ``~/.zshrc`` 中添加:
+
+.. literalinclude:: ruby_version_manager/zshrc
+   :caption: 添加 :ref:`macos` zsh环境变量( ~/.zshrc )
+
+
+
+
 然后关闭当前终端窗口，并再次打开新终端窗口，则此时修改生效
+
+- 另一种安装方式是使用git从官方源代码检出，然后配置shell环境:
+
+.. literalinclude:: ruby_version_manager/rbenv_git_install
+   :caption: 通过git方式源代码安装rbenv
 
 使用
 -----------

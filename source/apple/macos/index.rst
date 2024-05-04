@@ -10,7 +10,7 @@ macOS
    :maxdepth: 1
 
    mba11_late_2010.rst
-   mba13_mid_2013.rst
+   mba13_early_2014.rst
    mbp15_late_2013.rst
    bcm943602cs.rst
    macos_big_sur_gts_root_certificate.rst

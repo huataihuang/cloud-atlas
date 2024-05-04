@@ -1,15 +1,14 @@
-.. _rails_startup:
+.. _rails_db:
 
 ====================
-Rails快速起步
+Rails 数据库
 ====================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_rails.rst
-   gentoo_install_rails.rst
-   macos_install_rails.rst
+   rails_mysql.rst
+   rails_pgsql.rst
 
 .. only::  subproject and html
 

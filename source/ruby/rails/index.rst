@@ -11,6 +11,7 @@ Ruby on Rails
    startup/index
    microservice_vs_monolith.rst
    kamal/index
+   db/index
 
 .. only::  subproject and html
 

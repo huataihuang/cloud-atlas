@@ -277,6 +277,8 @@ brew很好地弥补了 macOS 的开源软件版本滞后的短板，强烈建议
 
    默认情况下 ``/usr/local/bin`` 的PATH优先级较高，所以通常会找到homebrew的对应应用程序，例如 ``python3`` ``pip3`` 等
 
+.. _big_sur_homebrew:
+
 Big Sur安装homebrew
 ====================
 
