@@ -10,6 +10,9 @@ SQLite 是世界上使用最广泛的SQL数据库引擎 - 每一个移动设备(
    :maxdepth: 1
 
    intro_sqlite.rst
+   tools/index
+   sqlite_describe_table.rst
+   date_and_time/index
    dqlite/index
 
 .. only::  subproject and html
