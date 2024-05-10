@@ -120,7 +120,7 @@ UEFI系统从一个微软便携执行格式(PE32+标准)的 ``EFI System Partiti
 
 .. literalinclude:: install_gentoo_on_mbp/fstab_mba13
    :language: bash
-   :caption: :ref:`mba13_mid_2013` 使用UUID配置 /etc/fstab
+   :caption: :ref:`mba13_early_2014` 使用UUID配置 /etc/fstab
    :emphasize-lines: 2
 
 为EFI安装GRUB

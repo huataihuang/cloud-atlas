@@ -132,7 +132,7 @@ Systemd
 子卷配置
 ==========
 
-我的 :ref:`mba13_mid_2013` 内置存储空间有限(128G)，所以我在 :ref:`install_gentoo_on_mbp` ( :ref:`mba13_mid_2013` )，为操作系统分配了很小的分区(20G):
+我的 :ref:`mba13_early_2014` 内置存储空间有限(128G)，所以我在 :ref:`install_gentoo_on_mbp` ( :ref:`mba13_early_2014` )，为操作系统分配了很小的分区(20G):
 
 .. literalinclude:: gentoo_zfs/parted_output
    :caption: 分配给 ``rootfs`` 的 ``/dev/sda2`` 只有20G

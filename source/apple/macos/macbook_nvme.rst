@@ -24,7 +24,7 @@ NvMe硬盘升级MacBook(2013~2017) SSD
 
 .. note::
 
-   很巧，我的 :ref:`mbp15_late_2013` 和 :ref:`mba13_mid_2013` 是同一代产品，也就是苹果Mac产品线的存储从SATA转向 :ref:`nvme` 的第一代产品，所以这两款笔记本电脑的升级存储方法都是一样的(我都采用 :ref:`samsung_pm9a1` )，硬件完全通用。
+   很巧，我的 :ref:`mbp15_late_2013` 和 :ref:`mba13_early_2014` 是同一代产品，也就是苹果Mac产品线的存储从SATA转向 :ref:`nvme` 的第一代产品，所以这两款笔记本电脑的升级存储方法都是一样的(我都采用 :ref:`samsung_pm9a1` )，硬件完全通用。
 
 转接卡
 ========

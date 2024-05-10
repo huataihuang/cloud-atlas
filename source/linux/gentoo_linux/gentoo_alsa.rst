@@ -17,7 +17,7 @@ Gentoo ALSA
 .. literalinclude:: gentoo_alsa/lspci
    :caption: 使用 ``lspci`` 检测声卡硬件
 
-我的 :ref:`mba13_mid_2013` 输出显示是Intel HD声卡:
+我的 :ref:`mba13_early_2014` 输出显示是Intel HD声卡:
 
 .. literalinclude:: gentoo_alsa/lspci_output
    :caption: 使用 ``lspci`` 检测声卡硬件显示案例: Intel HD声卡
