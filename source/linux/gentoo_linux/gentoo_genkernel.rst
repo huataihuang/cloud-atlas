@@ -62,7 +62,7 @@ Gentoo genkernel
 
 .. literalinclude:: gentoo_genkernel/efibootmgr_set_mba13
    :language: bash
-   :caption: :ref:`mba13_mid_2013` 设置efibootmgr，启动 ``genkernel`` 新编译的内核
+   :caption: :ref:`mba13_early_2014` 设置efibootmgr，启动 ``genkernel`` 新编译的内核
 
 报错: failed to compile the "prepare" target
 ---------------------------------------------

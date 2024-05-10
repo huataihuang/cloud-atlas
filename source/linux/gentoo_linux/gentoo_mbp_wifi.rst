@@ -14,7 +14,7 @@ Gentoo Linux在MacBook Pro配置Wifi
      - 我目前实在没有精力来折腾，所以准备购买Linux兼容的无线网卡来绕过这个问题 **为了使用闭源broadcom-sta导致很多新内核特性无法使用实在觉得得不偿失** ，这个闭源驱动从2015年以后就没有更新，所以在最新的内核中需要很多hack才能使用，代价很大
 
    - :ref:`mbp15_late_2013` 我在淘宝上花50元换一块 :ref:`bcm943602cs` 省的以后再折腾这种私有驱动了
-   - :ref:`mba13_mid_2013` 找不到内置兼容的无线网卡模块，太古老低端设备，我通过购买外接USB无线网卡来解决
+   - :ref:`mba13_early_2014` 找不到内置兼容的无线网卡模块，太古老低端设备，我通过购买外接USB无线网卡来解决
 
 Broadcom WiFi
 ===============
@@ -31,7 +31,7 @@ Broadcom WiFi
 Broadcom BCM4360
 -------------------
 
-到 :ref:`mbp15_late_2013` 以及我另外一台 :ref:`mba13_mid_2013`  ，采用是 Broadcom BCM4360 。这款无线芯片对开源支持不佳，参考 `Linux wireless b43文档 <https://wireless.wiki.kernel.org/en/users/drivers/b43>`_ 可以看到 ``b43`` 驱动不支持BCM4360，建议使用 ``wl`` 驱动 ``broadcom-sta``
+到 :ref:`mbp15_late_2013` 以及我另外一台 :ref:`mba13_early_2014`  ，采用是 Broadcom BCM4360 。这款无线芯片对开源支持不佳，参考 `Linux wireless b43文档 <https://wireless.wiki.kernel.org/en/users/drivers/b43>`_ 可以看到 ``b43`` 驱动不支持BCM4360，建议使用 ``wl`` 驱动 ``broadcom-sta``
 
 也就是需要使用闭源的Broadcom驱动( `Apple Macbook Pro Retina - Closed source Broadcom driver <https://wiki.gentoo.org/wiki/Apple_Macbook_Pro_Retina#Closed_source_Broadcom_driver>`_ )
 

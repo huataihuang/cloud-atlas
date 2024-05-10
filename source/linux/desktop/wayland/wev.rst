@@ -4,7 +4,7 @@
 wev
 ==============
 
-在 :ref:`install_gentoo_on_mbp` 之后，我使用了 :ref:`sway` 作为自己的轻量级桌面。 ``sway`` 采用 :ref:`wayland` 作为图形系统，和以往的X Window有很大差异。并且 :ref:`sway` 主要结合快捷键使用，我希望能够充分利用 :ref:`mba13_mid_2013` / :ref:`mbp15_late_2013` 的专用按键，例如音量调节键，屏幕光亮调节键。
+在 :ref:`install_gentoo_on_mbp` 之后，我使用了 :ref:`sway` 作为自己的轻量级桌面。 ``sway`` 采用 :ref:`wayland` 作为图形系统，和以往的X Window有很大差异。并且 :ref:`sway` 主要结合快捷键使用，我希望能够充分利用 :ref:`mba13_early_2014` / :ref:`mbp15_late_2013` 的专用按键，例如音量调节键，屏幕光亮调节键。
 
 在X Window环境下，有一个 ``xev`` 工具可以用来捕获键盘和鼠标事件，转换成终端输出的字符串，这样我们就能知道每次按键所代表的事件，就能够结合到桌面快捷键映射工具 ``xbindkey`` (配置文件为 ``~/.xbindkeyrc`` )实现任何基于X Window的桌面管理器的快捷键动作。
 

@@ -11,6 +11,7 @@ Rails起步
    gentoo_install_rails.rst
    macos_install_rails.rst
    rails_quickstart.rst
+   rails_model.rst
 
 .. only::  subproject and html
 

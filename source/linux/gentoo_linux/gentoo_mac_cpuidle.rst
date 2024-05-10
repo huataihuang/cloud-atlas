@@ -4,7 +4,7 @@
 Mac电脑的Gentoo Linux CPU idle
 ================================
 
-我在 :ref:`install_gentoo_on_mbp` 之后(实际在 :ref:`mba13_mid_2013` 实践)，似乎遇到一个问题:
+我在 :ref:`install_gentoo_on_mbp` 之后(实际在 :ref:`mba13_early_2014` 实践)，似乎遇到一个问题:
 
 - 操作系统运行时，合上笔记本屏幕，内核日志显示 ``dmesg -T`` 存在 ``Call Trace`` 报错:
 
@@ -17,7 +17,7 @@ Mac电脑的Gentoo Linux CPU idle
 排查
 =======
 
-我是使用网线直连笔记本电脑和 :ref:`hpe_dl360_gen9` ( ``zcloud`` )的一个网络接口，通过 ``zcloud`` 提供共享网络(IP masquerade)上网。由于两个电脑之间使用网线直连，所以首先排查两个电脑之间的网络: ``ping 192.168.6.200`` (也就是 ``zcloud`` 上网络地址，这是 ``bcloud`` ( :ref:`mba13_mid_2013` 笔记本)的默认网关:
+我是使用网线直连笔记本电脑和 :ref:`hpe_dl360_gen9` ( ``zcloud`` )的一个网络接口，通过 ``zcloud`` 提供共享网络(IP masquerade)上网。由于两个电脑之间使用网线直连，所以首先排查两个电脑之间的网络: ``ping 192.168.6.200`` (也就是 ``zcloud`` 上网络地址，这是 ``bcloud`` ( :ref:`mba13_early_2014` 笔记本)的默认网关:
 
 .. literalinclude:: gentoo_mac_cpuidle/ping
    :caption: 直接ping网关发现丢包率极高

@@ -9,10 +9,10 @@ Gentoo Intel显卡
 硬件检测
 =============
 
-- 使用 ``lspci`` 检测VGA显卡，在我的 :ref:`mba13_mid_2013` 上:
+- 使用 ``lspci`` 检测VGA显卡，在我的 :ref:`mba13_early_2014` 上:
 
 .. literalinclude:: gentoo_intel/mba13_intel_vga
-   :caption: 在 :ref:`mba13_mid_2013` 输出检测到的VGA芯片
+   :caption: 在 :ref:`mba13_early_2014` 输出检测到的VGA芯片
 
 可以看到是集成显卡 ``Haswell-ULT Integrated Graphics Controller``
 
@@ -63,7 +63,7 @@ GuC/HuC firmware
 
 .. note::
 
-   ``GVT-g graphics virtualization`` 技术是Broadwell之后的处理器才支持的虚拟化GPU技术，我的 :ref:`mba13_mid_2013` 处理器是 Haswell 不支持这个功能
+   ``GVT-g graphics virtualization`` 技术是Broadwell之后的处理器才支持的虚拟化GPU技术，我的 :ref:`mba13_early_2014` 处理器是 Haswell 不支持这个功能
 
    ``Intel PXP support and the Intel Management Engine Interface`` 用于支持 ``GuC/HuC firmware`` ，由于我的硬件不支持所以没有编译
 
