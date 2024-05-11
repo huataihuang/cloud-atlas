@@ -159,6 +159,27 @@ Rails提供了一个非常 **神奇** 的数据库交互方法，也就是控制
    :caption: 修订 ``app/controllers/tweets_controller.rb`` 添加索引index动作以便从数据库提取所有tweet
    :emphasize-lines: 3
 
+- 然后对应修改 ``app/views/tweets/index.html.erb`` 视图模版:
+
+.. literalinclude:: rails_model/index.html.erb
+   :caption: ``app/views/tweets/index.html.erb`` 视图
+   :language: ruby
+   :emphasize-lines: 4,6
+
+这里视图模版中使用了 HTML 和 ``ERB`` 混合:
+
+- ``ERB`` 是将Ruby代码前乳文档的模版系统
+- ``<% %>`` 表示 **解析包含的Ruby代码**
+- ``<%= %>`` 表示 **解析包含的Ruby代码** ``并且将返回值输出``
+
+通过使用ERB，剋将常规Ruby程序嵌入ERB标记中，实现很多功能。需要注意的是，应该尽量保持ERB的tag内容短小，以方便代码阅读。
+
+.. note::
+
+   数据库演示数据也可以通过 :ref:`sqlite_cli` 手工插入，这里我尝试了 :ref:`sqlite_current_timestamp` 插入案例增加了记录，这样就可以继续列表
+
+上述简单的案例，就可以输出一个动态的列表展示在WEB页面
+
 参考
 =======
 
