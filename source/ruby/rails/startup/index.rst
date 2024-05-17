@@ -12,6 +12,8 @@ Rails起步
    macos_install_rails.rst
    rails_quickstart.rst
    rails_model.rst
+   rails_crud_r.rst
+   rails_crud.rst
 
 .. only::  subproject and html
 
