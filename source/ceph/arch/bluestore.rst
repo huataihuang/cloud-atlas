@@ -26,6 +26,10 @@ BlueStore的优势：
 
    micron公司提供了 `Micron Accelerated Ceph Storage Solutions <https://www.micron.com/-/media/client/global/documents/products/other-documents/micron_9200_ceph_3,-d-,0_reference_architecture.pdf?la=en>`_ 可以作为Ceph硬件架构部署的参考。
 
+.. note::
+
+   `Starting 2022 with a Bang: Ceph on ZFS <https://vadosware.io/post/starting-2022-with-a-bang-ceph-on-zfs/>`_
+
 BlueStore工作原理
 ====================
 

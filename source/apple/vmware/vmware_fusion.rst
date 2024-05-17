@@ -18,6 +18,21 @@ Studio环境中的VMware Fusion
 
    目前我准备采用VMware，原因是在软件促销时购买了licence，加上VMware确实非常便利且性能优越。
 
+.. note::
+
+   好消息!!!
+
+   2024年5月，VMware宣布 **对于个人用户** `VMware Fusion Pro: Now Available Free for Personal Use <https://blogs.vmware.com/teamfusion/2024/05/fusion-pro-now-available-free-for-personal-use.html>`_ ；并且 `VMware Workstation Pro: Now Available Free for Personal Use <https://blogs.vmware.com/workstation/2024/05/vmware-workstation-pro-now-available-free-for-personal-use.html>`_ :
+
+   - 个人用户版本 VMware Fusion Pro / VMware Workstation Pro 和订阅版本完全一致，唯一区别是免费版本会显示“本产品仅供个人使用”
+   - 预计作为虚拟化巨头， `VMware 将其 Workstation Pro 和 Fusion Pro 产品免费提供给个人使用 <https://www.solidot.org/story?sid=78167>`_ 将扩大其影响力，并和广泛用于云计算的开源的 :ref:`kvm` 竞争
+
+.. note::
+
+   根据 `VMware Fusion Pro: Now Available Free for Personal Use <https://blogs.vmware.com/teamfusion/2024/05/fusion-pro-now-available-free-for-personal-use.html>`_ 说明，用户需要升级到 13.5.2 之后才能使用VMware提供的免费个人版本。
+
+   不过，由于我现在使用的笔记本 :ref:`mba13_early_2014` 过于古老，使用的Big Sur 11.7.10 过于古老，所以暂时无法实践。等后续我使用较好的硬件再做尝试...
+
 VMware Fusion
 ===============
 
