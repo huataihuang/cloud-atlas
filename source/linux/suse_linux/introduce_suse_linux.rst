@@ -15,6 +15,12 @@ SUSE(发音 ``/ˈsuːsə/`` ) Linux最早是基于SLS/Slackware Linux的发行�
 
 从openSUSE 13.2之后的openSUSE Leap 42.1开始直接采用了SLE(SUSE Linux Enterprise)的源代码，几乎就是SLE 12 SP1。
 
+对于openSUSE和SUSE而言，openSUSE Leap 15.3是一个重要的里程碑: Leap 15.3是第一个完全和SUSE Linux Enterprise共享相同源代码以及使用完全一致二进制软件包的发行版。
+
+.. note::
+
+   详细参考 :ref:`suse_distribution_builds`
+
 openSUSE Leap 是 openSUSE 的常规版本，发行周期如下:
 
 - 大约 12 个月发行一次次要版本，与 SUSE Linux Enterprise Service Packs 保持一致
@@ -69,10 +75,10 @@ YaST包管理
    - RPM系列使用koji
    - DEB系列使用launchpad
 
-
 参考
 =======
 
 - `维基百科SUSE <https://zh.wikipedia.org/wiki/SUSE>`_
 - `openSUSE:发行计划 <https://zh.opensuse.org/openSUSE:%E5%8F%91%E8%A1%8C%E8%AE%A1%E5%88%92>`_
 - `WikiPedia: SUSE Linux Enterprise <https://en.wikipedia.org/wiki/SUSE_Linux_Enterprise>`_
+- `SUSE官方blog: Closing the leap Gap <https://www.suse.com/c/closing-the-leap-gap-src/>`_

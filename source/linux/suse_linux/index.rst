@@ -8,8 +8,9 @@ SUSE Linux
    :maxdepth: 1
 
    introduce_suse_linux.rst
-   install_suse.rst
+   suse_distribution_builds.rst
    install_opensus_leap.rst
+   install_suse.rst
    zypper.rst
    suse_register.rst
    suse_static_ip.rst
