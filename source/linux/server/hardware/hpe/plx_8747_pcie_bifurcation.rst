@@ -6,6 +6,12 @@ PLX 8747硬件PCIe bifurcation
 
 在 :ref:`pcie_bifurcation` 探索时，我曾经想采用硬件来实现PCIe bifucation，市场上主流的硬件PCIe bifurcation是PLX公司芯片，例如 ``PEX 8747``
 
+我曾经短暂测试使用过 ``M.2 NVMe SSD扩展卡 PCIe3.0 X8X16扩2口4口M2 PLX8747`` :
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/plx8747_pcie_switch_card.jpg
+
+本文是一个验证笔记，实践证明该 :ref:`pcie_bifurcation` 硬件卡确实能够扩展古老的二手 :ref:`hpe_dl360_gen9` 存储，未来可能实践 :ref:`dl360_nvme_storage`
+
 检查验证
 =============
 

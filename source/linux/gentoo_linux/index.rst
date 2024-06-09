@@ -18,6 +18,7 @@ Gentoo Linux
    eselect.rst
    gentoo_overlays.rst
    upgrade_gentoo.rst
+   gentoo_update_profile.rst
    gentoo_grub.rst
    gentoo_neovim.rst
    gentoo_dbus.rst
