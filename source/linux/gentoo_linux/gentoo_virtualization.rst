@@ -32,12 +32,20 @@ USE flags
 :ref:`qemu`
 -------------
 
+
+
+
 :ref:`libvirt`
 ----------------
 
 .. note::
 
    If policykit USE flag is not enabled for libvirt package, the libvirt group will not be created when app-emulation/libvirt is emerged. If this is the case, another group, such as wheel must be used for unix_sock_group.
+
+livvirt 有很多USE参数，以下参数是我参考 `gentoo linux wiki: libvirt <https://wiki.gentoo.org/wiki/Libvirt>`_ 设置
+
+.. literalinclude:: gentoo_virtualization/libvirt.use
+   :caption: ``/etc/portage/package.use/libvirt``
 
 ``virt-manager``
 ------------------
