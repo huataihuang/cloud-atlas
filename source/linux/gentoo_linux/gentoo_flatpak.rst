@@ -124,6 +124,24 @@ KeepassXC
   - 由于我使用的图形软件极少，完全可以不用安装部署GTK/QT/Gnome/KDE就能够运行 `Flathub <https://flathub.org/>`_ 官网提供的图形软件，大大减轻了我的桌面部署心智负担
   - 可以专注与服务器端技术，将有限的精力投入到开发和AI
 
+Calibre
+---------------
+
+:ref:`kindle` 需要 Calibre 协助在不同平台阅读和转换文档格式，所以我也通过Flatpak来安装这个较为复杂庞大的软件(我 :ref:`install_gentoo_on_mbp` 现在采用了非常精简的 :ref:`gentoo_use_flags` 剔除了gtk和qt的支持):
+
+.. literalinclude:: gentoo_flatpak/install_calibre
+   :caption: 安装 Flathub 官网提供的 Calibre
+
+运行:
+
+.. literalinclude:: gentoo_flatpak/run_calibre
+   :caption: 运行 Flathub 官网提供的 Calibre
+
+.. note::
+
+   我在 :ref:`gentoo_sway` 环境运行不太顺利，设置 ``Perferences`` 对话框时候无法正常显示，没有更进一步使用。可能后续再自己折腾吧
+
+
 Chrome
 ---------
 
