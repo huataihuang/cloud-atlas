@@ -32,8 +32,8 @@ USE flags
 :ref:`qemu`
 -------------
 
-
-
+.. literalinclude:: gentoo_virtualization/qemu.use
+   :caption: ``/etc/portage/package.use/qemu``
 
 :ref:`libvirt`
 ----------------

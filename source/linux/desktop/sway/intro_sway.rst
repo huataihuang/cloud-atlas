@@ -31,6 +31,11 @@ sway继承了i3简洁的窗口管理能力，并且提供了基于现代化 :ref
 - Foliate
 - MPV Media Player
 
+SwayOS
+==========
+
+除了Fedora社区提供了 `Fedora Sway Spin <https://fedoraproject.org/spins/sway/>`_ 发行版， `SwayOS <https://swayos.github.io/>`_ 集成了Sway桌面以及必要的配置工具和常用软件，形成了一个较为完善的发行版，其组件选择可以作为Sway平台使用的安装参考。
+
 Sway使用要点
 ===============
 

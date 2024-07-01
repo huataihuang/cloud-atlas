@@ -70,5 +70,83 @@ OpenRC
 使用
 =========
 
-- 磁盘分区:
+- 使用 :ref:`parted` 工具对磁盘分区进行检查:
 
+.. literalinclude:: gentoo_zfs_xcloud/parted_print
+   :catpion: ``parted`` 检查当前磁盘分区
+
+输出显示:
+
+.. literalinclude:: gentoo_zfs_xcloud/parted_print
+   :catpion: ``parted`` 检查当前磁盘分区显示分区3具备384G
+   :emphasize-liens: 10
+
+.. warning::
+
+   磁盘分区操作是高危操作，务必提前备份，特别是已有多个分区在使用中，特别容易出现操作错误导致分区破坏。慎重!!!
+
+- 磁盘分区: 删除掉第3分区(原先使用 :ref:`macos` 的diskutils工具调整磁盘后空出分区，并重建分区用于ZFS存储
+
+.. literalinclude:: gentoo_zfs_xcloud/parted_delete_partiton3
+   :caption: 删除分区3
+
+此时分区3被删除，此时再次检查分区
+
+.. literalinclude:: gentoo_zfs_xcloud/parted_print
+   :catpion: ``parted`` 检查当前磁盘分区
+
+显示分区3已经消失了:
+
+.. literalinclude:: gentoo_zfs_xcloud/parted_print_partition3_deleted
+   :catpion: ``parted`` 检查当前磁盘分区显示分区3已经被删除了
+
+- 再次执行 :ref:`parted` 工具来完成分区创建，一定要确保分区位置不要覆盖现有使用分区:
+
+.. literalinclude:: gentoo_zfs_xcloud/parted_create_partition3
+   :caption: ``parted`` 创建分区3
+
+怎么检查分区是否正确(大小和位置)，我使用 ``parted /dev/nvme0n1 print`` 和 ``fdisk -l /dev/nvme0n1`` 分别检查，可以看到分区3创建正确，没有出现分区错位问题:
+
+.. literalinclude:: gentoo_zfs_xcloud/parted_print_partition3_created
+   :caption: ``parted /dev/nvme0n1 print`` 输出显示重新创建的分区3
+   :emphasize-liens: 10
+
+.. literalinclude:: gentoo_zfs_xcloud/fdisk_partition3_created
+   :caption: ``fdisk -l /dev/nvme0n1`` 显示重新创建的分区3，可以看到和之前记录完全一致分区
+   :emphasize-lines: 12
+
+ZFS文件系统构建
+====================
+
+我最终目标是在一个完整的底层host主机上构建3个ZFS存储池:
+
+- ``zpool-data`` 数据存储池
+- ``zpool-libvirt`` 用于 :ref:`libvirt_zfs_pool` (虽然不一定要用独立的ZFS pool，但是为了区分不混用，实际正式环境我还是独立设置一个zpool
+- ``zpool-docker`` 用于 :ref:`docker_zfs_driver` : Docker需要直接使用存储池作ZFS后端驱动，并且要挂载到 ``/var/lib/docker`` 目录，这和 :ref:`libvirt` 不同， ``libvirt`` 可以使用多个存储，libvirt只需配置一个ZFS zpool作为libvirt的pool就可以(可以复用现有的ZFS存储池)
+
+.. note::
+
+   在非正式开发测试环境，我暂时合并 ``zpoool-data`` 和 ``zpoool-libvirt`` ，只使用 ``zpool-data`` 
+
+   不过这个合并方式对于运维比较容易混淆，所以后续我构建服务器的时候，将拆分开
+
+.. note::
+
+   根据文档和我的之前实践，我初步判断 :ref:`libvirt_zfs_pool` 对于zpool没有强制要求，所以实际上是可以复用 :ref:`docker_zfs_driver` 的zpool，甚至我的数据存储也可以在 docker zpool 下继续构建。由于是个人笔记本测试环境，我小心地构建了这个混用zpool存储(但不推荐)，后续我的服务器实践将改进为分离存储池
+
+.. warning::
+
+   这段是测试笔记本，使用了一个存储池 ``zpool-data`` ，挂载到 ``/var/lib/docker`` 目录(为了满足 :ref:`docker_zfs_driver` 要求，仅适合测试环境。生产环境压力大， :ref:`libvirt` 和 :ref:`docker` 同时操作共用存储池预计会发生冲突，影响性能和稳定性。
+
+- 创建 ``zpool-data`` 存储池，默认挂载到 ``/var/lib/docker`` 目录(特例，为了满足 :ref:`docker_zfs_driver` :
+
+.. literalinclude:: gentoo_zfs_xcloud/zpool
+   :caption: 创建 ``zpool-data`` 存储池挂载到 ``/var/lib/docker`` 目录
+
+完成后使用 ``df -h`` 检查分区挂载:
+
+.. literalinclude:: gentoo_zfs_xcloud/df_output
+   :caption: 使用 ``df -h`` 检查分区挂载
+   :emphasize-lines: 8
+
+存储就绪之后，则可以开始构建 :ref:`gentoo_virtualization` 以便运行一个多虚拟化的开发测试环境
