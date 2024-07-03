@@ -73,13 +73,13 @@ OpenRC
 - 使用 :ref:`parted` 工具对磁盘分区进行检查:
 
 .. literalinclude:: gentoo_zfs_xcloud/parted_print
-   :catpion: ``parted`` 检查当前磁盘分区
+   :caption: ``parted`` 检查当前磁盘分区
 
 输出显示:
 
-.. literalinclude:: gentoo_zfs_xcloud/parted_print
-   :catpion: ``parted`` 检查当前磁盘分区显示分区3具备384G
-   :emphasize-liens: 10
+.. literalinclude:: gentoo_zfs_xcloud/parted_print_output
+   :caption: ``parted`` 检查当前磁盘分区显示分区3具备384G
+   :emphasize-lines: 10
 
 .. warning::
 
@@ -93,12 +93,12 @@ OpenRC
 此时分区3被删除，此时再次检查分区
 
 .. literalinclude:: gentoo_zfs_xcloud/parted_print
-   :catpion: ``parted`` 检查当前磁盘分区
+   :caption: ``parted`` 检查当前磁盘分区
 
 显示分区3已经消失了:
 
 .. literalinclude:: gentoo_zfs_xcloud/parted_print_partition3_deleted
-   :catpion: ``parted`` 检查当前磁盘分区显示分区3已经被删除了
+   :caption: ``parted`` 检查当前磁盘分区显示分区3已经被删除了
 
 - 再次执行 :ref:`parted` 工具来完成分区创建，一定要确保分区位置不要覆盖现有使用分区:
 
@@ -109,7 +109,7 @@ OpenRC
 
 .. literalinclude:: gentoo_zfs_xcloud/parted_print_partition3_created
    :caption: ``parted /dev/nvme0n1 print`` 输出显示重新创建的分区3
-   :emphasize-liens: 10
+   :emphasize-lines: 10
 
 .. literalinclude:: gentoo_zfs_xcloud/fdisk_partition3_created
    :caption: ``fdisk -l /dev/nvme0n1`` 显示重新创建的分区3，可以看到和之前记录完全一致分区
