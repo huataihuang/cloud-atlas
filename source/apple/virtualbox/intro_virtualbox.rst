@@ -14,7 +14,7 @@ VirtualBox是一个跨平台虚拟化技术，可以运行在微软Windows, :ref
 
 .. note::
 
-   我在工作中主要使用 :ref:`kvm` 虚拟化，不过由于近期旅行途中，使用 :ref:`macos` 作为主要工作平台，所以需要一个比较完善的macOS平台的虚拟化解决方案。VirtulBox由于跨平台且使用简单，所以被我用于日常构建Linux开发测试环境(另外一个主要的开发测试环境是 :ref:`docker_desktop` ，想通过虚拟化方式来学习 :ref:`lfs_linux`
+   我在工作中主要使用 :ref:`kvm` 虚拟化，不过由于近期旅行途中，使用 :ref:`macos` 作为主要工作平台，所以需要一个比较完善的macOS平台的虚拟化解决方案。VirtulBox由于跨平台且使用简单，所以被我用于日常构建Linux开发测试环境(另外一个主要的开发测试环境是 :ref:`docker_desktop` ，想通过虚拟化方式来学习 :ref:`lfs`
 
 host OS
 =========

@@ -11,7 +11,7 @@
 
 - 物理服务器安装 :ref:`ubuntu_linux`
 
-  - 其实我更倾向于底层物理服务器采用高度定制精简的 :ref:`gentoo_linux` 甚至 :ref:`lfs_linux` ，但是由于经费紧张，我需要采用 :ref:`vgpu` 构建 :ref:`gpu_k8s` ， :strike:`只能` 采用商业化较好的 :ref:`ubuntu_linux` 为好(或者 :ref:`redhat_linux` )
+  - 其实我更倾向于底层物理服务器采用高度定制精简的 :ref:`gentoo_linux` 甚至 :ref:`lfs` ，但是由于经费紧张，我需要采用 :ref:`vgpu` 构建 :ref:`gpu_k8s` ， :strike:`只能` 采用商业化较好的 :ref:`ubuntu_linux` 为好(或者 :ref:`redhat_linux` )
   - 如果有多块物理GPU卡，可以考虑采用 :ref:`gentoo_linux` 来构建自己定制的底层操作系统(希望有一天我有充足的GPU卡来完成这个构想实践)
   - 另一种激进的方法我构思采用 :ref:`gentoo_linux` 上 :ref:`docker` 运行 :ref:`ubuntu_linux` 来实现 :ref:`vgpu` (CRAZY，只是我的YY)
 

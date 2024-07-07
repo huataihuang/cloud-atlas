@@ -224,6 +224,11 @@ ARM环境Ubuntu虚拟机
         --location=http://mirrors.163.com/fedora/releases/35/Server/x86_64/os/ \
         --extra-args="console=tty0 console=ttyS0,115200"
 
+- 使用 :ref:`libvirt_zfs_pool` 则先创建ZFS卷再创建虚拟机:
+
+.. literalinclude:: create_vm/create_fedora40_vm_zfs
+   :caption: 创建ZFS存储卷上的Fedora 40虚拟机
+
 创建CentOS 7 (vault)虚拟机
 =============================
 
@@ -381,6 +386,19 @@ ARM环境Ubuntu虚拟机
       :scale: 75
 
    另外，需要注意苹果的 :ref:`macos` 提供了内置的VNC Server，也就是 ``Screen Sharing`` 功能(从 ``System Settings >> General >> Sharing`` 进入菜单)，这个 ``Screen Sharing`` 功能占用 ``5900`` 端口，所以在苹果macOS上使用上上述ssh端口转发登陆服务器，需要避免端口冲突
+
+创建LFS虚拟机
+===================
+
+- 使用 :ref:`libvirt_zfs_pool` 则先创建ZFS卷再创建虚拟机:
+
+.. literalinclude:: create_vm/create_fedora40_vm_zfs
+   :caption: 创建ZFS存储卷上的 LFS 虚拟机(使用Fedora LiveCD)
+   :emphasize-lines: 8
+
+注意 ``--os-type`` 参数已经废弃，现在需要使用 ``--os-variant/--osinfo`` 传递操作系统名字，这里因为使用LFS不属于常见的Linux发行版，选择了通用的 ``--os-variant=linux2022`` (使用 ``osinfo-query os`` 获取支持列表名)
+
+这里使用了 ``--graphics spice`` 参数指定图形界面，需要使用 :ref:`virt-viewer` 来访问，所以 :ref:`gentoo_virtualization` 需要安装 ``virt-viewer`` 软件包
 
 虚拟机bridge网络
 ==================

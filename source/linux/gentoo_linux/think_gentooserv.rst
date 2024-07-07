@@ -6,7 +6,7 @@ Gentoo服务(器)思考
 
 我曾经多次 :ref:`install_gentoo_on_mbp` ，想要构建一个个人使用的非常轻量级的开发工作环境。然而，这并不是一个轻松的事情。至少对我而言，处理各种桌面应用的复杂编译和依赖，往往要耗费几天甚至几周的时间。
 
-前一段时间，我在洗澡的时候，突然想到很久以前 :ref:`priv_cloud_infra` 我也构想过在最底层使用 :ref:`gentoo_linux` 甚至 :ref:`lfs_linux` 来实现精简且性能最优的底层。既然我花费了这么多时间，仅仅为了桌面中文输入和 :ref:`sway` 这样轻量级的图形管理器，不如把时间投入到更为专注的服务器领域，将 :ref:`linux_server` +  :ref:`kubernetes` 和 :ref:`kvm` 结合实现 :ref:`performance` 的最优化。
+前一段时间，我在洗澡的时候，突然想到很久以前 :ref:`priv_cloud_infra` 我也构想过在最底层使用 :ref:`gentoo_linux` 甚至 :ref:`lfs` 来实现精简且性能最优的底层。既然我花费了这么多时间，仅仅为了桌面中文输入和 :ref:`sway` 这样轻量级的图形管理器，不如把时间投入到更为专注的服务器领域，将 :ref:`linux_server` +  :ref:`kubernetes` 和 :ref:`kvm` 结合实现 :ref:`performance` 的最优化。
 
 构想
 ======

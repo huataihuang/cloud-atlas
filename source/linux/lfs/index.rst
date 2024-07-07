@@ -1,4 +1,4 @@
-.. _lfs_linux:
+.. _lfs:
 
 ======================================
 LFS(Linux from scratch)
@@ -18,6 +18,7 @@ LFS(Linux from scratch)
 
    intro_lfs.rst
    lfs_prepare.rst
+   lfs_vm.rst
 
 .. only::  subproject and html
 

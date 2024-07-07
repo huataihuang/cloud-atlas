@@ -8,7 +8,7 @@
 
 一狠心，我决定从 :ref:`upgrade_developer_toolset_on_centos7` 开始，完整把所有开发、程序运行环境全部重新编译升级一遍，做出一个类似 :ref:`docker` 容器化干净的系统:
 
-- 参考 :ref:`lfs_linux` 完全从源码编译整个Developer Toolkit :ref:`upgrade_developer_toolset_on_centos7`
+- 参考 :ref:`lfs` 完全从源码编译整个Developer Toolkit :ref:`upgrade_developer_toolset_on_centos7`
 - 源码编译最新的 Python 3
 - 采用 :ref:`virtualenv` 运行自己开发的Python程序
 

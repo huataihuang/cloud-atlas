@@ -4,7 +4,7 @@
 更新CentOS 7的Develop Toolset
 ===============================
 
-结合 `Red Hat Developer Toolset > 12 > User Guide > Chapter 1. Red Hat Developer Toolset <https://access.redhat.com/documentation/en-us/red_hat_developer_toolset/12/html/user_guide/chap-red_hat_developer_toolset>`_ 和 :ref:`lfs_linux` ``构建 LFS 交叉工具链和临时工具`` 章节可以知晓 :ref:`build_python3_in_centos7` 的Develop Toolset包括:
+结合 `Red Hat Developer Toolset > 12 > User Guide > Chapter 1. Red Hat Developer Toolset <https://access.redhat.com/documentation/en-us/red_hat_developer_toolset/12/html/user_guide/chap-red_hat_developer_toolset>`_ 和 :ref:`lfs` ``构建 LFS 交叉工具链和临时工具`` 章节可以知晓 :ref:`build_python3_in_centos7` 的Develop Toolset包括:
 
 .. csv-table:: Develop Toolset(不包含debugger相关工具)
    :file: upgrade_developer_toolset_on_centos7/developer_toolset.csv
@@ -16,7 +16,7 @@ GCC
 
 - :ref:`upgrade_gcc_on_centos7` 部署安装的是 GCC 10.5.0，我在本文实践中会用这个版本GCC再次编译升级最新版本GCC
 
-由于系统已经具备了 binutils, gcc 10.5.0 ，所以相当于 :ref:`lfs_linux` 再次进行，参考顺序:
+由于系统已经具备了 binutils, gcc 10.5.0 ，所以相当于 :ref:`lfs` 再次进行，参考顺序:
 
 - make-4.4.1
 - binutils-3.8.2

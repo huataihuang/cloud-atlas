@@ -22,4 +22,9 @@ LFS 系统需要在一个已经安装好的 Linux 发行版（比如 Debian、Op
 
 例如使用LiveCD，可以通过 `转换ISO文件为启动U盘 <https://www.linux.com/blog/how-burn-iso-usb-drive>`_ 然后启动笔记本电脑，再通过这个U盘运行的Ubuntu系统来编译安装LFS。
 
+.. note::
 
+   我的学习实践是通过虚拟机来完成一次完整的LFS构建，然后再移植到物理服务器构建，目标是定制自己的Linux精简发行版:
+
+   - 定制适合 :ref:`kvm` 虚拟化和 :ref:`docker` 容器化的运行环境
+   - 上层运行的虚拟机则采用 :ref:`debian` 这种通用Linux发行版，保持底座host主机系统的最小化定制化
