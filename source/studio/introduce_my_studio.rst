@@ -53,7 +53,7 @@
 
 由于居无定所，显然很难持续使用强大的 :ref:`hpe_dl360_gen9` ，所以我再次将中心转向使用古老的 :ref:`mbp15_late_2013` ，努力在有限的硬件中挖掘潜力:
 
-- 转向更为底层的Linux构建技术: 采用 :ref:`kvm_nested_virtual` 结合 :ref:`lfs_linux` 构建基础OS，并且自己定制 :ref:`debian` 来实现规模化云计算集群
+- 转向更为底层的Linux构建技术: 采用 :ref:`kvm_nested_virtual` 结合 :ref:`lfs` 构建基础OS，并且自己定制 :ref:`debian` 来实现规模化云计算集群
 - 通过手工打造OS和 :ref:`kubernetes` 来实现对底层技术的深入理解
 
 一点一滴

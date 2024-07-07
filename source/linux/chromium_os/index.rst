@@ -10,7 +10,7 @@ Chromium OS/Chrome OS完全基于因特网运行的轻量级客户端，在网�
 
 我个人更看好基于Android的系统来融合移动设备操作系统，毕竟Android市场海量的应用目前还是WEB无法超越的。何况，在国内的生态环境，很多工作应用如果不能使用Android，则即使引入Linux容器也无法满足需求。
 
-对于技术爱好者，我觉得更好的方式是学习 :ref:`chromium_os_arch` ，通过 :ref:`lfs_linux` 来构建自己的操作系统，构建精简的轻量级操作系统，同时构建AnBox来运行Android应用。
+对于技术爱好者，我觉得更好的方式是学习 :ref:`chromium_os_arch` ，通过 :ref:`lfs` 来构建自己的操作系统，构建精简的轻量级操作系统，同时构建AnBox来运行Android应用。
 
 .. note::
 

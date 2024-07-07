@@ -27,7 +27,7 @@ Kubuntu - Ubuntu的KDE桌面发行版
 
 - 使用体验非常接近于 :ref:`macos` ，界面美观简洁: 可以说在轻量级和功能完善上做了非常巧妙的平衡(比 :ref:`xfce` 功能更为完备)
 
-- Ubuntu提供了完善的 :ref:`anbox` 运行环境，这是我选择 :ref:`ubuntu_linux` 作为桌面的主要原因(虽然我更喜欢技术控制更强的 :ref:`alpine_linux` / :ref:`arch_linux` / :ref:`lfs_linux` )
+- Ubuntu提供了完善的 :ref:`anbox` 运行环境，这是我选择 :ref:`ubuntu_linux` 作为桌面的主要原因(虽然我更喜欢技术控制更强的 :ref:`alpine_linux` / :ref:`arch_linux` / :ref:`lfs` )
 
   - 通过 :ref:`anbox` 来运行DingTalk以及安全软件
 

@@ -106,7 +106,7 @@ calibre 是全功能的电子书库管理软件，提供阅读、转换和分类
 
 .. note::
 
-   如果后续采用 :ref:`gentoo_linux` 或者 :ref:`lfs_linux` 则从源代码编译，我比较倾向于：
+   如果后续采用 :ref:`gentoo_linux` 或者 :ref:`lfs` 则从源代码编译，我比较倾向于：
 
    - ``foliate`` 独立支持不同格式电子书
    - ``zathura`` 使用 ``mupdf`` 后端同时支持 pdf 和 epub
