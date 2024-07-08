@@ -17,6 +17,11 @@ CentOS 8最小化server模式安装，对于开发环境初始化安装软件包
    gcc gcc-c++ make telnet flex autoconf automake ncurses-devel crontabs \
    zlib-devel git
 
+如果编译LFS，则:
+
+.. literalinclude:: ../../lfs/lfs_prepare/dnf_install_env
+   :caption: 在Fedora环境安装LFS编译环境
+
 .. note::
 
    如果要全面开发，也可以简单安装 ``dnf group install "Development Tools"`` ，但是这个安装方式将占据600+M
