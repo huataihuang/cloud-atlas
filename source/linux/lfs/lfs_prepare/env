@@ -1,0 +1,1 @@
+export LFS=/mnt/lfs

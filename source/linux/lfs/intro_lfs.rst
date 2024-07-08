@@ -28,3 +28,10 @@ LFS 系统需要在一个已经安装好的 Linux 发行版（比如 Debian、Op
 
    - 定制适合 :ref:`kvm` 虚拟化和 :ref:`docker` 容器化的运行环境
    - 上层运行的虚拟机则采用 :ref:`debian` 这种通用Linux发行版，保持底座host主机系统的最小化定制化
+
+资料和关注
+=============
+
+由于LFS是从源代码编译安装，需要关注上游源代码的安全漏洞和补丁升级:
+
+- `LFS 相关资源 <https://lfs.xry111.site/zh_CN/12.1/chapter01/resources.html>`_

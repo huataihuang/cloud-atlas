@@ -1,0 +1,22 @@
+# 案例: /dev/vdb (第二块虚拟磁盘)作为LFS磁盘
+
+# 初始化磁盘分区表
+parted /dev/vdb mklabel gpt
+
+# 创建第一个vdb1分区，用于EFI启动
+parted -a optimal /dev/vdb mkpart ESP fat32 0% 256MB
+parted /dev/vdb set 1 esp on
+
+# /boot分区 vdb2，分配512MB, ext4
+parted -a optimal /dev/vdb mkpart bootfs ext4 256MB 768MB
+
+# /分区 vdb3，所有剩余磁盘, ext4
+parted -a optimal /dev/vdb mkpart rootfs ext4 768MB 100%
+
+# 完成后检查
+parted /dev/vdb print
+
+# 分区格式化
+mkfs.vfat -F 32 -n EFI /dev/vdb1
+mkfs.ext4 /dev/vdb2
+mkfs.ext4 /dev/vdb3
