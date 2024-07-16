@@ -21,6 +21,7 @@
    pi_5.rst
    pi_pcie.rst
    turing_pi/index
+   pi_pwm_fan.rst
 
 .. only::  subproject and html
 

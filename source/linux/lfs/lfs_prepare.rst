@@ -107,7 +107,7 @@ LFS对分区没有硬性规定，但是有一些建议:
 - ``/tmp`` 分区，一般是配置瘦客户机时使用，如果系统有足够内存，可以在 ``/tmp`` 挂载一个 ``tmpfs`` 以加速访问临时文件
 - ``/usr/src`` 用于存储BLFS源代码，并且可以在多个LFS系统之间共享；可以用来编译BLFS软件包，通常划分 30-50 GB
 
-LFS架设根问加系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核且根分区并没有极端的性能要求，我目前按照官方文档采用默认的 ext4 文件系统)
+LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核且根分区并没有极端的性能要求，我目前按照官方文档采用默认的 ext4 文件系统)
 
 我的分区
 ----------------
@@ -162,16 +162,20 @@ LFS架设根问加系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 - 官方 `wget-list-sysv <https://www.linuxfromscratch.org/lfs/view/stable/wget-list-sysv>`_ 作为 :ref:`wget` 命令的输入来下载所有软件包和补丁:
 
 .. literalinclude:: lfs_prepare/wget
-   :caption: 下载所有 `wget-list-sysv <https://www.linuxfromscratch.org/lfs/view/stable/wget-list-sysv>`_ 列出的软件包和补丁
+   :caption: 下载所有 wget-list-sysv 列出的软件包和补丁
 
 使用LFS提供的 `md5sums <https://www.linuxfromscratch.org/lfs/view/stable/md5sums>`_ 文件校验下载的软件包:
 
 .. literalinclude:: lfs_prepare/md5sum
-   :caption: 使用LFS提供的 `md5sums <https://www.linuxfromscratch.org/lfs/view/stable/md5sums>`_ 文件校验下载的软件包
+   :caption: 使用LFS提供的 md5sums 文件校验下载的软件包
 
 .. note::
 
-   对于LFS稳定版，可以从官方镜像网站直接下载打包好的软件包文件
+   对于LFS稳定版，可以从 `LFS官方镜像网站直接下载打包好的软件包文件 <https://www.linuxfromscratch.org/lfs/mirrors.html#files>`_ 
+
+.. note::
+
+   部分文件可能会因为上游下载源更改无法下载，需要手工处理
 
 在LFS文件系统中创建有限目录布局
 ==================================
@@ -182,7 +186,7 @@ LFS架设根问加系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
    :caption: 创建目录布局
    :language: bash
 
-- 此外位交叉编译器准备一个专用目录，使得其和其他程序分离:
+- 此外为交叉编译器准备一个专用目录，使得其和其他程序分离:
 
 .. literalinclude:: lfs_prepare/tools
    :caption: 创建交叉编译器目录
@@ -195,10 +199,65 @@ LFS架设根问加系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 添加LFS用户
 =============
 
-创建 ``lfs`` 用户，避免微小错误损坏或摧毁系统:
+- 创建 ``lfs`` 用户，避免微小错误损坏或摧毁系统:
 
 .. literalinclude:: lfs_prepare/lfs_user
    :caption: 创建lfs用户
+   :language: bash
+
+如果是使用 ``root`` 用户身份切换到 ``lfs`` 用户，则不要求 ``lfs`` 用户帐号设置过密码；其他用户如果要切换到 ``lfs`` 用户，则需要为 ``lfs`` 用户设置密码( ``passwd lfs`` )
+
+- 将 ``lfs`` 设置为 ``$LFS`` 中所有目录的所有者，这样 ``lfs`` 就对它们拥有 **完全访问权** :
+
+.. literalinclude:: lfs_prepare/chown_lfs
+   :caption: 设置 ``$LFS`` 目录属主为 ``lfs`` 用户
+   :language: bash
+
+- 从 ``root`` 切换身份到 ``lfs`` ，后续操作以 ``lfs`` 用户身份来执行(避免出现误操作破坏系统)::
+
+   su - lfs
+
+配置环境
+=============
+
+为了配置良好工作环境，需要为bash创建两个新的启动脚本，以下命令以 ``lfs`` 身份执行，创建一个新的 ``.bash_profile`` :
+
+.. literalinclude:: lfs_prepare/bash_profile
+   :caption: 创建 ``lfs`` 用户的 ``.bash_profile``
+   :language: bash
+
+上述 ``.bash_profile`` 中采用 ``exec env -i .../bin/bash`` 可以确保除了 ``HOME, TERM 以及 PS1`` 之外没有任何环境变量的 shell，防止宿主机环境中有不需要和有潜在风险的环境变量进入构建环境。
+
+- 由于新的shell实例是 **非登录shell** ，所以它不会读取和执行 ``/etc/profile`` 或者 ``.bash_profile`` 中内容，而是读取并执行 ``.bashrc`` ，所以我们现在需要创建一个 ``.bashrc`` 文件:
+
+.. literalinclude:: lfs_prepare/lfs_bashrc
+   :caption: 为 ``lfs`` 的非登录shell创建一个独立使用的 ``~/.bashrc``
+   :language: bash
+
+``.bashrc`` 中设置含义(部分摘录参考):
+
+- ``set +h`` 关闭bash的散列功能。bash使用一个散列表维护各个可执行文件的完整路径，这样就不用每次都在 ``PATH`` 指定的目录中搜索可执行文件。这是一个非常有用的功能，但是在LFS构建中，我们希望总是使用最新安装的工具，所以关闭散列功能来强制shell在运行程序的时候总是搜索PATH
+- ``umask 022`` 将用户的文件创建掩码(umask)设置为 ``022`` ，确保只有文件的所有者可以写新创建的文件和目录，但是其他任何人都可以读取、执行它们
+- ``LFS=/mnt/lfs`` LFS 环境变量必须被设定为之前选择的挂载点
+- ``C_ALL=POSIX`` 将 LC_ALL 设置为 “POSIX” 或者 “C”(这两种设置是等价的) 可以保证在交叉编译环境中所有命令的行为完全符合预期，而与宿主的本地化设置无关
+- ``LFS_TGT=$(uname -m)-lfs-linux-gnu`` LFS_TGT变量设定了一个非默认，但与宿主系统兼容的机器描述符。该描述符被用于构建交叉编译器和交叉编译临时工具链
+- ``PATH=/usr/bin`` 许多现代 Linux 发行版合并了 /bin 和 /usr/bin。在这种情况下，标准 PATH 变量应该被设定为 /usr/bin
+- ``if [ ! -L /bin ]; then PATH=/bin:$PATH; fi`` 如果 /bin 不是符号链接，则它需要被添加到 PATH 变量中
+- ``PATH=$LFS/tools/bin:$PATH`` 将 $LFS/tools/bin 附加在默认的 PATH 环境变量之前，一旦安装了新的程序，shell 就能立刻使用它们
+- ``CONFIG_SITE=$LFS/usr/share/config.site`` 如果没有设定这个变量，configure 脚本可能会从宿主系统的 /usr/share/config.site 加载一些发行版特有的配置信息。覆盖这一默认路径，避免宿主系统可能造成的污染。 
+- ``export ...`` 设定了一些变量，为了让所有子 shell 都能使用这些变量
+
+对于多CPU core的主机，可以并行执行make，所以在 ``.bashrc`` 添加以下配置(如果不希望所有cpu core被使用，则将 ``$(nproc)`` 替换成希望使用的cpu core数量:
+
+.. literalinclude:: lfs_prepare/makeflags
+   :caption: 为make程序设置使用的cpu core数量
+   :language: bash
+
+最后确保构建临时工具所需环境就绪，强制bash shell读取刚才创建的配置文件:
+
+.. literalinclude:: lfs_prepare/source_profile
+   :caption: 强制shell读取配置文件
+   :language: bash
 
 参考
 ======
