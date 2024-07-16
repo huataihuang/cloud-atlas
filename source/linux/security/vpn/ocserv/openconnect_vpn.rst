@@ -26,13 +26,18 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 
 .. note::
 
-   本文方案实践服务器和客户端都基于Ubuntu 18.10系统，其他发行版可能会有一些差异。
+   本文方案实践服务器和客户端都基于Ubuntu 18.10系统，其他发行版(例如 :ref:`openconnect_vpn_arch_linux` )可能会有一些差异。此外，我也在 :ref:`redhat_linux` 系的AlmaLinux上部署，其中的一些安装差异在本文注明
 
    详细操作步骤参考 `在Ubuntu部署OpenConnect VPN服务器 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/security/vpn/openconnect/deploy_ocserv_vpn_server_on_ubuntu.md>`_
 
-- 安装ocserv::
+- Debian/Ubuntu 安装ocserv::
 
    apt install ocserv
+
+- RedHat/AlmaLinux 需要通过 EPEL 仓库来安装ocserv:
+
+.. literalinclude:: openconnect_vpn/redhat_install_ocserv
+   :caption: :ref:`redhat_linux` 通过EPEL安装ocserv
 
 安装完成后，OpenConnect VPN服务自动启动，可以通过 ``systemctl status ocserv`` 检查。
 
@@ -60,8 +65,8 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
 
    :ref:`arch_linux` 仓库提供软件包上述配置文件可能已经就绪(不过我尚未实践 :ref:`archlinux_aur` 安装成功)
 
-配置
--------
+配置(Let's Encrypt证书)
+============================
 
 - 安装Let's Encrypt客户端（Certbot）::
 
@@ -105,6 +110,39 @@ OpenConnect VPN Server，也称为 ``ocserv`` ，采用OpenConnect SSL VPN协议
    :language: bash
    :caption: 配置 /etc/ocserv/ocserv.conf 添加Let’s Encrypt证书
    :emphasize-lines: 13,14
+
+配置(字签名证书)
+==================
+
+自签名证书需要使用 ``guntls`` 工具:
+
+- Debian/Ubuntu安装 ``gnutils`` 工具:
+
+.. literalinclude:: openconnect_vpn/apt_gnutils
+   :caption: 使用 :ref:`apt` 安装 ``gnutls-bin``
+
+- Red Hat Linux/CentOS/AlmaLinux 安装 ``gnutls`` 工具:
+
+.. literalinclude:: openconnect_vpn/dnf_gnutils
+   :caption: 使用 :ref:`dnf` 安装 ``gnutls-utils``
+
+- 首先需要为签发证书准备一个私钥，执行以下命令生成 ``ca-privkey.pem`` 私钥:
+
+.. literalinclude:: openconnect_vpn/generate_privkey
+   :caption: 生成用于签发证书的私钥
+
+- 然后创建一个模板证书文件 ``ca-cert.cfg`` :
+
+.. literalinclude:: openconnect_vpn/ca-cert.cfg
+   :caption: 证书模板文件 ``ca-cert.cfg``
+
+- 结合上面的两个文件，即用私钥 ``ca-privkey.pem`` 和证书模板文件 ``ca-cert.cfg`` 生成字签名证书 ``ca-cert.pem``
+
+.. literalinclude:: openconnect_vpn/generate_ca
+   :caption: 生成服务器CA证书
+
+部署运行
+==============
 
 - 重启ocserv::
 
@@ -208,5 +246,6 @@ Cisco AnyConnect VPN Client
 =======
 
 - `Set up OpenConnect VPN Server (ocserv) on Ubuntu 16.04/18.04 with Let’s Encrypt <https://www.linuxbabe.com/ubuntu/openconnect-vpn-server-ocserv-ubuntu-16-04-17-10-lets-encrypt>`_
+- `Set up Certificate Authentication in OpenConnect VPN Server (ocserv) <https://www.linuxbabe.com/ubuntu/certificate-authentication-openconnect-vpn-server-ocserv>`_ 设置服务器自签名证书和客户端证书
 - `How to Set up an OpenConnect VPN Server <https://www.alibabacloud.com/blog/how-to-set-up-an-openconnect-vpn-server_595185>`_
 - `How to run openconnect with username and password in a line in the terminal? <https://askubuntu.com/questions/1043024/how-to-run-openconnect-with-username-and-password-in-a-line-in-the-terminal>`_

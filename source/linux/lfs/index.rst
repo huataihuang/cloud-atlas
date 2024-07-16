@@ -17,8 +17,10 @@ LFS(Linux from scratch)
    :maxdepth: 1
 
    intro_lfs.rst
-   lfs_prepare.rst
    lfs_vm.rst
+   lfs_partition.rst
+   lfs_prepare.rst
+   lfs_cross_toolchain/index
 
 .. only::  subproject and html
 
