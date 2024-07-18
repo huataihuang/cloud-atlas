@@ -24,6 +24,7 @@ macOS
    macos_studio.rst
    macos_share_file.rst
    homebrew.rst
+   homebrew_python.rst
    install_disabled_homebrew_package.rst
    multi_jdk_on_macos.rst
    macos_keyboard_customize.rst
