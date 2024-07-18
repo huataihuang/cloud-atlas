@@ -7,6 +7,7 @@ Python起步
 .. toctree::
    :maxdepth: 1
 
+   python_env_tools.rst
    virtualenv.rst
    rebuild_virtualenv.rst
    pip.rst
