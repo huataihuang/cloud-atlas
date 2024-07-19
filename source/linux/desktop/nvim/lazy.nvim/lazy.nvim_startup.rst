@@ -26,6 +26,57 @@ lazy.nvim快速起步
 .. literalinclude:: lazy.nvim_startup/checkhealth_output
    :caption: 检查输出信息
 
+:ref:`homebrew` 安装异常排查
+------------------------------
+
+在 :ref:`homebrew` 中安装的 ``nvi`` 使用上述安装方法，在 ``checkhealth lazy`` 输出信息中有报错:
+
+.. literalinclude:: lazy.nvim_startup/checkhealth_output_error
+   :caption: :ref:`homebrew` 安装 ``nvim`` 的 ``lazy.nvim`` 后检查 ``checkhealth lazy`` 报错
+   :emphasize-lines: 14,18
+
+方法一: 通过安装 ```Gighub: vhyrro/luarocks.nvim <https://github.com/vhyrro/luarocks.nvim>`_ 解决
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+上述报错参考 `Gighub: vhyrro/luarocks.nvim <https://github.com/vhyrro/luarocks.nvim>`_ ，使用 ``luarocks.nvim`` 来方便安装 luarocks 包:
+
+- 先安装 ``luajit`` :
+
+.. literalinclude:: lazy.nvim_startup/brew_install_luajit
+   :caption: 使用 :ref:`homebrew` 安装 ``luajit``
+
+- 修改 ``~/.config/nvim/init.lua`` 代码如下:
+
+.. literalinclude:: lazy.nvim_startup/init_luarocks.lua
+   :caption: 在 ``init.lua`` 中添加 ``luarocks.nvim`` 配置来安装 ``luarocks`` 软件包，避免 ``lazy.nvim`` 因缺少 ``luarocks`` 报错
+   :emphasize-lines: 16-19
+
+此时当调用 ``lazy.nvim`` 就会自动变易一个本地 ``luarocks`` 安装。 **如果没有自动完成，则可以手工执行** ``:Lazy build luarocks.nvim`` (注意，这里必须是 ``Lazy`` ，第一个字母大写，否则会报错没有这个指令)
+
+方法二: 直接安装 ``LuaRocks``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+
+   `LuaRocks <https://luarocks.org/>`_ 是Lua模块的包管理器
+
+我后来发现一个非常简单的解决方法，就是在系统中直接安装 ``LuaRocks`` 就完全解决了( 之前在 :ref:`gentoo_linux` 上实践 :ref:`nvim` 使用的 USE Flags是 ``lua_single_target_luajit`` Build for LuaJIT only，似乎没有启用 ``LuaRocks`` ):
+
+- 安装 ``LuaRocks`` 是会自动依赖安装Lua 5.4:
+
+.. literalinclude:: lazy.nvim_startup/brew_install_luarocks
+   :caption: 在 :ref:`macos` 上使用 :ref:`homebrew` 安装 ``luarocks``
+
+.. note::
+
+   `luarocks Installing <https://github.com/luarocks/luarocks/wiki/Download>`_ 提供了不同平台安装 LuaRocks 的方法，其中 macOS 平台推荐使用 :ref:`homebrew` 方式安装
+
+上述 ``luarocks`` 安装完成后，再次执行 ``:checkhealth lazy`` 就会看到 ``luarocks`` 报错消失:
+
+.. literalinclude:: lazy.nvim_startup/checkhealth_output_luarocks
+   :caption: 系统安装了 ``luarocks`` 之后报错消失
+   :emphasize-lines: 13-15
+
 插件
 ======
 
@@ -38,6 +89,10 @@ lazy.nvim快速起步
    :emphasize-lines: 15-18
 
 完成配置修订后重新进入 ``nvim`` ，就会看到自动安装过程，并且nvim的编辑风格转换
+
+.. note::
+
+   不知为何，在 macOS Terminal 中使用 ``catppuccin`` theme时候，会出现灰绿色背景，但是在 :ref:`tmux` 中使用这个theme则非常完美... Why?
 
 参考
 ========

@@ -40,12 +40,12 @@ Homebrew
    实际上在墙内，执行第一步在线安装命令就会出错，原因是GFW屏蔽了 ``raw.githubusercontent.com`` 。不过，这个脚本实际上可以下载到本地执行(通过墙外VPS搬运回来)。这样只要开始执行安装脚本，接下来就是如何让 :ref:`git` 和 :ref:`curl` :ref:`across_the_great_wall` 了，我在下文提供了解决方法。
 
 安装网络阻塞问题的解决方法
-------------------------------
+==========================
 
 安装Homebrew的最大麻烦是 GFW 对GitHub的干扰(并不是完全不通，但是不断间歇阻塞会浪费大量的时间精力)，解决的方法是使用代理。安装脚本中涉及到 ``curl`` 和 ``git`` 都需要配置代理。我采用的方法是: 
 
 socks代理
-~~~~~~~~~~
+----------
 
 采用 :ref:`ssh_tunneling_dynamic_port_forwarding` 构建本地socks代理，然后结合简单的 :ref:`curl_proxy`
 
@@ -64,7 +64,7 @@ socks代理
    :caption: 全局配置git使用socks5代理
 
 squid代理 :ref:`squid_socks_peer`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------
 
 由于墙内访问VPS阻塞严重，所以我改进为采用阿里云墙内服务器转跳方式的 squid代理 :ref:`squid_socks_peer` 也就是对于本地客户端而言，实际上是通过HTTP代理完成访问的
 
@@ -79,8 +79,8 @@ squid代理 :ref:`squid_socks_peer`
 .. literalinclude:: ../../web/curl/curl_proxy/http_env
    :caption: 配置curl的http/https代理环境变量
 
-:ref:`vpn_hotspot`
-~~~~~~~~~~~~~~~~~~~
+:ref:`vpn_hotspot` (简便且推荐)
+--------------------------------
 
 我还采用了一种方法是借助 :ref:`vpn_hotspot` ，通过手机VPN共享给局域网使用，使得自己的桌面电脑能够翻墙直接访问Homebrew的软件仓库，才能顺利完成Homebrew安装。
 
