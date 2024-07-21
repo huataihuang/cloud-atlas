@@ -54,8 +54,16 @@ macOS工作室
    :language: bash
    :caption: 通过virtualenv的Python环境安装sphinx doc
 
+:ref:`lima` 虚拟化
+====================
+
+
 :ref:`kubernetes` 模拟
 ===========================
+
+.. note::
+
+   另一个方案是自己构架虚拟化环境，也就是不依赖于 :ref:`install_docker_macos` 获得 Hypervisor 款里框架，而是手工通过 :ref:`lima` 构建虚拟机。这样更好玩，更有技术挑战。
 
 - 通过 :ref:`homebrew` :ref:`install_docker_macos` :
 

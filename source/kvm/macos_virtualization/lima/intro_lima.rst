@@ -11,10 +11,14 @@ Lima简介
 - `GitHub: Finch <https://github.com/runfinch/finch>`_ 对标 :ref:`docker_moby` 的macOS平台容器镜像构建工具
 - `Podman Desktop <https://podman-desktop.io/>`_ 使用一个插件来运行Lima虚拟机的Podman Desktop GUI
 
-我将在后续实践 :ref:`colima` 同时来尝试Lima
+
 
 参考
 =====
+
+- `lima-vm.io <https://lima-vm.io/>`_ 官方文档见 `Lima Documentation <https://lima-vm.io/docs/>`_
+
+  - `Lima FAQ: “How does Lima work?” <https://lima-vm.io/docs/faq/#how-does-lima-work>`_
 
 - `GitHub: lima-vm/lima <https://github.com/lima-vm/lima>`_
 

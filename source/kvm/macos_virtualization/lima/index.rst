@@ -8,6 +8,7 @@ Lima: Linux Machines
    :maxdepth: 1
 
    intro_lima.rst
+   lima_startup.rst
 
 
 .. only::  subproject and html

@@ -35,7 +35,7 @@ lazy.nvim快速起步
    :caption: :ref:`homebrew` 安装 ``nvim`` 的 ``lazy.nvim`` 后检查 ``checkhealth lazy`` 报错
    :emphasize-lines: 14,18
 
-方法一: 通过安装 ```Gighub: vhyrro/luarocks.nvim <https://github.com/vhyrro/luarocks.nvim>`_ 解决
+方法一: 通过安装 `Gighub: vhyrro/luarocks.nvim <https://github.com/vhyrro/luarocks.nvim>`_ 解决
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 上述报错参考 `Gighub: vhyrro/luarocks.nvim <https://github.com/vhyrro/luarocks.nvim>`_ ，使用 ``luarocks.nvim`` 来方便安装 luarocks 包:
