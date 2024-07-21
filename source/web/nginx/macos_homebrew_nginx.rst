@@ -13,7 +13,7 @@ macOS中使用Homebrew部署nginx
 .. literalinclude:: macos_homebrew_nginx/nginx.conf
    :language: bash
    :caption: 简单修订 /opt/homebrew/etc/nginx/nginx.conf 启用 Sphinx doc 访问
-   :emphasize-lines: 13,16
+   :emphasize-lines: 13,16,17
 
 .. note::
 
@@ -26,3 +26,13 @@ macOS中使用Homebrew部署nginx
 .. literalinclude:: macos_homebrew_nginx/brew_restart_nginx
    :language: bash
    :caption: 使用brew重启nginx
+
+.. note::
+
+   ``brew services run XXXX`` 是直接运行服务，但是不会注册成登陆时自动运行；但是 ``brew services start XXXX`` 则会在登陆或启动时自动运行服务
+
+.. note::
+
+   nginx实际运行进程的pid就是用户自己的id，例如我的用户名是 ``huatai`` ，则启动nginx服务之后可以看到是 ``huatai`` pid，就能够读取自己用户目录下的文件; ``nginx.conf`` 配置中也提供了 ``user nobody;`` 选项，但是默认没有激活
+
+

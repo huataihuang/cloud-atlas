@@ -261,6 +261,7 @@ brew很好地弥补了 macOS 的开源软件版本滞后的短板，强烈建议
    - :ref:`tmux` 是常用的多路会话软件，虽然从iterm2官网下载安装包也内置了安装 :ref:`tmux` 功能，但是为了方便升级并使用最新版本，采用 ``homebrew`` 来安装 ``iterm2``
    - macOS内置awk和sed，但是语法和GNU版本有差异，编写Linux上运行脚本采用较为通用的GNU版本
    - :ref:`openconnect_vpn` 客户端方便翻越GFW
+   - :ref:`keepassxc` 是跨平台开源密码管理器
    - iterm2提供了最佳终端，可以采用 :ref:`vim_tmux_iterm_zsh`
    - Homebrew提供了 :ref:`docker_desktop` 集成安装，可以方便实现Docker官方版本安装部署
    
