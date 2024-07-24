@@ -28,6 +28,13 @@ Colima快速起步
 .. literalinclude:: colima_startup/brew_start_colima
    :caption: 在 :ref:`macos` 平台通过 ``brew services`` 命令启动 ``colima`` 服务
 
+.. note::
+
+   ``brew services start colima`` 是在后台作为服务自动启动Colima，如果要在前台运行，可以直接使用 ``colima start`` 命令，例如:
+
+   .. literalinclude:: colima_startup/colima_foreground
+      :caption: 前台运行 ``colima`` 服务
+
 使用
 =====
 
@@ -51,6 +58,16 @@ Colima快速起步
 
    - 先部署 :ref:`squid_socks_peer` 构建跨越长城的代理
    - 然后设置 :ref:`curl_proxy`
+
+``colima start`` 选项
+========================
+
+运行 ``colima start help`` 命令可以看到，这个运行命令实际上有很多参数，提供了不同运行模式:
+
+- 我在 :ref:`mbp15_2018` 上构建一个使用 ``vz`` 模式的 ``4c8g`` 虚拟机运行 ``colima`` :
+
+.. literalinclude:: colima_startup/colima_vz_4c8g
+   :caption: 使用 ``vz`` 模式虚拟化的 ``4c8g`` 虚拟机运行 ``colima``
 
 ``colima nerdctl``
 ====================
@@ -79,6 +96,11 @@ Colima快速起步
    :caption: ``nerdctl`` 检查此时还没有容器运行
 
 接下来使用方法和 :ref:`docker_desktop` 相同，可以使用 :ref:`nerdctl` 来实现镜像的拉取、容器运行等操作
+
+运行容器案例
+============
+
+通过 :ref:`docker_images` 定义，使用相同的方法，可以运行起不同的工作环境
 
 异常和解决
 ===========
