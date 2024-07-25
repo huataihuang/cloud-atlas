@@ -9,7 +9,6 @@ macOS平台QEMU实现:UTM
 
    intro_utm.rst
 
-
 .. only::  subproject and html
 
    Indices

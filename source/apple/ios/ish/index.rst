@@ -1,15 +1,14 @@
-.. _ios:
+.. _ish:
 
 =================================
-iOS
+iSH: Linux shell for iOS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   a-shell/index
-   ish/index
-   ../../kvm/utm/index
+   intro_ish.rst
+   ish_ssh_server.rst
 
 .. only::  subproject and html
 

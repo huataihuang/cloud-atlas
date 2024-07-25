@@ -1,15 +1,14 @@
-.. _ios:
+.. _a-shell:
 
 =================================
-iOS
+a-shell: 原生iOS终端
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   a-shell/index
-   ish/index
-   ../../kvm/utm/index
+   intro_a-shell.rst
+   a-shell_commands.rst
 
 .. only::  subproject and html
 
