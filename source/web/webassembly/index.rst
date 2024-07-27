@@ -1,15 +1,13 @@
-.. _a-shell:
+.. _webassembly:
 
 =================================
-a-shell: 原生iOS终端
+WebAssembly
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_a-shell.rst
-   a-shell_commands.rst
-   a-shell_webassembly.rst
+   intro_webassembly.rst
 
 .. only::  subproject and html
 
