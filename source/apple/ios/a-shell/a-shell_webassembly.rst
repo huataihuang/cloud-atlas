@@ -25,11 +25,12 @@ a-shell环境WebAssembly
 .. literalinclude:: a-shell_webassembly/install_llvm_err
    :caption: 安装 ``llvm`` 报错
 
-这个报错是因为没有正确设置 ``$PKG_SERVER`` 环境变量，导致无法找到软件包仓库导致的，请执行以下命令(持久化则添加到 ``~/Documents/.profile`` ):                                                                                                                                                      
+这个报错是因为没有正确设置 ``$PKG_SERVER`` 环境变量，导致无法找到软件包仓库导致的，请执行以下命令(持久化则添加到 ``~/Documents/.profile`` ):
+
 .. literalinclude:: a-shell_commands/profile
-   :caption: 添加环境变量 PKG_SERVER
+   :caption: 添加环境变量 ``$PKG_SERVER``
 
 参考
-=======
+=========
 
 - `Clang etc ... can or how any program be run #7 <https://github.com/holzschu/a-Shell-commands/issues/7>`_
