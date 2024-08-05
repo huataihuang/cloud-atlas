@@ -9,6 +9,8 @@ Colima
 
    intro_colima.rst
    colima_startup.rst
+   colima_storage_manage.rst
+   images/index
 
 .. only::  subproject and html
 

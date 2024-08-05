@@ -30,6 +30,13 @@ Intel芯片的Mac电脑还提供了一些启动组合键:
 - ``Command-V`` 启动进入verbose模式
 - ``Eject (⏏) or F12 or mouse button or trackpad button`` 弹出移动介质，例如光驱中的光盘
 
+``2003F`` 报错
+===============
+
+由于internet recovery非常依赖internet连接，所以我发现现在(2024年)非常容易在恢复过程中出现异常中断(现象是网络流量停止)，而且即使使用了VPN也不能解决问题。此时安装洁面会出现 ``apple.com/support - 2003F``
+
+这个 ``2003f`` 报错和网络连接稳定性有关( `Understanding Mac Error 2003f and How to Resolve It <https://www.macobserver.com/tips/how-to/mac-error-2003f-resolve-it/>`_ )，我最终实在没有办法，是预约了苹果Genius到Apple维修中心连接维修中心的网络才顺利完成Internet recovery。总之，现在非常折腾。
+
 参考
 =========
 

@@ -69,6 +69,16 @@ Colima快速起步
 .. literalinclude:: colima_startup/colima_vz_4c8g
    :caption: 使用 ``vz`` 模式虚拟化的 ``4c8g`` 虚拟机运行 ``colima``
 
+- 启动后检查运行的虚拟机:
+
+.. literalinclude:: colima_startup/colima_list
+   :caption: 执行 ``colima list`` 可以看到运行的虚拟机
+
+显示刚才启动的 ``4c8g`` 虚拟机:
+
+.. literalinclude:: colima_startup/colima_list_output
+   :caption: 显示 ``4c8g`` 虚拟机
+
 ``colima nerdctl``
 ====================
 
@@ -96,6 +106,25 @@ Colima快速起步
    :caption: ``nerdctl`` 检查此时还没有容器运行
 
 接下来使用方法和 :ref:`docker_desktop` 相同，可以使用 :ref:`nerdctl` 来实现镜像的拉取、容器运行等操作
+
+Colima配置概述
+=================
+
+Colima的配置可以通过 ``$COLIMA_HOME`` 设置特定的配置文件位置，否则默认就是 ``$HOME/.colima`` 
+
+在 ``$HOME/.colima`` 目录下你可以找到
+
+- ``ssh_config`` 配置文件，这个配置文件指定了如何登陆到 ``colima`` 虚拟机内部进行维护
+- ``default`` 目录下保存了刚才我创建的虚拟机配置，
+
+  - ``colima.yaml`` 就是创建虚拟机的配置，当再次执行 ``colima start`` 或 ``colima stop`` 就会读取这个配置文件启动或停止虚拟机，可以修改这个配置来更改虚拟机的设置 
+
+``colima.yaml``
+=================
+
+``colima.yaml`` 提供了很多创建虚拟机的配置，并且提供了详细的注释，所以只要简单浏览一下就能够了解如何调整配置。以下是一些有用的配置
+
+- :ref:`colima_storage_manage`
 
 运行容器案例
 ============
