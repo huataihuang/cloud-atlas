@@ -21,33 +21,6 @@ Ubuntu镜像(采用tini替代systemd)
    :language: json
    :caption: 采用默认docker网络 bridge 上部署的 :ref:`docker_squid` 代理
 
-基础运行 ``ubuntu-base-tini``
-===============================
-
-- 初始构建一个基础Ubuntu:
-
-.. literalinclude:: ubuntu_tini_image/base/Dockerfile
-   :language: dockerfile
-   :caption: 基础Ubuntu镜像Dockerfile
-
-- 构建 ``ubuntu-base-tini`` 镜像:
-
-.. literalinclude:: ubuntu_tini_image/base/build_ubuntu-base-tini_image
-   :language: bash
-   :caption: 构建基础Ubuntu镜像Dockerfile
-
-- 运行 ``ubuntu-base-tini`` 镜像:
-
-.. literalinclude:: ubuntu_tini_image/base/run_ubuntu-base-tini_container
-   :language: bash
-   :caption: 运行ubuntu-base-tini容器
-
-- 连接到 ``ubuntu-base-tini`` 容器内:
-
-.. literalinclude:: ubuntu_tini_image/base/exec_ubuntu-base-tini_container
-   :language: bash
-   :caption: 通过docker exec运行容器内部bash
-
 tini运行ssh ``ubuntu-ssh-tini``
 ====================================
 
