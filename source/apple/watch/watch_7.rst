@@ -1,9 +1,8 @@
-.. watch_7:
+.. _watch_7:
 
 =======================
-Apple Watch 7 Series
+Apple Watch 7
 =======================
-
 
 
 参考

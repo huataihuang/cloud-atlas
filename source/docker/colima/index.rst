@@ -9,6 +9,7 @@ Colima
 
    intro_colima.rst
    colima_startup.rst
+   colima_debug_start.rst
    colima_storage_manage.rst
    images/index
 

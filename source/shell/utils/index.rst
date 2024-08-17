@@ -27,6 +27,7 @@ Shell 实用工具
    sponge.rst
    update-alternatives.rst
    qrencode.rst
+   lftp.rst
 
 .. only::  subproject and html
 

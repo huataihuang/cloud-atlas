@@ -17,6 +17,8 @@ Swift学徒(apprentice)
 - `SwiftUI Apprentice <https://www.raywenderlich.com/books/swiftui-apprentice/v1.0/>`_
 - `App Design Apprentice <https://readnote.org/app-design-apprentice-2nd-edition/>`_ 
 
+- `iOS 17 App Development Essentials eBook <https://www.payloadbooks.com/product/ios-17-app-development-essentials-ebook/>`_
+
 开发环境
 ==========
 
@@ -24,7 +26,8 @@ Swift学徒(apprentice)
 
 - 苹果iOS/macOS发展极快: 虽然交互和外观因为延续用户习惯是通过渐进改进方式，但是实际底层技术在不断快速发展
 - Xcode对运行的 :ref:`macos` 操作系统有强依赖要求， iOS 对手机环境也有硬性限制: 我的 :ref:`mbp15_late_2013` 最高只能运行 macOS Big Sur (当前使用 Version 11.6.8)，这也就限制了最高只能安装 Xcode 13.2.1 ; 我的 :ref:`iphone_se1` 限制最高只能运行 iOS 15.x
-- 作为初学者，我暂时选择符合教材的同时又是我目前能够获得的有限硬件所支持的平台，暂时采用 Xcode 13.2.1 对应开发 iOS 15应用; 后续计划在进阶阶段再改为最新的软硬件平台
+- 作为初学者，我暂时选择符合教材的同时又是我目前能够获得的有限硬件所支持的平台， :strike:`暂时采用 Xcode 13.2.1 对应开发 iOS 15应用` 后续计划在进阶阶段再改为最新的软硬件平台
+- 苹果开发者账号(99刀)，虽然日常开发不需要，但是如果要测试Siri集成，iCloud访问，Apple Pay，Game Center以及应用内购买，则必须激活Apple Developer Program membership才能测试
 
 .. note::
 
