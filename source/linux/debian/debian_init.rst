@@ -22,14 +22,25 @@ Debian精简系统初始化
 
 - 终端: ``qterminal`` / 浏览器: ``falkon``
 
+系统软件仓库更新
+==================
+
+- 在安装和更新软件包之前，我们通常需要先更新软件仓库索引(update)，并完成一次现有安装软件的全面更新(upgrade):
+
+.. literalinclude:: debian_init/apt_upgrade.sh
+   :caption: debian更新软件仓库索引，并全面更新已安装软件
+
 软件安装步骤
 ===============
 
-- 应用软件安装:
+- 对于轻量级简化桌面，可以尝试如下安装:
 
 .. literalinclude:: debian_init/debian_init_app
    :language: bash
    :caption: debian系安装应用
 
+- 对于纯后台服务器系统，可以采用如下精简安装:
 
+.. literalinclude:: debian_init/debian_init_vimrc_dev
+   :caption: 安装vim以及服务器开发所需软件集
 

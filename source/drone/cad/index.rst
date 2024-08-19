@@ -1,13 +1,14 @@
-.. _debian:
+.. _CAD:
 
 =================================
-Debian
+CAD
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   debian_init.rst
+   opensource_cad.rst
+   blender_3d.rst
 
 .. only::  subproject and html
 

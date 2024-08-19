@@ -93,6 +93,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    web/index
    big_data/index
    machine_learning/index
+   drone/index
    linux/index
    kernel/index
    performance/index
