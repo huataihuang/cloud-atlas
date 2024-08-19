@@ -1,13 +1,14 @@
-.. _debian:
+.. _drone:
 
 =================================
-Debian
+Drone Atlas
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   debian_init.rst
+   awesome_drones.rst
+   cad/index
 
 .. only::  subproject and html
 

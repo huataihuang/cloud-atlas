@@ -43,7 +43,7 @@ Raspberry Pi OS
 
 - 更新系统:
 
-.. literalinclude:: ../../linux/ubuntu_linux/debian_init/apt_upgrade.sh
+.. literalinclude:: ../../linux/debian/debian_init/apt_upgrade.sh
    :language: bash
    :caption: APT更新整个系统
 
@@ -97,7 +97,7 @@ Raspberry Pi OS
 
 - 安装应用软件:
 
-.. literalinclude:: ../../linux/ubuntu_linux/debian_init/debian_init_app
+.. literalinclude:: ../../linux/debian/debian_init/debian_init_app
    :language: bash
    :caption: debian系安装应用
 

@@ -36,7 +36,7 @@ Ubuntu/Debian使用的APT软件包管理也支持代理配置，这里我结合 
 
    "http://username:password@yourproxyaddress:proxyport";
 
-上述翻墙方式采用本地运行 :ref:`squid` 代理服务器，所以APT代理设置是 ``http`` 协议，实际在 :ref:`` 采用如下配置::
+上述翻墙方式采用本地运行 :ref:`squid` 代理服务器，所以APT代理设置是 ``http`` 协议，采用如下配置::
 
    Acquire::http::Proxy "http://192.168.6.200:3128/";
 
