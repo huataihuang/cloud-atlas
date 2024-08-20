@@ -56,3 +56,65 @@ apt代理
    :caption: 在 apt 配置中添加代理设置
 
 现在再次执行 ``apt update && apt upgrade`` 就不会有任何GFW的阻塞，顺利完成虚拟机操作系统更新
+
+docker/containerd 服务器代理
+==============================
+
+Colima虚拟机内部运行的 docker/containerd 需要设置代理以便能够下载镜像运行容器:
+
+Docker服务器代理
+-------------------
+
+我的实践中虚拟机中运行containerd取代默认的Docker:
+
+.. literalinclude:: colima_startup/colima_vz_4c8g
+   :caption: 使用 ``vz`` 模式虚拟化的 ``4c8g`` 虚拟机运行 ``colima``
+
+所以这段Docker服务器代理设置是我之前实践 :ref:`docker_server_proxy` ( 👈 请参考)
+
+Containerd服务器代理
+---------------------
+
+Colima虚拟机内部使用的操作系统是 :ref:`ubuntu_linux` ，完整使用了 :ref:`systemd` 系统来管理进程服务，所以可以采用我之前的实践 :ref:`containerd_proxy` 相同方法:
+
+- 修订 ``/etc/environment`` 添加代理配置:
+
+.. literalinclude:: colima_startup/environment
+   :caption: ``/etc/environment`` 设置代理环境变量
+
+- ``colima ssh`` 重新登陆系统使上述代理环境变量生效，然后执行以下脚本为containerd服务添加代理配置:
+
+.. literalinclude:: ../../kubernetes/container_runtimes/containerd/containerd_proxy/create_http_proxy_conf_for_containerd
+   :language: bash
+   :caption: 生成 /etc/systemd/system/containerd.service.d/http-proxy.conf 为containerd添加代理配置
+   :emphasize-lines: 7-9
+
+但是我发现一个尴尬的问题，当 ``containerd`` 开始同步时是使用代理的(因为我看到如果虚拟机内部不启动SSH tunnel，则出现如下访问代理报错::
+
+   error: failed to solve: debian:latest: failed to authorize: failed to fetch anonymous token: Get "https://auth.docker.io/token?scope=repository%3Alibrary%2Fdebian%3Apull&service=registry.docker.io": proxyconnect tcp: dial tcp 127.0.0.1:3128: connect: connection refused
+
+但是我发现接下来的https请求居然不再走代理，原因是我发现它报错信息解析的地址 ``production.cloudflare.docker.com => 210.209.84.142`` 是我本地虚拟机解析DNS的结果::
+
+   error: failed to solve: DeadlineExceeded: DeadlineExceeded: DeadlineExceeded: debian:latest: failed to copy: httpReadSeeker: failed open: failed to do request: Get "https://production.cloudflare.docker.com/registry-v2/docker/registry/v2/blobs/sha256/19/19fa7f391c55906b0bbe77bd45a4e7951c67ed70f8054e5987749785450c0442/data?verify=1724172530-5QFH8JiRFjY5RRAQqyHkaNW0Kb4%3D": dial tcp 210.209.84.142:443: i/o timeout
+
+而不是远在墙外squid服务器解析的域名地址(不同地区解析同一个域名返回的地址不同)。看起来 :ref:`containerd` 的代理设置并不是和 :ref:`docker_proxy` 一致，这让我很困扰。
+
+发现colima会将HOST主机proxy环境变量注入虚拟机
+------------------------------------------------
+
+我偶然发现，如果我的 macOS 操作系统环境变量设置了代理，例如:
+
+.. literalinclude:: colima_startup/macos_env
+   :caption: 如果macOS的host环境配置了代理变量
+
+则重新启动colima虚拟机之后，这个环境变量会注入到虚拟机内部，但是会做修改(IP地址从 ``127.0.0.1`` 调整为 ``192.168.5.2`` )，而且这个修改是写到虚拟机内部 ``/etc/environment`` 中:
+
+.. literalinclude:: colima_startup/colima_environment_proxy
+   :caption: Colima启动时会自动将HOST物理主机proxy环境变量注入到虚拟机 ``/etc/environment``
+   :emphasize-lines: 3-5
+
+.. warning::
+
+   为了解决这个问题，我重新用空白的macOS环境来执行 ``colima start`` ，避免导入这个 ``192.168.5.2`` 作为代理配置。不过，似乎这个配置和 ``127.0.0.1`` 是同一个回环地址
+
+**继续折腾**

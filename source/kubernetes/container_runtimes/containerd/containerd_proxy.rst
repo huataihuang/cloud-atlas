@@ -6,6 +6,8 @@ containerd代理
 
 由于GFW影响，很多镜像下载都可能出现问题，导致部署非常麻烦。例如在 :ref:`stable_diffusion_on_k8s` 始终出现镜像下载错误。由于部署的 :ref:`z-k8s` 采用了 ``containerd`` ，虽然 :ref:`nerdctl` 可以通过环境变量配置代理，但是对于远程服务器上的 ``containerd`` 也需要通过以下方法配置代理:
 
+.. _containerd_client_proxy:
+
 containerd客户端代理
 =======================
 
@@ -22,6 +24,8 @@ containerd客户端代理
    - ``env:`` 设置
    - secret
    - :ref:`config_pod_by_configmap`
+
+.. _containerd_server_proxy:
 
 containerd服务端代理
 =======================
