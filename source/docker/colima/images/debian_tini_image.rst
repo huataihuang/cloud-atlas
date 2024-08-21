@@ -31,5 +31,19 @@ tini运行ssh ``debian-ssh-tini``
    :caption: 无法下载镜像导致构建失败
    :emphasize-lines: 14
 
-我尝试通过 :ref:`colima_proxy` 来解决无法访问问题
+通过 :ref:`colima_proxy` 来解决无法访问问题
 
+- 运行容器: 注意这里继承了 :ref:`colima_storage_manage` 中两个HOST物理主机卷映射到容器内部，以便提供SSH密钥以及工作 ``docs`` 目录
+
+.. literalinclude:: debian_tini_image/ssh/run_debian-ssh-tini_container
+   :language: bash
+   :caption: 运行容器挂载2个从HOST主机映射到colima虚拟机的卷(这样可以直接访问HOST主机数据)
+
+- 一切顺利，现在在HOST主机上配置 ``~/.ssh/config`` 添加访问debian容器的SSH登陆(端口1122):
+
+.. literalinclude:: debian_tini_image/ssh/ssh_config
+   :caption: ``~/.ssh/config`` 添加访问debian容器的SSH登陆
+
+.. note::
+
+   HOST主机的 ``~/secrets`` 包含了SSH公钥，所以如果被正确挂载到容器的 ``~/.ssh`` 目录，就能够无需密码登陆容器

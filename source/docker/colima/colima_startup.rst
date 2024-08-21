@@ -79,6 +79,21 @@ Colima快速起步
 .. literalinclude:: colima_startup/colima_list_output
    :caption: 显示 ``4c8g`` 虚拟机
 
+清理colima
+==============
+
+如果不再需要 ``colima`` ，可以 ``delete`` 掉虚拟机:
+
+.. literalinclude:: colima_startup/colima_delete
+   :caption: 执行 ``colima delete`` 删除不需要的colima虚拟机(所有数据丢失!!!)
+
+此时会提示信息警告，确认 ``y`` 之后删除:
+
+.. literalinclude:: colima_startup/colima_delete_output
+   :caption: 执行 ``colima delete`` 删除提示警告数据完全删除
+
+这个删除会清理掉用户 ``~/.colima/`` 目录下对应的虚拟机配置以及该目录下 ``ssh_config`` 证书配置。当再次创建colima会重新生成配置
+
 ``colima nerdctl``
 ====================
 
@@ -164,3 +179,4 @@ Colima的配置可以通过 ``$COLIMA_HOME`` 设置特定的配置文件位置�
 
 - `GitHub: abiosoft/colima <https://github.com/abiosoft/colima>`_
 - `Replace Docker-Desktop in Mac with Lima-VM, nerdctl and containerd <https://techexpertise.medium.com/replace-docker-desktop-in-mac-with-lima-vm-nerdctl-and-containerd-4a0cdc36d9ec>`_
+- `How do I completely remove the VM that colima uses on MacOS? #258 <https://github.com/abiosoft/colima/issues/258>`_

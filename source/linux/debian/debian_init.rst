@@ -44,3 +44,4 @@ Debian精简系统初始化
 .. literalinclude:: debian_init/debian_init_vimrc_dev
    :caption: 安装vim以及服务器开发所需软件集
 
+- debian发行版中， ``mlocate`` 已经被 ``plocate`` (更快)替代( ``/usr/bin/locate --> /etc/alternatives/locate --> /usr/bin/plocate`` ): 使用方法相同 ``updatedb && locate XXX``

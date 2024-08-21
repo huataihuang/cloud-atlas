@@ -101,6 +101,24 @@ systemd配置Docker服务器Proxy
 
    Environment=HTTP_PROXY=http://192.168.6.200:3128/ HTTPS_PROXY=http://192.168.6.200:3128/
 
+结合环境变量和脚本配置
+-----------------------
+
+上述手工修订配置文件还有一个改进方法是使用脚本生成，方法参考 :ref:`containerd_server_proxy` :
+
+- 在 ``/etc/environemt`` 设置:
+
+.. literalinclude:: ../../kubernetes/container_runtimes/containerd/containerd_proxy/environment_proxy
+   :language: bash
+   :caption: 在 /etc/environment 中添加代理配置
+
+- 然后通过脚本添加一个独立的配置 ``/etc/systemd/system/docker.service.d/http-proxy.conf`` :
+
+.. literalinclude:: docker_proxy/create_http_proxy_conf_for_docker
+   :language: bash
+   :caption: 生成 /etc/systemd/system/docker.service.d/http-proxy.conf 为containerd添加代理配置
+   :emphasize-lines: 7-9 
+
 .. _docker_server_socks_proxy:
 
 配置docker使用socks代理
