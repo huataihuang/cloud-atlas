@@ -39,7 +39,7 @@ containerd服务端代理
    :caption: 修订 /usr/local/lib/systemd/system/containerd.service 添加代理配置环境变量
    :emphasize-lines: 3,4
 
-- 不过，更好的是为 ``containerd`` 添加一个独立的配置 ``/etc/systemd/system/containerd.service.d/http-proxy.conf`` :\
+- 不过，更好的是为 ``containerd`` 添加一个独立的配置 ``/etc/systemd/system/containerd.service.d/http-proxy.conf`` :
 
 .. literalinclude:: containerd_proxy/create_http_proxy_conf_for_containerd
    :language: bash
@@ -56,6 +56,11 @@ containerd服务端代理
 
    systemctl daemon-reload
    systemctl restart containerd
+
+- 检查环境变量是否生效:
+
+.. literalinclude:: containerd_proxy/systemcdl_env
+   :caption: 检查 ``containerd`` 服务的环境变量是否生效
 
 参考
 ======

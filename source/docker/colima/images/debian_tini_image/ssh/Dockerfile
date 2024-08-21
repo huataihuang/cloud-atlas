@@ -1,7 +1,6 @@
 FROM debian:latest
-MAINTAINER vincent huatai <vincent@huatai.me>
 
-ENV container docker
+ENV container=docker
 
 RUN apt update -y
 RUN apt upgrade -y
@@ -25,6 +24,7 @@ RUN adduser admin sudo
 RUN echo "%sudo        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
 
 # set TIMEZONE to Shanghai
+RUN unlink /etc/localtime
 RUN ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 RUN mkdir /run/sshd
