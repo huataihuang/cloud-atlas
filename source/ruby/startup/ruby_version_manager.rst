@@ -70,6 +70,16 @@ RVM
 
    ``get.rvm.io`` 实际上是 ``raw.githubusercontent.com`` 重定向，所以在墙内是无法直接执行上述安装脚本的。解决的方法是使用 :ref:`curl_proxy` 结合 :ref:`ssh_tunneling` (socks代理) 或者 :ref:`squid_socks_peer` ，总之，需要 "梯子"
 
+快速安装
+----------
+
+我的实践，通过以下方式可以快速完成最新版本ruby和RoR安装:
+
+.. literalinclude:: ruby_version_manager/rvm_install_ruby_rails
+   :caption: 安装rvm，并通过rvm安装ruby和RoR
+
+这个安装步骤我整合到 :ref:`debian_tini_image` 中，作为容器运行使用
+
 使用
 ------
 
@@ -236,9 +246,6 @@ rbenv
 
 .. literalinclude:: ruby_version_manager/zshrc
    :caption: 添加 :ref:`macos` zsh环境变量( ~/.zshrc )
-
-
-
 
 然后关闭当前终端窗口，并再次打开新终端窗口，则此时修改生效
 
