@@ -47,3 +47,9 @@ tini运行ssh ``debian-ssh-tini``
 .. note::
 
    HOST主机的 ``~/secrets`` 包含了SSH公钥，所以如果被正确挂载到容器的 ``~/.ssh`` 目录，就能够无需密码登陆容器
+
+现在 ``ssh debian`` 就能够登陆到运行的容器中，并且执行 ``df -h`` 可以看到如下输出，显示HOST主机的存储卷被正确挂载到容器内部(包括登陆密钥):
+
+.. literalinclude:: debian_tini_image/ssh/df
+   :caption: 登陆容器检查卷挂载
+   :emphasize-lines: 6,7

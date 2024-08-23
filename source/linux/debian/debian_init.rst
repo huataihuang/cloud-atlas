@@ -39,6 +39,12 @@ Debian精简系统初始化
    :language: bash
    :caption: debian系安装应用
 
+- 服务器系统，安装必要的管理工具:
+
+.. literalinclude:: debian_init/debian_init_devops
+   :language: bash
+   :caption: 安装运维管理工具
+
 - 对于纯后台服务器系统，可以采用如下精简安装:
 
 .. literalinclude:: debian_init/debian_init_vimrc_dev
