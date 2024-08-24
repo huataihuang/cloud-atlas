@@ -15,7 +15,7 @@ RUN chmod +x /entrypoint.sh
 # SSH
 RUN apt -y install sudo passwd openssh-client openssh-server curl
 # Utilities
-RUN apt -y install cron tmux neovim locales net-tools dnsutils plocate gnupg2
+RUN apt -y install cron tmux neovim locales net-tools dnsutils plocate gnupg2 git
 
 # 补全locales
 RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment
