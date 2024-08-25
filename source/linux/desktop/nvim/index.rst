@@ -10,6 +10,7 @@ neovim
    :maxdepth: 1
 
    vim_vs_neovim.rst
+   compile_nvim_debian.rst
    startup/index
    nvim_lua.rst
    coc.nvim.rst

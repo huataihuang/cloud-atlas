@@ -79,6 +79,19 @@ Colima快速起步
 .. literalinclude:: colima_startup/colima_list_output
    :caption: 显示 ``4c8g`` 虚拟机
 
+- 如果需要修订 :ref:`colima_storage_manage` ，则配置修订后需要重启 ``colima`` 虚拟机:
+
+.. literalinclude:: colima_startup/colima_restart
+   :caption: 重启 colima 虚拟机
+
+``colima ssh``
+==================
+
+执行SSH可以登陆到 ``colima`` 虚拟机内部:
+
+.. literalinclude:: colima_startup/colima_ssh
+   :caption: 通过SSH登陆到colima虚拟机内部
+
 清理colima
 ==============
 
