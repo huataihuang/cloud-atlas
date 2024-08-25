@@ -15,7 +15,7 @@ RUN chmod +x /entrypoint.sh
 # SSH
 RUN apt -y install sudo passwd openssh-client openssh-server curl
 # Utilities
-RUN apt -y install cron tmux neovim locales net-tools dnsutils plocate gnupg2 git
+RUN apt -y install cron tmux vim-tiny locales net-tools dnsutils plocate gnupg2 git
 
 # 补全locales
 RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment
@@ -25,6 +25,8 @@ RUN locale-gen en_US.UTF-8
 
 # c program
 RUN apt -y install glibc-doc manpages-dev libc6-dev gcc build-essential
+# 编译neovim需要
+RUN apt -y install cmake gettext
 # ruby program install rvm
 # python program (debian already inatalled python3)
 RUN apt -y install python3.11-venv

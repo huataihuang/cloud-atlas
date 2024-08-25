@@ -13,6 +13,7 @@ Colima
    colima_proxy.rst
    colima_storage_manage.rst
    images/index
+   colima_dev_studio.rst
 
 .. only::  subproject and html
 

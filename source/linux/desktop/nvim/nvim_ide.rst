@@ -37,7 +37,7 @@ NeoVim IDE
 
 - 在 ``init.lua`` 中添加以下配置激活使用 ``options.lua`` :
 
-.. literalinclude:: nvim_ide/init_options.lua
+.. literalinclude:: nvim_ide/init.lua
    :language: lua
    :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``options.lua``
    :emphasize-lines: 1
@@ -63,10 +63,39 @@ NeoVim IDE
 
 - 同样在 ``init.lua`` 中添加以下配置激活使用 ``keymaps.lua`` :
 
-.. literalinclude:: nvim_ide/init_options.lua
+.. literalinclude:: nvim_ide/init.lua
    :language: lua
    :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``keymaps.lua``
    :emphasize-lines: 2
+
+安装包管理器
+================
+
+``nvim`` 通过第三方插件提供了强大的能力。有多种插件管理器，其中 :ref:`lazy.nvim` 非常受欢迎，提供了很多神奇功能:
+
+  - 修正以来顺序
+  - 锁文件 ``lazy-lock.json`` 跟踪安装的插件
+  - ...
+
+- 创建 ``~/.config/nvim/lua/plugins.lua`` :
+
+.. literalinclude:: nvim_ide/plugins.lua
+   :language: lua
+   :caption: ``~/.config/nvim/lua/plugins.lua`` 管理插件
+
+- 同样在 ``init.lua`` 中添加以下配置激活使用 ``plugins.lua`` :
+
+.. literalinclude:: nvim_ide/init.lua
+   :language: lua
+   :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``plugins.lua``
+   :emphasize-lines: 3
+
+这里我遇到一个报错:
+
+.. literalinclude:: nvim_ide/nvim_ver_err
+   :caption: ``nvim`` 版本低于 0.8.0 导致不能使用 lazy.nvim 报错
+
+解决方法是 :ref:`compile_nvim_debian` ，安装自己编译的最新版本后，重新执行上述安装包管理器
 
 参考
 ===========
