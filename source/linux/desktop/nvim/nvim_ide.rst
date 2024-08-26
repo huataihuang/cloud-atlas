@@ -97,6 +97,34 @@ NeoVim IDE
 
 解决方法是 :ref:`compile_nvim_debian` ，安装自己编译的最新版本后，重新执行上述安装包管理器
 
+如果一切正常，首次重新启动 ``nvim`` 会有短暂的黑屏(没有输出内容)，之后正常见到Dashboard。此时，输入 ``:Lazy`` 检查是否工作正常。
+
+配色(Colorscheme)
+====================
+
+在完成了上文 :ref:`lazy.nvim` 配置之后，就可以安装配色插件，这里参考原文使用了 `monokai.nvim <https://github.com/tanvirtin/monokai.nvim>`_ 插件，并且选择了我对比之后认为较为美观的 ``monokai`` 风格:
+
+- 修订 ``~/.config/nvim/lua/plugins.lua`` ，增加安装 ``monokai.nvim`` 的配置行:
+
+.. literalinclude:: nvim_ide/plugins_colorscheme.lua
+   :language: lua
+   :caption: ``~/.config/nvim/lua/plugins.lua`` 增加 ``monokai.nvim`` 插件管理配色
+   :emphasize-lines: 15
+
+- 创建一个 ``~/.config/nvim/lua/colorscheme.lua`` 来定制 ``monokai.nvim`` 插件:
+
+.. literalinclude:: nvim_ide/colorscheme.lua
+   :language: lua
+   :caption: ``~/.config/nvim/lua/colorscheme.lua`` 定制 ``monokai.nvim`` 插件
+   :emphasize-lines: 2
+
+- 最后在 ``~/.config/nvim/init.lua`` 激活配置
+
+.. literalinclude:: nvim_ide/init.lua
+   :language: lua
+   :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``colorscheme.lua``
+   :emphasize-lines: 4
+
 参考
 ===========
 
