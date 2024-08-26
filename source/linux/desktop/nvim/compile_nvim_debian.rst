@@ -14,6 +14,11 @@ Debian环境编译neovim
 .. literalinclude:: compile_nvim_debian/build_nvim
    :caption: 编译nvim的debian安装包
 
+不过，我实践遇到 :ref:`lazy.nvim_lua_treesitter` 异常报错，所以实际修正为如下安装方式(参考官方 `neovim/INSTALL.md <https://github.com/neovim/neovim/blob/master/INSTALL.md>`_ ):
+
+.. literalinclude:: compile_nvim_debian/build_nvim_source
+   :caption: 编译nvim安装到用户目录
+
 参考
 ======
 

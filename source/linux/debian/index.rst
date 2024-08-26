@@ -9,6 +9,7 @@ Debian
 
    debian_init.rst
    debian_programming.rst
+   debian_alternatives.rst
 
 .. only::  subproject and html
 
