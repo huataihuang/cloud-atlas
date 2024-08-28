@@ -125,6 +125,109 @@ NeoVim IDE
    :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``colorscheme.lua``
    :emphasize-lines: 4
 
+自动代码补全(Auto-completion)
+================================
+
+``nvim`` 可以配置成自动代码补全，通过一些极佳的插件可以轻易实现。
+
+使用插件 `nvim-cmp <https://github.com/hrsh7th/nvim-cmp>`_ 可以管理多种自动代码补全功能，也提供了自定义补全菜单等功能。
+
+- 创建 ``~/.config/nvim/lua/config/nvim-cmp.lua`` 为 ``nvim-cmp`` 准备配置:
+
+.. literalinclude:: nvim_ide/nvim-cmp.lua
+   :language: lua
+   :caption: 在 ``~/.config/nvim/lua/config/nvim-cmp.lua`` 增加 ``nvim-cmp``
+
+- 修订 ``~/.config/nvim/lua/plugins.lua`` 添加:
+
+.. literalinclude:: nvim_ide/plugins_nvim-cmp.lua
+   :language: lua
+   :caption: ``~/.config/nvim/lua/plugins.lua`` 增加 ``nvim-cmp`` 设置
+
+解析:
+
+  - ``cmp.setup`` 功能接受一个Lua表，该表定义了一些定制选项。
+  - ``LuaSnip`` 是一个代码片段引擎(code snippet engine)， ``nvim-cmp`` 可以从该引擎中获取一个代码片段，不过如果你不需要的话可以忽略
+  - 在 ``lazy.nvim`` 中的 ``config = function() ... end`` 设置了该插件将要加载的代码，这部分保存在 ``nvim-cmp.lua`` 中
+  - ``nvim-cmp`` 是主要的插件，其他以 ``cmp-`` 开头的插件是 ``nvim-cmp`` 所使用的自动补全源代码帮手。而 ``lspkind.nvim`` 将这些代码补全显示得更为美观
+
+``nvim-cmp`` 的键盘映射
+-------------------------
+
+``mapping = ...`` 语法是 ``['<key-binding>'] = cmp.mapping.xxx,`` ，不同的 ``cmp.mapping.xxx`` 选项可以在手册中找到，如果需要修改键盘绑定，只需要修改 ``[...]`` ，这里采用:
+
+  - ``<C-k/j>`` 或者 ``/`` 来在补全项之间移动
+  - ``<C-b/f>`` 在补全项的文档中滚动
+  - ``<CR>`` 确认补全
+
+``nvim-cmp`` 补全菜单
+------------------------
+
+使用 ``formatting = ...`` :
+
+  - ``fields`` 设置每个补全项目的显示
+  - ``format = function(...)`` 设置每个补全源代码的文本，你可以在 ``sources = ...`` 设置补全代码的源。
+
+.. note::
+
+   到这里基本配置已经完成
+
+LSP
+======
+
+要将 ``Nvim`` 作为IDE，需要依赖LSP实现。但是手动安装和配置LSP很麻烦，因为不同的LSP有不同的安装步骤，对后期的管理来说很不方便。所以就有了 `mason.nvim <https://github.com/williamboman/mason.nvim>`_ 和 `mason-ispconfig.nvim <https://github.com/williamboman/mason-lspconfig.nvim>`_ 来简化配置。
+
+- 修改 ``plugins.lua`` 添加如下行:
+
+.. literalinclude:: nvim_ide/plugins_lsp.lua
+   :language: lua
+   :caption: ``~/.config/nvim/lua/plugins.lua`` 增加 ``nason.nvim`` 相关设置
+
+- 然后再创建一个 ``~/.config/nvim/lua/lsp.lua`` 管理 ``mason`` ，这里首先配置 ``mason`` 和 ``mason-ispconfig`` :
+
+.. literalinclude:: nvim_ide/lsp.lua
+   :language: lua
+   :caption: ``~/.config/nvim/lua/lsp.lua`` 管理 ``mason`` 配置
+
+.. note::
+
+   所有需要添加的LSP都在 ``ensure_installed`` 中排脂，完整列表见 `nvim-lspconfig/doc/server_configurations.md <https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md>`_ 
+
+在上述 ``lsp.lua`` 中，不仅需要配置 ``mason-lspconfig`` ，之后还需要配置 ``nvim-lspconfig`` ，但是这个代码非常长， `Transform Your Neovim into a IDE: A Step-by-Step Guide <https://martinlwx.github.io/en/config-neovim-from-scratch/>`_ 原文作者给出了一个案例 `GitHub:MartinLwx dotfiles/nvim/lua/lsp.lua <https://github.com/MartinLwx/dotfiles/blob/main/nvim/lua/lsp.lua>`_ 来展示 ``pylsp`` ，其他配置需要自己根据 `nvim-lspconfig/doc/server_configurations.md <https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md>`_ 来完成。
+
+.. note::
+
+   每个LSP可能需要配置自己的选项，需要检查相应的GitHub仓库啊获得进一步信息，或者仅仅设置 ``on_attach = on_attach`` 
+
+- 在 ``~/.config/nvim/lua/lsp.lua`` 文件中添加如下代码(这里我按照 原文作者给出了一个案例 `GitHub:MartinLwx dotfiles/nvim/lua/lsp.lua <https://github.com/MartinLwx/dotfiles/blob/main/nvim/lua/lsp.lua>`_ ):
+
+.. literalinclude:: nvim_ide/lsp_complete.lua
+   :language: lua
+   :caption: ``~/.config/nvim/lua/lsp.lua`` 添加详细配置
+
+- 最后，在 ``init.lua`` 中加入激活 ``lsp`` :
+
+.. literalinclude:: nvim_ide/init.lua
+   :language: lua
+   :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``lsp.lua``
+   :emphasize-lines: 5
+
+一旦完成上述配置，重启 ``Nvim`` ，可以看到 ``Mason`` 会安装指定LSP。要跟踪安装，在命令状态输入 ``:Mason`` ，此时会看到一个动态安装进度，安装完成后会看到类似如下显示:
+
+.. figure:: ../../../_static/linux/desktop/nvim/mason_install_lsp.png
+   
+   ``Mason`` 安装完成LSP的情况
+
+继续探索
+=========
+
+参考 `Transform Your Neovim into a IDE: A Step-by-Step Guide <https://martinlwx.github.io/en/config-neovim-from-scratch/>`_ ，可以完成一个轻量级的IDE，但是这只是一个开始:
+
+- 获得了一个代码高亮显示、代码自动补全、语法检查等功能，完全采用开源方式构建；但是这仅仅提供了一个案例学习配置，实际生产适配不同语言，需要再深入学习实践
+- `mason.nvim <https://github.com/williamboman/mason.nvim>`_ 和 `mason-ispconfig.nvim <https://github.com/williamboman/mason-lspconfig.nvim>`_ 配置需要针对不同开发语言进行配置和打磨，这有待我后续实践: 我计划把自己学习和使用的语言配置上
+
+这是一个开始，我将继续实践...
+
 参考
 ===========
 
