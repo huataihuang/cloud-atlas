@@ -72,7 +72,7 @@ RHEL 8 和 9特定步骤
 
 - [步骤7]在内核参数上添加 ``module_name.blacklist=1 rd.driver.blacklist=module_name`` ，这样RHEL8 和RHEL9的 ``grubby`` 工具就会修改内核参数::
 
-   grubby --args  "<module_name.blacklist=1 rd.driver.blacklist=module_name>"  --update-kernel ALL
+   grubby --args  "module_name.blacklist=1 rd.driver.blacklist=module_name"  --update-kernel ALL
 
 这个内核参数修改我建议直接修改 ``/etc/default/grub`` 配置，然后执行 ``update-grub`` 工具来修订
 
