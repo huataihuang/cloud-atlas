@@ -191,7 +191,7 @@ LSP
 
 .. note::
 
-   所有需要添加的LSP都在 ``ensure_installed`` 中排脂，完整列表见 `nvim-lspconfig/doc/server_configurations.md <https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md>`_ 
+   所有需要添加的LSP都在 ``ensure_installed`` 中列出，完整列表见 `nvim-lspconfig/doc/server_configurations.md <https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md>`_ 
 
 在上述 ``lsp.lua`` 中，不仅需要配置 ``mason-lspconfig`` ，之后还需要配置 ``nvim-lspconfig`` ，但是这个代码非常长， `Transform Your Neovim into a IDE: A Step-by-Step Guide <https://martinlwx.github.io/en/config-neovim-from-scratch/>`_ 原文作者给出了一个案例 `GitHub:MartinLwx dotfiles/nvim/lua/lsp.lua <https://github.com/MartinLwx/dotfiles/blob/main/nvim/lua/lsp.lua>`_ 来展示 ``pylsp`` ，其他配置需要自己根据 `nvim-lspconfig/doc/server_configurations.md <https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md>`_ 来完成。
 

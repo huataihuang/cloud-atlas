@@ -15,7 +15,7 @@ RUN chmod +x /entrypoint.sh
 # SSH
 RUN apt -y install sudo passwd openssh-client openssh-server curl
 # Utilities
-RUN apt -y install cron tmux vim-tiny locales net-tools dnsutils plocate gnupg2 git
+RUN apt -y install cron tmux vim-tiny locales net-tools dnsutils plocate gnupg2 git tree unzip
 
 # 补全locales
 RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment
@@ -60,6 +60,10 @@ RUN bash -c 'source /home/admin/.rvm/scripts/rvm && rvm install 3.3.4 && gem ins
 RUN bash -c 'cd /home/admin && python3 -m venv venv3'
 RUN bash -c 'source /home/admin/venv3/bin/activate && pip install sphinx && pip install sphinx_rtd_theme && pip install sphinxnotes-strike'
 RUN bash -c 'source /home/admin/venv3/bin/activate && pip install sphinxcontrib-video && pip install sphinxcontrib-youtube'
+
+# node program: nvm install node
+RUN bash -c "cd /home/admin && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash" 
+RUN bash -c "source /home/admin/.bashrc && npm install 22"
 
 # entrypoint.sh 需要使用root身份执行
 USER root

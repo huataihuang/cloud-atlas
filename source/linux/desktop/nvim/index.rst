@@ -12,12 +12,13 @@ neovim
    vim_vs_neovim.rst
    compile_nvim_debian.rst
    startup/index
-   nvim_lua.rst
-   coc.nvim.rst
-   lazy.nvim/index
-   nvim_ide.rst
    ../../gentoo_linux/gentoo_neovim.rst
    nvim_mouse.rst
+   nvim_lua.rst
+   coc.nvim.rst
+   nvim_ide.rst
+   lazy.nvim/index
+   mason.nvim/index
 
 
 .. only::  subproject and html

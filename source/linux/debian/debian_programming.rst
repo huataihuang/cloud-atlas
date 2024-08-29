@@ -20,6 +20,17 @@ Ruby语言开发
 .. literalinclude:: ../../ruby/startup/ruby_version_manager/rvm_install_ruby_rails
    :caption: 安装rvm，并通过rvm安装ruby和RoR
 
+Node.js语言开发
+===================
+
+- 通过 ``nvm`` 安装Nodes:
+
+.. literalinclude:: ../../nodejs/startup/nodejs_dev_env/install_nvm
+   :caption: 先安装nvm
+
+.. literalinclude:: ../../nodejs/startup/nodejs_dev_env/nvm_install_nodejs
+   :caption: 再通过nvm安装指定版本Node
+
 参考
 ========
 
