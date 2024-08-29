@@ -86,7 +86,10 @@ neovim 不是重头开始的项目，是从 vim 7 fork出来进行重构，大�
 - 迁移到CMake进行构建: 遗留过时代码被清理，并且删除了专门支持遗留系统和编译器的代码
 - 大多数特定平台代码被删除，并使用 ``libuv`` (现代化的多平台库，具有执行常见系统任务功能，支持大多数Unix和Windows)处理系统差异
 - 所有支持嵌入式脚本语言解释器的代码都被一个新的插件系统取代: 插件系统支持任何语言编写的扩展
-- GUI作为插件实现，与 neovim 核心解耦
+- GUI作为插件实现，与 neovim 核心解耦 ，可以和其他GUI程序融合:
+
+  - `Github: vscode-neovim <https://github.com/vscode-neovim/vscode-neovim>`_ 在 :ref:`vscode` 中原生支持 ``neovim`` ，并且直吹 ``init.vim`` 和很多Vim插件
+  - `Github: firenvim <https://github.com/glacambre/firenvim>`_ 将 ``neovim`` 嵌入到Firefox/Chrome浏览器中，可以在浏览器输入框中使用vim
 
 参考
 =====

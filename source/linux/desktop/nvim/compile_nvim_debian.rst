@@ -19,7 +19,12 @@ Debian环境编译neovim
 .. literalinclude:: compile_nvim_debian/build_nvim_source
    :caption: 编译nvim安装到用户目录
 
+.. note::
+
+   除了源代码编译可以获得最新的Neovim外，另外一种常用方式是通过Github官方release的二进制程序，官方Relase页面还提供了一种AppImage格式可以让程序运行在大多数Linux平台( `How to install Neovim on Debian the right way <https://mansoorbarri.com/neovim-debian/>`_ )
+
 参考
 ======
 
 - `Neovim on debian? <https://www.reddit.com/r/debian/comments/188d3wc/neovim_on_debian/>`_
+- `Github: neovim/INSTALL.md <https://github.com/neovim/neovim/blob/master/INSTALL.md>`_

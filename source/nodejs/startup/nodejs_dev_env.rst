@@ -23,11 +23,11 @@ Node.js开发环境
    :language: bash
    :caption: 安装nvm
 
-上述命令脚本将clone一个nvm代码仓库到 ``~/.nvm`` ，并尝试在profile环境中加入一下内容(我手工加到 ``~/.zshrc`` )::
+上述命令脚本将clone一个nvm代码仓库到 ``~/.nvm`` ，并尝试在profile环境中(例如对于 :ref:`debian` 就是添加到当前用户的 ``~/.bashrc`` 最后)加入一下内容(我手工加到 ``~/.zshrc`` ):
 
-   export NVM_DIR="$HOME/.nvm"
-   [ -s "$NVM_DIR/nvm.sh"  ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-   [ -s "$NVM_DIR/bash_completion"  ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+.. literalinclude:: nodejs_dev_env/bashrc
+   :language: bash
+   :caption: ``nvm`` 安装脚本会自动在用户的profile中添加环境变量，例如 ``~/.bashrc``
 
 .. note::
 
