@@ -72,9 +72,18 @@ RHEL 8 和 9特定步骤
 
 - [步骤7]在内核参数上添加 ``module_name.blacklist=1 rd.driver.blacklist=module_name`` ，这样RHEL8 和RHEL9的 ``grubby`` 工具就会修改内核参数::
 
-   grubby --args  "<module_name.blacklist=1 rd.driver.blacklist=module_name>"  --update-kernel ALL
+   grubby --args  "module_name.blacklist=1 rd.driver.blacklist=module_name"  --update-kernel ALL
+
+.. note::
+   当你发现参数写错了的时候，可以使用 ``--remove-args`` 来删除内核参数，例如：
+
+   grubby --remove-args "module_name.blacklist=1 rd.driver.blacklist=module_name" --update-kernel ALL
 
 这个内核参数修改我建议直接修改 ``/etc/default/grub`` 配置，然后执行 ``update-grub`` 工具来修订
+
+.. note::
+   将多个模块列入黑名单时，请注意，它们之间仅用逗号分隔。 空格或其他内容可能会破坏语法。
+   ``module_blacklist`` 会让内核完全拒绝加载模块。如果只想阻止隐式加载，可能会在稍后手动加载模块，那么正确的参数是``modprobe.blacklist=modname1,modname2,modname3``。这并不能阻止启动过程中的显式加载，例如通过 systemd 或其他模块。
 
 - [步骤8]备份kdump initramfs::
 
@@ -147,3 +156,4 @@ RHEL 7特定步骤
 =======
 
 - `How do I prevent a kernel module from loading automatically? <https://access.redhat.com/solutions/41278#EarlyBootStageModuleUnloading>`_ Red Hat官方知识库文档英文版写得非常详尽，特别是分别对现代RHEL 7/8/9 操作进行详述，适合现代化的各种Linux发行版，例如 Ubuntu 等
+- `内核模块#使用内核命令行_2 <https://wiki.archlinuxcn.org/wiki/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97#%E4%BD%BF%E7%94%A8%E5%86%85%E6%A0%B8%E5%91%BD%E4%BB%A4%E8%A1%8C_2>`_ Arch Linux wiki 专门对这两个参数的区别进行了解释
