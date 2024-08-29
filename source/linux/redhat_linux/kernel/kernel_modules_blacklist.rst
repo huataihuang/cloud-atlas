@@ -156,4 +156,4 @@ RHEL 7特定步骤
 =======
 
 - `How do I prevent a kernel module from loading automatically? <https://access.redhat.com/solutions/41278#EarlyBootStageModuleUnloading>`_ Red Hat官方知识库文档英文版写得非常详尽，特别是分别对现代RHEL 7/8/9 操作进行详述，适合现代化的各种Linux发行版，例如 Ubuntu 等
-- `内核模块#使用内核命令行_2 <https://wiki.archlinuxcn.org/wiki/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97#%E4%BD%BF%E7%94%A8%E5%86%85%E6%A0%B8%E5%91%BD%E4%BB%A4%E8%A1%8C_2>`_Arch Linux wiki 专门对这两个参数的区别进行了解释
+- `内核模块#使用内核命令行_2 <https://wiki.archlinuxcn.org/wiki/%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97#%E4%BD%BF%E7%94%A8%E5%86%85%E6%A0%B8%E5%91%BD%E4%BB%A4%E8%A1%8C_2>`_ Arch Linux wiki 专门对这两个参数的区别进行了解释
