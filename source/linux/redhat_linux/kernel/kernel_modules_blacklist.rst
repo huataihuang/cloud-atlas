@@ -75,15 +75,18 @@ RHEL 8 和 9特定步骤
    grubby --args  "module_name.blacklist=1 rd.driver.blacklist=module_name"  --update-kernel ALL
 
 .. note::
-   当你发现参数写错了的时候，可以使用 ``--remove-args`` 来删除内核参数，例如：
 
-   grubby --remove-args "module_name.blacklist=1 rd.driver.blacklist=module_name" --update-kernel ALL
+   当你发现参数写错了的时候，可以使用 ``--remove-args`` 来删除内核参数，例如::
+
+      grubby --remove-args "module_name.blacklist=1 rd.driver.blacklist=module_name" --update-kernel ALL
 
 这个内核参数修改我建议直接修改 ``/etc/default/grub`` 配置，然后执行 ``update-grub`` 工具来修订
 
 .. note::
+
    将多个模块列入黑名单时，请注意，它们之间仅用逗号分隔。 空格或其他内容可能会破坏语法。
-   ``module_blacklist`` 会让内核完全拒绝加载模块。如果只想阻止隐式加载，可能会在稍后手动加载模块，那么正确的参数是``modprobe.blacklist=modname1,modname2,modname3``。这并不能阻止启动过程中的显式加载，例如通过 systemd 或其他模块。
+
+   ``module_blacklist`` 会让内核完全拒绝加载模块。如果只想阻止隐式加载，可能会在稍后手动加载模块，那么正确的参数是 ``modprobe.blacklist=modname1,modname2,modname3`` 。这并不能阻止启动过程中的显式加载，例如通过 systemd 或其他模块。
 
 - [步骤8]备份kdump initramfs::
 
