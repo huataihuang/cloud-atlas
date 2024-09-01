@@ -18,7 +18,7 @@
 
 也可以在环境变量中配置好，这样就不用每次 ``configure`` 时传递
 
-.. literalinclude:: ../web/nginx/build_nginx_macos/build_env
+.. literalinclude:: ../../web/nginx/build_nginx_macos/build_env
    :language: bash
    :caption: 通过环境变量传递指定pcre2/zlib/openssl的头文件和库文件位置
 

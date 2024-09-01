@@ -47,6 +47,7 @@ Life Balance
    skill/index
    music/index
    photography/index
+   travel/index
 
 .. only::  subproject and html
 

@@ -1,16 +1,14 @@
-.. _clang:
+.. _gmake:
 
 =================================
-C Atlas
+GNU make
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   install/index
-   c_startup/index
-   gmake/index
-   c++/index
+   parallel_make.rst
+   parallel_make_oom.rst
 
 .. only::  subproject and html
 

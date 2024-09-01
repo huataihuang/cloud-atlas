@@ -24,6 +24,22 @@ CS61A: Structure and Interpretation of Computer Programs
 - `伯克利CS 61A课程网站 <https://inst.eecs.berkeley.edu/~cs61a/su20/>`_ 提供了所有视频课程的索引，所以很方便完成上课和作业
 - `CS61A课程视频(YouTube) <https://www.youtube.com/watch?v=0_LryzvBxFw&list=PL6BsET-8jgYVkdaPYJNyvuNga3QA_U1gA>`_
 
+.. _learn_enough:
+
+Learn Enough系列
+===================
+
+:ref:`ruby` 社区有一个著名的学习书籍 `Ruby on Rails Tutorial <https://www.railstutorial.org>`_ ，该书作者 `Michael Hartl <https://www.michaelhartl.com>`_ 是一位Web开发者，也是 `Learn Enough <https://www.learnenough.com>`_ 的联合创始人兼主要作者。这个 Learn Enough 系列覆盖了 Ruby / Python 以及WEB开发的各项技术，我感觉是非常适合我的开发入门系列书籍，从入门开始同时专注实践。
+
+.. note::
+
+   `Michael Hartl <https://www.michaelhartl.com>`_ 虽然是著名的WEB开发者，但他之前是加州理工学院（Caltech）的物理讲师，在那里他获得了卓越教学终身成就奖。他毕业于哈佛大学，拥有加州理工学院的物理学博士学位 (orz) ，也是Y Combinator企业家项目的校友。
+
+`Learn Enough Python to Be Dangerous <https://www.amazon.com/Learn-Enough-Python-Dangerous-Development/>`_
+
+我的学习路线
+=============
+
 我计划系统学习并结合一些经典Python书籍完成学习:
 
 

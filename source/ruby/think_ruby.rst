@@ -43,6 +43,15 @@ Ruby是非常小众的语言，但是在个人和小型企业快速起步阶段�
 
   - 非常推荐 `ihower <https://ihower.tw/>`_ 很多资讯
 
+学习书籍
+===========
+
+- `Learn enough ruby <https://www.learnenough.com/ruby>`_ 入门书籍，从ruby开始到Ruby on Rails
+- `Ruby on Rails tutorial <https://www.railstutorial.org>`_  (进阶学习)
+
+.. note::
+
+   :ref:`learn_enough` 可以作为全面WEB开发入门
 
 参考
 =====

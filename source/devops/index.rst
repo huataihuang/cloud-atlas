@@ -14,6 +14,7 @@ DevOps Atlas
    jenkins/index
    gitea/index
    terraform/index
+   heroku/index
    ansible/index
    jsonnet/index
    airflow/index

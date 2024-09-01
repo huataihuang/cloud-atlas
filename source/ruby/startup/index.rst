@@ -12,6 +12,7 @@ Ruby起步
    ruby_version_manager.rst
    ruby_gem.rst
    ruby_quickstart.rst
+   ruby_in_browser.rst
    ruby_object.rst
    ruby_number.rst
    ruby_control.rst
