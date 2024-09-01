@@ -1,0 +1,1 @@
+chsh -s /bin/bash

@@ -33,7 +33,7 @@ make
 
 - 配置 :ref:`parallel_make` ( ``~/.bash_profile`` ):
 
-.. literalinclude:: parallel_make/make_j
+.. literalinclude:: ../gmake/parallel_make/make_j
 
 binutils
 ===========

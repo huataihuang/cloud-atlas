@@ -1,16 +1,15 @@
-.. _clang:
+.. _travel:
 
 =================================
-C Atlas
+旅行
 =================================
+
+旅行始终是打工人的心灵重压的调节器
 
 .. toctree::
    :maxdepth: 1
 
-   install/index
-   c_startup/index
-   gmake/index
-   c++/index
+   obvious_travel_advice.rst
 
 .. only::  subproject and html
 

@@ -1,16 +1,14 @@
-.. _clang:
+.. _c_startup:
 
 =================================
-C Atlas
+C语言起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   install/index
-   c_startup/index
-   gmake/index
-   c++/index
+   c_compile.rst
+   cppflags_ldflags.rst
 
 .. only::  subproject and html
 
