@@ -25,7 +25,28 @@ Windows 10 LTSC 即长期服务频道为企业特定用户提供长达五年甚�
 
    如果实在贫穷无法承担，可以尝试 kms 方式激活
 
+Windows 10 版本
+=================
+
+使用 ``Business Editions`` 的Windows 10安装，会提示有多个可安装版本，其中主要后缀有:
+
+- Windows 10 Pro
+- Windows 10 Pro N
+- Windows 10 Pro Education
+- Windows 10 Pro Education N
+- Windows 10 Pro for Workstation
+- Windows 10 Pro N for Workstation
+- ...
+
+这里主要区别是:
+
+- Windows 10包含了该OS的所有内容
+- Windows 10N 表示系统中不包含media player
+- Windows 10KN 表示系统完全移除了media play功能
+- Windows SLP 表示语言是预装的
+
 参考
 =======
 
 - `win10 LTSC是什么？ <https://www.zhihu.com/question/389770085/answer/2274645940>`_
+- `Difference BETWEEN Windows 10 ,Windows 10N, Windows 10KN, Windows 10 Single language and how to create recovery disc <https://answers.microsoft.com/en-us/windows/forum/all/difference-between-windows-10-windows-10n-windows/9cfde2eb-011b-4227-91f5-00168a74525f>`_
