@@ -13,7 +13,7 @@ macOS非常适合工作学习，然而有时候也需要使用Windows软件。�
 - macOS需要升级到最新版本: 我在 :ref:`mba13_early_2014` 上使用的是macOS Big Sur Version 11.7.10
 - :strike:`需要至少64G空间用于创建Boot Camp分区，如果使用Windows自动更新，则至少128G` 我的实践由于笔记本硬盘只有128G，在使用Boot Camp Assistant划分磁盘时最多只能给Windows分区54GB，但是安装过程也没有报错，所以具体需要多大空间以实践为准(请自行尝试)
 - 注意: **Windows 10必须是64位版本**
-- 参考 在 `macOS Mojave 上通过 Boot Camp 安装最新的 Windows 10 <https://imtx.me/archives/2725.html>`_ ：最新的Windows ISO镜像解包文件有单个文件超过4GB的，超过Boot Camp安装Windows时创建的FAT32分区所支持的最大4GB文件限制，会导致安装失败。需要使用 `Boot Camp ISO Converter <https://twocanoes-software-updates.s3.amazonaws.com/Boot%20Camp%20ISO%20Converter1_6.dmg>`_ 处理
+- ( **我没有遇到这个问题** )参考 在 `macOS Mojave 上通过 Boot Camp 安装最新的 Windows 10 <https://imtx.me/archives/2725.html>`_ ：最新的Windows ISO镜像解包文件有单个文件超过4GB的，超过Boot Camp安装Windows时创建的FAT32分区所支持的最大4GB文件限制，会导致安装失败。需要使用 `Boot Camp ISO Converter <https://twocanoes-software-updates.s3.amazonaws.com/Boot%20Camp%20ISO%20Converter1_6.dmg>`_ 处理
 
 安装Windows
 ==============
