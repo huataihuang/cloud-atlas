@@ -20,6 +20,8 @@ macOS
    apple_silicon_m1_pro.rst
    macos_install_drive.rst
    create_boot_usb_from_iso_in_mac.rst
+   install_win10_on_mac_with_boot_camp.rst
+   adobe_flash.rst
    introduce_macos_studio.rst
    macos_studio_startup.rst
    macos_studio.rst
