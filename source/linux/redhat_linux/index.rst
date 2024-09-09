@@ -9,7 +9,7 @@ RedHat Linux
 
    redhat_linux_state.rst
    centos/index
-   almalinux/index
+   rockylinux/index
    fedora/index
    admin/index
    systemd/index

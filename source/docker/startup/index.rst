@@ -13,6 +13,7 @@ Docker 起步
    install_docker_linux.rst
    archlinux_docker.rst
    install_docker_centos8.rst
+   rockylinux_docker.rst
    post_install/index
    docker_run.rst
    docker_infrastructure.rst

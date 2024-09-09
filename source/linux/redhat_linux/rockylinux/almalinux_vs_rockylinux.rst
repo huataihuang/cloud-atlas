@@ -43,7 +43,10 @@ AlmaLinux vs. Rocky Linux
    :widths: 20,20,20,20,20
    :header-rows: 1
 
-由于我不想采用默认的AliOS，所以综合上述对比，选择采用 AlmaLinux 来学习开发
+由于我不想采用默认的AliOS，所以综合上述对比，选择采用 :strkie:`AlmaLinux` ``Rocky Linux`` 来学习开发:
+
+- 更为原生复制Red Hat Enterprise Linux，可以充分借鉴Red Hat的大量文档和知识库，很多时候线上系统的问题需要Red Hat这样严谨的厂商才能深入解决
+- 和CentOS原先的下游身份一致，虽然由于Red Hat商业策略所限，下游更新会落后于商业版本大约半年甚至更久，但是对于中小企业很少会遇到头部大厂这样规模才会遇到的极端问题，相对来说风险可控
 
 参考
 ======

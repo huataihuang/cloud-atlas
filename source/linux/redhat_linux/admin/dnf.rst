@@ -242,6 +242,8 @@ repo-graph              dnf repograph                  dnf-plugins-extras-repogr
 代理
 =======
 
+.. _yum_proxy:
+
 YUM代理
 ------------
 
@@ -260,6 +262,8 @@ YUM代理
    # The account details for yum connections
    proxy_username=yum-user
    proxy_password=qwerty
+
+.. _dnf_proxy:
 
 DNF代理
 ---------
