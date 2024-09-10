@@ -34,7 +34,7 @@ Rocky Linux作为CentOS的后继者，部署 Docker Engine 方法和 :ref:`insta
 
 请参考 :ref:`colima_proxy` 使用 :ref:`dnf_proxy` :ref:`across_the_great_wall` 。
 
-另外，阿里云提供的rocky linux直接将软件仓库设置为阿里云自己的镜像网站，一旦 :re:`dnf_proxy` 会导致反向访问阿里云仓库过于缓慢甚至无法正常使用的问题，所以需要修订 ``/etc/yum.repos.d`` 目录下的仓库配置，将阿里云相关的 ``baseurl`` 注释掉，恢复默认的 ``mirrorlist`` (以下是 ``rocky.repo`` 配置修改案例:
+另外，阿里云提供的rocky linux直接将软件仓库设置为阿里云自己的镜像网站，一旦配置 :ref:`dnf_proxy` 会导致反向访问阿里云仓库过于缓慢甚至无法正常使用的问题，所以需要修订 ``/etc/yum.repos.d`` 目录下的仓库配置，将阿里云相关的 ``baseurl`` 注释掉，恢复默认的 ``mirrorlist`` (以下是 ``rocky.repo`` 配置修改案例:
 
 .. literalinclude:: rockylinux_docker/rocky.repo
    :caption: 修订仓库配置，恢复默认的 ``mirrorlist``

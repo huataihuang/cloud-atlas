@@ -7,8 +7,8 @@ AlmaLinux vs. Rocky Linux
 2021年12月31日，随着CentOS Linux 8来到生命周期重点(End of Life, EoL)，所有以CentOS作为Red Hat Enterprise Linux平替的企业和个人都需要考虑何去何从:
 
 - CentOS将演变为CentOS Stream(9)，作为RHEL的开发版本和"滚动发布"版本，意味着在生产环境中使用存在风险
-- 作为个人爱好者，期望有企业级的开发学习环境，并且紧跟RHEL技术发展，可以选择社区驱动快速迭代的 :ref:`almalinux`
-- `Rocky Linux <https://rockylinux.org/>`_ 承诺bug级复制的RHEL，则更为适合需要完全复制Red Hat Enterprise Linux的企业用户(有时候bug的兼容也很重要，避免触发生产环境work around失效)，也适合企业规模升级后切换到Red Hat Enterprise Linux
+- 作为个人爱好者，期望有企业级的开发学习环境，并且紧跟RHEL技术发展，可以选择社区驱动快速迭代的 `almalinux <https://almalinux.org>`_
+- :ref:`rockylinux` 承诺bug级复制的RHEL，则更为适合需要完全复制Red Hat Enterprise Linux的企业用户(有时候bug的兼容也很重要，避免触发生产环境work around失效)，也适合企业规模升级后切换到Red Hat Enterprise Linux
 
 区别
 ======
@@ -43,7 +43,7 @@ AlmaLinux vs. Rocky Linux
    :widths: 20,20,20,20,20
    :header-rows: 1
 
-由于我不想采用默认的AliOS，所以综合上述对比，选择采用 :strkie:`AlmaLinux` ``Rocky Linux`` 来学习开发:
+由于我不想采用默认的AliOS，所以综合上述对比，选择采用 :strike:`AlmaLinux` ``Rocky Linux`` 来学习开发:
 
 - 更为原生复制Red Hat Enterprise Linux，可以充分借鉴Red Hat的大量文档和知识库，很多时候线上系统的问题需要Red Hat这样严谨的厂商才能深入解决
 - 和CentOS原先的下游身份一致，虽然由于Red Hat商业策略所限，下游更新会落后于商业版本大约半年甚至更久，但是对于中小企业很少会遇到头部大厂这样规模才会遇到的极端问题，相对来说风险可控
