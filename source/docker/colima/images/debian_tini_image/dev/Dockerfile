@@ -63,7 +63,7 @@ RUN bash -c 'source /home/admin/venv3/bin/activate && pip install sphinxcontrib-
 
 # node program: nvm install node
 RUN bash -c "cd /home/admin && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash" 
-RUN bash -c "source /home/admin/.bashrc && npm install 22"
+RUN bash -c "source /home/admin/.bashrc && nvm install 22"
 
 # entrypoint.sh 需要使用root身份执行
 USER root
