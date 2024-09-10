@@ -54,25 +54,25 @@ tini运行ssh ``debian-ssh-tini``
    :caption: 登陆容器检查卷挂载
    :emphasize-lines: 6,7
 
-开发环境 ``debian-dev-tini``
+开发环境 ``debian-dev``
 ===============================
 
 在 ``debian-ssh-tini`` 基础上，增加开发工具包安装:
 
-- ``debian-dev-tini`` 包含了安装常用工具和开发环境:
+- ``debian-dev`` 包含了安装常用工具和开发环境:
 
 .. literalinclude:: debian_tini_image/dev/Dockerfile
    :language: dockerfile
    :caption: 包含常用工具和开发环境的debian镜像Dockerfile
 
-- 构建 ``debian-dev-tini`` 镜像:
+- 构建 ``debian-dev`` 镜像:
 
-.. literalinclude:: debian_tini_image/dev/build_debian-dev-tini_image
+.. literalinclude:: debian_tini_image/dev/build_debian-dev_image
    :language: bash
    :caption: 构建包含开发环境的debian镜像
 
-- 运行 ``debian-dev-tini`` :
+- 运行 ``debian-dev`` :
 
-.. literalinclude:: debian_tini_image/dev/run_debian-dev-tini_container
+.. literalinclude:: debian_tini_image/dev/run_debian-dev_container
    :language: bash
    :caption: 运行包含开发环境的debian容器
