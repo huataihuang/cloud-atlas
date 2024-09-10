@@ -83,12 +83,12 @@ Colima容器化开发环境
 
 - 构建 ``debian-dev-tini`` 镜像:
 
-.. literalinclude:: images/debian_tini_image/dev/build_debian-dev-tini_image
+.. literalinclude:: images/debian_tini_image/dev/build_debian-dev_image
    :language: bash
    :caption: 构建包含开发环境的debian镜像
 
 - 运行 ``debian-dev-tini`` :
 
-.. literalinclude:: images/debian_tini_image/dev/run_debian-dev-tini_container
+.. literalinclude:: images/debian_tini_image/dev/run_debian-dev_container
    :language: bash
    :caption: 运行包含开发环境的debian容器

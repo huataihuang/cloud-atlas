@@ -65,6 +65,10 @@ RUN bash -c 'source /home/admin/venv3/bin/activate && pip install sphinxcontrib-
 RUN bash -c "cd /home/admin && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash" 
 RUN bash -c "source /home/admin/.bashrc && nvm install 22"
 
+# neovim
+RUN bash -c 'mkdir /home/admin/src && source /home/admin/.bashrc && cd /home/admin/src && git clone https://github.com/neovim/neovim.git && cd /home/admin/src/neovim && make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/neovim" && make install && echo "export PATH=\"\$HOME/neovim/bin:\$PATH\"" >> /home/admin/.bashrc && echo alias vi=\"\$HOME/neovim/bin/nvim\" >> /home/admin/.bashrc'
+RUN rm -rf /home/admin/src
+
 # entrypoint.sh 需要使用root身份执行
 USER root
 
