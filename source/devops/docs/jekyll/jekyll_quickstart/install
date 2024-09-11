@@ -1,0 +1,1 @@
+gem install bundler jekyll

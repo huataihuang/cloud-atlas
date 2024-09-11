@@ -23,6 +23,7 @@ Chromium OS/Chrome OS完全基于因特网运行的轻量级客户端，在网�
 
    chromium_os_arch.rst
    fydeos_pi.rst
+   chromeos_serial.rst
 
 .. only::  subproject and html
 

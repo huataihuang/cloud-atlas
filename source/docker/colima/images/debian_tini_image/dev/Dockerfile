@@ -2,6 +2,13 @@ FROM debian:latest
 
 ENV container=docker
 
+# 容器内代理设置: 物理服务器上通过SSH Tunnel访问墙外HTTP/HTTPS代理，所以IP地址是Docker的NAT网络网关IP
+# 如不需要请注释掉
+ENV HTTP_PROXY "http://172.17.0.1:3128"
+ENV HTTP_PROXY "http://172.17.0.1:3128"
+ENV FTP_PROXY "ftp://172.17.0.1:3128"
+ENV NO_PROXY "*.baidu.com,192.168.0.0/16,10.0.0.0/8"
+
 RUN apt update -y
 RUN apt upgrade -y
 
@@ -55,9 +62,12 @@ RUN curl -sSL https://get.rvm.io | bash -s stable
 # 每个RUN都是一个容器，所以为了继承环境变量来运行多个命令，将这些命令写成一行RUN
 # rvm需要使用BASH，所以最终改成 bash -c 'xxx && yyy && zzz'
 RUN bash -c 'source /home/admin/.rvm/scripts/rvm && rvm install 3.3.4 && gem install rails'
+# 我使用Jekyll构建个人blog，如不需要请注释掉下面一行
+RUN bash -c 'source /home/admin/.bashrc && gem install bundler jekyll'
 
 # python program: virtualenv
 RUN bash -c 'cd /home/admin && python3 -m venv venv3'
+# 我使用Sphinx doc来撰写Cloud-Atlas文档，如不需要请注释掉下面两行
 RUN bash -c 'source /home/admin/venv3/bin/activate && pip install sphinx && pip install sphinx_rtd_theme && pip install sphinxnotes-strike'
 RUN bash -c 'source /home/admin/venv3/bin/activate && pip install sphinxcontrib-video && pip install sphinxcontrib-youtube'
 
@@ -67,6 +77,7 @@ RUN bash -c "source /home/admin/.bashrc && nvm install 22"
 
 # neovim
 RUN bash -c 'mkdir /home/admin/src && source /home/admin/.bashrc && cd /home/admin/src && git clone https://github.com/neovim/neovim.git && cd /home/admin/src/neovim && make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/neovim" && make install && echo "export PATH=\"\$HOME/neovim/bin:\$PATH\"" >> /home/admin/.bashrc && echo alias vi=\"\$HOME/neovim/bin/nvim\" >> /home/admin/.bashrc'
+RUN bash -c 'cd /home/admin/src && git clone https://github.com/huataihuang/cloud-studio.git && cd /home/admin/src/cloud-studio/config && sh install.sh'
 RUN rm -rf /home/admin/src
 
 # entrypoint.sh 需要使用root身份执行
@@ -76,6 +87,8 @@ USER root
 EXPOSE 22:1122
 # Sphinx
 EXPOSE 8080:18080
+# Jekyll
+EXPOSE 4000:14000
 # HTTP
 EXPOSE 80:1180
 # HTTPS

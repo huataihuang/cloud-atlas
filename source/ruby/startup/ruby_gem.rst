@@ -22,6 +22,11 @@ gem标准结构:
 .. literalinclude:: ../../devops/docs/tiddlywiki/tiddlywiki_on_ruby_webrick/gem_install
    :caption: 通过 :ref:`ruby_gem` 安装依赖
 
+管理gem
+=========
+
+:ref:`bundler`
+
 参考
 ========
 
