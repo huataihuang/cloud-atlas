@@ -11,6 +11,8 @@
    android_build_env_ubuntu.rst
    build_lineageos_20_pixel_4.rst
    extract_proprietary_blobs_from_lineageos_zip.rst
+   build_lineageos_21_pixel_4.rst
+   build_lineageos_21_chromecast_tv.rst
 
 .. only::  subproject and html
 

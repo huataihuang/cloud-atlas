@@ -36,6 +36,8 @@ Android Hack
    android_monitor.rst
    android_otg.rst
    project_soli.rst
+   pixel_usb_devices.rst
+   pixel_uart.rst
 
 .. only::  subproject and html
 
