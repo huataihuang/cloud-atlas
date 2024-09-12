@@ -17,7 +17,7 @@ Raspberry Pi Cluster
 - 在Kubernetes基础上构建 :ref:`openshift`
   - 实现应用服务自动交付
 
-本章节专注基础服务器集群的自动部署
+本章节专注基础服务器集群的 :strike:`自动部署` 方案构想(相应实践的索引入口)
 
 .. toctree::
    :maxdepth: 1
@@ -25,6 +25,8 @@ Raspberry Pi Cluster
    pi_stack.rst
    diskless_pi_cluster.rst
    autodeploy_pi_os.rst
+   pi_storage_cluster.rst
+   pi_soft_storage_cluster.rst
 
 .. only::  subproject and html
 
