@@ -79,3 +79,4 @@
 - `Samsung OEM Client SSD PM9A1 1TB, M.2 (MZVL21T0HCLR-00B00) <https://skinflint.co.uk/samsung-oem-client-ssd-pm9a1-1tb-mzvl21t0hclr-00b00-a2454424.html>`_
 - `SSD固态硬盘选购指标-寿命：P/E、TBW 、DWPD <https://www.jianshu.com/p/ce9edc670de7>`_
 - `SSD 可靠性指标 MTTF、MTBF、AFR 解析 <https://xie.infoq.cn/article/5b1b691e4dd01901c0ec1886d>`_
+- `Product Brief | PM9A1 <https://download.semiconductor.samsung.com/resources/brochure/Product%20Overviews%20PM9A1%20SSD%20Storage%20for%20the%20Next-Generation%20PC.pdf>`_

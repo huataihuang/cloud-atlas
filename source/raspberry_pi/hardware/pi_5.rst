@@ -7,7 +7,7 @@
 硬件规格
 ============
 
-- 处理器: Broadcom BCM2712 quad-core Arm Cortex A76 processor @ 2.4GHz
+- 处理器: Broadcom BCM2712 quad-core Arm Cortex A76 processor @ 2.4GHz (大约是上一代 :ref:`pi_4` 的2~3倍性能)
 - 内存: 最高8GB
 - 存储接口: PCIe 2.0 X1 接口FPC连接器
 - PWM控制风扇接口(需要主动散热)
@@ -28,6 +28,8 @@
 - Raspberry Pi 5 主板
 - 树莓派5 官方主动散热器
 - 树莓派5 官方电源
+
+  - 官方标配27W USB-C电源: 考虑到 :ref:``
 
 .. note::
 
