@@ -1,16 +1,13 @@
-.. _ml_hardware:
+.. _hailo_ai:
 
 =================================
-机器学习硬件
+Hailo AI 处理器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   dl_hardware.rst
-   nvidia_gpu/index
-   hailo_ai/index
-   benchmark_gpu.rst
+   intro_hailo_ai.rst
 
 .. only::  subproject and html
 
