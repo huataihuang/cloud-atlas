@@ -28,9 +28,13 @@
 
 - 提供了 1G 缓存(但是比较尴尬，完整的ftl表需要大约1T配1G缓存；对于2T规格配备1G缓存不上不下)
 
+.. figure:: ../../../_static/linux/storage/nvme/ssd_ftl.png
+
+   Flash Translation Layer (FTL) `High Performance FTL for PCIe/NVMe SSDs <https://files.futurememorystorage.com/proceedings/2016/20160811_S302D_Tai.pdf>`_
+
 缺点:
 
-- 2T规格耐用度 800TBW；1T规格耐用度 400TBW，比其他品牌SSD低很多(例如 :ref:`samsung_pm9a1` 1T规格的耐用度是 600TB); 不过，还是比 :ref:`crucial_p3` 的 2T规格 440TBW 好很多
+- 2T规格耐用度 800TBW，1T规格耐用度 400TBW: 比其他品牌SSD低很多(例如 :ref:`samsung_pm9a1` 1T规格的耐用度是 600TB); 不过，还是比 :ref:`crucial_p3` 的 2T规格 440TBW 好很多
 
 最终选择
 =========

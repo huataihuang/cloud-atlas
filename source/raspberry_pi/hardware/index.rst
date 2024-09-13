@@ -21,6 +21,7 @@
    pi_5.rst
    pi_pcie.rst
    pi_5_pcie_m.2_ssd.rst
+   pi_ai_kit.rst
    turing_pi/index
    pi_pwm_fan.rst
 
