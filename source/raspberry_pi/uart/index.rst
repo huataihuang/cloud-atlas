@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    intro_pi_uart.rst
+   pi_5_uart.rst
 
 .. only::  subproject and html
 
