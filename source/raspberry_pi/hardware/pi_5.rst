@@ -27,9 +27,12 @@
 
 - Raspberry Pi 5 主板
 - 树莓派5 官方主动散热器
+
+  - 安装手册见 `Raspberry Pi Active Coller for Raspberry Pi 5 <https://datasheets.raspberrypi.com/cooling/raspberry-pi-active-cooler-product-brief.pdf>`_ ：注意，连接线接头插入方向(红线向内)，主板上 ‘FAN’ 有一个盖帽需要取下来( `How do you attach the case fan on the Raspberry Pi 5? <https://raspberrypi.stackexchange.com/questions/145095/how-do-you-attach-the-case-fan-on-the-raspberry-pi-5>`_ / `Constant Fan - Active Cooler for Raspberry Pi 5 <https://forums.raspberrypi.com/viewtopic.php?t=358253>`_ )
+
 - 树莓派5 官方电源
 
-  - 官方标配27W USB-C电源: 考虑到 :ref:``
+  - 官方标配27W USB-C电源: 考虑到 :ref:`pi_5_pcie_m.2_ssd` 需要稳定电力，建议选用官方认证电源
 
 .. note::
 

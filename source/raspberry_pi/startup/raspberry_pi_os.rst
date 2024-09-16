@@ -30,7 +30,16 @@ Raspberry Pi OS是基于Debain开发的开源操作系统，并且针对 :ref:`p
 安装
 ==========
 
-采用 :ref:`pi_quick_start` 步骤完成初始安装和运行，历代 :ref:`pi_hardware` 操作系统安装方法基本相同，兼容性非常好，所以几乎没有什么难度，只需要制作启动TF卡启动，然后按照交互引导简单配置就能够使用( 如果要使用USB接口存储，可以参考 :ref:`usb_boot_ubuntu_pi_4` ，存储IO性能会有很大提升)
+采用 :ref:`pi_quick_start` 步骤完成初始安装和运行，历代 :ref:`pi_hardware` 操作系统安装方法基本相同，兼容性非常好，所以几乎没有什么难度，只需要制作启动TF卡启动:
+
+.. literalinclude:: raspberry_pi_os/dd
+   :caption: 在 :ref:`macos` 上通过 ``dd`` 命令从镜像文件制作TF启动盘
+
+然后按照交互引导简单配置就能够使用( 如果要使用USB接口存储，可以参考 :ref:`usb_boot_ubuntu_pi_4` ，存储IO性能会有很大提升)
+
+.. note::
+
+   如果没有显示器，可以使用 :ref:`pi_uart` ( :ref:`pi_5_uart` ) 来实现控制台访问，这个功能和 :ref:`linux_server` 的 :ref:`ipmi` (串口)相似
 
 参考
 ========
