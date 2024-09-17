@@ -36,6 +36,10 @@ http/https代理
 .. literalinclude:: curl_proxy/http_env
    :caption: 配置curl的http/https代理环境变量
 
+比较通用的方法是设置操作系统全局环境变量，也就是设置 ``/etc/environment`` :
+
+.. literalinclude:: curl_proxy/environment
+   :caption: 设置操作系统全局环境变量配置 ``/etc/environment``
 
 - 环境变量设置:
 

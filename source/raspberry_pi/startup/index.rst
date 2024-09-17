@@ -9,6 +9,7 @@
 
    pi_os.rst
    raspberry_pi_os.rst
+   raspberry_pi_os_init.rst
    pi_firmware_update.rst
    pi_4_hdmi_output.rst
    pi_400_4k_display.rst

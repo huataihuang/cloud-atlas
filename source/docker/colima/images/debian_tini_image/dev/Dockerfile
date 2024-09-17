@@ -4,10 +4,10 @@ ENV container=docker
 
 # 容器内代理设置: 物理服务器上通过SSH Tunnel访问墙外HTTP/HTTPS代理，所以IP地址是Docker的NAT网络网关IP
 # 如不需要请注释掉
-ENV HTTP_PROXY "http://172.17.0.1:3128"
-ENV HTTP_PROXY "http://172.17.0.1:3128"
-ENV FTP_PROXY "ftp://172.17.0.1:3128"
-ENV NO_PROXY "*.baidu.com,192.168.0.0/16,10.0.0.0/8"
+#ENV HTTP_PROXY "http://172.17.0.1:3128"
+#ENV HTTP_PROXY "http://172.17.0.1:3128"
+#ENV FTP_PROXY "ftp://172.17.0.1:3128"
+#ENV NO_PROXY "*.baidu.com,192.168.0.0/16,10.0.0.0/8"
 
 RUN apt update -y
 RUN apt upgrade -y
@@ -22,7 +22,7 @@ RUN chmod +x /entrypoint.sh
 # SSH
 RUN apt -y install sudo passwd openssh-client openssh-server curl
 # Utilities
-RUN apt -y install cron tmux vim-tiny locales net-tools dnsutils plocate gnupg2 git tree unzip
+RUN apt -y install cron tmux vim-tiny locales net-tools dnsutils plocate gnupg2 git tree unzip lsof
 
 # 补全locales
 RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment

@@ -8,6 +8,7 @@ Docker网络
    :maxdepth: 1
 
    docker_proxy.rst
+   docker_proxy_quickstart.rst
    docker_expose_publish_port.rst
 
 .. only::  subproject and html

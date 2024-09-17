@@ -145,14 +145,16 @@ Arch Linux发行版的 ``docker`` 软件包就是Docker CE版本，可以直接�
 
 使用 ``docker`` 指令连接docker服务默认是通过sock，所以用户需要有对 ``/var/run/docker.sock`` 读写的权限。
 
-- 检查操作系统中 ``docker.sock`` 文件权限::
+- 检查操作系统中 ``docker.sock`` 文件权限:
 
-   $ ls -lh /var/run/docker.sock
-   srw-rw---- 1 root docker 0 Feb 11 11:21 /var/run/docker.sock
+.. literalinclude:: install_docker_linux/docker.sock
+   :caption: 检查 ``docker.sock`` 的属主
+   :emphasize-lines: 2
 
-可以看到 ``/var/run/docker.sock`` 属于 ``docker`` 用户组（ubuntu系统），如果你使用的操作系统不同，可能是其他用户组，如 ``root`` ，则对应加入到相应用户组::
+可以看到 ``/var/run/docker.sock`` 属于 ``docker`` 用户组（ubuntu系统），如果你使用的操作系统不同，可能是其他用户组，如 ``root`` ，则对应加入到相应用户组:
 
-   sudo usermod -aG docker $USER
+.. literalinclude:: install_docker_linux/usermod
+   :caption: 将当前用户添加到 ``docker`` 用户组
 
 .. note::
 

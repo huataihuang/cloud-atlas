@@ -14,6 +14,8 @@ contrib/non-free软件包
    deb http://deb.debian.org/debian buster main contrib non-free
    deb-src http://deb.debian.org/debian buster main contrib non-free
 
+.. _apt_proxy:
+
 APT代理
 ========
 

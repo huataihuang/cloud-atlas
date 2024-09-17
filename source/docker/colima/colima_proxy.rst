@@ -191,7 +191,7 @@ Colima是Docker/Containerd混合体?
 
 .. literalinclude:: ../network/docker_proxy/create_http_proxy_conf_for_docker
    :language: bash
-   :caption: 生成 /etc/systemd/system/docker.service.d/http-proxy.conf 为containerd添加代理配置
+   :caption: 生成 /etc/systemd/system/docker.service.d/http-proxy.conf 为docker服务添加代理配置
    :emphasize-lines: 7-9
 
 现在，加上前面配置 :ref:`containerd_server_proxy` ，实际上服务器端运行时(containerd)和管控(docker)都已经启用的PROXY代理。可以通过在colima虚拟机内部检查 ``systemctl show <service_name> --property Environment`` 查看:

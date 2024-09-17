@@ -11,6 +11,7 @@ Docker 起步
    container_terminology.rst
    docker_concept.rst
    install_docker_linux.rst
+   install_docker_raspberry_pi_os.rst
    archlinux_docker.rst
    install_docker_centos8.rst
    rockylinux_docker.rst

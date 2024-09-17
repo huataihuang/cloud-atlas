@@ -23,8 +23,9 @@
    pi_5_pcie_m.2_ssd.rst
    pi_5_pcie_4_m.2_ssd.rst
    pi_ai_kit.rst
+   pi_5_active_cooler.rst
+   pi_4_pwm_fan.rst
    turing_pi/index
-   pi_pwm_fan.rst
 
 .. only::  subproject and html
 
