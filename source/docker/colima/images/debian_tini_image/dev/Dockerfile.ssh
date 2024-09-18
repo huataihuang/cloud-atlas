@@ -55,20 +55,20 @@ RUN ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 RUN mkdir /run/sshd
 RUN ssh-keygen -A
 
+
 USER admin
 
 # ruby program: rvm install ruby in $HOME
 RUN gpg2 --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
 RUN curl -sSL https://get.rvm.io | bash -s stable
-# /bin/sh 不支持source，需要使用 . 
+# /bin/sh 不支持source，需要使用 .
 # 每个RUN都是一个容器，所以为了继承环境变量来运行多个命令，将这些命令写成一行RUN
 # rvm需要使用BASH，所以最终改成 bash -c 'xxx && yyy && zzz'
 RUN bash -c 'source /home/admin/.rvm/scripts/rvm && rvm install 3.3.4 && gem install rails'
 
 # 我使用Jekyll构建个人blog，如不需要请注释掉下面一行
-RUN bash -c 'source /home/admin/.bashrc && gem install bundler jekyll'
-# 如果报错 "gem: command not found" (我在debian的ARM镜像时遇到)，则改成 "source /home/admin/.rvm/scripts/rvm"
-# RUN bash -c 'source /home/admin/.rvm/scripts/rvm && gem install bundler jekyll'
+# RUN bash -c 'source /home/admin/.bashrc && sleep 2 && gem install bundler jekyll'
+RUN bash -c 'source /home/admin/.rvm/scripts/rvm && gem install bundler jekyll'
 
 # python program: virtualenv
 RUN bash -c 'cd /home/admin && python3 -m venv venv3'
@@ -77,18 +77,45 @@ RUN bash -c 'source /home/admin/venv3/bin/activate && pip install sphinx && pip 
 RUN bash -c 'source /home/admin/venv3/bin/activate && pip install sphinxcontrib-video && pip install sphinxcontrib-youtube'
 
 # node program: nvm install node
-RUN bash -c "cd /home/admin && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash" 
-RUN bash -c "source /home/admin/.bashrc && nvm install 22"
-# 如果报错 "nvm: command not found" (在debian的ARM镜像时遇到)，则改成 "source /home/admin/.nvm/nvm.sh" 来加载nvm (参考 ~/.bashrc )
-# RUN bash -c "/home/admin/.nvm/nvm.sh && nvm install 22"
+RUN bash -c "cd /home/admin && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash"
+# RUN bash -c "source /home/admin/.bashrc && sleep 1 && nvm install 22"
+RUN bash -c "source /home/admin/.nvm/nvm.sh && nvm install 22"
 
 # neovim
-# 由于容器镜像构建时需要使用HTTP代理，所以这里配置git通过代理clone，如果没有GFW干扰或者运行时没有遇到类似 "error: RPC failed; curl 18 Transferred a partial file" 报错，则不需要添加git代理配置
-#RUN git config --global http.proxy http://172.17.0.1:3128
-# 当git使用operations over HTTP时，实际使用的是curl library
-RUN bash -c 'mkdir /home/admin/src && source /home/admin/.bashrc && cd /home/admin/src && git clone https://github.com/neovim/neovim.git && cd /home/admin/src/neovim && make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/neovim" && make install && echo "export PATH=\"\$HOME/neovim/bin:\$PATH\"" >> /home/admin/.bashrc && echo alias vi=\"\$HOME/neovim/bin/nvim\" >> /home/admin/.bashrc'
-RUN bash -c 'cd /home/admin/src && git clone https://github.com/huataihuang/cloud-studio.git && cd /home/admin/src/cloud-studio/config && sh install.sh'
+
+# 这个步骤是为了解决GFW屏蔽，使用git clone的 over HTTP报错，不得已采用SSH模式，所以会复制密钥，如果直接通过git operations over HTTP工作正常，则不需要这个步骤
+# 注意，需要在Dockerfile相同目录下执行 ssh-keygen -t rsa 生成密钥对(私钥不可密码保护)，并将公钥上传到github以便能够git clone
+
+USER admin
+
+#### 接受github的主机认证密钥
+#### 可以通过SSH忽略主机密钥 -o StrictHostKeyChecking=no 绕过
+## -------------------------------------------------------------
+## RUN mkdir /home/admin/.ssh
+## RUN ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+## -------------------------------------------------------------
+
+#### 采用git SSH方式
+## -------------------------------------------------------------
+RUN mkdir /home/admin/src
+## COPY 命令复制的文件需要修改属主，否则ssh无法读取
+COPY id_rsa /home/admin/src/id_rsa
+USER root
+RUN chown admin:admin /home/admin/src/id_rsa
+USER admin
+#### 指定git密钥，这里使用 --global 是因为当前没有在git项目目录下，不用这个参数会报错 "fatal: not in a git directory"
+RUN git config --global core.sshCommand 'ssh -i /home/admin/src/id_rsa -o StrictHostKeyChecking=no'
+#### git clone使用SSH方式是为了避免GFW干扰，使用git的operation over HTTP在代理模式下存在curl RPC报错
+RUN bash -c 'source /home/admin/.bashrc && cd /home/admin/src && git clone git@github.com:neovim/neovim.git && cd /home/admin/src/neovim && make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/neovim" && make install && echo "export PATH=\"\$HOME/neovim/bin:\$PATH\"" >> /home/admin/.bashrc && echo alias vi=\"\$HOME/neovim/bin/nvim\" >> /home/admin/.bashrc'
+RUN bash -c 'cd /home/admin/src && git clone git@github.com:huataihuang/cloud-studio.git && cd /home/admin/src/cloud-studio/config && sh install.sh'
 RUN rm -rf /home/admin/src
+RUN rm /home/admin/.gitconfig
+
+#### 使用git operations over HTTP较为简洁，但是会受到网络干扰影响出现 "error: RPC failed; curl 18 Transferred a partial file"
+## -------------------------------------------------------------
+# RUN bash -c 'mkdir /home/admin/src && source /home/admin/.bashrc && cd /home/admin/src && git clone https://github.com/neovim/neovim.git && cd /home/admin/src/neovim && make CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/neovim" && make install && echo "export PATH=\"\$HOME/neovim/bin:\$PATH\"" >> /home/admin/.bashrc && echo alias vi=\"\$HOME/neovim/bin/nvim\" >> /home/admin/.bashrc'
+# RUN bash -c 'cd /home/admin/src && git clone https://github.com/huataihuang/cloud-studio.git && cd /home/admin/src/cloud-studio/config && sh install.sh'
+# RUN rm -rf /home/admin/src
 
 # entrypoint.sh 需要使用root身份执行
 USER root

@@ -15,6 +15,7 @@ git
    git_config.rst
    git_ignorecase.rst
    git_proxy.rst
+   git_ssh_script.rst
    git-openssl.rst
    reduce_git_repo_size.rst
    git-flow.rst
