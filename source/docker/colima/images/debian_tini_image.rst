@@ -142,5 +142,5 @@ git ssh最终解决方法
 .. literalinclude:: debian_tini_image/dev/Dockerfile.ssh
    :language: dockerfile
    :caption: 包含常用工具和开发环境的debian镜像Dockerfile(为解决GFW干扰采用SSH方法)
-   :emphasize-lines: 98-112
+   :emphasize-lines: 100-114
 
