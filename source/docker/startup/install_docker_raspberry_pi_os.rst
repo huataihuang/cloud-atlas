@@ -65,6 +65,25 @@ Docker官方文档提供了多种安装途径，不过我的实践只选择通�
 .. literalinclude:: install_docker_linux/usermod
    :caption: 将当前用户添加到 ``docker`` 用户组
 
+验证
+=======
+
+按照官方文档提供的简单测试进行验证:
+
+.. literalinclude:: install_docker_raspberry_pi_os/hello-world
+   :caption: 运行 ``hello world`` 验证docker安装
+
+输出显示正确运行:
+
+.. literalinclude:: install_docker_raspberry_pi_os/hello-world_output
+   :caption: 运行 ``hello world`` 验证docker安装的输出显示
+   :emphasize-lines: 7
+
+并且可以进一步按照上述提示实际测试一个 :ref:`ubuntu_linux` 容器运行:
+
+.. literalinclude:: install_docker_raspberry_pi_os/ubuntu
+   :caption: 运行 :ref:`ubuntu_linux` 容器
+
 参考
 ======
 

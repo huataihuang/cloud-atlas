@@ -64,6 +64,7 @@ tini运行ssh ``debian-ssh-tini``
 .. literalinclude:: debian_tini_image/dev/Dockerfile
    :language: dockerfile
    :caption: 包含常用工具和开发环境的debian镜像Dockerfile
+   :emphasize-lines: 13
 
 - 构建 ``debian-dev`` 镜像:
 
@@ -76,3 +77,70 @@ tini运行ssh ``debian-ssh-tini``
 .. literalinclude:: debian_tini_image/dev/run_debian-dev_container
    :language: bash
    :caption: 运行包含开发环境的debian容器
+
+问题排查记录
+==============
+
+apt安装找不到软件包
+----------------------
+
+我在 ``amd64`` (x86_64)平台构建 ``debian-dev`` 成功，但是当我将同样的Dockerfile在 :ref:`install_docker_raspberry_pi_os` 却遇到无法安装 ``tini`` 报错:
+
+.. literalinclude:: debian_tini_image/raspberry_pi_os_apt_error
+   :caption: 在树莓派 Raspberry Pi OS上构建Docker镜像遇到无法找到软件包报错
+   :emphasize-lines: 13,23
+
+我最初以为是 :ref:`docker_proxy_quickstart` 设置代理网关错误(我确实错误设置了 ``127.0.0.1:3128`` ，正确应该是 ``172.17.0.1:3128`` )，但是实践发现即使修正了代理网关IP也同样报错。最后我发现，原来ARM版本的debian官方镜像似乎有仓库配置残留，在Dockerfile中添加 ``apt clean`` 步骤清理现场，然后执行升级和安装就能够正常工作。(已修正上文 ``debian-dev`` Dockerfile)
+
+git下载出现curl报错"RPC failed; curl 18 Transferred a partial file"
+----------------------------------------------------------------------
+
+我在 :ref:`install_docker_raspberry_pi_os` 上执行构建(家里的网络远不如阿里云虚拟机公网)，反复出现curl报错:
+
+.. literalinclude:: debian_tini_image/raspberry_pi_os_git_error
+   :caption: ``git clone`` 时始终出现 "RPC failed; curl 18 Transferred a partial file" 错误
+   :emphasize-lines: 5-9
+
+注意，这里报错的 ``error: 1183 bytes of body are still expected`` 每次可能数值不同，看起来就是传输错误　
+
+我尝试增加 ``git config --global http.proxy http://172.17.0.1:3128`` 这样可以确保 git 通过代理访问 HTTPS 来解决，但是我发现并没有解决上述报错。既然 git 在执行 operations over HTTP 实际使用的是curl库，所以我也尝试了 ``echo "proxy=172.17.0.1:3128" > /home/admin/.curlrc`` 来指定curl代理，但是此时报错:
+
+.. literalinclude:: debian_tini_image/raspberry_pi_os_git_curl_error
+   :caption: ``git clone`` 配置 ``~/.curlrc`` 指定代理，但是依然出现TLS报错，看起来是代理无法通过，还是代理问题
+   :emphasize-lines: 8
+
+参考 `Github - unexpected disconnect while reading sideband packet <https://stackoverflow.com/questions/66366582/github-unexpected-disconnect-while-reading-sideband-packet>`_ 提示是网络不稳定导致的，可以尝试:
+
+.. literalinclude:: debian_tini_image/git_env
+   :caption: 设置git环境变量跟踪错误
+
+不过输出信息其实和之前报错是一样的
+
+git ssh最终解决方法
+~~~~~~~~~~~~~~~~~~~~~~
+
+参考 `Error Cloning Repository: RPC Failed; curl 18 transfer closed with outstanding read data remaining #18972 <https://github.com/desktop/desktop/issues/18972>`_ : 使用 ssh 替代 https 来进行 git clone ，可以解决网络传输问题。(应该可行，因为GFW没有屏蔽github的SSH)就是需要在Dockerfile中复制一个本地专用于git的SSH密钥，导致Dockerfile通用性较差。
+
+不过，也不是很顺利，原因是每次访问github的HOST主机密钥变化，需要默认接受，否则会报错:
+
+.. literalinclude:: debian_tini_image/git_ssh_err
+   :caption: 如果git没有默认接受github的主机ssh密钥，则会报错失败
+   :emphasize-lines: 5-6
+
+参考 `Git error: "Host Key Verification Failed" when connecting to remote repository <https://stackoverflow.com/questions/13363553/git-error-host-key-verification-failed-when-connecting-to-remote-repository>`_ 在执行git之前，首先添加github的主机密钥，避免脚本执行报错:
+
+.. literalinclude:: debian_tini_image/ssh-keyscan
+   :caption: 通过 ``ssh-keyscan`` 命令添加github主机认证密钥
+
+另外一个要点是，用户git的私钥不能有密码保护(我通常个人使用都会给RAS密钥对的私钥加上密码)，否则也会报错: ``git@github.com: Permission denied (publickey).`` ，所以需要单独为git准备一个 **没有密码保护** 的RSA密钥对:
+
+.. literalinclude:: ../../../infra_service/ssh/ssh_key/ssh-keygen
+   :caption: 在当前目录下生成没有密码保护的密钥对(这样脚本执行时无需输入保护密码)
+
+结合上述要点，参考 :ref:`git_ssh_script` 方法改进Dockerfile(不过由于SSH方法比较复杂，常规还是采用 git operations over HTTP，只有为了解决网络阻塞GFW的时候才使用SSH方法)，以下是完整Dockerfile:
+
+.. literalinclude:: debian_tini_image/dev/Dockerfile.ssh
+   :language: dockerfile
+   :caption: 包含常用工具和开发环境的debian镜像Dockerfile(为解决GFW干扰采用SSH方法)
+   :emphasize-lines: 98-112
+

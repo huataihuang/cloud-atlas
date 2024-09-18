@@ -29,9 +29,8 @@ RSA密钥
 
 使用 ``ssh-keygen`` 命令生成密钥对
 
-.. code:: bash
-
-   ssh-keygen -t rsa
+.. literalinclude:: ssh_key/ssh-keygen
+   :caption: 生成密钥对
 
 ..
 
@@ -199,7 +198,7 @@ shell环境解决ssh-agent对会话的要求
 
    ssh -o "IdentitiesOnly=yes" -i <private key filename> <hostname>
 
-这个方法适合存储不同的ssh私钥登陆不同的系统
+这个方法适合存储不同的ssh私钥登陆不同的系统: 特别是在 :ref:`git` 使用中，可以通过传递指定私钥来操作git，具体案例可以见 :ref:`debian_tini_image` (我的docker实践遇到需要解决Dockerfile中指定git SSH密钥)
 
 忽略服务器key验证
 =================
@@ -211,6 +210,8 @@ shell环境解决ssh-agent对会话的要求
    ssh -o StrictHostKeyChecking=no username@hostname
 
 这样服务器的key就会自动接受存入 ``~/.ssh/known_hosts``
+
+这个方法也适合在脚本中避免交互操作(否则就需要人为去确认)，特备是在 :ref:`debian_tini_image` 案例中，Dockerfile必须确保访问github的时候直接接受服务器的主机认证密钥，否则会导致 ``docker build`` 失败
 
 另外一种情况是用户目录不能修改，例如不能保存和修改 ``~/.ssh/known_hosts`` ，则再加上 ``UserKnownHostsFile`` 参数指定另一个文件(例如指向null文件):
 
