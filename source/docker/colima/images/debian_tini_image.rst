@@ -137,10 +137,21 @@ git ssh最终解决方法
 .. literalinclude:: ../../../infra_service/ssh/ssh_key/ssh-keygen
    :caption: 在当前目录下生成没有密码保护的密钥对(这样脚本执行时无需输入保护密码)
 
+ARM版本 :ref:`nvim` 安装clangd LSP
+------------------------------------
+
+由于 LLVM clangd 没有在官方提供clangd的ARM64 for Linux，所以需要通过发行版安装 ``clangd`` 来实现 :ref:`nvim_clangd_arm` :
+
+.. literalinclude:: ../../../linux/desktop/nvim/nvim_clangd_arm/clangd
+   :caption: 通过安装发行版clangd解决debian ARM的NeoVim LSP
+
+开发环境 ``debian-dev`` (ARM64版本)
+========================================
+
 结合上述要点，参考 :ref:`git_ssh_script` 方法改进Dockerfile(不过由于SSH方法比较复杂，常规还是采用 git operations over HTTP，只有为了解决网络阻塞GFW的时候才使用SSH方法)，以下是完整Dockerfile:
 
-.. literalinclude:: debian_tini_image/dev/Dockerfile.ssh
+.. literalinclude:: debian_tini_image/dev/Dockerfile.arm
    :language: dockerfile
    :caption: 包含常用工具和开发环境的debian镜像Dockerfile(为解决GFW干扰采用SSH方法)
-   :emphasize-lines: 100-114
+   :emphasize-lines: 100-120
 

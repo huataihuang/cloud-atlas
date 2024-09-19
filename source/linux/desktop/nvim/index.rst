@@ -17,6 +17,7 @@ neovim
    nvim_lua.rst
    coc.nvim.rst
    nvim_ide.rst
+   nvim_clangd_arm.rst
    lazy.nvim/index
    mason.nvim/index
 
