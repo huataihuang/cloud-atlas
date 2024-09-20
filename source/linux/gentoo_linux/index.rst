@@ -44,6 +44,7 @@ Gentoo Linux
    gentoo_intel.rst
    gentoo_mbp_wifi.rst
    gentoo_mba_wifi.rst
+   gentoo_wpa_supplicant.rst
    usb_modeswitch.rst
    gentoo_brcmfmac_wifi.rst
    gentoo_kernel.rst

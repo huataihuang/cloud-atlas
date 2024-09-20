@@ -130,7 +130,7 @@ IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP�
 连接隐藏的无线网络
 ==================
 
-有些无线网络SSID并不广播，所以需要在 ``/etc/wpa_supplicant.conf`` 配置中添加::
+有些无线网络SSID并不广播，所以需要在 ``/etc/wpa_supplicant.conf`` 配置中添加(注意，是添加在每一段 ``network`` 配置中)::
 
    scan_ssid=1
 
@@ -153,6 +153,23 @@ IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP�
    我曾经在 :ref:`pi_ubuntu_network` 反复折腾了一周时间 `排查wpa_supplicant无法连接5GHz无线问题 <https://github.com/huataihuang/cloud-atlas-draft/blob/master/os/linux/redhat/system_administration/systemd/debug_systemd_networkd.md>`_ 。
 
    如果使用 :ref:`netplan` 配置管理 ``systemd-networkd`` ，则同样设置 ``REGDOMAIN=CN`` 。
+
+:ref:`networkmanager` 和 ``wpa_supplicant``
+==============================================
+
+:ref:`networkmanager` 是通过 :ref:`dbus` 和 ``wpa_supplicant`` 通讯的，我在 :ref:`raspberry_pi_os` 上实践( :ref:`pi_5` )发现，当通过 ``raspi-config`` 配置无线网络，实际上生成的是 ``/etc/NetworkManager/system-connections/MY_SSID.nmconnection`` (这里假设连接的是 ``MY_SSID`` 这个无线AP) :
+
+.. literalinclude:: wpa_supplicant/MY_SSID.nmconnection
+   :caption: 使用 ``raspi-config`` 生成 :ref:`networkmanager` 无线配置
+   :emphasize-lines: 9,12-14
+
+此时对应的 ``/etc/wpa_supplicant/wpa_supplicant.conf`` 非常简单:
+
+.. literalinclude:: wpa_supplicant/pi_wpa_supplicant.conf
+   :caption: 树莓派 ``/etc/wpa_supplicant/wpa_supplicant.conf``
+   :emphasize-lines: 4
+
+注意， :ref:`networkmanager` 不会管理 ``/etc/network/interfaces`` 配置中列出的接口，所以需要确保这个配置文件中没有包含无线网卡，以便让渡给NetworkManager管理
 
 启动时自动运行
 ================
