@@ -39,3 +39,10 @@
 ------------------
 
 实时数据流
+
+数据科学
+============
+
+海量数据需要科学分析才有价值
+
+- `towards data science <https://towardsdatascience.com/>`_ 提供关于数据科学的 Sharing concepts, ideas, and codes ，有不错的知识文档可以参考学习
