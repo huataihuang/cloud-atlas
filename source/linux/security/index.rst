@@ -8,6 +8,7 @@ Linux安全
    :maxdepth: 1
 
    chroot.rst
+   wpa.rst
    vpn/index
    audit/index
    tpm/index

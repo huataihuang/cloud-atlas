@@ -26,7 +26,7 @@ Gentoo使用wpa_supplicant连接无线网络
    :caption: 使用 ``wpa_supplicant`` 的debug ( ``-d`` 参数) 输出
    :emphasize-lines: 13
 
-``invalid group cipher 0x8 (000fac02)`` 在Gentoo论坛和bugzilla平台可以找到，对应的是无线路由器使用了 ``TKIP`` 不安全的 ``WPA2-TKIP`` 加密技术，默认情况下Gentoo编译 ``net-wireless/wpa_supplicant`` 是关闭了 ``tkip`` 这个USE flag导致的。
+``invalid group cipher 0x8 (000fac02)`` 在Gentoo论坛和bugzilla平台可以找到，对应的是无线路由器使用了 ``TKIP`` 不安全的 ``WPA2-TKIP`` :ref:`wpa` 标准，默认情况下Gentoo编译 ``net-wireless/wpa_supplicant`` 是关闭了 ``tkip`` 这个USE flag导致的。
 
 解决方法很简单: 配置 ``/etc/portage/package.use/wpa_supplicant`` 内容如下:
 

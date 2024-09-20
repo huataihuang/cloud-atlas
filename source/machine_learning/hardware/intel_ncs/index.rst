@@ -1,17 +1,15 @@
-.. _ml_hardware:
+.. _intel_ncs:
 
 =================================
-机器学习硬件
+Intel Neural Compute Stick
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   dl_hardware.rst
-   nvidia_gpu/index
-   hailo_ai/index
-   intel_ncs/index
-   benchmark_gpu.rst
+   intro_intel_ncs.rst
+   ncs_pi.rst
+   ncs_quickstart.rst
 
 .. only::  subproject and html
 
