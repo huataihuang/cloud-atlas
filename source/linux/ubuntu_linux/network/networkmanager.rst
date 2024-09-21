@@ -29,7 +29,7 @@ nmcli
 通过使用nmcli可以避免手工管理网络链接，也方便脚本编写。注意NetworkManager也支持运行脚本，这种方式称为 ``dispatcher scripts`` 以便能够响应网络事件。nmcli可以在没有图形界面的服务器，headless服务器和终端执行。
 
 General命令
---------------
+==============
 
 ``general`` 命令提供了NetworkManager状态和权限的显示，可以用来获得或修改系统主机名。
 
@@ -62,7 +62,7 @@ General命令
 这个命令和 ``hostnamectl set-hostname jetson-r`` 是同样效果，都是修改 ``/etc/hostname`` 配置。
 
 nmcli命令规律
------------------
+==================
 
 nmcli命令的规律是尽可能使用 ``help`` ，每一级命令都有help可以帮助你进行下一级子命令。
 
@@ -134,14 +134,14 @@ nmcli命令的规律是尽可能使用 ``help`` ，每一级命令都有help可�
    Connection successfully activated (D-Bus active path: /org/freedesktop/NetworkManager/ActiveConnection/3)
 
 nmcli命令案例
------------------
+==================
 
 .. note::
 
    在游泳中学游泳
 
 检查NetworkManager是否运行
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 - nmcli提供了 ``-t`` 参数可以简短( ``--terse`` )输出，结合 ``-f`` 可以指点字段 ( ``--field`` )::
 
@@ -161,7 +161,7 @@ nmcli命令案例
    connected  full          enabled  enabled  enabled  enabled
 
 列出所有可用设备
-~~~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 - ``dev`` 对象状态可显示所有可用设备::
 
@@ -192,7 +192,7 @@ nmcli命令案例
    `How to use USB device networking <https://developer.ridgerun.com/wiki/index.php/How_to_use_USB_device_networking>`_
 
 配置静态IP地址
-~~~~~~~~~~~~~~~~
+-------------------
 
 - 检查连接::
 
@@ -205,7 +205,7 @@ nmcli命令案例
    nmcli con up id "static-eth0"
 
 配置单网卡多IP(IP Aliasing)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 
 我没有找到直接使用 ``nmcli`` 来添加IP别名的命令行文档，不过 NetworkManager 有一个终端交互界面程序 ``nmtui`` (Text User Interface for controlling NetworkmNager)，可以非常方便配置网络以及IP Aliasing:
 
@@ -248,7 +248,7 @@ nmcli命令案例
 .. _nmcli_wifi:
 
 配置无线网络
-~~~~~~~~~~~~~~~
+-----------------
 
 我在 :ref:`kali_network` 实践中有一个配置无线网络的案例，汇总整理在这里
 
@@ -300,8 +300,10 @@ nmcli命令案例
 
    nmcli con up office
 
-MAC Spoofing
-~~~~~~~~~~~~~~~~
+.. _networkmanager_mac_spoofing:
+
+NetworkManager MAC Spoofing(MAC欺骗)
+-------------------------------------
 
 NetworkManager的Mac Spoofing是通过 ``ethernet.cloned-mac-address`` 和 ``wifi.cloned-mac-address`` 属性实现的，通过 ``nmcli`` 命令可以设置。
 
@@ -320,8 +322,20 @@ NetworkManager的Mac Spoofing是通过 ``ethernet.cloned-mac-address`` 和 ``wif
 - 然后启动连接::
 
    nmcli con up <con_name>
-
+ 
 一旦启动连接，就会看到无线网卡的MAC地址做了spoofing修改。
+
+.. _networkmanager_disable_random_mac:
+
+NetworkManager禁止随机MAC地址
+---------------------------------
+
+**记录备查** 暂未实践
+
+参考 `How to disable random mac address? <https://www.reddit.com/r/archlinux/comments/6ls9gn/how_to_disable_random_mac_address/>`_ ，配置 ``/etc/NetworkManager/conf.d/30-mac-randomization.conf`` :
+
+.. literalinclude:: networkmanager/30-mac-randomization.conf 
+   :caption: 禁止随机MAC地址，配置 ``/etc/NetworkManager/conf.d/30-mac-randomization.conf``
 
 .. _nmtui:
 
