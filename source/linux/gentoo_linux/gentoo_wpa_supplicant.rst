@@ -43,6 +43,33 @@ Gentoo使用wpa_supplicant连接无线网络
 .. literalinclude:: gentoo_wpa_supplicant/wpa_supplicant.conf
    :caption: 简单的 ``wpa_supplicant.conf``
 
+系统idle休眠导致无线网卡不工作问题
+====================================
+
+在解决了 ``wpa_supplicant`` 支持 ``WPA-TKIP`` :ref:`wpa` 协议之后，确实驱动了 :ref:`bcm943602cs` 正常工作，但是我接着发现，一旦系统idle休眠无线网卡就不工作了，此时IP丢失，没有数据包进出无线网卡:
+
+.. literalinclude:: gentoo_wpa_supplicant/wifi_not_work_ifconfig
+   :caption: 系统休眠以后无线网卡上IP丢失且无数据包进出
+
+而且，只有笔记本电脑完全断电关机再重启才能正常工作(不断电而是 ``shutdown -r now`` 则无线网卡无法恢复)。看起来似乎和休眠有关，我检查了一下系统日志:
+
+.. literalinclude:: gentoo_wpa_supplicant/dmesg_brcmf_inetaddr_changed
+   :caption: 系统日志提示 ``brcmf_inetaddr_changed`` 存在错误
+
+如果系统不进入休眠(一直在使用)，则上述系统日志有这条错误记录也没有关系，就是一休眠无线网卡就不工作。
+
+参考 `ieee80211 phy0: brcmf_inetaddr_changed: fail to get arp ip table err:-52, AFTER boot completes <https://www.reddit.com/r/archlinux/comments/1aqqwpb/ieee80211_phy0_brcmf_inetaddr_changed_fail_to_get/>`_ 有人提到了禁止 ``MAC address randomization`` (随机MAC地址) 功能可以解决这个问题。我参考 `wpa_supplicant.conf 配置样例 <https://w1.fi/cgit/hostap/plain/wpa_supplicant/wpa_supplicant.conf>`_ 配置:
+
+.. literalinclude:: gentoo_wpa_supplicant/disable_random_mac_wpa_supplicant.conf
+   :caption: 禁止随机MAC的 wpa_supplicant.conf
+   :emphasize-lines: 13
+
+似乎有效，继续观察
+
+.. note::
+
+   :ref:`networkmanager` 有一个 :ref:`networkmanager_disable_random_mac`
+
 参考
 =====
 
