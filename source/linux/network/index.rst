@@ -15,7 +15,7 @@ Linux网络
    iproute2/index
    iptables/index
    socat.rst
-   hostapd/index
+   hostap/index
    dpdk/index
    ethtool/index
 

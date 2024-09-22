@@ -13,6 +13,7 @@
    raspbian_static_ip.rst
    dhcpcd.rst
    router/index
+   wifi/index
 
 .. only::  subproject and html
 

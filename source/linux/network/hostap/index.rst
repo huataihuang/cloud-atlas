@@ -1,12 +1,13 @@
-.. _hostapd:
+.. _hostap:
 
 =================================
-hostapd - Linux无线热点AP
+HostAP - Linux无线热点AP
 =================================
 
 .. toctree::
    :maxdepth: 1
 
+   intro_hostap.rst
    create_ap.rst
    create_ap_kali.rst
    linux_router.rst

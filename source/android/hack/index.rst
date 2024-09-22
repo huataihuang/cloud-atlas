@@ -38,6 +38,7 @@ Android Hack
    project_soli.rst
    pixel_usb_devices.rst
    pixel_uart.rst
+   pixel_minicom.rst
 
 .. only::  subproject and html
 
