@@ -1,14 +1,14 @@
-.. _wifi:
+.. _pi_wifi:
 
 =================================
-Wi-Fi无线网络
+树莓派Wi-Fi无线
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   wi-fi_direct.rst
-   wi-fi_software.rst
+   pi_wi-fi_direct.rst
+   pi_wi-fi_ad_hoc.rst
 
 .. only::  subproject and html
 

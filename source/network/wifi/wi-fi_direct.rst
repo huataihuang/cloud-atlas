@@ -20,6 +20,11 @@ Wi-Fi Direct无线直连通常用于文件传输，Miracast，无线打印以及
 
    看起来 :ref:`wpa_supplicant` 在 ``P2P GO`` 网络上有独立实现，后续可以参考 `wpa_supplicant.conf 配置样例 <https://w1.fi/cgit/hostap/plain/wpa_supplicant/wpa_supplicant.conf>`_ 研究
 
+目标规划
+===========
+
+- :ref:`pi_wi-fi_direct`
+
 参考
 =======
 
