@@ -18,4 +18,14 @@
 
    铠侠KIOXIA EXCERIA NVMe SSD存储
 
-等收货后实际组装并使用后再继续完成本文...
+组装
+=====
+
+.. figure:: ../../_static/raspberry_pi/hardware/pi_5_exceria_nvme.png
+
+   装配完成后的使用M.2 NVMe SSD存储的树莓派5(nvme存储下面是 :ref:`pi_5_active_cooler` )
+
+软件配置
+===========
+
+:ref:`pi_5_pcie_3_m.2_ssd`

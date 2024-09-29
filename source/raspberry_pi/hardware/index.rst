@@ -4,11 +4,6 @@
 树莓派硬件
 =================================
 
-参考
-========
-
-- `Wikipedia: Raspberry Pi <https://en.wikipedia.org/wiki/Raspberry_Pi>`_
-
 .. toctree::
    :maxdepth: 1
 
@@ -21,6 +16,7 @@
    pi_5.rst
    pi_pcie.rst
    pi_5_pcie_m.2_ssd.rst
+   pi_5_pcie_3_m.2_ssd.rst
    pi_5_pcie_4_m.2_ssd.rst
    pi_ai_kit.rst
    pi_5_active_cooler.rst
