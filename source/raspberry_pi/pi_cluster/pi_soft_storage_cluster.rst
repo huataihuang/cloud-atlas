@@ -12,8 +12,8 @@
 
 既然我的Clous Atlas是一个模拟学习指南，那么尽可能少投入、尽可能多锻炼实践是我的终极目标，那么有没有可能用一个极为低廉的资金来实现一个功能齐全的 **软件模拟存储集群** 呢?
 
-我的构思
-==========
+我的构思一
+==============
 
 - 在 :ref:`boot_on_zfs_for_raspberry_pi` 实现RAID1存储ZFS:
 
@@ -34,3 +34,22 @@
 .. note::
 
    由于 :ref:`pi_5` 性能有限，完整部署的负载可能单台树莓派无法承担，必要时再购买1~2台 :ref:`pi_5` 进行横向扩展
+
+我的构思二
+============
+
+进一步的想法是结合现有 :ref:`pi_4` 来构建一种物理和虚拟结合的集群:
+
+- 我有 ``3个`` :ref:`pi_4` 作为 :ref:`kubernetes` 的控制平面(是的，原先我是作为工作节点，现在有了 :ref:`pi_5` 之后， :ref:`pi_4` 降级为控制，而 :ref:`pi_5` 作为计算节点)
+
+  - 管控节点部署 :ref:`prometheus` / :ref:`grafana` 等监控
+
+- 我 **又购置了一台** :ref:`pi_5` ，并且也添加了 **一块NVMe存储** ( :ref:`kioxia_exceria_g2` )
+
+  - 一个 :ref:`pi_5` 划分2个分区，用来模拟 :ref:`zfs` 的 RAID1 ，部署 :ref:`boot_on_zfs_for_raspberry_pi` (注意，这会消耗双倍的存储空间)，所以我仅使用 (128G x2)
+  - 一个 :ref:`pi_5` 使用传统的 :ref:`ext` 4 ，简单构建 :ref:`pi_5_nvme_boot` ，使用 128G (对应另外一个 :ref:`pi_5` )，然后再准备 128G EXT4文件系统(这个分区对应另一个 :ref:`pi_5` 的 :ref:`zfs` RAID1多消耗的冗余数据空间)，这个第二分区将作为 :ref:`zfs` 的实验室，也就是使用模拟块文件来测试ZFS的 RAIDZ
+  - 两个 :ref:`pi_5` 都使用 256G 来构建一个 :ref:`docker_zfs_driver` (开启压缩)，实现容器镜像本地存储
+  - 两个 :ref:`pi_5` 划分 1T 用于构建 :ref:`ceph` ，实现 :ref:`kubernetes` 云存储
+  - 两个 :ref:`pi_5` 剩余 512G (实际不足) 用于构建 :ref:`gluster` ，作为日常数据冗余存储，也提供给 :ref:`kubernetes` 作为文件存储和离线存储
+
+- :ref:`kubernetes` 集群主要容器镜像都存储在 :ref:`ceph` 云存储，仅对数据库容器存储采用本地存储(数据库有自己的容灾)

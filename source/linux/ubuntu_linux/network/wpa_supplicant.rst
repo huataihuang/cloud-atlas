@@ -114,8 +114,8 @@ IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP�
 
 .. literalinclude:: wpa_supplicant/wpa_supplicant-office.conf
    :language: bash
-   :linenos:
-   :caption:
+   :caption: ``/etc/wpa_supplicant/wpa_supplicant.conf`` 配置 ``WPA-EAP`` (对应有线网络的 ``IEEE8021X`` )
+   :emphasize-lines: 8-13
 
 简单的wpa_supplicant脚本
 ========================
@@ -170,6 +170,38 @@ IEEE8021X是用于有线网络的认证，对应的无线网络认证是WPA-EAP�
    :emphasize-lines: 4
 
 注意， :ref:`networkmanager` 不会管理 ``/etc/network/interfaces`` 配置中列出的接口，所以需要确保这个配置文件中没有包含无线网卡，以便让渡给NetworkManager管理
+
+:ref:`networkmanager` 和 ``wpa_supplicant`` 的无线连接优先级设置
+==================================================================
+
+当配置多个无线网络时候，可以设置一个优先级( ``priority`` )来按一定顺序连接无线， :ref:`networkmanager` 和 ``wpa_supplicant`` 都支持传递这个配置参数，但略有不同:
+
+- 直接编辑 ``/etc/wpa_supplicant/wpa_supplicant.conf`` ，可以为每个 ``network`` 配置不同的 ``priority`` (数字越小优先级越低):
+
+.. literalinclude:: wpa_supplicant/wpa_supplicant-office.conf
+   :language: bash
+   :caption: ``/etc/wpa_supplicant/wpa_supplicant.conf`` 配置 ``WPA-EAP`` (对应有线网络的 ``IEEE8021X`` )
+   :emphasize-lines: 14
+
+- 如果通过 :ref:`networkmanager` 来管理无线网络，则在使用 ``nmcli`` 命令时就可以指定 ``priority`` :
+
+.. literalinclude:: wpa_supplicant/nmcli_wifi_wpa-psk
+   :language: bash
+   :caption: :ref:`nmcli` 命令行传递 ``connection.autoconnect-priority`` 优先级参数
+   :emphasize-lines: 3
+
+上述 :ref:`nmcli` 命令传递参数会在 ``/etc/NetworkManager/system-connections/home.nmconnection`` 配置文件的 ``[connection]`` 配置段添加 ``autoconnect-priority=10``
+
+连接没有密码保护的开放网络
+==============================
+
+- 对于在机场等公共空间，开放无密码的wifi，可以设置 ``wpa_supplicant.conf`` 的 ``network`` 段落 ``key_mgmt=NONE`` :
+
+.. literalinclude:: wpa_supplicant/wpa_supplicant_open.conf
+   :caption: 连接开放无密码网络
+   :emphasize-lines: 2
+
+如果上述配置中没有指定 ``ssid`` 则会连接无线范围内任意一个开放网络
 
 启动时自动运行
 ================
@@ -285,3 +317,5 @@ avahi-daemon监听在UDP端口5353，所以防火墙需要打开这个端口。�
 
 - `Using WPA_Supplicant to Connect to WPA2 Wi-fi from Terminal on Ubuntu 16.04 Server <https://www.linuxbabe.com/command-line/ubuntu-server-16-04-wifi-wpa-supplicant>`_
 - `archlinux - wpa_supplicant <https://wiki.archlinux.org/index.php/Wpa_supplicant>`_
+- `How to manage available wireless network priority? <https://askubuntu.com/questions/165679/how-to-manage-available-wireless-network-priority>`_
+- `Connect to unsecured wireless network <https://raspberrypi.stackexchange.com/questions/15393/connect-to-unsecured-wireless-network>`_

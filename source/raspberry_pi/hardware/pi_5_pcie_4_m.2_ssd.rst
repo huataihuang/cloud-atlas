@@ -1,8 +1,8 @@
 .. _pi_5_pcie_4_m.2_ssd:
 
-============================================
-树莓派5 PCIe转M.2 NVMe "PCIe gen4" SSD存储
-============================================
+=======================================================
+(实践失败)树莓派5 PCIe转M.2 NVMe "PCIe gen4" SSD存储
+=======================================================
 
 我原本计划 :ref:`pi_5_pcie_m.2_ssd` 采用 :ref:`kioxia_exceria_g2` ，但是淘宝商家发错成 ``kioxia EXCERIA Plus`` 版本，也就是 ``PCIe gen4`` 规格的NVMe。从官方文档来看，树莓派只能工作于PCIe gen2 和 gen3，其中gen 3模式需要特定激活。
 
@@ -22,7 +22,7 @@
 
 - 修改 ``/boot/firmware/config.txt`` 设置:
 
-.. literalinclude:: pi_5_pcie_4_m.2_ssd/pcie_3_config.txt
+.. literalinclude:: pi_5_pcie_3_m.2_ssd/pcie_3_config.txt
    :caption: 配置激活 ``PCIe gen 3``
 
 可以看到确实激活了 ``pcie 3`` 模式，但是很不幸，无法正常使用 ``PCIe gen 4`` 的 :ref:`samsung_pm9a1`
