@@ -1,0 +1,34 @@
+# 案例: /dev/sda (第二块虚拟磁盘)作为LFS磁盘
+
+# 初始化磁盘分区表
+parted /dev/sda mklabel gpt
+
+# 创建第一个sda1分区，用于EFI启动
+parted -a optimal /dev/sda mkpart ESP fat32 0% 256MB
+parted /dev/sda set 1 esp on
+
+# /boot分区 sda2，分配1GB, ext4
+parted -a optimal /dev/sda mkpart bootfs ext4 256MB 1278MB
+
+# swap分区 sda3, 分配4GB
+parted -a optimal /dev/sda mkpart swap linux-swap 1278MB 5374MB
+
+# Arch Linux root分区 sda4 ，分配大约32G
+parted -a optimal /dev/sda mkpart arch-rootfs ext4 5374MB 37GB
+
+# LFS Linux root分区 sda5 ，分配大约64G
+parted -a optimal /dev/sda mkpart lfs-rootfs ext4 37GB 101GB
+
+# ZFS 分区 sda6，所有剩余磁盘(使用fdisk工具中t子命令来标记 FreeBSD ZFS 分区类型，不过ZFS并不在乎这个分区标签)
+parted -a optimal /dev/sda mkpart zpool 101GB 100%
+
+# 完成后检查
+parted /dev/sda print
+
+# 分区格式化
+mkfs.vfat -F 32 -n EFI /dev/sda1
+mkfs.ext4 /dev/sda2
+mkswap /dev/sda3
+mkfs.ext4 /dev/sda4
+mkfs.ext4 /dev/sda5
+# 最后一个sda5是保留给ZFS使用，所以不要格式化
