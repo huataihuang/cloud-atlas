@@ -30,7 +30,7 @@ LFS的目标架构是 AMD/Intel 的 x86(32位) 和 x86_64(64位) CPU (需要修�
 
 构建LFS至少需要一个现有的Linux系统:
 
-- 可以是一个已经正在运行的Linux系统，现代Linux发行版(需要较新版本，对内核有和工具链有要求)
+- 可以是一个已经正在运行的Linux系统，现代Linux发行版(需要较新版本，对内核有和工具链有要求)，我在 :ref:`lfs_mba` 中先安装一个 :ref:`arch_linux` 作为编译基础环境(同时也是向arch linux发行版学习软件组合和配置方法)
 - 也可以是某个发行版的LiveCD运行一个编译环境，例如我就使用 :ref:`fedora` 的一个LiveCD来完成，具体是通过 :ref:`create_vm` 运行Fedoraa LiveCD系统来编译构建
 
 32位 vs. 64位

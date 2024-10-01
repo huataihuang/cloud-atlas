@@ -4,6 +4,10 @@
 部署GlusterFS和Heketi
 =======================
 
+.. warning::
+
+   `GitHub: heketi/heketi <https://github.com/heketi/heketi/>`_ 从2023年7月开始已经不再开发，所以建议尝试 :ref:`kadalu` 来完成FlusterFS on Kubernetes
+
 参考
 ======
 

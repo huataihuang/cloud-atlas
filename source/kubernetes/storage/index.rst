@@ -18,6 +18,7 @@ Kubernetes存储
    k8s_rbd.rst
    k8s_storage_platform.rst
    rook/index
+   kadalu/index
    heketi/index
 
 .. only::  subproject and html

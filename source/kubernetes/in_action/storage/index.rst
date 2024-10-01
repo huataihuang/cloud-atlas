@@ -9,4 +9,3 @@ Kubernetes存储实践
 
    k8s_hostpath_pv_in_action.rst
    k8s_local_pv_in_action.rst
-   kadalu/index
