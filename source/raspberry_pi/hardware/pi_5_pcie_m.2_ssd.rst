@@ -28,4 +28,5 @@
 软件配置
 ===========
 
-:ref:`pi_5_pcie_3_m.2_ssd`
+- 首先配置激活 ``PCIe gen3支持`` :ref:`pi_5_pcie_3_m.2_ssd`
+- 然后配置 :ref:`pi_5_nvme_boot`
