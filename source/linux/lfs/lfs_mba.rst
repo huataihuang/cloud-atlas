@@ -10,7 +10,7 @@
 
 .. figure:: ../../_static/apple/macos/apple-macbook-air-2010-11.jpg
 
-   仅仅 **1.06公斤** 的 ``14年前`` MacBook Air (扶我起来还能打)
+   仅仅 **1.06公斤** 的 ``14年前`` MacBook Air ( ``扶我起来还能打`` )
 
 :ref:`lfs_prepare`
 ===================

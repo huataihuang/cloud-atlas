@@ -60,7 +60,7 @@
 
 - 安装 ``wpa_supplicant`` ::
 
-   sudo apt install wpasupplicant
+   sudo apt install wpa_supplicant
 
 - 创建初始配置:
 

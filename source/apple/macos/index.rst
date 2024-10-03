@@ -44,6 +44,7 @@ macOS
    vlc_play_bluray.rst
    macos_recovery.rst
    reset_mac.rst
+   fix_macbook_stuck_shift.rst
 
 .. only::  subproject and html
 

@@ -162,29 +162,40 @@ arch linux的镜像网站定义在 ``/etc/pacman.d/mirrorlist`` 。在这个定�
 配制
 ======
 
-- fstab: 生成fstab文件(这里 ``-U`` 或 ``-L`` 定义UUID或labels)::
+- fstab: 生成fstab文件(这里 ``-U`` 或 ``-L`` 定义UUID或labels):
 
-   genfstab -U /mnt >> /mnt/etc/fstab
+.. literalinclude:: archlinux_on_mba/fstab
+   :caption: 生成fstab文件
 
-- chroot: 将根修改到新系统::
+- chroot 将根修改到新系统:
 
-   arch-chroot /mnt
+.. literalinclude:: archlinux_on_mba/chroot
+   :caption: chroot进入安装的arch linux系统
+   :language: bash
 
-- 设置时区::
+- 设置时区:
 
-   ln -sf /usr/share/zoneinifo/Asia/Shanghai /etc/localtime
+.. literalinclude:: archlinux_on_mba/timezone
+   :language: bash
+   :caption: 设置上海时区
 
-运行 ``hwclock`` 生成 ``/etc/cadjtime`` ::
+- 运行 ``hwclock`` 生成 ``/etc/cadjtime`` :
 
-   hwclock --systohc
+.. literalinclude:: archlinux_on_mba/hwclock
+   :language: bash
+   :caption: 同步校正时间到硬件时钟
 
-- 本地化语言支持 - 只需要UTF支持就可以，所以修改 ``/etc/locale.gen`` 保留 ``en_US.UTF-8 UTF-8`` 然后执行::
+- 本地化语言支持 - 只需要UTF支持就可以，所以修改 ``/etc/locale.gen`` 保留 ``en_US.UTF-8 UTF-8`` 然后执行:
 
-   locale-gen
+.. literalinclude:: archlinux_on_mba/local-gen
+   :language: bash
+   :caption: 本地化语言支持 UTF
 
-创建 ``locale.conf`` 设置如下::
+创建 ``locale.conf`` 设置如下:
 
-   LANG=en_US.UTF-8
+.. literalinclude:: archlinux_on_mba/locale.conf
+   :language: bash
+   :caption: ``/etc/locale.conf`` 配置
 
 - 创建 ``/etc/hostname`` 内容是主机名::
 
@@ -195,20 +206,17 @@ arch linux的镜像网站定义在 ``/etc/pacman.d/mirrorlist`` 。在这个定�
    127.0.0.1    localhost
    127.0.1.1    xcloud.huatai.me  xcloud
 
-- 设置root密码::
+- 设置root密码:
 
-   passwd
+.. literalinclude:: archlinux_on_mba/passwd
+   :language: bash
+   :caption: 设置root密码
 
-- 设置日常帐号::
+- 创建日常账号( ``admin`` )并设置sudo:
 
-   groupadd -g 20 staff
-   useradd -g 20 -u 501 -d /home/huatai -m huatai
-   passwd huatai
-
-- 设置sudo::
-
-   pacman -S sudo
-   echo "huatai   ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+.. literalinclude:: archlinux_on_mba/admin_sudo
+   :language: bash
+   :caption: 设置admin账号并设置sudo
 
 - 之前在 :ref:`archlinux_on_thinkpad_x220` 遇到默认内核没有加载Vfat模块导致无法读取EFI分区,编辑 ``/etc/mkinitcpio.conf`` ::
 

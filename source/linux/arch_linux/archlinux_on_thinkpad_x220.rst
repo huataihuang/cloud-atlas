@@ -130,31 +130,40 @@ arch linux的镜像网站定义在 ``/etc/pacman.d/mirrorlist`` 。在这个定�
 
 - fstab
 
-生成fstab文件(这里 ``-U`` 或 ``-L`` 定义UUID或labels)::
+生成fstab文件(这里 ``-U`` 或 ``-L`` 定义UUID或labels):
 
-   genfstab -U /mnt >> /mnt/etc/fstab
+.. literalinclude:: archlinux_on_mba/fstab
+   :caption: 生成fstab文件
 
-- chroot
+- chroot 将根修改到新系统:
 
-将根修改到新系统::
+.. literalinclude:: archlinux_on_mba/chroot
+   :caption: chroot进入安装的arch linux系统
+   :language: bash
 
-   arch-chroot /mnt
+- 设置时区:
 
-- 设置时区::
+.. literalinclude:: archlinux_on_mba/timezone
+   :language: bash
+   :caption: 设置上海时区
 
-   ln -sf /usr/share/zoneinifo/Assia/Shanghai /etcc/localtime
+- 运行 hwclock 生成 /etc/cadjtime :
 
-运行 hwclock 生成 /etc/cadjtime ::
+.. literalinclude:: archlinux_on_mba/hwclock
+   :language: bash
+   :caption: 同步校正时间到硬件时钟
 
-   hwclock --systohc
+- 本地化语言支持 - 只需要UTF支持就可以，所以修改 ``/etc/locale.gen`` 保留 ``en_US.UTF-8 UTF-8`` 然后执行:
 
-- 本地化语言支持 - 只需要UTF支持就可以，所以修改 ``/etc/locale.gen`` 保留 ``en_US.UTF-8 UTF-8`` 然后执行::
+.. literalinclude:: archlinux_on_mba/local-gen
+   :language: bash
+   :caption: 本地化语言支持 UTF
 
-   locale-gen
+- 创建 ``locale.conf`` 设置如下:
 
-创建 ``locale.conf`` 设置如下::
-
-   LANG=en_US.UTF-8
+.. literalinclude:: archlinux_on_mba/locale.conf
+   :language: bash
+   :caption: ``/etc/locale.conf`` 配置
 
 网络配置
 ----------
@@ -171,27 +180,26 @@ arch linux的镜像网站定义在 ``/etc/pacman.d/mirrorlist`` 。在这个定�
 Initramfs
 -------------
 
-通常不需要创建新的 ``initramfs`` ，因为在执行 ``pacstrap`` 命令安装linux软件包的时候已经执行过 ``mkinitcpio`` 。不过，对于LVM, 系统加密 或者 RAID ，则需要修改 ``mkinitcpio.conf`` 然后创建 initramfs 镜像::
+通常不需要创建新的 ``initramfs`` ，因为在执行 ``pacstrap`` 命令安装linux软件包的时候已经执行过 ``mkinitcpio`` 。不过，对于LVM, 系统加密 或者 RAID ，则需要修改 ``mkinitcpio.conf`` 然后创建 initramfs 镜像:
 
-   mkinitcpio -p linux
+.. literalinclude:: archlinux_on_mba/mkinitcpio
+   :language: bash
+   :caption: 修订 ``/etc/mkinitcpio.conf`` 后执行 ``mkinitcpio`` 生成定制的 **Initramfs**
 
 Root密码及用户账号
 ====================
 
-- 设置root密码::
+- 设置root密码:
 
-   passwd
+.. literalinclude:: archlinux_on_mba/passwd
+   :language: bash
+   :caption: 设置root密码
 
-- 设置日常账号::
+- 创建日常账号( ``admin`` )并设置sudo:
 
-   group add -g 20 staff
-   useradd -g 20 -u 501 -d /home/huatai -m huatai
-   passwd huatai
-
-- 设置sudo::
-
-   pacman -S sudo
-   echo "huatai   ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+.. literalinclude:: archlinux_on_mba/admin_sudo
+   :language: bash
+   :caption: 设置admin账号并设置sudo
 
 安装Boot Loader
 ==================
@@ -204,13 +212,11 @@ Root密码及用户账号
 
    详细请参考 `EFI system partition - Mount the partitioon <https://wiki.archlinux.org/index.php/EFI_system_partition#Mount_the_partition>`_
 
-待实践，通常应该是::
+- 安装Boot Loader (参考 :ref:`gentoo_grub` ) (实际实践是在 :ref:`archlinux_on_mba` 完成)
 
-   pacman -S grub
-   grub-install --target=x86_64-efi --efi-directory=esp --bootloader-id=GRUB
-   grub-mkconfig -o /boot/grub/grub.cfg
-
-由于我使用EFISTUB直接启动内核，所以不需要安装boot loader，目前这步跳过。
+.. literalinclude:: archlinux_on_mba/grub
+   :language: bash
+   :caption: 安装和设置grub
 
 使用EFISTUB启动
 ==================

@@ -30,7 +30,7 @@ arch linux中文环境
    :language: bash
    :caption: arch linux安装fcitx5和chinese-addons
 
-- (可选，如果在x86平台) 使用 :ref:`fcitx` + Rime引擎: （ArchLinux没有提供ARM版本Rime，只有x86版本):
+- (可选，如果在x86平台) 使用 :ref:`fcitx` + Rime引擎(比较小巧，112MB) （ArchLinux没有提供ARM版本Rime，只有x86版本):
 
 .. literalinclude:: archlinux_chinese/archlinux_fcitx_rime
    :language: bash
