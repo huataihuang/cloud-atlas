@@ -17,7 +17,7 @@ archlinux Sway图形桌面
 
    pacman -S dmenu
 
-- (由于alacritty不能很好支持中文输入，所以放弃):strike:`安装alacritty作为终端` (参考 :ref:`freebsd_sway` )::
+- ( **由于alacritty不能很好支持中文输入，所以放弃** ) :strike:`安装alacritty作为终端` (参考 :ref:`freebsd_sway` )::
 
    pacman -S alacritty
 
@@ -32,14 +32,27 @@ Sway启动前需要访问硬件设备，例如键盘，鼠标和图形卡，这�
 
    pacman -S seatd
 
-如果系统同时安装了 ``polkit`` ，那么 Sway 可以自动访问seat。另一种方式是，如果没有安装 ``polkit`` ，则将自己加入 ``seat`` 用户组，然后激活和启动 ``seatd.service`` (我采用这种方法)::
+如果系统同时安装了 ``polkit`` ，那么 Sway 可以自动访问seat。
 
+- 另一种方式是，如果没有安装 ``polkit`` ，则将自己加入 ``seat`` 用户组，然后激活和启动 ``seatd.service`` ::
+
+   usermod -aG seat admin
    systemctl enable seatd.service
    systemctl start seatd.service
+
+如果没有将用户加入到 ``seat`` 组，则启动sway时候，终端会显示报错:
+
+.. literalinclude:: archlinux_sway/seat_sock_err
+   :caption: 用户没有属于 ``seat`` 组，则访问 ``/run/seatd.sock`` 无权限报错
 
 - 启动::
 
    sway
+
+如果 :ref:`archlinux_chinese` ，启动时需要增加 ``dbus`` 支持:
+
+.. literalinclude:: ../gentoo_linux/gentoo_sway/start_sway
+   :caption: 使用 ``dbus-run-session`` 启动 sway 这样能够正确获得 :ref:`dbus_session_bus`
 
 配置
 ========
