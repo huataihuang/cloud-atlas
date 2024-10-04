@@ -8,9 +8,11 @@
 ============
 
 - 处理器: Broadcom BCM2712 quad-core Arm Cortex A76 processor @ 2.4GHz (大约是上一代 :ref:`pi_4` 的2~3倍性能)
-- 内存: 最高8GB
+- 内存: 最高8GB(LPDDR4-4267)
 - 存储接口: PCIe 2.0 X1 接口FPC连接器
 - PWM控制风扇接口(需要主动散热)
+- 千兆以太网，支持双频802.11ac的无线网络及蓝牙5.0 (和 :ref:`pi_4` 一样)
+- 额定功率 25W(5V/5A)
 
 .. note::
 
