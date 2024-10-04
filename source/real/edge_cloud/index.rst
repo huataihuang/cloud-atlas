@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    edge_cloud_infra.rst
+   edge_cloud_infra_2024.rst
    edge_jetson.rst
    edge_jetson_net.rst
    edge_pi.rst
