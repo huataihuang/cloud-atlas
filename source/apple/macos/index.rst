@@ -10,6 +10,7 @@ macOS
    :maxdepth: 1
 
    mba11_late_2010.rst
+   mba11_late_2010_replace_keyboard.rst
    mba13_early_2014.rst
    mbp15_late_2013.rst
    mbp15_2018.rst
