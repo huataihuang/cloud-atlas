@@ -35,7 +35,6 @@ Termux开发环境
 
 .. literalinclude:: termux_dev/termux_apt_dev
    :language: bash
-   :linenos:
    :caption: termux中安装软件包(apt)
 
 vim

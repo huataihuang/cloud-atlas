@@ -28,6 +28,7 @@ Infra-Service Atlas
    nfs/index
    asciinema/index
    guacamole/index
+   web_terminal/index
 
 .. only::  subproject and html
 

@@ -21,52 +21,32 @@
 硬件环境
 =========
 
-我最初想利旧我之前购买的    
+我最初主要考虑省钱，有几个思路:
 
-**以下文档待重写**
+- 只购买一台 :ref:`pi_5` ，然后通过部署 :ref:`kind` 来模拟整个 :ref:`kubernetes` 集群
+- 想利旧我之前购买的 :ref:`pi_4` ，也就是将3台 :ref:`pi_4` 作为管控节点，运行起一个初始化的 :ref:`kubernetes` ，然后将 :ref:`pi_5` 来作为工作节点(最初只购买一台)，这样也能通过降低硬件成本来节约资金
 
-我购买过多代树莓派产品以及 :ref:`jetson_nano` :
+不过最终我还是没有忍住，陆续购买了3台 :ref:`pi_5` ，并且配套 :ref:`pi_5_pcie_m.2_ssd` ，目标是能够实现和 :ref:`priv_cloud` 相似功能(但性能较弱):
 
-- :ref:`pi_1` - :strike:`构建边缘云计算(监控)` (考虑到组装树莓派集群需要小巧，类似 :ref:`turing_pi` ，所以我还是决定舍弃 :ref:`pi_1` ，改为采用一台低配置 :ref:`pi_4` 来实现管理和监控)
-- :ref:`pi_3` - 构建边缘云计算(管控节点)
-- :ref:`pi_4` - 构建边缘云计算(计算节点)
-
-  - 其中一台 ``2G`` 内存配置的 :ref:`pi_4` 独立作为监控和管理服务器，提供这个 :ref:`edge_cloud` 的监控
-
-    - 资源有限，并且要有一个 :ref:`prometheus` 体系之外的单独监控，所以该节点运行轻量级监控以及对外通知
-
-    - 采用监控( :ref:`prometheus` 结合跟多网络管理平台 )
-
-  - 在3台 :ref:`pi_4` 作为工作节点( ``worker`` )
-
-    - 由于3个 :ref:`pi_4` 的其中一个只有 ``2G`` 内存，调度只分配监控服务 :ref:`prometheus` / :ref:`grafana` / :ref:`thanos` 来构建集群监控
-
-  - 另外两台 ``8G`` 内存配置的 :ref:`pi_4` 加入 :ref:`k3s` 作为工作节点
-
-    - ``8G`` 节点内存，部署 :ref:`jenkins` (集成在 :ref:`rancher` 中作为 pipeline)
-
-- :ref:`jetson_nano` - 构建边缘云计算( :ref:`machine_learning` )
-- :ref:`pi_400` - 作为管理和操作(悲剧: 已损坏)
-
-我将 3个 :ref:`pi_4` 和 3 个 :ref:`pi_3` 堆叠起来，构建一个mini的树莓派集群:
-
-.. figure:: ../../_static/raspberry_pi/pi_cluster/edge_cloud_pi.jpg
-   :scale: 60
+- :ref:`k3s` 实现 :ref:`kubernetes` ，部署企业级的业务容器
+- 后端持久化存储采用 :ref:`ceph` :ref:`gluster` :ref:`zfs` ，实践 :ref:`arm` 边缘计算
+- 后续补充 :ref:`hailo_ai` 学习实践 :ref:`machine_learning`
+- 如果还能修好 :ref:`jetson_nano`
 
 ARM服务器分布
 =============
 
 .. csv-table:: ARM边缘计算主机分配
-   :file: edge_cloud_infra/hosts.csv
+   :file: edge_cloud_infra_2024/hosts.csv
    :widths: 20, 10, 10, 10, 20, 30
    :header-rows: 1
 
-ARM架构的边缘计算采用了 ``192.168.7.x`` 作为网络IP段(融入到我的家庭网络)，和 :ref:`priv_cloud_infra` 的 ``192.168.6.x`` 隔离，中间采用 3层 :ref:`cisco` 路由
+ARM架构的边缘计算采用了 ``192.168.7.x`` 作为网络IP段，和 :ref:`priv_cloud_infra` 的 ``192.168.6.x`` 隔离
 
 虽然也可以在树莓派上实现 :ref:`arm_kvm` ，但是考虑到边缘计算硬件性能有限，所以采用轻量级 :ref:`kubernetes` 实现 :ref:`k3s` 来构建mini集群，目标是实现:
 
 - 任意调度计算资源实现服务的伸缩、高可用
-- 构建边缘计算场景: 传感器数据采集、存储、传输，以及独立的AI计算，结合 :ref:`priv_cloud` 的强大算力，实现云计算的合理分布
+- 构建边缘计算场景: 传感器数据采集、存储、传输，以及独立的AI计算
 
 .. note::
 
@@ -78,17 +58,3 @@ ARM架构的边缘计算采用了 ``192.168.7.x`` 作为网络IP段(融入到我
    - 保留一段IP用于内网DHCP，提供手机等移动客户端使用:
 
      - 192.168.7.151 ~ 192.168.7.199
-
-网络互联(原构想)
-==================
-
-模拟多机房互联:
-
-- (废弃)使用 :ref:`thinkpad_x220` 构建VPN中心节点，实现多机房集中到中心节点连接
-- (废弃)在每个集群上启动 :ref:`bird` 路由Daemon来维护动态路由，并结合 :ref:`k8s_network_infra` 实现不同集群路由
-
-网络互联
-============
-
-作为边缘云计算集群，ARM设备的低功耗适合构建在无需风扇散热的角落里。我在家中采用树莓派构建一个无风扇的静音集群，安装在桌子底下的树莓派设备，完全不会影响工作生活。那么，如何实现树莓派连接外部网络，以及对外提供服务访问呢:
-

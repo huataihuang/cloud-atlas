@@ -53,7 +53,7 @@ Kubebox功能展示
 服务器运行
 -----------
 
-kubebox可以作为Kubernetes集群的服务运行，终端模拟是通过 `xterm.js <https://github.com/xtermjs/xterm.js>`_ 结合kubebox服务代理和Kubernetes master API通讯。
+kubebox可以作为Kubernetes集群的服务运行，终端模拟是通过 :ref:`xtermjs` 结合kubebox服务代理和Kubernetes master API通讯。
 
 - 部署Kubernetes集群的kubebox服务::
 
