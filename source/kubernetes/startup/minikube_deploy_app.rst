@@ -21,9 +21,9 @@ master节点是负责集群所有活动的协调，例如调度应用程序，�
 
 - ``node``
 
-每个node节点都运行一个 ``kubelet`` 代理程序，用于管理节点以及和Kubernetes master通讯。节点也安装了用于操作容器都工具，例如Docker或rkt。一个用于生产环境都Kubernetes集群至少需要3个node节点。
+每个node节点都运行一个 ``kubelet`` 代理程序，用于管理节点以及和Kubernetes master通讯。节点也安装了用于操作容器的工具，例如Docker或rkt。一个用于生产环境的Kubernetes集群至少需要3个node节点。
 
-但你在kubernetes中部署应用时，你是和master节点进行交互以启动应用程序的容器。master节点会将容器调度到集群的node节点。 ``node节点和master节点之间通许使用Kubernetes API`` ，也就是master对外暴露的API接口提供的。用户虽然使用的是 ``kubectl`` 命令行工具，实际也是调用 Kubernetes API和集群进行交互。
+但你在kubernetes中部署应用时，你是和master节点进行交互以启动应用程序的容器。master节点会将容器调度到集群的node节点。 ``node节点和master节点之间通讯使用Kubernetes API`` ，也就是master对外暴露的API接口提供的。用户虽然使用的是 ``kubectl`` 命令行工具，实际也是调用 Kubernetes API和集群进行交互。
 
 .. note::
 
@@ -117,7 +117,7 @@ Kubernetes是采用最终一致性方式来维护系统的。一旦应用实例�
 
 .. note::
 
-   当 Pod 创建并运行，pod 是运行在Kubernetes内部当，并且运行在一个私有并且隔离的网络中。默认情况下，pod可以被相同的kubernetes集群内的其他pod和service访问，但是不能被外部网络访问。此时我们使用 ``kubectl`` 命令实际上是和应用程序的API endpoint 通讯交互。
+   当 Pod 创建并运行，pod 是运行在Kubernetes内部的，并且运行在一个私有并且隔离的网络中。默认情况下，pod可以被相同的kubernetes集群内的其他pod和service访问，但是不能被外部网络访问。此时我们使用 ``kubectl`` 命令实际上是和应用程序的API endpoint 通讯交互。
 
 - ``kubectl proxy``
 
