@@ -70,23 +70,36 @@ Mac OS X 10.9.5(Mavericks)是最后一代拟物化Mac OS X，具有经典的拟�
 
 苹果公司提供了macOS的免费升级，并且每次升级都会带来全新的功能改进和bug修复。苹果的MacBook有一个特殊的recovery分区，能够通过网络自动恢复破坏的操作系统，不过，这个修复只限于最近安装的操作系统版本。也就是说，一旦操作系统升级，就如果iOS升级一样，想要回退到之前的旧版本，则非常困难。
 
-不过，好在Mac设备是生产力设备，苹果公司相对控制较少，只要能够找到早期发行版的安装介质，依然有可能降级Mac操作系统。只是，这个找寻非常花费时间，所以自制安装介质通常需要同样的操作系统，就比较折腾。所以，我总结了一些经验：
+不过，好在Mac设备是生产力设备，苹果公司相对控制较少，只要能够找到早期发行版的安装介质，依然有可能降级Mac操作系统。 
 
-* 从 `Mac OS X Mountain Lion 10.8.5 Free Download <http://allmacworld.com/mac-os-x-mountain-lion-10-8-5-free-download/>`_ 下载 Mountain Lion 10.8.5镜像文件.dmg
+**警告:这段当时经验可能不正确，我现在采用直接制作安装启动盘** :strike:`只是，这个找寻非常花费时间，所以自制安装介质通常需要同样的操作系统，就比较折腾。所以，我总结了一些经验` ：
 
-  * 选择Mountain Lion的原因是只有这个版本才能直接从安装包中直接复制出`InstallESD.dmg`光盘镜像；
-  * 而更高的Mavericks则需要动用 ``createinstallmedia`` 镜像工具，可惜这个镜像工具必须在Mavericks操作系统中运行，并且需要从AppStore下载Installer软件包，这两个条件无法满足(当时没有正在运行Mavericks的Mac设备)
-
-* 使用 ``InstallESD.dmg`` 光盘镜像先在VMware Fusion中安装一个Mountain Lion的虚拟机，这样就具备了最初的低版本操作系统。
-* 在Mountain Lion的虚拟机中，支持使用 ``Disk Utility`` 来创建安装U盘：
-
-  * 使用从ISORIVER下载 `Mac OS X Mavericks 10.9 ISO and DMG Image Download <https://isoriver.com/mac-os-x-mavericks-10-9-iso-dmg-image/>`_ 的 ``Mavericks_ESD.dmg`` 恢复到U盘中，然后将U盘拿到物理主机MacBook Air 2011上安装。
-
-* 后来还找到了很久以前(2017年)通过Time Machine备份的笔记本完整操作系统，也可以恢复旧版本OS X，甚至可以用来创建VMware虚拟机。
+  * 从 `Mac OS X Mountain Lion 10.8.5 Free Download <http://allmacworld.com/mac-os-x-mountain-lion-10-8-5-free-download/>`_ 下载 Mountain Lion 10.8.5镜像文件.dmg
+  
+    * 选择Mountain Lion的原因是只有这个版本才能直接从安装包中直接复制出`InstallESD.dmg`光盘镜像；
+    * 而更高的Mavericks则需要动用 ``createinstallmedia`` 镜像工具，可惜这个镜像工具必须在Mavericks操作系统中运行，并且需要从AppStore下载Installer软件包，这两个条件无法满足(当时没有正在运行Mavericks的Mac设备)
+  
+  * 使用 ``InstallESD.dmg`` 光盘镜像先在VMware Fusion中安装一个Mountain Lion的虚拟机，这样就具备了最初的低版本操作系统。
+  * 在Mountain Lion的虚拟机中，支持使用 ``Disk Utility`` 来创建安装U盘：
+  
+    * 使用从ISORIVER下载 `Mac OS X Mavericks 10.9 ISO and DMG Image Download <https://isoriver.com/mac-os-x-mavericks-10-9-iso-dmg-image/>`_ 的 ``Mavericks_ESD.dmg`` 恢复到U盘中，然后将U盘拿到物理主机MacBook Air 2011上安装。
+  
+  * 后来还找到了很久以前(2017年)通过Time Machine备份的笔记本完整操作系统，也可以恢复旧版本OS X，甚至可以用来创建VMware虚拟机。
 
 .. note::
 
    我的折腾记录请参考 `降级macOS <https://github.com/huataihuang/cloud-atlas-draft/tree/master/develop/mac/downgrade_macos.md>`_
+
+2024年安装Mavericks经验
+=========================
+
+我在 2024年10月 重新修复好 :ref:`mba11_late_2010` 尝试重新安装Mavericks时经验;
+
+- 这个 :ref:`mba11_late_2010` 太古老了，虽然internet recovery显示可以安装Lion，但是实际安装时候报错，最终还是通过 :ref:`macos_install_drive` 来安装Mavericks
+- 我在网上找到国内 `苹果系统之家精品软件分享 <https://macoshome.com>`_ 提供的安装软件包 ``OS_X_Mavericks_10.9.5_macOShome.dmg`` ，直接在 ``macOS Big Sur 11.7.10`` 上执行以下命令制作启动安装盘:
+
+.. literalinclude:: skeuomorphism_os/createinstallmedia
+   :caption: 制作Mavericks启动安装U盘
 
 Apple ID
 ----------

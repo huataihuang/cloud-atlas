@@ -18,10 +18,10 @@ Store中选择最新操作系统安装升级，但是在下载了安装软件之
 
 - 使用Disk Utility将U盘格式化成 Mac OS Extended(Jorunaled) 文件系统 - 这里假设格式化磁盘命名为 ``macos_installer`` ，则后续制作U盘的卷名就是 ``/Volumes/macos_installer``
 
-- 在终端执行以下命令创建启动安装U盘::
+- 在终端执行以下命令创建启动安装U盘:
 
-   sudo /Applications/Install\ macOS\ Big\ Sur.app/Contents/Resources/createinstallmedia \
-      --volume /Volumes/macos_installer -- /Applications/Install\ macOS\ Big\ Sur.app
+.. literalinclude:: macos_install_drive/createinstallmedia
+   :caption: 创建启动安装U盘
 
 修改安全设置
 ================
