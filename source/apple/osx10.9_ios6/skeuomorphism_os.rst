@@ -72,7 +72,15 @@ Mac OS X 10.9.5(Mavericks)是最后一代拟物化Mac OS X，具有经典的拟�
 
 不过，好在Mac设备是生产力设备，苹果公司相对控制较少，只要能够找到早期发行版的安装介质，依然有可能降级Mac操作系统。 
 
-**警告:这段当时经验可能不正确，我现在采用直接制作安装启动盘** :strike:`只是，这个找寻非常花费时间，所以自制安装介质通常需要同样的操作系统，就比较折腾。所以，我总结了一些经验` ：
+.. warning::
+
+   现在(2024年10月) ISORIVER 下载服务器已经无法直接访问了，所以实际下载ISO镜像需要翻墙
+
+.. note::
+
+   我的2024年10月实践经验证明，这段安装方法是有效的，目前看来只有这种方法
+
+只是，这个找寻非常花费时间，所以自制安装介质通常需要同样的操作系统，就比较折腾。所以，我总结了一些经验 ：
 
   * 从 `Mac OS X Mountain Lion 10.8.5 Free Download <http://allmacworld.com/mac-os-x-mountain-lion-10-8-5-free-download/>`_ 下载 Mountain Lion 10.8.5镜像文件.dmg
   
@@ -84,16 +92,16 @@ Mac OS X 10.9.5(Mavericks)是最后一代拟物化Mac OS X，具有经典的拟�
   
     * 使用从ISORIVER下载 `Mac OS X Mavericks 10.9 ISO and DMG Image Download <https://isoriver.com/mac-os-x-mavericks-10-9-iso-dmg-image/>`_ 的 ``Mavericks_ESD.dmg`` 恢复到U盘中，然后将U盘拿到物理主机MacBook Air 2011上安装。
   
-  * 后来还找到了很久以前(2017年)通过Time Machine备份的笔记本完整操作系统，也可以恢复旧版本OS X，甚至可以用来创建VMware虚拟机。
+  * :strike`后来还找到了很久以前(2017年)通过Time Machine备份的笔记本完整操作系统，也可以恢复旧版本OS X，甚至可以用来创建VMware虚拟机。`
 
 .. note::
 
    我的折腾记录请参考 `降级macOS <https://github.com/huataihuang/cloud-atlas-draft/tree/master/develop/mac/downgrade_macos.md>`_
 
-2024年安装Mavericks经验
-=========================
+失败的经验(安装包校验失败)
+============================
 
-我在 2024年10月 重新修复好 :ref:`mba11_late_2010` 尝试重新安装Mavericks时经验;
+我在 2024年10月 重新修复好 :ref:`mba11_late_2010` 尝试重新安装Mavericks时(失败)，原本以为能够直接安装Mavericks，但是实践是失败的，依然要采用之前安装方法
 
 - 这个 :ref:`mba11_late_2010` 太古老了，虽然internet recovery显示可以安装Lion，但是实际安装时候报错，最终还是通过 :ref:`macos_install_drive` 来安装Mavericks
 - 我在网上找到国内 `苹果系统之家精品软件分享 <https://macoshome.com>`_ 提供的安装软件包 ``OS_X_Mavericks_10.9.5_macOShome.dmg`` ，直接在 ``macOS Big Sur 11.7.10`` 上执行以下命令制作启动安装盘:
@@ -101,8 +109,21 @@ Mac OS X 10.9.5(Mavericks)是最后一代拟物化Mac OS X，具有经典的拟�
 .. literalinclude:: skeuomorphism_os/createinstallmedia
    :caption: 制作Mavericks启动安装U盘
 
+- **但是安装过程启动后，提示安装程序无法通过苹果的校验(程序被修改过)，所以Installer直接失败退出了**
+
+重试安装的经验
+================
+
+2024年10月再次实践，我发现之前的从 ISORIVER 下载镜像的经验是可行的，只是需要增加翻墙步骤(之前可以畅通无阻直接下载的啊):
+
+- 使用从ISORIVER下载 `Mac OS X Mavericks 10.9 ISO and DMG Image Download <https://isoriver.com/mac-os-x-mavericks-10-9-iso-dmg-image/>`_ 的 ``Mavericks_ESD.dmg`` 恢复到U盘中，然后将U盘拿到物理主机MacBook Air 2011上安装。注意，只有 ``10.9.4`` 安装镜像可以下载到。
+
+  - 再次实践证明，下载到的官方  ``Mavericks_ESD.dmg`` 只能在Mavericks或更低Mac OS X上运行安装，高版本无法构建Installer，所以，还是要像之前那样，先搞到一个Lion版本的运行主机(或虚拟机)，安装了这个 ``Mavericks_ESD.dmg`` 之后才能从中使用 ``createinstallmedia`` 命令创建 ``Mavericks`` 安装U盘
+
+- 从苹果官网可以获得 `下载 - OS X Mavericks 组合更新 10.9.5 <https://support.apple.com/zh-cn/106413>`_ 进行升级(或许也可以直接通过版本升级完成)
+
 Apple ID
-----------
+============
 
 虽然iOS 6已经无法使用App Store安装软件，但是Mac笔记本性能相对性能过剩，早期的操作系统依然得到很多应用软件支持。但是Mac OS X 10.9.5和iOS 6一样，不支持Apple ID的双重验证，也就无法登录Apple账号。
 
