@@ -24,17 +24,22 @@ arch linux中文环境
 中文输入法
 ============
 
-- 安装 :ref:`fcitx` + 中文addons (依赖安装 fcitx5-qt ，所以安装软件非常大，有321MB):
+- ( **我现在不使用** )安装 :ref:`fcitx` + 中文addons (依赖安装 fcitx5-qt ，所以安装软件非常大，有321MB):
 
 .. literalinclude:: archlinux_chinese/archlinux_fcitx_chinese-addons
    :language: bash
    :caption: arch linux安装fcitx5和chinese-addons
 
-- (可选，如果在x86平台) 使用 :ref:`fcitx` + Rime引擎(比较小巧，112MB) （ArchLinux没有提供ARM版本Rime，只有x86版本):
+- ( **如果在x86平台，我现在就使用这个rime输入法** 当前在 :ref:`archlinux_on_mba` 实践就使用这个方法) 使用 :ref:`fcitx` + Rime引擎(比较小巧，112MB) （ArchLinux没有提供ARM版本Rime，只有x86版本):
 
 .. literalinclude:: archlinux_chinese/archlinux_fcitx_rime
    :language: bash
    :caption: arch linux安装fcitx5和rime输入引擎
+
+- 安装 ``fcitx5-gtk`` 支持firefox输入，见下文:
+
+.. literalinclude:: archlinux_chinese/archlinux_fcitx_gtk
+   :caption: 为支持 ``firefox`` 中文输入框，需要安装 ``fcitx5-gtk``
    
 配置中文输入法
 =================
@@ -63,7 +68,9 @@ arch linux中文环境
 
 .. note::
 
-   非必须，我觉得只要做好依次配置调整，将配置文件保存备用就可以了。配置文件是 ``.config/fcitx5`` 目录下文件
+   我觉得只要做好依次配置调整，将配置文件保存备用就可以了。配置文件是 ``.config/fcitx5`` 目录下文件
+
+   目前 :ref:`archlinux_on_mba` 实践我是安装了这个软件包，然后通过 ``fcitx5-configtool`` 配置添加 ``rime`` 输入法，就可以使用 ``ctrl+space`` 切换中文输入法
 
 配置
 =======
@@ -82,6 +89,27 @@ arch linux中文环境
 
 - chromium依然没有解决中文输入，所以还是如 :ref:`run_sway` 一样使用firefox来支持中文输入。 :strike:`但是这次遇到奇怪问题，就是fcitx5的候选字不显示`
 - 需要安装 ``fcitx5-gtk`` 才能在firefox中使用fcitx5输入法时候显示"候选字符"，否则看不到候选字词就只能盲打输入中文
+
+- ``foot`` 终端没有输入框，根据 `arch linux: Fcitx5 <https://wiki.archlinux.org/title/Fcitx5>`_ 说明，目前arch linux稳定版本还没有集成 ``sway-im`` 包所提供的补丁，这个包需要通过 :ref:`archlinux_aur` 安装:
+
+.. literalinclude:: archlinux_aur/install_yay
+   :caption: 编译安装yay
+
+.. note::
+
+   需要翻墙否则:
+
+   - :ref:`go_proxy`
+   - :ref:`git_proxy`
+
+.. literalinclude:: archlinux_chinese/sway-im
+   :caption: 安装 ``sway-im``
+
+.. note::
+
+   ``sway-im`` 是用来取代 ``sway`` 的，所以最后提示 ``sway-im-1:1.9-2 and sway-1:1.9-5 are in conflict. Remove sway? [y/N]`` 回答 **y**
+
+   替换以后，再次使用 ``sway`` (也就是补丁过的 ``sway-im`` )，就可以在 ``foot`` 中看到中文输入候选词框了，非常方便
 
 alacritty
 ----------------

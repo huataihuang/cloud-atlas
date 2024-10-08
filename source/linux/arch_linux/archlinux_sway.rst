@@ -28,13 +28,25 @@ archlinux Sway图形桌面
 启动
 =======
 
-Sway启动前需要访问硬件设备，例如键盘，鼠标和图形卡，这个硬件信息搜集称为一个 ``seat`` (类似 :ref:`freebsd_sway`)，所以需要安装::
+Sway启动前需要访问硬件设备，例如键盘，鼠标和图形卡，这个硬件信息搜集称为一个 ``seat`` (类似 :ref:`freebsd_sway`)
+
+设置访问方法一: ``polkit`` (推荐)
+--------------------------------------
+
+如果系统同时安装了 ``systemd-logind`` (不需要手工安装，默认 :ref:`archlinux_on_mba` 安装过程已经安装) 和 ``polkit`` 就能自动访问 ``seat`` ::
+
+   pacman -S polkit
+
+设置访问方法二: 手工设置加入 ``seat`` 用户组
+------------------------------------------------
+
+另一种方式是，如果没有安装 ``polkit`` ，则:
+
+- 安装 ``seatd`` ::
 
    pacman -S seatd
 
-如果系统同时安装了 ``polkit`` ，那么 Sway 可以自动访问seat。
-
-- 另一种方式是，如果没有安装 ``polkit`` ，则将自己加入 ``seat`` 用户组，然后激活和启动 ``seatd.service`` ::
+将自己加入 ``seat`` 用户组，然后激活和启动 ``seatd.service`` ::
 
    usermod -aG seat admin
    systemctl enable seatd.service
@@ -45,14 +57,89 @@ Sway启动前需要访问硬件设备，例如键盘，鼠标和图形卡，这�
 .. literalinclude:: archlinux_sway/seat_sock_err
    :caption: 用户没有属于 ``seat`` 组，则访问 ``/run/seatd.sock`` 无权限报错
 
-- 启动::
+使用
+========
+
+启动sway
+----------
+
+- 简单启动::
 
    sway
 
-如果 :ref:`archlinux_chinese` ，启动时需要增加 ``dbus`` 支持:
+(使用 ``polkit`` )启动时终端提示:
+
+.. literalinclude:: archlinux_sway/sway_output
+   :caption: 安装 ``polkit`` 直接使用 ``sway`` 启动终端输出
+
+``dbus-run-session`` 启动sway(arch linxu似乎不需要)
+------------------------------------------------------
+
+.. warning::
+
+   这次我绕了很多弯路， ``dbus-run-session`` 是我之前在 :ref:`gentoo_sway` 中实践所使用的，但是我发现这次在arch linux中套用这个经验没有成功，阅读了arch linux wiki中有关sway的部分，也没有提到需要使用 ``dbus-run-session`` ，所以这段存留，但是 **不要使用** 。
+
+- 如果 :ref:`archlinux_chinese` ，启动时需要增加 ``dbus`` 支持:
 
 .. literalinclude:: ../gentoo_linux/gentoo_sway/start_sway
    :caption: 使用 ``dbus-run-session`` 启动 sway 这样能够正确获得 :ref:`dbus_session_bus`
+
+(使用 ``polkit`` )启动时终端提示:
+
+.. literalinclude:: archlinux_sway/dbus_sway_output
+   :caption: 安装 ``polkit`` 使用 ``dbus-run-session`` 启动 sway 输出显示
+   :emphasize-lines: 1,2,6-8,10
+
+解决
+~~~~~~
+
+- 安装 ``xwayland`` ::
+
+   pacman -S xorg-xwayland
+
+.. note::
+
+   也可以不安装 ``xorg-xwayland`` ，上述报错只是因为arch linux默认的 ``sway`` 配置激活了 ``xwayland`` ，只需要禁止就可以阻止这个报错。也就是修改 ``~/.config/sway/config`` 设置::
+
+      xwayland disable
+
+可以 **消除第1,2行有关xwayland错误** ，此时报错依然有关于dbus报错:
+
+.. literalinclude:: archlinux_sway/dbus_error
+   :caption: 补充安装 ``xwayland``  后只解决了xwayland相关报错，但是dbus报错依旧
+   :emphasize-lines: 4-6
+
+参考 `process org.freedesktop.systemd1 exited with status 1 #5247 <https://github.com/systemd/systemd/issues/5247>`_ 上述有关 ``org.freedesktop.systemd1`` 报错是由于 ``/usr/share/dbus-1/services/org.freedesktop.systemd1.service`` 有一段代码:
+
+.. literalinclude:: archlinux_sway/org.freedesktop.systemd1.service
+   :language: bash
+   :caption: ``/usr/share/dbus-1/services/org.freedesktop.systemd1.service`` 执行 ``/bin/false``
+
+为何会出现调用 ``org.freedesktop.systemd1`` 呢，看起来这是一个检测功能。也就是说，当运行环境不满足 ``dbus`` 要求时候，就会走到调用这个注定返回 ``false`` 的子服务。会不会和上面两个没有设置的环境变量有关？
+
+**实践看来和这两个环境变量无关**
+
+参考 `swaywm: XDG_CURRENT_DESKTOP not set <https://bbs.archlinux.org/viewtopic.php?id=289689>`_ ，我在执行 ``dbus-run-session sway`` 之前加上了一个环境变量:
+
+.. literalinclude:: archlinux_sway/xdg_current_desktop
+   :caption: 增加 ``XDG_CURRENT_DESKTOP`` 环境变量设置
+
+可以消除环境变量错误，不过 dbus 相关的 ``org.freedesktop.systemd1`` 还是同样报错。
+
+不过，仔细看了报错信息中有 ``dbus-update-activation-environment`` ，在 `arch linux wiki: Sway #Configuration <https://wiki.archlinux.org/title/Sway#Configuration>`_ 有一段说明:
+
+用户配置应该包含  ``include /etc/sway/config.d/*`` 以便引入配置片段。 ``sway`` 软件包提供了 ``50-systemd-user.conf`` 插入文件，该文件将多个环境变量导入 :ref:`systemd` 用户会话和 ``dbus`` 。这对于 ``xdg-desktop-portal-wlr`` 等多个应用程序是必须的。
+
+想到之前在 :ref:`gentoo_sway` 有设置环境变量 ``XDG_RUNTIME_DIR`` 经历，并且需要在 :ref:`gentoo_xdg-desktop-portal` 安装过对应的 ``xdg-desktop-portal-wlr`` ( wayland显示服务器协议 的 wlroots 后端xdg-desktop-portal )，所以参考上次实践也在 arch linux 中安装对应的 ``xdg-desktop-portal`` :
+
+.. literalinclude:: archlinux_sway/xdg-desktop-portal
+   :caption: 安装 ``xdg-desktop-portal`` 以及对应的后端 ``xdg-desktop-portal-wlr`` + ``xdg-desktop-portal-gtk``
+
+我发现安装 ``xdg-desktop-portal-gtk`` 也会对应安装themes，所以能够消除上面找不到 ``icon themes`` 的报错(即消除了 ``Warning: no icon themes loaded`` )
+
+.. note::
+
+   暂时没有解决
 
 配置
 ========

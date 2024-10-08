@@ -30,7 +30,15 @@ MacBook Air上运行Arch Linux
 
    Arch Linux安装需要网络，通常建议先通过有线网络连接Internet来完成安装过程
 
-:ref:`mba11_late_2010` 无线网卡兼容性较好，能够直接被 Arch Linux 安装识别， :strike:`所以我这里采用无线配置网络后进行安装` 但是很不幸，和 :ref:`mba11_late_2010_win10` 经历一样，我发现初始时候， :ref:`mba11_late_2010` 键盘不能被安装程序正确识别，这导致了无法输入包含特定字符和数字的命令(实际上也就无法完成安装过程的命令输入)。不过，好在天无绝人之路，Arch Linux默认只要连接有线网络，就能够通过dhcp分配地址，加上默认启动了 :ref:`ssh` 服务，所以很快通过有线网络连接+ssh远程登陆就可以继续完成安装。
+:ref:`mba11_late_2010` 无线网卡兼容性较好，能够直接被 Arch Linux 安装识别，通过 :ref:`wpa_supplicant` 简单命令就能够启动无线:
+
+.. literalinclude:: archlinux_on_mba/wifi
+   :language: bash
+   :caption: 简单配置wifi
+
+如果没有无线，则将电脑通过有线连接，启动 ``dhcpcd`` 获取有线网络动态分配地址(或静态配置)
+
+然后就可以通过 :ref:`ssh` 访问arch linux安装的主机(需要先设置 ``root`` 密码以便能够远程登陆)
 
 磁盘分区
 ===========

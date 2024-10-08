@@ -39,6 +39,14 @@ yay是使用Go编写的Arch Linux AUR helper，基于 yaourt, apacman 和 pacaur
 
    编译安装yay会相关依赖安装开发软件工具链(gcc,make,automake等)，并且安装golang，所以也是一个准备开发环境的过程。
 
+.. note::
+
+   需要翻墙否则编译会失败:
+
+   - :ref:`go_proxy`
+   - :ref:`git_proxy`
+   - :ref:`curl_proxy` (我在 ``/etc/environment`` 中配置proxy环境变量)
+
 yay-git
 ----------
 
