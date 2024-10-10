@@ -1,0 +1,40 @@
+.. _foot:
+
+========================
+foot轻量级终端
+========================
+
+``foot`` 是一个快速、轻量级以及简单的 :ref:`wayland` 终端模拟器，也是 :ref:`sway` 默认使用的终端。
+
+foot支持CJK，也就是支持中文，但是由于 :ref:`wayland` 对输入法有特定要求，目前 :ref:`fcitx` 在 :ref:`archlinux_sway` 上通过安装 ``sway-im`` 补丁版本实现中文输入显示框。我的实践也验证 :ref:`arch_linux` 使用体验较好(sway环境可以非常方便实现 ``foot`` 中文输入)，而 :ref:`gentoo_sway` 则没有方便的解决方法(至少我还没有成功)。
+
+配置
+=======
+
+``foot`` 会加载位于 ``$XDG_CONFIG_HOME/foot/foot.ini``` 配置文件(默认就是 ``RHOME/.config/foot/foot.ini`` )。一般是将模板配置文件从 ``/etc/xdg/foot/foot.ini`` 复制过来进行修改，修订的配置项会覆盖默认配置而达到修改目标。
+
+终端类型
+=============
+
+如果没有配置 ``foot.init`` ，那么在默认终端配置实际上就是 ``TERM=foot`` ，但是这个终端类型不被很多终端模拟程序支持，例如使用 :ref:`tmux` 时，就会提示报错:
+
+.. literalinclude:: foot/unsuitable_terminal_err
+   :caption: 对于 ``foot`` 终端类型，没有得到 :ref:`tmux` 支持而报错
+
+解决方法就是修订 ``RHOME/.config/foot/foot.ini`` :
+
+.. literalinclude:: foot/foot.ini
+   :caption: 配置 ``foot.ini`` 设置终端类型 ``xterm-256color``
+
+这样，再次运行foot就能正确使用 :ref:`tmux`
+
+.. note::
+
+   ``foot`` 还支持 Server(daemon) 模式，可以节约运行内存消耗并加快启动速度。但是缺点是一旦某个窗口非常繁忙(例如忙于输出)则会导致所有窗口呆住。
+
+   默认 ``foot`` 运行是为每个窗口启动一个foot进程(非daemon模式)
+
+参考
+======
+
+- `archlinux wiki: Foot <https://wiki.archlinux.org/title/Foot>`_

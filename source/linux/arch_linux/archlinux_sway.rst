@@ -13,9 +13,14 @@ archlinux Sway图形桌面
 
    pacman -S sway swaylock swayidle swaybg
 
-- 安装 dmenu (本来想安装 wofi 但是发现依赖安装太多软件了)::
+- 安装 :strike:`dmenu` ``wmenu`` ( ``dmenu`` 和 ``rofi`` 虽然在sway环境工作良好，但是以来 Xwayland ，所以如果配置禁用 Xwayland，则推荐使用 ``wmenu`` ) ::
 
-   pacman -S dmenu
+   pacman -S wmenu
+
+注意: 实际上 ``sway`` 现在默认推荐使用 ``wmenu`` ，所以模板配置中已经包含了使用 ``wmenu`` 而不是早期的 ``dmenu`` ，配置实际案例如下(默认配置无需修改):
+
+.. literalinclude:: archlinux_sway/config_wmenu
+   :caption: sway默认config中已经激活了 ``wmenu``
 
 - ( **由于alacritty不能很好支持中文输入，所以放弃** ) :strike:`安装alacritty作为终端` (参考 :ref:`freebsd_sway` )::
 
