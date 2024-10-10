@@ -16,6 +16,7 @@ sway - i3兼容Wayland compositor
    wayland_sway_video.rst
    sway_screen_sharing.rst
    sway_macbook_key.rst
+   foot.rst
 
 .. only::  subproject and html
 
