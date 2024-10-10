@@ -18,6 +18,7 @@ Arch Linux
    archlinux_wpa_supplicant.rst
    archlinux_sway.rst
    archlinux_chinese.rst
+   archlinux_sway_chinese.rst
    archlinux_ms_fonts.rst
    archlinux_vultr.rst
    pacman.rst
