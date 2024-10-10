@@ -25,6 +25,10 @@ archlinux Sway图形桌面
 
    pacman -S foot
 
+- 安裝 swaybar::
+
+   pacman -S swaybar ttf-font-awesome
+
 启动
 =======
 
