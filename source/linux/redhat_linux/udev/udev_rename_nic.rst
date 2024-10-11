@@ -99,8 +99,8 @@
 
 - 配置 ``/etc/udev/rules.d/30-net_names.rules``
 
-   SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="ff:ff:ff:ff:ff:ff", NAME="eth0"
-   SUBSYSTEM=="net", ACTION=="add", ATTR{address}=="ee:ee:ee:ee:ee:ee", NAME="wlan0"
+.. literalinclude:: udev_rename_nic/30-net_names.rules
+   :caption: 网络设备添加时通过udev规则重命名设备
 
 重启系统后，对应的有线和无线网卡会分别重命名为 ``eth0`` 和 ``wlan0``
 
