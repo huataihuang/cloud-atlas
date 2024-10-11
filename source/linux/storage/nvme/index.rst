@@ -13,6 +13,7 @@ Linux NVMe
    samsung_pm9a1_rtl9210b.rst
    kioxia_exceria_g2.rst
    crucial_p3.rst
+   intel_optane_m10.rst
    nvme-cli.rst
    nvme_ssd_management.rst
    nvme_passthru.rst
