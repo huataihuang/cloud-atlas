@@ -16,7 +16,9 @@ arch linux配置IP(静态或动态)
 配置静态IP
 ==============
 
-``netctl`` 方法
+.. _netctl:
+
+``netctl``
 -------------------
 
 ``netctl`` 是用于控制systemd服务网络管理器的命令行工具，如果已经安装了 ``netctl`` 则有一些案例位于 ``/etc/netctl/examples/`` 目录下:
@@ -81,6 +83,16 @@ arch linux配置IP(静态或动态)
 .. literalinclude:: archlinux_config_ip/systemd-networkd-resolved
    :language: ini
    :caption: 激活 systemd-networkd 和 systemd-resolved
+
+:ref:`networkmanager`
+============================
+
+目前主要的发行版都使用 :ref:`networkmanager` 来管理Desktop版本的网络，配套提供了 :ref:`nmcli` 和 :ref:`nmtui` 来方便管理配置。其中 :ref:`nmtui` 使用最为简单，完全和图形桌面管理工具类似。
+
+使用 :ref:`nmtui` 配置静态IP地址，实际上就是生成一个 ``/etc/NetworkManager/system-connections`` 目录下以 ``.nmconnection`` 后缀的配置文件(文件名前缀可以任意字符串)。例如，可以将生成的 ``eth0.nmconnection`` 复制到其他服务器，简单修改就可以完成配置:
+
+.. literalinclude:: archlinux_config_ip/eth0.nmconnection
+   :caption: ``/etc/NetworkManager/system-connections/eth0.nmconnection``
 
 :ref:`wpa_supplicant`
 ==========================

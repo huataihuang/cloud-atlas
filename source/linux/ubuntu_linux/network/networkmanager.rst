@@ -19,6 +19,10 @@ NetworkManager
 
    :ref:`mobile_cloud_infra` 部署中，我采用了 :ref:`fedora_networkmanager` 来配置 :ref:`mobile_cloud_arm_vm` 的静态IP地址
 
+.. note::
+
+   :ref:`nmtui` 是最为简单的交互方式管理 NetworkManager 的终端工具
+
 .. _nmcli:
 
 nmcli
