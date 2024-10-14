@@ -1,8 +1,12 @@
-.. _archlinux_zfs-dkms:
+.. _archlinux_zfs-dkms_x86:
 
-====================================
-使用zfs-dkms在arch linux编译安装ZFS
-====================================
+==========================================
+使用zfs-dkms在arch linux(X86)编译安装ZFS
+==========================================
+
+.. warning::
+
+   本文正在根据自己近期 :ref:`archlinux_on_mba` 之后的ZFS实践重写，和以前 :ref:`archlinux_zfs-dkms_arm` 有所不同。部分内容参考和基于以前的 :ref:`archlinux_zfs-dkms_arm` (可能有重复)
 
 ``zfs-dkms`` 软件包提供了 :ref:`dkms` 支持，可以自动为兼容内核编译ZFS内核模块
 
@@ -19,16 +23,12 @@
 
 需要自己按照内核来编译，也就是采用 :ref:`dkms` 安装对应的 ``zfs-dkms`` 
 
-.. note::
-
-   我在 :ref:`asahi_linux` ( :ref:`arm` 架构 )上，采用 ``zfs-dkms`` 来安装部署ZFS( :ref:`archlinux_archzfs` 没有提供ARM架构 )
-
 安装
 =======
 
 - 检查内核variant(变种):
 
-.. literalinclude:: archlinux_zfs-dkms/archlinux_check_kernel_variant
+.. literalinclude:: archlinux_zfs-dkms_arm/archlinux_check_kernel_variant
    :language: bash
    :caption: 检查当前内核variant
 
@@ -38,7 +38,7 @@
 
 输出是::
 
-   linux-asahi
+   linux
 
 - 检查内核版本:
 
@@ -52,7 +52,7 @@
 
 输出是::
 
-   5.19.asahi5-1
+   6.11.3.arch1-1
 
 - 安装内核头文件:
 
@@ -62,41 +62,15 @@
 
 可以看到对应安装的是::
 
-   linux-asahi-headers-5.19.asahi5-1
+   linux-headers-6.11.3.arch1-1
+
+**以下步骤待继续**
 
 - 安装zfs-dkms:
 
 .. literalinclude:: archlinux_zfs/archlinux_install_zfs-dkms
    :language: bash
    :caption: 安装zfs-dkms
-
-如果出现编译正常但是安装类似如下报错，则说明系统缺少内核对应头文件::
-
-   ...
-   (1/1) installing zfs-dkms                                                       [#############################################] 100%
-   :: Running post-transaction hooks...
-   (1/2) Arming ConditionNeedsUpdate...
-   (2/2) Install DKMS modules
-   ==> ERROR: Missing bin kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing proc kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing mnt kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing lib kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing boot kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing var kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing root kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing srv kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing usr kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing run kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing tmp kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing sbin kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing sys kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing dev kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing home kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing etc kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing lost+found kernel headers for module zfs/2.1.6.
-   ==> ERROR: Missing opt kernel headers for module zfs/2.1.6.
-
-这个报错是我疏忽了，没有遵照 `OpenZFS官方文档:Getting Started>>Arch Linux>>zfs-dkms <https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/2-zfs-dkms.html>`_ ，遗漏安装内核头文件导致的。我重新按照该文档完整走一遍(已经修订上文)
 
 - (我没有执行)忽略内核包更新::
 
