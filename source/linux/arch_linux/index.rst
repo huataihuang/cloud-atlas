@@ -33,8 +33,10 @@ Arch Linux
    xmodmap.rst
    dropbox.rst
    cross_compile.rst
+   archlinux_makepkg.rst
    archlinux_wine.rst
    archlinux_build_kernel.rst
+   archlinux_kernel.rst
 
 .. only::  subproject and html
 
