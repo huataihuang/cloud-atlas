@@ -164,9 +164,18 @@ conflicting files
 
    sudo mv /usr/lib/p11-kit-trust.so /usr/lib/p11-kit-trust.so.bak
 
+并行下载
+=============
+
+从 pacman 6.0 开始支持平行下载功能，但是默认没有启用，修改配置 ``/etc/pacman.conf`` 如下(实际只要取消注释#就可以，默认并发下载数量是5):
+
+.. literalinclude:: pacman/pacman.conf
+   :caption: 修订 ``/etc/pacman.conf`` 设置并行下载
+
 参考
 =======
 
 - `archlinux - pacman <https://wiki.archlinux.org/index.php/Pacman>`_
 - `xorgproto issues.. <https://bbs.archlinux.org/viewtopic.php?id=251517>`_
 - `How do I list files installed by a package from the AUR? <https://superuser.com/questions/1265425/how-do-i-list-files-installed-by-a-package-from-the-aur>`_
+- `Enable Parallel Downloading In Pacman In Arch Linux <https://ostechnix.com/enable-parallel-downloading-in-pacman-in-arch-linux/>`_

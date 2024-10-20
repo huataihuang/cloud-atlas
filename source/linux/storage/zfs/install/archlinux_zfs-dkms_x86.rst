@@ -64,35 +64,75 @@
 
    linux-headers-6.11.3.arch1-1
 
-**以下步骤待继续**
-
 - 安装zfs-dkms:
 
 .. literalinclude:: archlinux_zfs/archlinux_install_zfs-dkms
    :language: bash
    :caption: 安装zfs-dkms
 
-- (我没有执行)忽略内核包更新::
-
-   sed -i 's/#IgnorePkg/IgnorePkg/' /etc/pacman.conf
-   sed -i "/^IgnorePkg/ s/$/ ${INST_LINVAR} ${INST_LINVAR}-headers/" /etc/pacman.conf
-
 .. note::
 
-   如果不锁定内核包更新，确实有问题:
-
-   - ``pacman -Syu`` 升级了内核，但是 :ref:`dkms` 编译时候会报错::
-
-      (10/14) Install DKMS modules
-      ==> ERROR: Missing 6.1.0-rc6-asahi-5-1-ARCH kernel headers for module zfs/2.1.6.
-
-   但是实际上内核头文件包已经升级好了，原因排查见下文 ``升级内核问题排查``
+   安装过程需要从 github 下载 ``zfs-2.2.6.tar.gz`` ，这个过程会被GFW阻塞，所以需要设置 :ref:`linux_proxy_env`
 
 - 加载内核模块:
 
 .. literalinclude:: archlinux_zfs/archlinux_load_zfs
    :language: bash
    :caption: 加载zfs内核模块
+
+我这里遇到报错显示zfs内核模块不存在:
+
+.. literalinclude:: archlinux_zfs-dkms_x86/modprobe_zfs_error
+   :caption: 加载zfs内核模块显示模块没有存在于当前内核目录
+
+仔细检查  ``yay`` 安装 ``zfs-dkms`` 安装输出信息，可以看到在内核模块 :ref:`dkms` 安装时会提示信息显示不支持过高内核:
+
+.. literalinclude:: archlinux_zfs-dkms_x86/dkms_error
+   :caption: 由于内核版本只支持 6.10 以下导致无法编译
+
+这个问题在 :ref:`archlinux_zfs-dkms_arm` 也遇到过，但是当时我采用了 :ref:`btrfs` 来替换ZFS绕开这个问题。不过，这个问题毕竟需要解决
+
+参考 `archlinux wiki: ZFS#DKMS <https://wiki.archlinux.org/title/ZFS#DKMS>`_ 可以看到有如下 ``DKMS`` 解决方法:
+
+- ``zfs-dkms`` 是面向稳定版本的动态内核模块支持，也就意味着它可能不能支持最新内核
+- ``zfs-dkms-staging-compat-git`` 从ZFS最新补丁加上backport来支持最新内核
+- ``zfs-dkms-staging-git`` 跟踪最新发布候选版本(release candidate, RC)以及最新ZFS分支(如果还没有RC)
+- ``zfs-dkms-git`` DKMS的开发者版本
+
+我决定回退到特定内核版本(6.1)，然后重新安装 ``zfs-dkms`` 。需要注意 :ref:`archlinux_kernel` 安装 ``6.1`` LTS内核是通过 :ref:`archlinux_aur` 实现的，所以执行:
+
+.. literalinclude:: ../../../arch_linux/archlinux_kernel/yay_linux6.1
+   :caption: 通过:ref:`archlinux_aur` 安装指定的 Kernel 6.1 
+
+.. note::
+
+   没有使用安装 ``linux-lts`` 是因为当前 ``长期稳定支持`` 内核已经滚动升级到 ``6.5`` 系列，已经超出了zfs支持范围。
+
+.. warning::
+
+   编译安装最新的内核非常消耗计算资源，所以务必先在系统激活 :ref:`makepkg_parallel_jobs` ( 不是配置 :ref:`parallel_make` )以充分利用CPU的多核心，否则效率会低到无法忍受的程度。我曾经在 :ref:`mba11_late_2010` 单CPU核心编译超过16小时依然失败，实在非常低效。
+
+内核编译错误处理
+------------------
+
+内核编译oom
+~~~~~~~~~~~~~
+
+.. literalinclude:: archlinux_zfs-dkms_x86/kernel_btf_error
+   :caption: 内核编译 BTF 相关报错
+
+可以看到编译进程被突然杀死，检查系统 ``dmesg -T`` 日志查找可能OOM的killer日志
+
+再次编译时，我关闭所有图形程序，退出 :ref:`sway` 桌面，采用 :ref:`tmux` 运行编译，以节约内存使用。
+
+内核编译需要大量空间
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. literalinclude:: archlinux_zfs-dkms_x86/build_space_error
+   :caption: 编译完成，但是安装时空间不足
+   :emphasize-lines: 3
+
+检查可以看到 :ref:`archlinux_aur` 使用了用户目录下 ``$HOME/.cache/`` 目录来保存编译过程数据，而编译内核达到了惊人的 ``21GB`` 空间占用。也就是说，要完整编译 ``linux-lts61`` 需要 **至少21GB磁盘空间**
 
 检查zfs内核:
 
@@ -106,81 +146,6 @@
    :language: bash
    :caption: 检查zfs内核模块输出显示模块加载
 
-升级内核问题排查
-====================
-
-我升级 ``pacman -Syu`` ，内核版本 ``6.1.0-rc6-asahi-5-1-ARCH`` ，但是 :ref:`dkms` 编译报错，显示头文件不存在
-
-非常奇怪， ``pacman -Qe | grep header`` 可以看到::
-
-   linux-asahi-headers 6.1rc6.asahi5-1
-
-显示已经安装完成
-
-参考 `[solved] dkms install hook fails when installing zfs-dkms <https://bbs.archlinux.org/viewtopic.php?id=280416>`_ 检查::
-
-   # pacman -Q zfs-dkms
-   zfs-dkms 2.1.6-1
-
-   # pacman -Q linux
-   linux-asahi 6.1rc6.asahi5-1
-
-   # pacman -Q linux-asahi
-   linux-asahi 6.1rc6.asahi5-1
-
-   # pacman -Q linux-headers
-   error: package 'linux-headers' was not found
-
-   # pacman -Q linux-asahi-headers
-   linux-asahi-headers 6.1rc6.asahi5-1
-
-   # pacman -Q pahole
-   pahole 1:1.24-1
-
-我看出了一些差异:
-
-- 最新的 :ref:`asahi_linux` 内核版本是 ``6.1rc6.asahi5-1`` ， ``uname -r`` 输出信息是 ``6.1.0-rc6-asahi-5-1-ARCH``
-- 之前稳定版本内核版本是 ``5.19.asahi5-1`` ，对应的 ``uname -r`` 输出是 ``5.19.0-asahi-5-1-ARCH`` ，没有 ``rc6`` 这个中间版本字段
-
-这或许是 ``zfs-dkms`` 去查找对应版本内核头文件出错的原因(猜测，但是不肯定，可能需要等后续 :ref:`asahi_linux` 使用稳定release 6.1 版本才能验证)
-
-不过，查看了 `openzfs zfs-2.1.6 <https://github.com/openzfs/zfs/releases/tag/zfs-2.1.6>`_ relase文档确实说明: **Linux: compatible with 3.10 - 5.19 kernels**
-
-在官方 `openzfs/zfs/META <https://github.com/openzfs/zfs/blob/master/META>`_ 提供了zfs软件版本支持信息::
-
-   Meta:          1
-   Name:          zfs
-   Branch:        1.0
-   Version:       2.1.99
-   Release:       1
-   Release-Tags:  relext
-   License:       CDDL
-   Author:        OpenZFS
-   Linux-Maximum: 6.0
-   Linux-Minimum: 3.10
-
-看起来官方源代码尚未适配 6.0 以上内核
-
-很巧，我执行 ``pacman -Syu`` 升级系统，正好遇到 :ref:`asahi_linux` 官方升级 `Updates galore! November 2022 Progress Report <https://asahilinux.org/2022/11/november-2022-report/>`_ 升级了最新内核 ``6.1``
-
-最终解决方案(实际绕过)
----------------------------
-
-考虑有以下解决方案:
-
-- 参考 `AsahiLinux/linux Tags <https://github.com/AsahiLinux/linux/tags>`_ 查找适配内核版本，将内核版本降低到适配版本，即通过 :ref:`archlinux_downgrade_package`
-
-  - :ref:`asahi_linux` 官方发行二进制版本没有提供 v6.0 内核，但是官方有源代码，理论上可以自己编译内核来满足ZFS内核版本要求
-  - 或者直接采用上一个官方发行二进制版本 v5.19
-
-- 暂时放弃使用ZFS，等 :ref:`asahi_linux` 官方发行 v6.1 正式版本，再尝试通过 :ref:`dkms` 重新编译ZFS内核模块
-
-- 放弃在 :ref:`asahi_linux` 上使用ZFS，改为使用 :ref:`btrfs` (紧跟内核主线)，这样就不必使用 :ref:`dkms` ; 另外我在 Macbook Pro 2013 late (x86_64)上可以继续实践 :ref:`archlinux_archzfs`
-
-我最终选择方法3: 在 :ref:`asahi_linux` 上采用 :ref:`btrfs` :
-
-- 将精力集中在实践 :ref:`mobile_cloud_infra` 上，主攻 :ref:`kubernetes` ( :ref:`kind` )，同时也能实践 :ref:`btrfs`
-- 在成熟的X86环境，相对稳定的Linux内核主线上实践 :ref:`zfs`
 
 参考
 =======

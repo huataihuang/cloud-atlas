@@ -14,6 +14,7 @@ ZFS安装
    archlinux_root_on_zfs.rst
    fedora_zfs.rst
    ubuntu_zfs.rst
+   raspberry_pi_os_zfs.rst
    gentoo_zfs.rst
    gentoo_zfs_xcloud.rst
    boot_on_zfs_for_raspberry_pi.rst
