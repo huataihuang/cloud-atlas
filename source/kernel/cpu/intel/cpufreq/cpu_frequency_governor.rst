@@ -4,6 +4,14 @@
 CPU频率调节器
 ======================
 
+cpupower
+===============
+
+- 在 :ref:`debian` 平台通过以下命令安装 ``cpupower`` 工具包:
+
+.. literalinclude:: cpu_frequency_governor/apt_install_cpupower
+   :caption: 在 :ref:`debian` 中安装 ``cpupower``
+
 cpufreq governor
 ===================
 
@@ -91,9 +99,13 @@ Linux内核支持的cpufreq调节器
 
 如果 ``echo 1 > /sys/devices/system/cpu/intel_pstate/no_turbo`` 关闭 ``turbo`` ，则压力下处理器主频会降低，对于我的 ``Intel(R) Xeon(R) CPU E5-2670 v3 @ 2.30GHz`` 在没有启用Trubo时候，最高主频只有 ``2.3GHz`` 。
 
-- 启用全面的Performance策略::
+性能设置
+---------
 
-   cpupower frequency-set -g performance
+- 启用全面的Performance策略:
+
+.. literalinclude:: cpu_frequency_governor/frequency-set_performance_governor
+   :caption: 设置 ``performance`` governor
 
 此时会看到所有cpu都滚动一遍设置::
 
@@ -116,6 +128,15 @@ Linux内核支持的cpufreq调节器
    ...
 
 可以看到即使系统压力不大，所有运行程序的处理器核心频率都在 ``2.3GHz ~ 2.6GHz`` 之间，基本上就是最高主频了
+
+节电设置
+-------------
+
+如果对性能没有强要求，但是需要节约电能，则可以设置 ``powersave`` governor:
+
+.. literalinclude:: cpu_frequency_governor/frequency-set_powersave_governor
+   :caption: 设置 ``powersave`` governor
+
 
 冲击最高主频
 =================
@@ -147,6 +168,17 @@ Linux内核支持的cpufreq调节器
 .. literalinclude:: cpu_frequency_governor/cpupower_frequency-set_powersave
    :language: bash
    :caption: 设置当前运行的 ``cpufreq governer``
+
+.. _debian_governor:
+
+:ref:`debian` governor
+==========================
+
+在 :ref:`debian` 系(例如 ``Raspberry Pi OS`` )，通过配置 ``/etc/default/cpu_governor`` 就能够设置系统默认的 CPU governor
+
+.. literalinclude:: cpu_frequency_governor/cpu_governor
+   :caption: :ref:`debian` 系列设置启动的 CPU governor
+   :emphasize-lines: 6
 
 参考
 ======

@@ -7,6 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
+   pi_5_cpufreq.rst
    pi_benchmark.rst
    pi_overclock.rst
 
