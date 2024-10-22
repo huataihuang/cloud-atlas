@@ -31,6 +31,17 @@
    :caption: :ref:`debian` 系列设置启动的 CPU governor
    :emphasize-lines: 6
 
+- 检查调整后的CPU governor:
+
+.. literalinclude::  ../../kernel/cpu/intel/cpufreq/cpu_frequency_governor/cpupower_frequency-info
+   :caption: cpupower frequency-info 命令检查CPU主频伸缩策略
+
+输出显示可以看到当前governor是 ``powersave`` :
+
+.. literalinclude:: pi_5_cpufreq/powersave_governor_output
+   :caption: 当前CPU governor信息
+   :emphasize-lines: 2,10,12
+
 参考
 =======
 
