@@ -11,7 +11,7 @@ X86移动云ZFS
 - :ref:`zfs`
 - :ref:`btrfs`
 
-经过实践探索( :ref:`archlinux_zfs-dkms` )， :ref:`asahi_linux` 内核激进采用v6.1，尚未得到 ``OpenZFS`` 支持，所以
+经过实践探索( :ref:`archlinux_zfs-dkms_arm` )， :ref:`asahi_linux` 内核激进采用v6.1，尚未得到 ``OpenZFS`` 支持，所以
 
 - 在 :ref:`apple_silicon_m1_pro` MacBook Pro 采用 :ref:`btrfs`
 - 在 X86_64 的 Macbook Pro 2013 采用 :ref:`zfs`
@@ -75,7 +75,7 @@ Docker准备
 安装ZFS
 ==========
 
-受限于ZFS的CDDL license，需要额外的工作来完成 :ref:`zfs_install` 。之前在 :ref:`mobile_cloud_arm` 中我采用 :ref:`archlinux_zfs-dkms` ；而现在在 :ref:`mobile_cloud_x86` 系统中，由于 `archzfs repo <https://github.com/archzfs/archzfs>`_ 提供 ``x86_64`` 安装包，所以参考 `OpenZFS Getting Started: Arch Linux <https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/index.html>`_ 使用软件仓库安装。
+受限于ZFS的CDDL license，需要额外的工作来完成 :ref:`zfs_install` 。之前在 :ref:`mobile_cloud_arm` 中我采用 :ref:`archlinux_zfs-dkms_arm` ；而现在在 :ref:`mobile_cloud_x86` 系统中，由于 `archzfs repo <https://github.com/archzfs/archzfs>`_ 提供 ``x86_64`` 安装包，所以参考 `OpenZFS Getting Started: Arch Linux <https://openzfs.github.io/openzfs-docs/Getting%20Started/Arch%20Linux/index.html>`_ 使用软件仓库安装。
 
 使用 `archzfs repo <https://github.com/archzfs/archzfs>`_ 安装
 

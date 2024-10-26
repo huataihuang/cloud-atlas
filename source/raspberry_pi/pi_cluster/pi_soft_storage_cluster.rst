@@ -53,3 +53,23 @@
   - 两个 :ref:`pi_5` 剩余 512G (实际不足) 用于构建 :ref:`gluster` ，作为日常数据冗余存储，也提供给 :ref:`kubernetes` 作为文件存储和离线存储
 
 - :ref:`kubernetes` 集群主要容器镜像都存储在 :ref:`ceph` 云存储，仅对数据库容器存储采用本地存储(数据库有自己的容灾)
+
+我的构思三(最终选择)
+=====================
+
+正如 :ref:`edge_cloud_infra_2024` 所述，我最终剁手了 ``3台`` :ref:`pi_5` :
+
+- 考虑到性能以及扩展性 ( :ref:`pi_ai_kit` / :ref:`pi_5_pcie_m.2_ssd` )，我最终决定采用 :strike:`3台` ``4台`` :ref:`pi_5` 来构建模拟集群
+
+  - 考虑到SSD磁盘宝贵(价格昂贵)，方案二中ZFS的RAID模拟测试我准备改为虚拟机模拟测试，以便随时回收测试资源避免磁盘空间浪费
+  - 最初我安装 :ref:`raspberry_pi_os` 采用了精简的 :ref:`raspberry_pi_os_init` ，并且使用了 ``64GB`` TF卡安装。所以后续 :ref:`pi_5_nvme_boot` 继承了64GB的操作系统使用分区空间大小
+
+    - 我认为对于稳定的服务器系统，64GB空间是足够的，后续数据存储将使用 :ref:`zfs` 构建，不会占用基础OS磁盘分区空间
+
+  - :ref:`ceph` 使用 1T 存储
+  - :ref:`pi_5_nvme_zfs` 使用剩余存储空间，采用一个 ``zpool-data`` 来构建 :ref:`pi_5_nvme_zfs`
+
+.. csv-table:: 树莓派5模拟集群NVMe存储分区
+   :file: pi_soft_storage_cluster/parted.csv
+   :widths: 5, 15, 20, 30, 30
+   :header-rows: 1

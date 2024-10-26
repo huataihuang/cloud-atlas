@@ -17,7 +17,7 @@ ZFS管理准备
 首先需要完成 :ref:`archlinux_zfs` 的以下安装(选择其中之一):
 
 - :ref:`archlinux_archzfs`
-- :ref:`archlinux_zfs-dkms`
+- :ref:`archlinux_zfs-dkms_x86`
 
 磁盘分区
 ==========
@@ -26,6 +26,12 @@ ZFS管理准备
 
 :ref:`apple_silicon_m1_pro` 的MacBook Pro 2022
 ------------------------------------------------
+
+.. note::
+
+   本段ZFS磁盘准备采用了3个分区独立构建zpool，这种方式适合生产环境(需要使用独立3个磁盘)。
+
+   考虑到模拟测试环境节约磁盘消耗，我在 :ref:`gentoo_zfs_xcloud` 和 :ref:`pi_5_nvme_zfs` 模拟中，变通采用了合并zpool，以便划分子卷时不会浪费空间。
 
 :ref:`apple_silicon_m1_pro` 的MacBook Pro 2022自身存储 500GB ，使用 ``parted`` 检查:
 

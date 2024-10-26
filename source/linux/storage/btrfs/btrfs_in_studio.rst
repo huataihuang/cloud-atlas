@@ -37,7 +37,7 @@ Btrfs的多次实践
 
 我在2019年10月1日的btrfs系统中发现了异常虚拟机hang以及btrfs读写错误(推测是硬件隐患故障)，转眼已过去2年。2021年，我重新在 :ref:`hpe_dl360_gen9` 上部署了 :ref:`ubuntu_linux` 来运行虚拟化 :ref:`kvm` ，存储再次选择 Btrfs 。我期望能够验证和充分发挥系统性能
 
-2022年11月，我在 :ref:`mobile_cloud` 选择 :ref:`asahi_linux` ，:ref:`archlinux_zfs-dkms` 遇到内核版本和zfs不兼容问题，所以再次采用 :ref:`btrfs_mobile_cloud` 。
+2022年11月，我在 :ref:`mobile_cloud` 选择 :ref:`asahi_linux` ，:ref:`archlinux_zfs-dkms_arm` 遇到内核版本和zfs不兼容问题，所以再次采用 :ref:`btrfs_mobile_cloud` 。
 
 初始安装操作系统的磁盘
 =========================
