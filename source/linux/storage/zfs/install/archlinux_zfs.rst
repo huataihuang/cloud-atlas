@@ -17,7 +17,7 @@ Arch Linux上运行ZFS
 在Arch Linux上安装有3种方式:
 
 - :ref:`archlinux_archzfs`
-- :ref:`archlinux_zfs-dkms`
+- :ref:`archlinux_zfs-dkms_arm` / :ref:`archlinux_zfs-dkms_x86`
 - zfs-linux 针对不同内核进行安装
 
 .. note::

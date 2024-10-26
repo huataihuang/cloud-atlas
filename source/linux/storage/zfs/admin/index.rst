@@ -18,6 +18,7 @@ ZFS管理的主要手册可以参考:
    :maxdepth: 1
 
    zfs_admin_prepare.rst
+   pi_5_nvme_zfs.rst
    config_zfs_auto_start.rst
    zfs_startup.rst
    zfs_startup_zcloud.rst

@@ -4,7 +4,7 @@
 移动云计算的Btrfs实践
 =========================
 
-由于 :ref:`asahi_linux` 的内核迭代非常激进，最新的 v6.1 内核已经超出了 ``OpenZFS`` 支持的最高 v6.0版本，所以在 :ref:`archlinux_zfs-dkms` 遇到困难。为了能够在 :ref:`mobile_cloud_infra` 中实践前沿Linux技术，考虑到 ``Btrfs`` 是Linux内核主线内置支持，我于2022年11月，改为采用 ``Btrfs`` 来构建 :ref:`docker_btrfs_driver` 。
+由于 :ref:`asahi_linux` 的内核迭代非常激进，最新的 v6.1 内核已经超出了 ``OpenZFS`` 支持的最高 v6.0版本，所以在 :ref:`archlinux_zfs-dkms_arm` 遇到困难。为了能够在 :ref:`mobile_cloud_infra` 中实践前沿Linux技术，考虑到 ``Btrfs`` 是Linux内核主线内置支持，我于2022年11月，改为采用 ``Btrfs`` 来构建 :ref:`docker_btrfs_driver` 。
 
 前置工作 
 ==========
@@ -18,7 +18,7 @@
 磁盘分区
 ============
 
-由于在 :ref:`apple_silicon_m1_pro` 的MacBook Pro 2022，我放弃了之前的 :ref:`archlinux_zfs-dkms` ，但是分区方式沿用，所以依然使用 :ref:`parted` 对磁盘进行分区，做了一些细微调整:
+由于在 :ref:`apple_silicon_m1_pro` 的MacBook Pro 2022，我放弃了之前的 :ref:`archlinux_zfs-dkms_arm` ，但是分区方式沿用，所以依然使用 :ref:`parted` 对磁盘进行分区，做了一些细微调整:
 
 .. csv-table:: 移动云计算的磁盘分区
    :file: btrfs_mobile_cloud/mobile_cloud_parted.csv

@@ -55,7 +55,7 @@ archzfs的限制
    :caption: 由于archzfs和内核紧密关联，需要同时升级archzfs和kernel
    :emphasize-lines: 10
 
-如果要紧跟内核升级，那么需要采用 :ref:`archlinux_zfs-dkms` ；但是如果已经采用了 ``archzfs`` ，这样的阻塞导致整个系统无法更新升级也不是办法，所以可以在 :ref:`pacman` 的配置文件 ``/etc/pacman.conf`` 中配置::
+如果要紧跟内核升级，那么需要采用 :ref:`archlinux_zfs-dkms_arm` ；但是如果已经采用了 ``archzfs`` ，这样的阻塞导致整个系统无法更新升级也不是办法，所以可以在 :ref:`pacman` 的配置文件 ``/etc/pacman.conf`` 中配置::
 
    IgnorePkg   = linux linux-headers
 
