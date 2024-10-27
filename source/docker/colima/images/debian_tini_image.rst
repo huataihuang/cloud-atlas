@@ -148,10 +148,26 @@ ARM版本 :ref:`nvim` 安装clangd LSP
 开发环境 ``debian-dev`` (ARM64版本)
 ========================================
 
+.. note::
+
+   实践在 :ref:`pi_5` 的环境中进行，为 :ref:`pi_soft_storage_cluster` 做准备
+
 结合上述要点，参考 :ref:`git_ssh_script` 方法改进Dockerfile(不过由于SSH方法比较复杂，常规还是采用 git operations over HTTP，只有为了解决网络阻塞GFW的时候才使用SSH方法)，以下是完整Dockerfile:
 
 .. literalinclude:: debian_tini_image/dev/Dockerfile.arm
    :language: dockerfile
    :caption: 包含常用工具和开发环境的debian镜像Dockerfile(为解决GFW干扰采用SSH方法)
-   :emphasize-lines: 100-120
+   :emphasize-lines: 100-121
+
+- 构建 ``acloud-dev`` 镜像:
+
+.. literalinclude:: debian_tini_image/dev/build_acloud-dev_image
+   :language: bash
+   :caption: 构建包含开发环境的ARM环境debian镜像
+
+- 运行 ``acloud-dev`` :
+
+.. literalinclude:: debian_tini_image/dev/run_acloud-dev_container
+   :language: bash
+   :caption: 运行包含开发环境的ARM环境debian镜像
 
