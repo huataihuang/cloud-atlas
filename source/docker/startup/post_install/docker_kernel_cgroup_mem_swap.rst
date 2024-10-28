@@ -28,11 +28,10 @@ Docker内核支持cgroup内存和 swap限制
 alpine修订方法
 ==================
 
-对于树莓派上运行 :ref:`alpine_linux` ，则没有使用 Grub 或 extlinux，则直接修订 ``/boot/cmdline.txt`` 在最后添加::
+对于树莓派上运行 :ref:`alpine_linux` 或 :ref:`raspberry_pi_os` ，则没有使用 Grub 或 extlinux，则直接修订 ``/boot/cmdline.txt`` 在最后添加:
 
-   cgroup_enable=memory cgroup_memory=1 swapaccount=1
-
-但是很奇怪，我系统重启以后发现内核参数并没有上述添加内容，也没有解决 ``docker info`` 输出告警信息
+.. literalinclude:: docker_kernel_cgroup_mem_swap/cmdline
+   :caption: 树莓派修订 ``/boot/cmdline.txt`` 激活cgroup内存和swap限制
 
 参考
 ========

@@ -16,19 +16,30 @@
    :widths: 5, 15, 20, 30, 30
    :header-rows: 1
 
-- 使用 :ref:`parted` 对当前磁盘分区进行检查(目前只有 :ref:`raspberry_pi_os` 使用的2个分区:
+- 使用 ``fdisk`` 对当前磁盘分区进行检查，可以看到目前只有 :ref:`raspberry_pi_os` 使用的2个分区(之所以使用 ``fdisk`` 而没有使用 :ref:`parted` 是因为 ``fdisk`` 默认使用 ``MiB/GiB/TiB`` 来计算容量，也就是 ``1024`` 为 **1k** 计算；而 :ref:`parted` 默认使用 ``MB/GB/TB`` 计算容量，即以 ``1000`` 为 **1k** 计算。我纯粹是为了更贴近程序员习惯，轻度强迫症):
 
-.. literalinclude:: pi_5_nvme_zfs/parted_print
-   :caption: ``parted print`` 显示当前分区信息
+.. literalinclude:: pi_5_nvme_zfs/fdisk_print
+   :caption: ``fdisk -l`` 显示当前分区信息
 
-.. literalinclude:: pi_5_nvme_zfs/parted_print_output
+.. literalinclude:: pi_5_nvme_zfs/fdisk_print_output
    :caption: 可以看到当前分区
-   :emphasize-lines: 8,9
+   :emphasize-lines: 10,11
+
+Docker处理
+============
+
+我的实践案例在这里有一个插入步骤，是因为我已经在 :ref:`install_docker_raspberry_pi_os` ，所以需要先备份导出镜像，然后停止docker，移除 ``/var/lib/docker`` 目录。这样能够为后续 :ref:`docker_zfs_driver` 腾出 ``zpool`` 挂载目录。
+
+:ref:`transfer_docker_image_without_registry` 步骤一: 备份
+------------------------------------------------------------
+
+我后续准备 :ref:`k8s_deploy_registry` ，所以当前Docker环境没有部署镜像仓库。这种情况下，切换 :ref:`docker_zfs_driver` 要保障镜像和容器能够恢复，需要使用 :ref:`transfer_docker_image_without_registry` :
+
+.. literalinclude:: pi_5_nvme_zfs/docker_image_save
+   :caption: 导出docker中需要保存的容器镜像
 
 docker挂载分区卸载
 --------------------
-
-我的实践案例在这里有一个插入步骤，是因为我已经在 :ref:`install_docker_raspberry_pi_os` ，所以需要先备份导出镜像，然后停止docker，移除 ``/var/lib/docker`` 目录。这样能够为后续 :ref:`docker_zfs_driver` 腾出 ``zpool`` 挂载目录:
 
 - 停止Docker:
 
@@ -61,13 +72,23 @@ docker挂载分区卸载
 
 .. literalinclude:: pi_5_nvme_zfs/fdisk
    :caption: ``fdisk`` 磁盘分区，为 :ref:`ceph` 和 :ref:`zfs` 分别准备分区
-   :emphasize-lines: 5,13,27,31-34,38,42,45,46,50,66
+   :emphasize-lines: 5,13,27,31-34,38,52,56,59-60,64,80
 
 现在再次执行 ``fdisk -l /dev/nvme0n1`` 可以看到增加了2个分区:
 
 .. literalinclude:: pi_5_nvme_zfs/fdisk_output_4
    :caption: ``fdisk`` 检查可以看到增加了2个分区，分别用于 :ref:`ceph` 和 :ref:`zfs`
    :emphasize-lines: 12,13
+
+- 使用 :ref:`parted` 检查是否满足 :ref:`4k_alignment` :
+
+.. literalinclude:: pi_5_nvme_zfs/parted_align-check
+   :caption: 检查各个分区是否4k对齐
+
+输出显示每个分区都已经实现对齐( ``aligned`` ):
+
+.. literalinclude:: pi_5_nvme_zfs/parted_align-check_output
+   :caption: 检查各个分区是否4k对齐
 
 ZFS存储构建
 ===============
@@ -104,15 +125,17 @@ ZFS存储构建
    :caption: ``docker info`` 输出
    :emphasize-lines: 20-27
 
-:ref:`transfer_docker_image_without_registry`
-===============================================
 
-我后续准备 :ref:`k8s_deploy_registry` ，所以当前Docker环境没有部署镜像仓库。这种情况下，切换 :ref:`docker_zfs_driver` 要保障镜像和容器能够恢复，需要使用 :ref:`transfer_docker_image_without_registry` :
+:ref:`transfer_docker_image_without_registry` 步骤二: 恢复
+============================================================
 
-.. literalinclude:: pi_5_nvme_zfs/docker_image_save
-   :caption: 导出docker中需要保存的容器镜像
-
-然后将备份的镜像复制到需要恢复的主机上进行加载
+- 备份的镜像复制到需要恢复的主机上进行加载
 
 .. literalinclude:: pi_5_nvme_zfs/docker_image_load
    :caption: 加载保存的容器镜像
+
+- 恢复容器运行:
+
+.. literalinclude:: ../../../../docker/colima/images/debian_tini_image/dev/run_acloud-dev_container
+   :language: bash
+   :caption: 运行包含开发环境的ARM环境debian镜像
