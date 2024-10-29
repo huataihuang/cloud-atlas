@@ -4,10 +4,10 @@
 Docker内核支持cgroup内存和 swap限制
 ======================================
 
-在 :ref:`alpine_docker` 执行 ``docker info`` 时候，默认会看到如下警告信息::
+在 :ref:`alpine_docker` 执行 ``docker info`` 时候，默认会看到如下警告信息:
 
-   WARNING: No memory limit support
-   WARNING: No swap limit support
+.. literalinclude:: docker_kernel_cgroup_mem_swap/docker_info_memory_swap_error
+   :caption: ``docker info`` 显示不支持内存和swap限制的警告
 
 上述报错参考 `Your kernel does not support cgroup swap limit capabilities <https://docs.docker.com/engine/install/linux-postinstall/#your-kernel-does-not-support-cgroup-swap-limit-capabilities>`_ ，通常出现在 Ubuntu 或 Debian系统上，而基于RPM的系统已经默认激活了上述功能。
 

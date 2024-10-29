@@ -8,6 +8,7 @@ Docker 安装后调整
    :maxdepth: 2
 
    docker_kernel_cgroup_mem_swap.rst
+   docker_kernel_bridge-nf-call-iptables.rst
 
 .. only::  subproject and html
 
