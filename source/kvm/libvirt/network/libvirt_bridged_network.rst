@@ -37,7 +37,7 @@ libvirt服务器必须通过以太网有线网络连接，如果是无线网络�
        inet6 fe80::d9ef:58a4:a664:6d7c/64 scope link noprefixroute 
           valid_lft forever preferred_lft forever   
 
-- `ntefilter的bridge性能和安全原因 <https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0>`_ ，禁止bridge设备的netfilter，所以创建 ``/etc/sysctl.d/bridge.conf`` 并通过 ``sysctl`` 刷新内核配置:
+- `ntefilter的bridge性能和安全原因 <https://bugzilla.redhat.com/show_bug.cgi?id=512206#c0>`_ (避免主机iptables规则影响虚拟机的bridge交换网络)，通常需要禁止bridge设备的netfilter，所以创建 ``/etc/sysctl.d/bridge.conf`` 并通过 ``sysctl`` 刷新内核配置:
 
 .. literalinclude:: libvirt_bridged_network/sysctl_bridge
    :language: bash
@@ -55,11 +55,13 @@ libvirt服务器必须通过以太网有线网络连接，如果是无线网络�
 
 .. warning::
 
-   配置并执行 ``/etc/sysctl.d/bridge.conf`` 非常重要，如果没有设置内核 ``net.bridge.bridge-nf-call-iptables=0`` 这3个参数，则连接在 ``br0`` 上的虚拟机之间网络不通，虽然这些虚拟机依然能够通过物理网卡连接外部世界。
+   配置并执行 ``/etc/sysctl.d/bridge.conf`` 非常重要，如果没有设置内核 ``net.bridge.bridge-nf-call-iptables=0`` 这3个参数，则连接在 ``br0`` 上的虚拟机之间网络不通(受到主机配置的iptables FORWARD规则链影响)，虽然这些虚拟机依然能够通过物理网卡连接外部世界。
+
+   另外需要注意， :ref:`docker_kernel_bridge-nf-call-iptables` 也有配置 ``bridge-nf-call-iptables`` 内核参数的需求，但是和 :ref:`libvirt` 相反， :ref:`docker` 需要启用 ``bridge-nf-call-iptables`` ( ``net.bridge.bridge-nf-call-iptables=1`` ) ，原因是容器内部无法处理host主机内核(kvm虚拟机有自己的独立内核)，所以容器网络是通过host主机iptables来管理虚拟交换网络。
 
 .. note::
 
-   实践发现在RHEL的系统中，存在 ``/proc/sys/net/bridge/bridge-nf-call-*tables`` 内核配置入口，上述配置在CentOS 7上可以完成。但是在Arch Linux平台没有上述内核配置，所以没有执行。
+   实践发现在RHEL的系统中，存在 ``/proc/sys/net/bridge/bridge-nf-call-*tables`` 内核配置入口，上述配置在CentOS 7上可以完成。但是在Arch Linux/debian等发行版默认没有上述 bridge-nf-call-iptables 内核配置入口，解决方法是加载 :ref:`br_netfilter` 。
 
 配置网桥
 =========

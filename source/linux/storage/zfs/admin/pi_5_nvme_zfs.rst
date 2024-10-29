@@ -125,6 +125,18 @@ ZFS存储构建
    :caption: ``docker info`` 输出
    :emphasize-lines: 20-27
 
+这里 ``docker info`` 有4行警告信息:
+
+.. literalinclude:: ../../../../docker/startup/post_install/docker_kernel_cgroup_mem_swap/docker_info_memory_swap_error
+   :caption: ``docker info`` 显示不支持内存和swap限制的警告
+
+.. literalinclude:: ../../../../docker/startup/post_install/docker_kernel_bridge-nf-call-iptables/warning_bridge-nf-call-iptables
+   :caption: ``docker info`` 显示 ``bridge-nf-call-iptables`` 被禁止的警告
+
+解决方法是:
+
+- :ref:`docker_kernel_cgroup_mem_swap`
+- :ref:`docker_kernel_bridge-nf-call-iptables`
 
 :ref:`transfer_docker_image_without_registry` 步骤二: 恢复
 ============================================================
