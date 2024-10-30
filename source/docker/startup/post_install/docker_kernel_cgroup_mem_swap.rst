@@ -15,23 +15,18 @@ Docker内核支持cgroup内存和 swap限制
 
 内存和swap记账功能会消耗大约1%的可用内存以及总体10%的性能降低，即使Docker没有运行
 
-- 配置 ``/etc/default/grub`` ，添加 ``GRUB_CMDLINE_LINUX`` 行内容添加如下2个键值对::
+- 配置 ``/etc/default/grub`` ，添加 ``GRUB_CMDLINE_LINUX`` 行内容添加如下2个键值对，然后执行 ``update-grub`` 更新  :ref:`grub` 之后重启系统生效:
 
-   GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
-
-- 更新GRUB::
-
-   sudo update-grub
-
-然后重启系统可以消除上述报错警告。
+.. literalinclude:: docker_kernel_cgroup_mem_swap/grub
+   :caption: 配置 ``/etc/default/grub`` ，添加 ``GRUB_CMDLINE_LINUX`` 行内容
 
 alpine修订方法
 ==================
 
-对于树莓派上运行 :ref:`alpine_linux` 或 :ref:`raspberry_pi_os` ，则没有使用 Grub 或 extlinux，则直接修订 ``/boot/cmdline.txt`` 在最后添加:
+对于树莓派上运行 :ref:`alpine_linux` 或 :ref:`raspberry_pi_os` ，则没有使用 Grub 或 extlinux，则直接修订 ``/boot/firmware/cmdline.txt`` 在最后添加:
 
 .. literalinclude:: docker_kernel_cgroup_mem_swap/cmdline
-   :caption: 树莓派修订 ``/boot/cmdline.txt`` 激活cgroup内存和swap限制
+   :caption: 树莓派修订 ``/boot/firmware/cmdline.txt`` 激活cgroup内存和swap限制
 
 参考
 ========
