@@ -1,16 +1,18 @@
-.. _linux_audio:
+.. _kobo:
 
 =================================
-Linux音频
+Kobo电子阅读器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   ../../arch_linux/archlinux_alsa.rst
-   pulseaudio.rst
-   play_music_on_linux.rst
-   mpd.rst
+   intro_kobo.rst
+   kobo_aura_one.rst
+   kobo_libra_h20.rst
+   kobo_pocket.rst
+   kobo_koreader.rst
+
 
 .. only::  subproject and html
 

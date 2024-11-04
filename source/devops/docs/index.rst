@@ -23,6 +23,7 @@ DevOps 文档
    hugo/index
    hexo/index
    kindle/index
+   kobo/index
    pandoc.rst
    ffmpeg.rst
    imagemagick.rst

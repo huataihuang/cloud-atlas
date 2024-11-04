@@ -51,11 +51,10 @@ Unmuting
  
 其实ALSA默认已经激活，但是有可能被mute了，所以可以通过以下方式激活：
 
-- 使用amixer来unmute::
+- 使用amixer来unmute:
 
-   amixer sset Master unmute
-   amixer sset Speaker unmute
-   amixer sset Headphone unmute
+.. literalinclude:: archlinux_alsa/amixer_unmute
+   :caption: 使用 ``amixer`` 将音频设备默认静音去除 ``unmute``
 
 - 使用alsamixer来unmute::
 
@@ -73,7 +72,6 @@ MGEG-4 AAC
 我安装了 ``gst-libav`` 之后解决了这个问题。从 `Arcl Linux社区文档 - Codecs and containers <https://wiki.archlinux.org/index.php/Codecs_and_containers>`_ 看，对应不同的音频和视频，可能需要安装不同的解码器。
 
 其中比较常用的是 ``gstreamer`` 。
-
 
 参考
 ======

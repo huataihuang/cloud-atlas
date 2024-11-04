@@ -9,16 +9,16 @@
 mpd
 ======
 
-大多数音乐客户端实际上是 ``mpd`` 客户端，通过 ``mpd`` 可以实现网络服务的音乐流，客户端可以按需选择。
+大多数音乐客户端实际上是 :ref:`mpd` 客户端，通过 ``mpd`` 可以实现网络服务的音乐流，客户端可以按需选择。
 
 audacious
 ============
 
 audacious是GNOME平台默认音乐播放器，轻量且功能完备
 
-目前我暂时没有解决 :ref:`pulseaudio` 配置，所以采用修改 ``Output`` 设备，直接选择 :ref:`alsa` ，即 ``Output Settings => Output plugin: ALSA Output`` 中配置 ``PMC device: hw:0,0 - bcm2835 HDMI 1`` 。配合我的AOC显示器自带的音频3.5"音频输出，可以正常工作
+目前我暂时没有解决 :ref:`pulseaudio` 配置，所以采用修改 ``Output`` 设备，直接选择 :ref:`archlinux_alsa` ，即 ``Output Settings => Output plugin: ALSA Output`` 中配置 ``PMC device: hw:0,0 - bcm2835 HDMI 1`` 。配合我的AOC显示器自带的音频3.5"音频输出，可以正常工作
 
-但是有背景杂音，经过摸索，我发现原来直接使用 :ref:`alsa` 做音频输出设备时，不能同时运行 :ref:`pulseaudio` 服务: 杀掉系统默认启动的 :ref:`pulseaudio` 服务之后音乐播放就非常清澈了。
+但是有背景杂音，经过摸索，我发现原来直接使用 :ref:`archlinux_alsa` 做音频输出设备时，不能同时运行 :ref:`pulseaudio` 服务: 杀掉系统默认启动的 :ref:`pulseaudio` 服务之后音乐播放就非常清澈了。
 
 ncmpcpp
 =============
