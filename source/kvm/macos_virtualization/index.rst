@@ -9,6 +9,7 @@ macOS Virtualization
 
    lima/index
    osx_kvm.rst
+   darwinkvm.rst
    xhyve.rst
 
 

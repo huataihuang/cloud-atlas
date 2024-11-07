@@ -160,7 +160,12 @@ DL360服务器有两种大小规格的磁盘 - 4LFF(3.5") 和 8SFF(2.5")/10SFF(2
 .. figure:: ../../../../_static/linux/server/hardware/hpe/hpe_dl360_gen9_10disks.png
    :scale: 50
 
-10SFF配置有一种性能极致的配置: ``HP DL360 Gen9 6 NVMe + 4 SAS/SATA Express Bay Enablement Kit  817676-B21`` 背板替换后，可以支持 4个SAS/SATA 加上 6个NVMe (U.2接口)设备，但是这个配件的价格约在 800 刀到 1000 刀，并且万能淘宝也找不到，只有海外直购，所以并不现实。
+10SFF配置有一种性能极致的配置: ``HP DL360 Gen9 6 NVMe + 4 SAS/SATA Express Bay Enablement Kit  817676-B21`` 背板替换后，可以支持 4个SAS/SATA 加上 6个NVMe (U.2接口)设备，但是这个配件的价格约在 800 刀到 1000 刀， :strike:`并且万能淘宝也找不到，只有海外直购，所以并不现实。 ``实际上也有非官方的解决方案`` : **现在淘宝上已经普及了 PCIe 转 U.2 NVMe 扩展卡** : 
+
+- PLX8749/PLX8748免拆分PCIe扩展卡: 可以在服务器内部/外部连接GPU卡和U.2 SSD
+- SFF8654转U.2数据线
+
+使用场景包括通过 ``双卡槽底座+支架`` 安装2块GPU / 服务器内部通过 ``SFF8654转U.2数据线`` 连接4块 U.2 SSD存储组建阵列等等...
 
 .. note::
 

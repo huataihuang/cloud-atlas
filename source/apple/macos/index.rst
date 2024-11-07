@@ -14,6 +14,7 @@ macOS
    mba13_early_2014.rst
    mbp15_late_2013.rst
    mbp15_2018.rst
+   mac_mini_2024.rst
    bcm943602cs.rst
    macos_big_sur_gts_root_certificate.rst
    macbook_nvme.rst

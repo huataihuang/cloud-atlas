@@ -14,6 +14,7 @@
    pi_400.rst
    pi_cm4.rst
    pi_5.rst
+   pi_5_vs_mac_mini_m4.rst
    pi_pcie.rst
    pi_5_pcie_m.2_ssd.rst
    pi_5_pcie_3_m.2_ssd.rst
