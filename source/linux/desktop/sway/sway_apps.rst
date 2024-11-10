@@ -27,6 +27,13 @@ Sway应用程序
 
 另外也可以参考 `Fedora Cinnamon Spin项目 <https://fedoraproject.org/spins/cinnamon/>`_ (从GNOME 2 fork出来的轻量级发行版)，使用 ``nemo`` 作为文件管理器(但是安装也需要很多依赖)
 
+.. note::
+
+   我的最终选择是 :ref:`thunar` :
+
+   - 同时安装 :ref:`xfce` 默认图片查看器 ``ristretto`` ，这样会同时安装 ``Thunar`` 的图片预览插件，就能够在文件管理器中预览
+   - 由于我已经 :ref:`sway_screenshot` 中安装了 ``swappy`` (不仅能够浏览图片，而且还能够标注)，所以把 ``thunar`` 默认图片处理设置为 ``swappy`` ，则双击图片就能查看，且可以修改，非常方便。
+
 参考
 =======
 

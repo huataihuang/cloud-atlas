@@ -12,6 +12,7 @@ Kobo电子阅读器
    kobo_libra_h20.rst
    kobo_pocket.rst
    kobo_koreader.rst
+   embed_fonts_into_pdf.rst
 
 
 .. only::  subproject and html

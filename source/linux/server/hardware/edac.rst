@@ -216,19 +216,11 @@ rasdaemon可以之际命令启动，此时会在后台运行，并不断通过sy
 .. literalinclude:: edac/ras-mc-ctl_print-labels
    :caption: 检查DIMM输出
 
-就会看到增加了label标签的DIMM输出(后续DIMM内存故障就容易找到对应问题了):
+就会看到增加了label标签的DIMM输出(后续DIMM内存故障就容易找到对应问题了)
 
-.. _hpe_dl360_gen9_memory:
+.. note::
 
-HP DL360 Gen9 内存插入顺序
-=============================
-
-根据HP的文档 :ref:`hpe_dl360_gen9` 是 4个 Channel ，所以官方文档推荐安装内存条的时候，要按照 ``ABCDEFGHIJKL`` 顺序安装(其实就是先安装白色槽，其次是黑色，最后是绿色)，见下图(参考 `Help with HP DL360 Gen9 memory configuration <https://www.reddit.com/r/homelab/comments/xt37v6/help_with_hp_dl360_gen9_memory_configuration/>`_ )，这样才能确保内存通道均衡:
-
-.. figure:: ../../../_static/linux/server/hardware/hpe_dl360_gen9_memory.webp
-
-   HPE DL360 Gen9 内存插槽顺序
-
+   我的 :ref:`hpe_dl360_gen9_memory` 曾经发生过一次 :ref:`dl360_gen9_pci_bus_error` ，通过 ``edac`` 可以帮助我们找到异常的硬件故障
 
 参考
 ======
