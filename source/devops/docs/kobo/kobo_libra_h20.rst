@@ -13,7 +13,11 @@ Kobo Libra H2O上市时售价169.99美金，比Kobo Forma(8英寸)的280美金�
 规格
 =======
 
+- 重量: 192克
 
+.. figure:: ../../../_static/devops/docs/kobo/kobo.jpg
+
+   kobo 可以在休眠状态显示正在阅读图书的封面
 
 特点
 ==========
