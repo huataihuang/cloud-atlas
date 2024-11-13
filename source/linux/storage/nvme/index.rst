@@ -14,6 +14,7 @@ Linux NVMe
    kioxia_exceria_g2.rst
    crucial_p3.rst
    intel_optane_m10.rst
+   4_nvme_usb_disk.rst
    nvme-cli.rst
    nvme_ssd_management.rst
    nvme_passthru.rst
