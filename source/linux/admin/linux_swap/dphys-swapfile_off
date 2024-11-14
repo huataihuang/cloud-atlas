@@ -1,0 +1,1 @@
+dphys-swapfile swapoff
