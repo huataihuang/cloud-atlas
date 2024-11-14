@@ -4,9 +4,14 @@
 树莓派5存储Intel Optane(傲腾)
 ===============================
 
+.. _optane_performance:
+
+Intel Optane(傲腾)读写性能
+===========================
+
 .. warning::
 
-   我的测试方法有问题，没有实际测试出 Optane(傲腾)和常规NVMe :ref:`kioxia_exceria_g2` 的真实性能差异。不过，我没有精力继续测试，暂时先这样记录。以后有实际需求再搞。
+   我的测试方法有问题，没有实际测试出 Optane(傲腾)和常规NVMe :ref:`kioxia_exceria_g2` (因为铠侠的NVMe存储配备了1G缓存RAM，所以测试读写如果小于1G实际上只测试RAM的性能)的真实性能差异。
 
 对比随机写4k， :ref:`intel_optane_m10` (16G)和 :ref:`kioxia_exceria_g2` (2T) 没有什么太大区别:
 

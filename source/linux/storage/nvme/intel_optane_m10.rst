@@ -4,15 +4,30 @@
 Intel Optane(傲腾) M10
 ====================================
 
-Intel Optane(傲腾)是Intel公司推出的介于DRAM和常规3D-NAND SSD之间的特殊存储，具有非易失性的持久化存储特性，同时又兼具RAMD的(接近)性能，最夸张的是具有较NAND Flahs有1000倍的耐用性。
+Intel Optane(傲腾)是Intel公司推出的介于DRAM和常规3D-NAND SSD之间的特殊存储，具有非易失性的持久化存储特性，同时又兼具RAM的(接近)性能，最夸张的是具有较NAND Flash有1000倍的耐用性。
 
 但是，由于特殊的PCM(相变化存储器)原理，无法像3D-NAND一样堆叠扩展容量，导致生产大容量成本极高。始终无法在消费市场拓展，且技术迭代进展缓慢，Intel已经放弃Optane(傲腾)技术线路。
 
 .. note::
 
-   以上论述综合往上资料，不一定准确，后续不断完善
+   我之所以关注Intel Optane(傲腾)，是因为在淘宝上，有非常廉价的小规格傲腾m.2存储: 16GB(实际是13.4G)仅需要13块RMB。如此低廉的价格，加上Intel Optane(傲腾)的超高性能和耐用度，使得我这样的电子垃圾佬不由不心动，想要尝试一下(虽然也有很多信息显示这款存储兼容性和可用度非常狭小)。
 
-我之所以关注Intel Optane(傲腾)，是因为在淘宝上，有非常廉价的小规格傲腾m.2存储: 16GB(实际是13.4G)仅需要13块RMB。如此低廉的价格，加上Intel Optane(傲腾)的超高性能和耐用度，使得我这样的电子垃圾佬不由不心动，想要尝试一下(虽然也有很多信息显示这款存储兼容性和可用度非常狭小)。
+Intel Optane 的使用方法比较奇特:
+
+- 如果是新的Optane，那么开箱即用，表现为一个16G的SSD存储一样
+
+- 但是实际上Intel在OEM市场推广Optane是结合传统的HDD(磁盘)来使用的:
+
+  - 使用Intel的Optane软件工具将Optane和一个HDD配对以后，对系统而言就看不到独立的Optane设备，只看到一块磁盘
+  - 配对以后的Optane将无法独立使用，除非再次使用Optane软件工具unpair(我怀疑买到的一些Optane无法识别就是已经pair过的拆机存储，需要unpair才能使用)
+  - Intel Optane技术非常类似 :ref:`linux_bcache` ，但是驱动限定为Windows平台
+
+- 对于已经pair的Optane，如果安装到USB硬盘盒表现为一个U盘，可能还是可以使用的
+
+- Optane不是内存(RAM)，也无法作为内存使用(来扩展内存容量)，它就是一个存储设备
+
+  - 对于Linux系统，为了充分利用Optane的高速和耐用性，可以尝试 :ref:`swap_on_optane` 来部分解决系统内存不足(例如，我将购买的Optane M10作为 :ref:`pi_5` 的swap设备)
+
 
 使用小结
 ==========
@@ -51,5 +66,7 @@ Intel Optane(傲腾)是Intel公司推出的介于DRAM和常规3D-NAND SSD之间�
 ======
 
 - `What Is Intel Optane Memory? <https://www.howtogeek.com/317294/what-is-intel-optane-memory/>`_
+- `Intel Optane Memory Module - Frequently Asked Questions <https://www.dell.com/support/kbdoc/en-us/000175253/optane-memory-module-frequently-asked-questions>`_
 - `英特尔傲腾内存M10 <https://www.intel.cn/content/www/cn/zh/products/details/memory-storage/optane-memory/optane-memory-m10-series.html>`_
 - `Intel (傲腾) Optane 工作原理 <https://zhuanlan.zhihu.com/p/347543437>`_
+- `How do I use intel optane memory as ram?  <https://www.reddit.com/r/buildapc/comments/ab17fg/how_do_i_use_intel_optane_memory_as_ram/>`_
