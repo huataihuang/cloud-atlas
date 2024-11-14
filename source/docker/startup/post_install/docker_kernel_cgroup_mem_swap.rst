@@ -15,7 +15,7 @@ Docker内核支持cgroup内存和 swap限制
 
 内存和swap记账功能会消耗大约1%的可用内存以及总体10%的性能降低，即使Docker没有运行
 
-- 配置 ``/etc/default/grub`` ，添加 ``GRUB_CMDLINE_LINUX`` 行内容添加如下2个键值对，然后执行 ``update-grub`` 更新  :ref:`grub` 之后重启系统生效:
+- 配置 ``/etc/default/grub`` ，添加 ``GRUB_CMDLINE_LINUX`` 行内容添加如下2个键值对，然后执行 ``update-grub`` 更新  :ref:`ubuntu_grub` 之后重启系统生效:
 
 .. literalinclude:: docker_kernel_cgroup_mem_swap/grub
    :caption: 配置 ``/etc/default/grub`` ，添加 ``GRUB_CMDLINE_LINUX`` 行内容
