@@ -19,7 +19,7 @@ swap文件
 dphys-swapfile
 =====================
 
-在 Raspberry Pi OS中，现在默认安装可以在 ``top`` 输出中看到默认启用了 ``200M`` swap。但是，检查 ``/etc/fstab`` 可以看到提示，当前系统使用的是 ``dphys-swapfile`` 来管理 :ref:`swap_file`
+在 :ref:`raspberry_pi_os` 中，现在默认安装可以在 ``top`` 输出中看到默认启用了 ``200M`` swap。但是，检查 ``/etc/fstab`` 可以看到提示，当前系统使用的是 ``dphys-swapfile`` 来管理 :ref:`swap_file`
 
 .. literalinclude:: linux_swap/pi_fstab
    :caption: 树莓派的 ``/etc/fstab`` 注释显示通过 ``dphys-swapfile`` 工具管理swap文件
@@ -55,6 +55,15 @@ swap分区
 ----------------------------
 
 由于 :ref:`optane_performance` 性能和读写寿命都远超常规SSD，所以我在 :ref:`pi_5` 上采用 :ref:`intel_optane_m10` 来构建swap分区，以便扩展 :ref:`pi_5` 有限的8G内存:
+
+.. literalinclude:: linux_swap/swap_partition
+   :caption: 构建swap分区
+
+最后在 ``/etc/fstab`` 中添加如下配置:
+
+.. literalinclude:: linux_swap/fstab
+   :caption: ``/etc/fstab`` 添加swap分区配置
+
 
 参考
 =====
