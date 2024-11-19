@@ -4,7 +4,7 @@
 MacBook Air 11" Late 2010
 ============================
 
-我的第一台MacBook是2011年2月购买的 MacBook Air 11寸, Late 2010。这是苹果推出的第二代Macbook Air，虽然不是现在流行的Retina屏幕(分辨率只有 1366x768)，但是非常轻薄，只有1.06公斤，即使放到十二年后的现在，依然属于便携笔记本中的佼佼者。
+我的第一台MacBook是2011年2月购买的 MacBook Air 11寸, Late 2010(MacBookAir3,1)。这是苹果推出的第二代Macbook Air，虽然不是现在流行的Retina屏幕(分辨率只有 1366x768)，但是非常轻薄，只有1.06公斤，即使放到十二年后的现在，依然属于便携笔记本中的佼佼者。
 
 .. figure:: ../../_static/apple/macos/apple-macbook-air-2010-11.jpg
 
