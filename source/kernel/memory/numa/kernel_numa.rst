@@ -43,3 +43,4 @@ SMP和NUMA系统通常用于数据挖掘和决策支持系统的应用程序，�
 
 - `What is NUMA? <https://www.kernel.org/doc/html/v4.18/vm/numa.html>`_
 - `NUMA (non-uniform memory access)  <https://whatis.techtarget.com/definition/NUMA-non-uniform-memory-access>`_
+- `NUMA (Non-Uniform Memory Access): An Overview <https://queue.acm.org/detail.cfm?id=2513149>`_ 非常详尽的科普

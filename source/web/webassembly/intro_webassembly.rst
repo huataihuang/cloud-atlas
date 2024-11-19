@@ -15,9 +15,7 @@ WebAssembly 于 2015年 首次发布，并且在4年以后，成为官方标准�
 
    WASM 不能直接与DOM交互，所以需要同时使用JavaScript和WASM
 
-WebAssembly模块可以被导入到一个Web App (或 Node.js) 中，并且暴露出供JavaScript使用的WebAssembly函数。JavaScript框架不但可以使用WebAssembly获得巨大的性能优势和新特性，而且还睡的各种功能保持对网络开发者的易用性。
-
-
+WebAssembly模块可以被导入到一个Web App (或 Node.js) 中，并且暴露出供JavaScript使用的WebAssembly函数。JavaScript框架不但可以使用WebAssembly获得巨大的性能优势和新特性，而且还随着各种功能保持对网络开发者的易用性。
 
 参考
 =====

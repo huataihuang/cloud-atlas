@@ -4,6 +4,19 @@
 MacBook Pro上运行Arch Linux
 ==============================
 
+.. note::
+
+   本文实践是在 :ref:`mbp15_late_2013` 完成的，这款MBP硬件是早期的X86架构，通用性较好(除了WiFi模块)
+
+   对于 :ref:`mbp15_2018` 则由于苹果引入了Touch Bar以及指纹识别和T2安全芯片，安装Linux系统就很复杂。我还没有尝试过这种特殊硬件的Linux安装，根据资料:
+
+   - `GitHub: TRPB/arch-macbook2018.md <https://gist.github.com/TRPB/437f663b545d23cc8a2073253c774be3>`_ 
+   - `t2linux wiki <https://wiki.t2linux.org/>`_ 面向T2芯片的Mac安装Linux
+
+   确实比较折腾，暂时还没有实践。
+
+   目前我主要采用在 :ref:`raspberry_pi` 构建的 :ref:`pi_soft_storage_cluster` 实践 :ref:`kubernetes` 技术，暂时放弃MacBook上直接运行Linux，改为纯净 :ref:`macos` 结合 :ref:`lima` / :ref:`colima` 来运行虚拟机和容器，以便专注于后端技术。
+
 安装
 =========
 
