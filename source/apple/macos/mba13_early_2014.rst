@@ -4,7 +4,7 @@
 MacBook Air 13" Early 2014
 ============================
 
-我的第二台MacBook是MacBook Air 13寸, Early 2014。配置不高，是公司提供的工作电脑，按照阿里的IT规定，使用3年以后可以回购，所以现在是我的 :strike:`备用电脑` 外出携带 :ref:`mobile_work` 电脑(相对较轻)
+我的第二台MacBook是MacBook Air 13寸, Early 2014(MacBookAir6,2)。配置不高，是公司提供的工作电脑，按照阿里的IT规定，使用3年以后可以回购，所以现在是我的 :strike:`备用电脑` 外出携带 :ref:`mobile_work` 电脑(相对较轻)
 
 .. figure:: ../../_static/apple/macos/apple-macbook-air-2013-13.jpg
 
