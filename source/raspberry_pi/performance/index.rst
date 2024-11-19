@@ -10,6 +10,7 @@
    pi_5_cpufreq.rst
    pi_benchmark.rst
    pi_overclock.rst
+   pi_5_overclock.rst
 
 .. only::  subproject and html
 

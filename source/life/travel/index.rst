@@ -10,6 +10,8 @@
    :maxdepth: 1
 
    obvious_travel_advice.rst
+   digital_nomad.rst
+
 
 .. only::  subproject and html
 

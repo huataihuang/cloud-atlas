@@ -8,6 +8,7 @@ NUMA架构
    :maxdepth: 1
 
    kernel_numa.rst
+   fake_numa.rst
    lstopo.rst
    intel_i7_numa.rst
    numa_in_action.rst

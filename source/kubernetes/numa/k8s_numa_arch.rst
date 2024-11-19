@@ -1,12 +1,20 @@
 .. _k8s_numa_arch:
 
 ===========================
-Kubernetes NUMA实现架构
+Kubernetes NUMA架构
 ===========================
 
 当Kubernetes部署到裸金属服务器(直接物理主机，非 :ref:`kvm` 虚拟机环境) ，就会面对一个现状：服务器的负载锁使用的物理资源分布，从内存、CPU到存储和I/O，会戏剧性地影响性能。直到最近的Kubernetes用户还没有直接方式来影响这个硬件和软件的关键因素，也就是通常所说的资源拓扑(Resource Topology)。
 
 2021年开始Kubernetes引入了 ``Topology Aware Scheduling`` (拓扑感知调度)功能，使得kubernel控制平面(control plane)可以在pod调度到节点到时候控制资源拓扑限制(keep to Resource Topology constraints)。这个技术实现是从Kubernetes 1.17引入到 ``Topology Manager`` ，在kuberlet中节点级别的资源拓扑实现强制限制。
+
+2021年8月发布的Kubernetes 1.22默认启用了 ``NUMA-aware Memory Manager`` ，至此开始Kubernetes进入了 :ref:`numa` 感知和资源管理阶段。
+
+.. note::
+
+   我最初购买二手 :ref:`hpe_dl360_gen9` 的原因之一就是想通过SMP服务器来学习和实践 :ref:`numa` 技术。
+
+   不过，实际上 :ref:`cpu` 物理硬件不支持 :ref:`numa` 也没有关系， :ref:`kernel` 支持一种 ref:`fake_numa` 技术可以通过软件方式模拟出NUMA，同样可以学习和实践。
 
 资源拓扑的意义
 ===============
