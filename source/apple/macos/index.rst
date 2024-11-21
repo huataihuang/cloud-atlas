@@ -18,8 +18,8 @@ macOS
    thunderbolt.rst
    bcm943602cs.rst
    macos_big_sur_gts_root_certificate.rst
-   macbook_nvme.rst
-   macbook_sata.rst
+   mbp15_late_2013_update_nvme.rst
+   mba11_late_2010_update_sata.rst
    apple_silicon_m1_pro.rst
    macos_install_drive.rst
    create_boot_usb_from_iso_in_mac.rst

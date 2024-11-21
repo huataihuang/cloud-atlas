@@ -51,15 +51,15 @@ nvme-cli用户工具
       :widths: 25, 75
       :header-rows: 1
 
-- 列出系统所有安装的NVMe SSD::
+- 列出系统所有安装的NVMe SSD:
 
-   sudo nvme list
+.. literalinclude:: nvme-cli/nvme_list
+   :caption: 列出系统安装NVMe
 
 在我的 :ref:`hpe_dl360_gen9` 上通过 :ref:`pcie_bifurcation` 安装了3根 :ref:`samsung_pm9a1` :
 
 .. literalinclude:: nvme-cli/nvme_list.txt
    :language: bash
-   :linenos:
    :caption: nvme list 输出
 
 - 检查NVMe控制器以及支持的功能::

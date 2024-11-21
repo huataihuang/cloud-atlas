@@ -49,6 +49,18 @@ ChromeOS Flex
    :widths: 40,30,30
    :header-rows: 1
 
+.. warning::
+
+   ChromeOS Flex 安装时会检测主机硬件配置，我原本以为最小配置仅是充分条件，但是没想到 :ref:`intel_optane_m10` 实际上只有 13.41G ，安装检测不能通过，所以被迫放弃。
+
+准备
+=============
+
+- 解压缩下载的zip文件，并写入U盘:
+
+.. literalinclude:: chromeos_flex/dd
+   :caption: 使用 ``dd`` 将下载的镜像写入U盘
+
 参考
 ======
 

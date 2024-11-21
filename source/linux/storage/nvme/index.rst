@@ -11,6 +11,7 @@ Linux NVMe
    u2_m2.rst
    samsung_pm9a1.rst
    samsung_pm9a1_rtl9210b.rst
+   update_samsung_pm9a1_firmware.rst
    kioxia_exceria_g2.rst
    crucial_p3.rst
    intel_optane_m10.rst
