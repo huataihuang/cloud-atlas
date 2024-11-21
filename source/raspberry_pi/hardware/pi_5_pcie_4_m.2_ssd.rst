@@ -1,12 +1,18 @@
 .. _pi_5_pcie_4_m.2_ssd:
 
 =======================================================
-(实践失败)树莓派5 PCIe转M.2 NVMe "PCIe gen4" SSD存储
+树莓派5 PCIe转M.2 NVMe "PCIe gen4" SSD存储报错记录
 =======================================================
 
-我原本计划 :ref:`pi_5_pcie_m.2_ssd` 采用 :ref:`kioxia_exceria_g2` ，但是淘宝商家发错成 ``kioxia EXCERIA Plus`` 版本，也就是 ``PCIe gen4`` 规格的NVMe。从官方文档来看，树莓派只能工作于PCIe gen2 和 gen3，其中gen 3模式需要特定激活。
+我原本计划 :ref:`pi_5_pcie_m.2_ssd` 采用 :ref:`kioxia_exceria_g2` ，但是淘宝商家发错成 ``kioxia EXCERIA Plus`` 版本，也就是 ``PCIe gen4`` 规格的NVMe。从官方文档来看，树莓派似乎只能工作于PCIe gen2 和 gen3，其中gen 3模式需要特定激活。
 
 和商家协商后准备寄还错发的 `kioxia EXCERIA Plus`` **PCIe gen4** ，换成正确的 :ref:`kioxia_exceria_g2` 。不过，此时我已经拿到 ``微雪电子 树莓派5 PCIe转M.2转接板 D型`` ，就在想是否可以用我曾经购买过 ``PCIe gen 4`` 的 :ref:`samsung_pm9a1` 试试。毕竟 ``PCIe gen 4`` 号称是兼容 ``PCIe gen 3`` ，如果测试成功，也可以避免重复投资购买 :ref:`nvme` 存储。
+
+.. warning::
+
+   现在回看当时尝试其实存在没有注意到的疏忽，所以我在 :ref:`update_samsung_pm9a1_firmware` 实践中修复了使用 :ref:`samsung_pm9a1` ，本文仅记录当时的尝试。
+
+   实际上，2021年购买的 :ref:`samsung_pm9a1` 的firmware存在缺陷，无法用于USB移动硬盘，也无法用于 :ref:`pi_5` 的PCIe转接 M.2 NVMe。通过升级到新版本firmware可以解决本文遇到的识别问题。
 
 默认 ``pcie 2`` 模式
 =======================
