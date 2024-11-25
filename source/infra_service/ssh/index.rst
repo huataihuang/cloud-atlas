@@ -10,6 +10,8 @@ ssh服务
    ssh_key.rst
    ssh_tunneling.rst
    ssh_tunneling_remote_port_forwarding.rst
+   autossh.rst
+   rstunnel.rst
    ssh_tunneling_dynamic_port_forwarding.rst
    cloudflare_tunnels.rst
    entropy_random.rst

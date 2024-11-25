@@ -139,15 +139,15 @@ AMD-Vi/Intel VT-d 是CPU内置支持，只需要通过BIOS设置激活。通常�
 
 .. note::
 
-   要同时输出设备ID和 ``vfio-pci`` 绑定ID，可以使用 ``lspci -nn`` 命令，可以显示详细信息::
+   要同时输出设备ID和 ``vfio-pci`` 绑定ID，可以使用 ``lspci -nn`` 命令，可以显示详细信息:
 
-      lspci -nn | grep -i samsung
+   .. literalinclude:: ovmf_gpu_nvme/lspci_nn
+      :caption: ``lspci -nn`` 命令检查设备ID和 ``vfio-pci`` 绑定ID
 
-   就可以看到详细信息::
+   就可以看到详细信息:
 
-      05:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-      08:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
-      0b:00.0 Non-Volatile memory controller [0108]: Samsung Electronics Co Ltd Device [144d:a80a]
+   .. literalinclude:: ovmf_gpu_nvme/lspci_nn_output
+      :caption: ``lspci -nn`` 命令看到 :ref:`samsung_pm9a1` 的 ``vfio-pci`` 绑定ID
 
    可以直接知道内核需要传递的 ``vfio-pci.ids`` 就是 ``144d:a80a`` ，同时也能够知道如何配置设备 ``.xml`` 文件用于 ``virsh attach-device``
 

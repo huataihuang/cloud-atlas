@@ -25,7 +25,7 @@ SSH Tunneling: 远程服务端口转发
    cd cloud-atlas/build/html
    python3 -m http.server 20080
 
-此时我的笔记本上启动了一个简单的http服务，监听端口是 ``20080``
+此时我的笔记本上启动了一个简单的http服务，监听端口是 ``127.0.0.1:20080``
 
 - 现在登陆到远程VPS上，启用远程端口映射::
 
@@ -33,8 +33,24 @@ SSH Tunneling: 远程服务端口转发
 
 举例::
 
+   # 对internet公开20080端口允许访问 192.168.10.101 (这里假设对外的IP地址是192.168.10.101) 端口20080，反向访问到我在局域网内部的笔记本的20080端口
    #ssh -R 20080:192.168.10.101:20080 huatai@cloud-atlas.huatai.me
+
+   # 这里没有提供internet公开20080端口，而是只允许用户在先ssh到远程服务器上，只通过远程服务器的 127.0.0.1 的20080来访问内网主机20080
    ssh -R 20080:localhost:20080 huatai@cloud-atlas.huatai.me
+
+``~/.ssh/config`` 配置 **远程服务端口转发**
+----------------------------------------------
+
+通过命令行参数虽然简单，但是还是稍微麻烦了一点，所以可以将上述命令行参数转为 ``~/.ssh/config`` 中的 ``RemoteForward`` 配置:
+
+.. literalinclude:: ssh_tunneling_remote_port_forwarding/config_remoteforward
+   :caption: ``~/.ssh/config`` 配置 ``RemoteForward``
+
+注意:
+
+- ``~/.ssh/config`` 的 ``RemoteForward`` 配置是远程端绑定IP和端口在前，本地主机绑定IP和端口在后，我理解是 ``source => destination`` ，数据流socket是从远程到本地
+- 命令行参数是 ``-R <client_ip>:<client_port>:<server_ip>:<server_port>``
 
 异常排查
 ----------
