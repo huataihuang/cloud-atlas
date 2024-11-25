@@ -57,6 +57,16 @@ Linux提供了一个名为 ``fwupdmgr`` 的客户端工具来管理firmware升�
 .. literalinclude:: update_samsung_pm9a1_firmware/fwupdmgr_get-devices
    :caption: 获取设备列表
 
+- 执行以下命令从 `LVFS <https://lvfs.readthedocs.io/en/latest/>`_ 服务器下载和刷新 metadata (元数据):
+
+.. literalinclude:: update_samsung_pm9a1_firmware/fwupdmgr_refresh
+   :caption: 从LVFS服务器下载刷新metadata
+
+- 最后执行升级:
+
+.. literalinclude:: update_samsung_pm9a1_firmware/fwupdmgr_update
+   :caption: 执行firmware升级
+
 参考
 =======
 

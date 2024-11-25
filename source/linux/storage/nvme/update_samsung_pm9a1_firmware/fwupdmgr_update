@@ -1,0 +1,1 @@
+sudo fwupdmgr update
