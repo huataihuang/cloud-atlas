@@ -8,7 +8,7 @@ Clone Gentoo Liinux
 
    实践尚未成功，待更新
 
-我的 :ref:`mba11_late_2010` 已经有十二年历史了，目前有一个比较异常的地方: 启动时键盘失效，准确地说，是无法使用 ``option`` 键来选择启动顺序，无法从U盘启动安装操作系统，也无法激活 :ref:`macos_recovery` 。而且启动时候非常缓慢，启动时有时进入安全模式。我感觉是SSD磁盘坏掉了，所以采用 :ref:`macbook_sata` 来尝试替换。
+我的 :ref:`mba11_late_2010` 已经有十二年历史了，目前有一个比较异常的地方: 启动时键盘失效，准确地说，是无法使用 ``option`` 键来选择启动顺序，无法从U盘启动安装操作系统，也无法激活 :ref:`macos_recovery` 。而且启动时候非常缓慢，启动时有时进入安全模式。我感觉是SSD磁盘坏掉了，所以采用 :ref:`mba11_late_2010_update_sata` 来尝试替换。
 
 为了能够在新的SATA磁盘上先安装好Linux，我采用在 :ref:`install_gentoo_on_mbp` ( :ref:`mba13_early_2014` 上完成 )，然后外接U盘方式进行本文的Clone步骤。目标是完整安装好系统之后，将硬盘再安装到 :ref:`mba11_late_2010` 。
 

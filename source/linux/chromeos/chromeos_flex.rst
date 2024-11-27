@@ -40,7 +40,7 @@ ChromeOS Flex
 硬件设备
 ===========
 
-最近我购买了 :ref:`4_nvme_usb_disk` 用于构建 :ref:`zfs` ，恰好我手头上4块 :ref:`samsung_pm9a1` 的其中一块原先就是 :ref:`macbook_nvme` ，现在将用于构建 :ref:`zfs` 。而我想尝试用新购买的 :ref:`intel_optane_m10` 安装到 :ref:`mbp15_late_2013` 中作为瘦客户机，也就是尝试 ChromeOS 的存储。
+最近我购买了 :ref:`4_nvme_usb_disk` 用于构建 :ref:`zfs` ，恰好我手头上4块 :ref:`samsung_pm9a1` 的其中一块原先就是 :ref:`mbp15_late_2013_update_nvme` ，现在将用于构建 :ref:`zfs` 。而我想尝试用新购买的 :ref:`intel_optane_m10` 安装到 :ref:`mbp15_late_2013` 中作为瘦客户机，也就是尝试 ChromeOS 的存储。
 
 目前就是这个硬件规划:
 
@@ -60,6 +60,27 @@ ChromeOS Flex
 
 .. literalinclude:: chromeos_flex/dd
    :caption: 使用 ``dd`` 将下载的镜像写入U盘
+
+- 安装非常简单，将U盘插入 :ref:`mbp15_late_2013` ，立即触发启动，按提示进行安装。速度过快，我甚至一度怀疑操作系统复制是不是没有完成，但是实际上已经安装好了。
+
+使用体验
+==========
+
+- 最大的困难可能是 :ref:`across_the_great_wall` ，我主要通过 :ref:`ssh_tunneling_dynamic_port_forwarding` 构建一个简单翻墙来帮助完成账号初始化
+- ChromeOS 内置了Google全家桶，大多数对于我来说并不是必须的，但是Terminal终端是我必要的工具:
+
+  - ChromeOS使用了虚拟机结合容器的方式来构建一个Linux运行环境，第一次启动时会从互联网下载虚拟机并在虚拟机内部再启动一个容器，通过双层隔离沙响来实现安全: 这种方式为Linux技术开发带来不便，ChromeOS不提供底层操作系统直接的终端，你很难对ChromeOS进行剖析
+  - 由于ChromeOS将 ``ctrl`` 健作为 Meta 健，导致在Linux虚拟机Terminal终端无法使用 ``ctrl`` 结合的快捷键，这个问题我还没有找奥解决方法: 暂时无法使用 ``ctrl-c`` (终止运行程序) 以及 ``ctrl-b`` ( :ref:`tmux` ) ，所以非常痛苦
+
+- 总体来说ChromeOS就是一个Google官方构建的Gnome精简系统:
+
+  - 提供了良好的中文输入支持，以及内置中文显示: 再也不用折腾Linux桌面中文环境，这点非常友好
+  
+- ChromeOS Flex 看起来还是和官方的ChromeOS有所区别，没有内置 :ref:`android` 运行环境，我暂时也没有时间去探索
+
+我的目标是尝试在ChromeOS Flex中能够运行 :ref:`android`  程序，但是看来目前没有简单方法实现。另外，内置的Linux Terminal由于在虚拟机和容器的双层嵌套下非常不方便，对开发和运维工作带来很大困扰。
+
+目前看不出将 :ref:`macos` 替换为 ChromOS的理由，甚至因为诸多安全限制，使用起来还不如 :ref:`linux_desktop` 方便，所以短暂尝试后，我暂时放弃了ChromeOS Flxe。(另外一个原因是无法使用Android，甚至现在科技新闻报导由于反垄断，Google很有可能拆分Chrome，并将放弃ChromeOS，合并到Android系统中，未来前景不明)
 
 参考
 ======

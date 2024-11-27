@@ -4,7 +4,7 @@
 奥睿科（ORICO）M.2 NVMe/SATA双协议移动硬盘盒
 =============================================
 
-我使用 :ref:`macbook_sata` ，由于 :ref:`mba11_late_2010` 的硬件有异常，启动无法使用 ``option`` 键切换启动设备，导致我我发直接从U盘安装 :ref:`gentoo_linux` 。所以我想了一个变通方法，先完成 :ref:`install_gentoo_on_mbp` ，然后通过购买的 ``奥睿科（ORICO）M.2 NVMe/SATA双协议移动硬盘盒`` 来 :ref:`clone_gentoo` 完成安装。最后，再将安装好 :ref:`gentoo_linux` 的SATA硬盘安装到 :ref:`mba11_late_2010` 。
+我使用 :ref:`mba11_late_2010_update_sata` ，由于 :ref:`mba11_late_2010` 的硬件有异常，启动无法使用 ``option`` 键切换启动设备，导致我我发直接从U盘安装 :ref:`gentoo_linux` 。所以我想了一个变通方法，先完成 :ref:`install_gentoo_on_mbp` ，然后通过购买的 ``奥睿科（ORICO）M.2 NVMe/SATA双协议移动硬盘盒`` 来 :ref:`clone_gentoo` 完成安装。最后，再将安装好 :ref:`gentoo_linux` 的SATA硬盘安装到 :ref:`mba11_late_2010` 。
 
 三星 CM871a 512GB MZ-NTN5120 (注意，这款是 :ref:`m2` SATA存储，非 :ref:`nvme` )
 
