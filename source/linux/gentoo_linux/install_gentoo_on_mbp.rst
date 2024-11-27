@@ -97,7 +97,7 @@
 
 .. note::
 
-   :ref:`mbp15_late_2013` 换过 :ref:`nvme` 存储( :ref:`macbook_nvme` )，所以磁盘空间较大(1T)
+   :ref:`mbp15_late_2013` 换过 :ref:`nvme` 存储( :ref:`mbp15_late_2013_update_nvme` )，所以磁盘空间较大(1T)
 
    **注意：我这里的案例是保留了macOS分区，也就是采用双启动方式。所以分区和后面挂载 /boot 分区和纯粹的只使用Linux的分区是不一样的** 如果你只安装Gentoo Linux(删除macOS)，那么就采用下面的 " :ref:`mba13_early_2014` 分区 " 方法
 
@@ -146,7 +146,7 @@
 
 .. note::
 
-   :ref:`mba13_early_2014` 原装存储 只有 128GB，而且在没有 :ref:`macbook_nvme` 之前，内置存储还是SATA
+   :ref:`mba13_early_2014` 原装存储 只有 128GB (在没有 :ref:`mba11_late_2010_update_sata` 之前)
 
 - 磁盘分区:
 

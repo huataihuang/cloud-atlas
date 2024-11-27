@@ -15,7 +15,7 @@
   - 实践发现对于内存有限的笔记本电脑(32GB)运行5个KVM虚拟机依然内存捉襟见肘，所以后来在 :ref:`mbp15_late_2013` 笔记本我追求轻量级运行，不再强求KVM虚拟化模拟，而是采用纯容器的 :ref:`kind`
   - 启用域名 ``cloud-atlas.io`` 模拟构建 ``dev.cloud-atlas.io`` 开发和持续集成环境
 
-- 一台非常古老的 :ref:`intel_core_i7_4850hq` :ref:`mbp15_late_2013` 笔记本，已经快10年历史了，不过我 :ref:`macbook_nvme` 还能再打:
+- 一台非常古老的 :ref:`intel_core_i7_4850hq` :ref:`mbp15_late_2013` 笔记本，已经快10年历史了，不过我 :ref:`mbp15_late_2013_update_nvme` 还能再打:
 
   - 采用纯容器运行 :ref:`kind`
   - 专注模拟 :ref:`kubernetes` 并进行相关开发

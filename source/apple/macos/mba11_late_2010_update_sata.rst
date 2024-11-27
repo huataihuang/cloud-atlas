@@ -4,12 +4,12 @@
 升级MacBook Air 2010存储SATA硬盘(m.2转接)
 =============================================
 
-:ref:`mba11_late_2010` 的存储还是SATA时代的技术，和 :ref:`mbp15_late_2013` / :ref:`mba13_early_2014` 不同，不能 :ref:`macbook_nvme` 方式升级，必须购买特定的早期SATA固态硬盘。
+:ref:`mba11_late_2010` 的存储还是SATA时代的技术，和 :ref:`mbp15_late_2013` / :ref:`mba13_early_2014` 不同，不能 :ref:`mbp15_late_2013_update_nvme` 方式升级，必须购买特定的早期SATA固态硬盘。
 
 苹果的产品接口总是独树一帜，虽然底层其实也是采用业界标准的SATA传输协议，但是就是给整出一个特别的接口，和别家完全不兼容。好在，市场有需求总有产品来满足，实际上第三方苹果接口转 :ref:`m2` 的转接卡非常廉价，只是需要注意:
 
 - 2010-2012 年代的苹果产品SSD存储都是SATA协议，只能购买淘宝上所谓NGFF固态硬盘(实际上这种叫法不准确，NGFF是接口标准，其实就是 :ref:`m2` 。底层传输协议分为SATA和 :ref:`nvme` 。不过，大家似乎约定俗成把M2接口SATA协议的SSD称为 NGFF协议硬盘，而区别于 :ref:`nvme` 协议硬盘)
-- 2013年代开始，MacBook产品处于SATA过渡到NVMe阶段，此时笔记本官方硬件是SATA SSD存储，但是可以通过升级Firmware(升级操作系统)来支持 :ref:`macbook_nvme`
+- 2013年代开始，MacBook产品处于SATA过渡到NVMe阶段，此时笔记本官方硬件是SATA SSD存储，但是可以通过升级Firmware(升级操作系统)来支持 :ref:`mbp15_late_2013_update_nvme` 类似情况
 
 为了能够让我的 :ref:`mba11_late_2010` 焕发青春(我想在外出时携带廉价轻巧的设备，以降低身心负担)，2023年618，我决定尝试升级 :ref:`mba11_late_2010` :
 
