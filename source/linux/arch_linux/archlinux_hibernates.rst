@@ -190,4 +190,4 @@ Hibernate设置实践
 参考
 =====
 
-- `Power management/Suspend and hibernate <https://wiki.archlinux.org/index.php/Power_management/Suspend_and_hibernate>`_
+- `archlinux wiki:Power management/Suspend and hibernate <https://wiki.archlinux.org/index.php/Power_management/Suspend_and_hibernate>`_

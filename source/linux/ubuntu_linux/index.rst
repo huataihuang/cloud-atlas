@@ -14,6 +14,7 @@ Ubuntu Linux
    ubuntu_desktop.rst
    upgrade_ubuntu.rst
    ubuntu_hibernate.rst
+   ubuntu_hibernate_old.rst
    admin/index
    cgroup/index
    network/index
