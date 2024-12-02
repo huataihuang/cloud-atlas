@@ -25,3 +25,6 @@
 
 2018年4月1日
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=huataihuang/cloud-atlas&type=Date)](https://star-history.com/#huataihuang/cloud-atlas&Date)
