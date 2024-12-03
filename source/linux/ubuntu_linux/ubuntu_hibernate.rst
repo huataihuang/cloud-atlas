@@ -80,7 +80,12 @@ Ubuntu Hibernate休眠
 - 系统恢复以后，可以通过以下命令检查 ``systemd-hibernate`` 服务，可以看到加载是否成功以及出错信息(如果有的话):
 
 .. literalinclude:: ubuntu_hibernate/systemctl_hibernate_status
-   :caption: 检查hibernate恢复状态信息(多次记录)
+   :caption: 检查hibernate恢复状态
+
+输出类似如下:
+
+.. literalinclude:: ubuntu_hibernate/systemctl_hibernate_status_output
+   :caption: 检查hibernate恢复状态信息输出(多次记录)
    :emphasize-lines: 12-15
 
 非root用户
