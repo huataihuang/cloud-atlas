@@ -4,7 +4,7 @@
 修改磁盘和分区的UUID
 =============================
 
-我在 :ref:`revert_pi_5_nvme_boot` 过程中，需要修改SD卡的磁盘分区UUID:
+我在 :ref:`backup_restore_pi_by_tar` 过程中，需要修改SD卡的磁盘分区UUID:
 
 - 原先 :ref:`pi_5_nvme_boot` 时是通过 ``dd`` 命令clone磁盘的，导致NVMe磁盘和SD卡的磁盘UUID和PARTUUID完全一致
 - 当需要从SD卡启动时，两个磁盘UUID一致会导致即使设置了SD卡启动也会将NVMe的分区挂载为根分区(因为NVMe性能更快，所以相应UUID挂载会先于SD卡)

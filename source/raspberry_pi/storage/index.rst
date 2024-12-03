@@ -23,7 +23,7 @@ ARM架构在存储上似乎落后于x86体系，毕竟我们熟悉的各种存�
    pi_disable_auto_resize.rst
    radxa_taco.rst
    pi_5_nvme_boot.rst
-   revert_pi_5_nvme_boot.rst
+   backup_restore_pi_by_tar.rst
 
 .. only::  subproject and html
 
