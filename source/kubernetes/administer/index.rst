@@ -12,6 +12,7 @@ Kubernetes管理
    :maxdepth: 1
 
    k8s_dashboard.rst
+   lens/index
    configure_pods_and_containers.rst
    delete_cluster.rst
    cordon_node.rst

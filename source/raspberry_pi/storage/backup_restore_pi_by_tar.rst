@@ -60,9 +60,10 @@
 
 - 修订一些配置( :ref:`edge_cloud_infra_2024` ):
 
+  - ``/mnt/boot/firmware/cmdline.txt`` 该文件参数 ``root=PARTUUID=`` 决定了启动时挂载的root分区
   - ``/mnt/etc/hosts``
   - ``/mnt/etc/hostname``
-  - ``/mnt/etc/fstab``
+  - ``/mnt/etc/fstab`` 根据 ``blkid`` 输出的磁盘分区 ``PARTUUID`` 修订
   - ``/mnt/etc/NetworkManager/system-connections/eth0.nmconnection``
   - ``/mnt/NetworkManager/system-connections/<wifi_ssid>.nmconnection``
 
