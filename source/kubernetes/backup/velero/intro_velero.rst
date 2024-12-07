@@ -10,6 +10,10 @@ Velero (以前称为Heptio) 提供了备份和恢复Kubernetes集群资源和持
 - 将集群资源迁移到其他集群
 - 将生产集群复制到开发和测试集群
 
+.. note::
+
+   类似 :ref:`mirantis` 收购Docker Enterprise，老牌的虚拟化厂商VMware于2019年收购了Heptio，全面进入Kubernetes市场竞争。
+
 Velero工作原理
 =================
 

@@ -48,6 +48,7 @@ Life Balance
    music/index
    photography/index
    travel/index
+   tea/index
 
 .. only::  subproject and html
 

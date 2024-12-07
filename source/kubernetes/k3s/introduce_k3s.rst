@@ -42,8 +42,14 @@ Ubuntu也开发了一个轻量级的Kubernetes版本 `MicroK8s <https://microk8s
 
 我可能在未来会做尝试。
 
+k0s
+=======
+
 参考
 =====
 
 - `Running K8s on ARM <https://www.nickaws.net/kubernetes/2020/03/20/Running-K8S-on-ARM.html>`_
 - `k3s官网 <https://k3s.io>`_
+- `K3s Vs K8s: What’s The Difference? (And When To Use Each) <https://www.cloudzero.com/blog/k3s-vs-k8s/>`_
+- `k0s vs k3s – Battle of the Tiny Kubernetes distros <https://www.virtualizationhowto.com/2023/07/k0s-vs-k3s-battle-of-the-tiny-kubernetes-distros/>`_
+- `k3s vs k0s | 青训营创作 <https://juejin.cn/post/7196924295309656120>`_ 这篇文章是机器翻译，有些拗口，不过还是可以快速了解k0s和k3s的异同及选择

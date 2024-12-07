@@ -13,6 +13,7 @@ K3s - 轻量级Kubernetes
    prepare_k3s_alpine.rst
    alpine_cfssl.rst
    k3s_ha_etcd.rst
+   kine/index
    k3s_install.rst
    k3s_squid/index
    longhorn/index
