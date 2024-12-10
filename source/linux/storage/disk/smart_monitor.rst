@@ -202,8 +202,7 @@ Intel SSD的长测试 **似乎是真测试** 需要花费30分钟完成
 
 搜索了一下，看来Intel有自己的诊断工具 `How to Perform Quick/Full Diagnostic of Intel® SSDs Using Intel® Memory and Storage Tool (Intel® MAS) GUI <https://www.intel.com/content/www/us/en/support/articles/000056729/memory-and-storage/ssd-management-tools.html>`_ (这个是Intel Optane SSDs / Memory 设备检测工具)
 
-详细请参考 ` Support for Intel® Memory and Storage Tool <https://www.intel.com/content/www/us/en/support/products/202249/memory-and-storage/ssd-management-tools/intel-memory-and-storage-tool.html>`_
-
+详细请参考 `Support for Intel® Memory and Storage Tool <https://www.intel.com/content/www/us/en/support/products/202249/memory-and-storage/ssd-management-tools/intel-memory-and-storage-tool.html>`_
 
 参考
 ========

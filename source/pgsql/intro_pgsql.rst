@@ -4,6 +4,15 @@
 PostgreSQL简介
 =====================
 
+PostgreSQL历史渊源
+=====================
+
+PostgreSQL最早由加州伯克利计算机系开发的 ``POSTGRES v4.2`` (POSTGRES项目最早于1986年实现，于1993年终止4.2版本)为基础的对象关系型数据库管理系统(ORDBMS)集成而来，最初以 ``Postgres95`` 发布源代码。第一次正式发布 ``PostgreSQL`` 是上世纪1996年，版本以 ``6.0`` 开始。
+
+PostgreSQL支持大部份SQL标准并提供了很多现代特性，并且提供了多种方法扩展。PostgreSQL使用了较为宽松的许可证，任何人都可以以任何目的免费使用、修改和分发PostgreSQL。
+
+当前(2024年12月)，PostgreSQL已经发展到 v17.2 ，是最先进的开源数据库。
+
 .. note::
 
    PostgreSQL和MySQL对比，可以参考知乎问答 `PostgreSQL 与 MySQL 相比，优势何在？ <https://www.zhihu.com/question/20010554>`_
@@ -20,7 +29,6 @@ PostgreSQL vs. MySQL
 - PostgreSQL稳定性超过MySQL，但在较为简单的应用场景中MySQL占优
 
   - 大多数应用都没有使用到复杂的SQL功能，即使是互联网巨头的应用系统，其实也只是追求性能以及将RDBMS作为简单的数据记录和快速查询，依靠的是自定义开发软件系统来实现复杂的商业逻辑，对RDBMS功能要求其实不高。所以大多数互联网公司都会选择MySQL作为数据库系统，以便自己定制和开发商业软件。互联网公司的数据库选择并不能为上述两个数据库系统对比做背书，实际上仅仅是一个特殊应用场景。
-
 
 .. note::
 
@@ -41,6 +49,7 @@ PostgreSQL的对安全要求较高，带来了复杂的安全管理和一些性�
 PostgreSQL有非常丰富的在线文档:
 
 - `PostgreSQL官方手册 <https://www.postgresql.org/docs/>`_
+- `PostgreSQL官方手册中文版 <http://www.postgres.cn/docs/current/index.html>`_ 版本略微落后，但是非常方便快速阅读
 - `Planet PostgreSQL <https://planet.postgresql.org>`_ 
 - `PostgreSQL Wiki <https://wiki.postgresql.org/wiki/Main_Page>`_
 

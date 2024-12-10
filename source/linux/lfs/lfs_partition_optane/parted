@@ -1,0 +1,16 @@
+# 初始化磁盘分区表
+parted /dev/nvme0n1 mklabel gpt
+
+# 创建第一个分区，用于EFI启动
+parted -a optimal /dev/nvme0n1 mkpart ESP fat32 0% 384MB
+parted /dev/nvme0n1 set 1 esp on
+
+# 第二个分区作为/，所有剩余磁盘
+parted -a optimal /dev/nvme0n1 mkpart rootfs xfs 384MB 100%
+
+# 分区格式化
+mkfs.vfat -F 32 -n EFI /dev/nvme0n1p1
+mkfs.xfs /dev/nvme0n1p2
+
+# 完成后检查
+parted /dev/nvme0n1 print
