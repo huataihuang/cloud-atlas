@@ -26,7 +26,7 @@ Jupyter Note
 
 Jupyter Notebook WEB环境中，可以编写程序、运行代码查看输出和可视化结果，而且提供了编排文本和撰写查看复杂数学公式功能。通过强大的REPL交互开发环境(Read-Eval-Pring-Loop, 读取用户输入-执行代码-输出结果-循环上述操作)，用户可以非常方便实现交互式开发以及丰富的文档功能。
 
-最早Jupyter是起源于Python交互式开发环境 IPython Notebook，后来将IPython和Python解释器剥离，实现对多种语言的支持，已经只吃了40多种语言，成为非常成功对交互式集成开发平台。
+最早Jupyter是起源于Python交互式开发环境 IPython Notebook，后来将IPython和Python解释器剥离，实现对多种语言的支持，已经支持了40多种语言，成为非常成功对交互式集成开发平台。
 
 Jupyter Lab
 ===============

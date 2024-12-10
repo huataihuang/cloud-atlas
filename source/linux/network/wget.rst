@@ -58,8 +58,38 @@ wget镜像网站目录 ``-m`` ，不过如果单纯使用这个参数可能会�
 .. literalinclude:: ../../gluster/deploy/suse/deploy_sles15sp4_gluster11_client/wget_mirror_gluster_sles15sp4
    :caption: 使用 :ref:`wget` 镜像网站方式下载GlusterFS 11 for SLES 15SP4
 
+按照文件中url内容来下载文件
+=============================
+
+在 :ref:`lfs_prepare` 中采用一个url列表文件来下载对应软件包:
+
+.. literalinclude:: ../lfs/lfs_prepare/wget
+   :caption: 下载所有 wget-list-sysv 列出的软件包和补丁
+
+.. _wget_proxy:
+
+``wget`` 代理
+================
+
+``wgetrc`` 配置
+-------------------
+
+``/etc/wgetrc`` 或者 ``~/.wgetrc`` 都可以为 ``wget`` 配置代理:
+
+.. literalinclude:: wget/wgetrc
+   :caption: ``/etc/wgetrc`` 或者 ``~/.wgetrc`` 配置代理
+
+命令行参数
+--------------
+
+``wget`` 命令的 ``-e`` 参数可以传递 ``wgetrc`` 配置，这样就可以代替配置文件:
+
+.. literalinclude:: wget/wget_proxy
+   :caption: 直接命令行 ``-e`` 参数传递代理配置
+
 参考
 ====
 
 - `How to specify the location with wget? <https://stackoverflow.com/questions/1078524/how-to-specify-the-location-with-wget>`_
 - `Make Offline Mirror of a Site using wget <https://www.guyrutenberg.com/2014/05/02/make-offline-mirror-of-a-site-using-wget/>`_
+- `How do I force wget to use a proxy server without modifying system files? [duplicate] <https://askubuntu.com/questions/346649/how-do-i-force-wget-to-use-a-proxy-server-without-modifying-system-files>`_

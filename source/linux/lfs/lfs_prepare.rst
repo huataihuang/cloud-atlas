@@ -6,14 +6,14 @@ LFS准备工作
 
 .. note::
 
-   中文社区翻译的LFS文档在2024年3月1日发布翻译版本12.1已经紧跟官方文档，非常方便实践，主要参考
+   中文社区翻译的LFS文档在2024年3月1日发布翻译版本12.2已经紧跟官方文档，非常方便实践，主要参考
 
 .. note::
 
    LFS分为两个分支:
 
-   - `Linux From Scratch 版本 12.1-systemd-中文翻译版 发布于 2024 年 3 月 1 日 <https://lfs.xry111.site/zh_CN/12.1-systemd/>`_
-   - `Linux From Scratch 版本 12.1-中文翻译版 发布于 2024 年 3 月 1 日 <https://lfs.xry111.site/zh_CN/12.1/>`_
+   - `Linux From Scratch 版本 12.2-systemd-中文翻译版 发布于 2024 年 9 月 1 日 <https://lfs.xry111.site/zh_CN/12.2-systemd/>`_
+   - `Linux From Scratch 版本 12.2-中文翻译版 发布于 2024 年 9 月 1 日 <https://lfs.xry111.site/zh_CN/12.2/>`_
 
    考虑到我的底座系统是为了运行 :ref:`kvm` 和 :ref:`docker` ，没有复杂的主机服务，纯粹是运行环境，所以我目前采用 sysv 版本
 
@@ -38,6 +38,8 @@ LFS的目标架构是 AMD/Intel 的 x86(32位) 和 x86_64(64位) CPU (需要修�
 
 - LFS官方文档是构建纯粹的64位系统，也就是值运行64位可执行程序 
 - 如果要构建 ``multi-lib`` 系统(同时支持32位和64位)则需要两次编译很多应用(考虑到现代硬件需要巨大的内存，远超4GB，所以我也按照官方文档构建 **纯粹64位系统** 以便获得一个精简的能够用于物理主机host底座的OS)
+
+.. _lfs_wget:
 
 软件包选择
 =============
@@ -84,8 +86,10 @@ LFS的目标架构是 AMD/Intel 的 x86(32位) 和 x86_64(64位) CPU (需要修�
 
 LFS被设计成在一次会话中构建完成，也就是架设整个编译过程中，系统不会关闭或重启。不过，并非要求严格地一气呵成，需要注意如果重启后继续编译LFS，根据进度不同，可能需要再次进行某些操作。
 
-分区
-======
+.. _lfs_partitions:
+
+LFS分区
+===========
 
 LFS对分区没有硬性规定，但是有一些建议:
 
@@ -177,6 +181,8 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 
    部分文件可能会因为上游下载源更改无法下载，需要手工处理
 
+此外，还需要 `下载LFS必要的补丁 <https://lfs.xry111.site/zh_CN/12.2/chapter03/patches.html>`_ (需要按照文档内容)
+
 在LFS文件系统中创建有限目录布局
 ==================================
 
@@ -186,6 +192,9 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
    :caption: 创建目录布局
    :language: bash
 
+.. literalinclude:: lfs_prepare/mkdir_output
+   :caption: 创建目录布局的输出信息
+
 - 此外为交叉编译器准备一个专用目录，使得其和其他程序分离:
 
 .. literalinclude:: lfs_prepare/tools
@@ -194,7 +203,31 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 
 .. warning::
 
-   LFS不适用 ``/usr/lib64`` 目录，一定要确保该目录不存在，否则可能破坏系统。需要经常检查并确认该目录不存在
+   LFS不使用 ``/usr/lib64`` 目录，一定要确保该目录不存在，否则可能破坏系统。需要经常检查并确认该目录不存在
+
+   但是，我发现 :ref:`ubuntu_linux` 就具有 ``/usr/lib64`` ，而且这个目录里面只有一个软链接:
+
+   .. literalinclude:: lfs_prepare/ubuntu_lib64
+      :caption: :ref:`ubuntu_linux` 使用了 ``/usr/lib64`` ，该目录下有一个非常关键的软链接
+      :emphasize-lines: 3
+
+   **但是 但是**  在 :ref:`ubuntu_linux` 这个 ``/usr/lib64`` 目录 ``千万不能移除`` ，不要看只有一个软链接，现在系统中有太多软件依赖这个遗留的软链接。我好死不活尝试移除这个目录:
+
+   .. literalinclude:: lfs_prepare/ubuntu_mv_lib64
+      :caption: 尝试移除 ``/usr/lib64`` ，整个系统无法运行了
+
+   接下来发现，任何系统命令都无法运行，都显示文件不存在::
+
+      # groupadd
+      -bash: /usr/sbin/groupadd: No such file or directory
+    
+   ``ssh`` 登陆也会提示bash不存在::
+
+      Last login: Tue Dec 10 10:59:43 2024 from 192.168.7.221
+      /bin/bash: No such file or directory
+      Shared connection to 192.168.7.200 closed.
+
+   也就是说， ``bash`` 运行依赖这个库文件软链接，没有它系统无法工作
 
 添加LFS用户
 =============
@@ -262,4 +295,4 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 参考
 ======
 
-- `Linux From Scratch 版本 12.1-中文翻译版 发布于 2024 年 3 月 1 日 <https://lfs.xry111.site/zh_CN/12.1/>`_
+- `Linux From Scratch 版本 12.2-中文翻译版 发布于 2024 年 9 月 1 日 <https://lfs.xry111.site/zh_CN/12.2/>`_
