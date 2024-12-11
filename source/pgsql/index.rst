@@ -9,7 +9,7 @@ PostgreSQL是历史悠久、功能丰富的开源数据库，并且随着生态�
 .. toctree::
    :maxdepth: 1
 
-   intro_pgsql.rst 
+   pgsql_intro.rst 
    ../linux/gentoo_linux/gentoo_pgsql.rst
    install_pgsql.rst
    access_pgsql.rst

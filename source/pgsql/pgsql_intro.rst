@@ -1,4 +1,4 @@
-.. _intro_pgsql:
+.. _pgsql_intro:
 
 =====================
 PostgreSQL简介
@@ -12,6 +12,14 @@ PostgreSQL最早由加州伯克利计算机系开发的 ``POSTGRES v4.2`` (POSTG
 PostgreSQL支持大部份SQL标准并提供了很多现代特性，并且提供了多种方法扩展。PostgreSQL使用了较为宽松的许可证，任何人都可以以任何目的免费使用、修改和分发PostgreSQL。
 
 当前(2024年12月)，PostgreSQL已经发展到 v17.2 ，是最先进的开源数据库。
+
+.. note::
+
+   PostgreSQL的缩写是 ``pgsql`` (我最初想要找到一个类似 :ref:`mysql` 一样简短的缩写来减少自己的输入):
+
+   - `PostgreSQL手册 附录 L. 首字母缩写词 <http://www.postgres.cn/docs/current/acronyms.html>`_ 权威列出了PostgreSQL文档中常用的缩略词列表，其中 ``PGSQL`` 代表的 ``PostgreSQL``
+   - 很多PostgreSQL的内置函数使用了 ``pg_XXXX`` ，所以 ``pg`` 可以看作是 ``Postgres`` 的缩写，而 ``POSTGRES`` 是 PostgreSQL 的前身和继承
+   - 虽然 ``psql`` 是 PostgreSQL 的客户端名字，但是单字母 ``p`` 用作函数缩写部分不容易区分
 
 .. note::
 

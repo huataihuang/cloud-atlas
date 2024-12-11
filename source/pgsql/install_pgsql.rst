@@ -4,8 +4,51 @@
 安装PostgreSQL
 ==========================
 
-macOS安装PostgreSQL
-======================
+.. _install_pgsql_debian:
+
+:ref:`debian` 安装PostgreSQL
+==============================
+
+发行版安装
+-------------
+
+- :ref:`debian` 发行版包含了PostgreSQL，版本稍微低一些，例如当前PostgreSQL的current是17.2，而Debian 12(bookworm)则提供PostgreSQL 15:
+
+.. literalinclude:: install_pgsql/apt_install_pgsql
+   :caption: 通过 :ref:`debian` 发行版安装PostgreSQL
+
+``postgresql-contrib`` 是社区捐赠软件包提供了有用的扩展和工具
+
+- 然后可以设置启动:
+
+.. literalinclude:: install_pgsql/enable_pgsql
+   :caption: 设置PostgreSQL自动启动
+
+使用官方软件仓库安装
+-----------------------
+
+PostgreSQL Apt仓库提供了更新的PostgreSQL版本以及补丁管理继承，可以自动完成所有PostgreSQL生命周期的所有版本更新: `PostgreSQL Downlaad > Linux downloads (Debian) <https://www.postgresql.org/download/linux/debian/>`_ 提供了详细支持OS版本和架构，例如我在 :ref:`pi_5` 实际是 :ref:`debian` bookworm(12.x)以及架构 ``arm64`` 都是官方支持的，所以通过以下方式安装:
+
+自动仓库配置安装
+~~~~~~~~~~~~~~~~~~
+
+简单执行以下命令就可以完成仓库配置:
+
+.. literalinclude:: install_pgsql/auto_repo_config
+   :caption: 自动完成仓库配置
+
+手工配置仓库安装
+~~~~~~~~~~~~~~~~~~
+
+执行以下命令配置Apt仓库:
+
+.. literalinclude:: install_pgsql/manual_repo_config_install
+   :caption: 手工完成仓库配置并安装
+
+.. _install_pgsql_macos:
+
+:ref:`macos` 安装PostgreSQL
+==============================
 
 第三方安装
 ----------------
@@ -47,3 +90,5 @@ macOS安装PostgreSQL
 ======
 
 - `PostgreSQL Download > macOS packages <https://www.postgresql.org/download/macosx/>`_
+- `PostgreSQL Downlaad > Linux downloads (Debian) <https://www.postgresql.org/download/linux/debian/>`_
+- `How to Install PostgreSQL on Debian 12: A Step-by-Step Tutorial <https://www.sqliz.com/posts/install-postgresql-on-debian-12/>`_
