@@ -16,9 +16,10 @@ Ubuntu修订Grub内核启动参数
    GRUB_CMDLINE_LINUX_DEFAULT="intel_iommu=on"
    GRUB_CMDLINE_LINUX=""
 
-- 然后执行::
+- 然后执行grub更新:
 
-   sudo update-grub
+.. literalinclude:: ubuntu_grub/update-grub
+   :caption: 更细GRUB
 
 - 重启操作系统，然后执行以下命令检查::
 

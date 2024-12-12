@@ -13,6 +13,7 @@ PostgreSQL是历史悠久、功能丰富的开源数据库，并且随着生态�
    ../linux/gentoo_linux/gentoo_pgsql.rst
    install_pgsql.rst
    access_pgsql.rst
+   pgadmin.rst
 
 .. only::  subproject and html
 

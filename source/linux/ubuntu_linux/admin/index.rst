@@ -18,6 +18,7 @@ Ubuntu系统管理
    ubuntu_unattended_upgrade.rst
    upgrade_ubuntu_20.04_to_22.04.rst
    ubuntu_grub.rst
+   ubuntu_serial_console.rst
    run_centos_in_chroot_under_ubuntu.rst
 
 .. only::  subproject and html

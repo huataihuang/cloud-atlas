@@ -8,6 +8,7 @@ IPMI
    :maxdepth: 1
 
    use_ipmi.rst
+   ipmitool_sol_activate.rst
    ipmitool.rst
    quick_config_ipmi.rst
    ipmi_sensor_fan_speed.rst
