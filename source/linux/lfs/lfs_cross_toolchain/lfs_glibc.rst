@@ -1,7 +1,7 @@
 .. _lfs_glibc:
 
 ==================
-LFS Glibc-2.39
+LFS Glibc-2.40
 ==================
 
 .. literalinclude:: lfs_glibc/build
