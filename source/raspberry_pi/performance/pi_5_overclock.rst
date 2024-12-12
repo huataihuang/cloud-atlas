@@ -50,4 +50,4 @@
 - `Changing Pi5 fan (case or active cooler) cooling map <https://forums.raspberrypi.com/viewtopic.php?t=362528>`_ 调整风扇转速以降低超频后温度
 - `An important consideration about Pi 5 overclocking  <https://www.jeffgeerling.com/blog/2024/important-consideration-about-pi-5-overclocking>`_
 - `How to Overclock A Raspberry Pi 5 <https://www.tomshardware.com/how-to/overclock-raspberry-pi-5>`_
-
+- `Overclocking and *Underclocking* the Raspberry Pi 5 <https://www.jeffgeerling.com/blog/2023/overclocking-and-underclocking-raspberry-pi-5>`_ 这篇比较详细对比功率和主频，但我还没有仔细阅读(Jeff Geerling有好几篇关于树莓派超频的blog，例如 `Hacking Pi firmware to get the fastest overclock <https://www.jeffgeerling.com/blog/2024/hacking-pi-firmware-get-fastest-overclock>`_
