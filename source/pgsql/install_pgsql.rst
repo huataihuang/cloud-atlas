@@ -45,6 +45,12 @@ PostgreSQL Apt仓库提供了更新的PostgreSQL版本以及补丁管理继承�
 .. literalinclude:: install_pgsql/manual_repo_config_install
    :caption: 手工完成仓库配置并安装
 
+使用PostgreSQL的官方仓库进行安装的PostgreSQL是设置为自动启动服务，所以可以看到:
+
+.. literalinclude:: install_pgsql/check_pgsql
+   :caption: 检查PostgreSQL
+   :emphasize-lines: 12-17
+
 .. _install_pgsql_macos:
 
 :ref:`macos` 安装PostgreSQL
@@ -85,6 +91,11 @@ PostgreSQL Apt仓库提供了更新的PostgreSQL版本以及补丁管理继承�
 
 .. literalinclude:: install_pgsql/command_postgresql
    :caption: 使用命令启动 PostgreSQL
+
+下一步
+==========
+
+完成PostgreSQL之后，就可以 :ref:`access_pgsql` (包括设置权限)
 
 参考
 ======

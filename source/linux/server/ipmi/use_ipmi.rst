@@ -45,9 +45,15 @@ IPMI硬件和软件要求
 
    在这里使用 ``set 2`` 对 channel 2 进行配置，实践发现，实际上ipmi可能使用不同的channel(尚未理解，我在实践中发现有使用channel 1也有channel 2，这里是在 我的 :ref:`hpe_dl360_gen9` 服务器上配置，使用的是 ``channel 2`` ；在通常情况下，这个channel是1)。例如有可能  ``sudo ipmitool lan print 1`` 显示 ``Invalid channel: 1`` 。而此时尝试 ``sudo ipmitool lan print 2`` 才有输出，则证明服务器采用的是 ``channel 2`` 。你可以尝试一下 ``sudo ipmitool lan print`` 
 
-- 检查配置::
+- 检查配置:
 
-   ipmitool lan print 2
+.. literalinclude:: use_ipmi/ipmi_lan_print
+   :caption: ``ipmitool lan print`` 输出 ``channel 2``
+
+输出显示:
+
+.. literalinclude:: use_ipmi/ipmi_lan_print_output
+   :caption: ``ipmitool lan print`` 输出 ``channel 2`` 内容
 
 - 配置admin权限用户账号::
 
@@ -234,6 +240,31 @@ IPMI不仅可以本机执行，也可以通过网络访问方式执行 ( ``-I la
 
 以下如果是登陆到服务器上并具有root权限，也都不需要 ``-I lanplus -H IP -U username -P password`` 。
 
+电源管理
+------------
+
+``ipmitool`` 可以远程通过网络管理服务器电源，也就是开机关机:
+
+- 电源开机:
+
+.. literalinclude:: use_ipmi/chassis_power_on
+   :caption: ``chassis power on`` 电源开机
+
+- 软方式关机:
+
+.. literalinclude:: use_ipmi/chassis_power_soft
+   :caption: ``chassis power soft`` 电源软关机
+
+- 强制硬关机:
+
+.. literalinclude:: use_ipmi/chassis_power_off
+   :caption: ``chassis power off`` 电源强制硬关机
+
+- 硬重启(reset)服务器:
+
+.. literalinclude:: use_ipmi/chassis_power_cycle
+   :caption: ``chassis power cycle`` 电源硬重启(reset)
+
 常用IMPI功能
 ---------------
 
@@ -369,3 +400,4 @@ raw参数说明:
 - `Using Intelligent Platform Management Interface (IPMI) <https://www.ibm.com/support/knowledgecenter/#!/linuxonibm/liaai/ipmi/ipmikick.htm>`_
 - `IPMI-Chassis Device <https://github.com/erik-smit/oohhh-what-does-this-ipmi-doooo-no-deedee-nooooo/blob/master/1-discovering/snippets/Computercheese/IPMI-Chassis%20Device%20Commands.txt>`_
 - `Example of BMC Configuration Using IPMItool <https://docs.oracle.com/en/database/oracle/oracle-database/12.2/cwaix/example-of-bmc-configuration-using-ipmitool.html#GUID-11E563E0-3688-4FE9-8440-81402A7AC23A>`_
+- `How to Use IPMItool to Control Power <https://docs.oracle.com/cd/E19273-01/html/821-0243/gixvt.html>`_
