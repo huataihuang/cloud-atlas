@@ -16,6 +16,10 @@ RSTunnel
 
 脚本写得很精简，阅读可以理解原理以及辅助逻辑
 
+.. note::
+
+   我比较习惯使用SSH config来控制SSH，所以我fork了RSTunnel改写了一个 `CTunnel <https://github.com/huataihuang/CTunnel>`_ (还比较粗糙，待改进)
+
 - 随脚本提供了一个 ``install`` 工具，用于通过交互方式完成安装，实际上就是生成一个 ``rstunnel.conf``
 
 - 运行依赖 ``nc`` 命令，是通过 ``netcat`` 工具包提供，所以需要确保安装:
