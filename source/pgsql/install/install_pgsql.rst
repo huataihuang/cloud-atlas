@@ -92,6 +92,11 @@ PostgreSQL Apt仓库提供了更新的PostgreSQL版本以及补丁管理继承�
 .. literalinclude:: install_pgsql/command_postgresql
    :caption: 使用命令启动 PostgreSQL
 
+- 创建 ``postgres`` 用户( :ref:`pgadmin` 使用这个角色访问):
+
+.. literalinclude:: install_pgsql/brew_pgsql_createuser
+   :caption: 通过 :ref:`homebrew` 安装的PostgreSQL，需要创建一个 ``postgres`` 系统用户角色
+
 下一步
 ==========
 

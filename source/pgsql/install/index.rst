@@ -1,13 +1,14 @@
-.. _lua:
+.. _pgsql_install:
 
 =================================
-Lua
+PostgreSQL 安装
 =================================
+
 
 .. toctree::
    :maxdepth: 1
 
-   lua_startup.rst
+   install_pgsql.rst
 
 .. only::  subproject and html
 

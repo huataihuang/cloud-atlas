@@ -1,7 +1,7 @@
 .. _performance:
 
 =================================
-Performance Atlas
+Performance
 =================================
 
 .. toctree::

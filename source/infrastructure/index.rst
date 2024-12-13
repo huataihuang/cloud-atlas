@@ -1,7 +1,7 @@
 .. _infrastructure:
 
 =================================
-Infrastructure Atlas
+Infrastructure
 =================================
 
 当我阅读到 `A Look Inside Wikipedia's Infrastructure <https://www.datacenterknowledge.com/archives/2008/06/24/a-look-inside-wikipedias-infrastructure>`_ ，我突然想到像Wiki百科这样世界上最大的WEB网站，却是构建在我们平时所轻视的PHP语言之上。Wiki百科通过 `Wikitech网站 <https://wikitech.wikimedia.org>`_ 完整展现了基础架构技术，这不是我们学习借鉴的标杆么？

@@ -1,7 +1,7 @@
 .. _kubernetes:
 
 =================================
-Kubernetes Atlas
+Kubernetes
 =================================
 
 Kubernetes是Google基于其内部容器管理技术研发的开源实现，简单而言，就是容器的编排管理平台(Orchestrate)。正如Docker技术使得容器易于分发和运行，Kubernetes的诞生带来了数据中心视野的容器调度能力。随着Kubernetes技术发展，它已经不仅是容器调度技术，也逐步发展为容器-原生虚拟化和serverless计算的平台。
