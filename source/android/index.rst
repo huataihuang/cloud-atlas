@@ -1,7 +1,7 @@
 .. _android:
 
 =================================
-Android Atlas
+Android
 =================================
 
 Android是Google开发的移动操作系统，基于定制的Linux内核和其他开源软件。核心Android源代码称为Android Open Source Project(AOSP)，主要采用Apache License发布。

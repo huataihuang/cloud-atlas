@@ -7,7 +7,7 @@ PostgreSQL简介
 PostgreSQL历史渊源
 =====================
 
-PostgreSQL最早由加州伯克利计算机系开发的 ``POSTGRES v4.2`` (POSTGRES项目最早于1986年实现，于1993年终止4.2版本)为基础的对象关系型数据库管理系统(ORDBMS)集成而来，最初以 ``Postgres95`` 发布源代码。第一次正式发布 ``PostgreSQL`` 是上世纪1996年，版本以 ``6.0`` 开始。
+PostgreSQL最早由加州伯克利计算机系开发的 ``POSTGRES v4.2`` (POSTGRES项目最早于1986年实现，于1993年终止4.2版本)为基础的对象关系型数据库管理系统(ORDBMS)继承而来，最初以 ``Postgres95`` 发布源代码。第一次正式发布 ``PostgreSQL`` 是上世纪1996年，版本以 ``6.0`` 开始。
 
 PostgreSQL支持大部份SQL标准并提供了很多现代特性，并且提供了多种方法扩展。PostgreSQL使用了较为宽松的许可证，任何人都可以以任何目的免费使用、修改和分发PostgreSQL。
 

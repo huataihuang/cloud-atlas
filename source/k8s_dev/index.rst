@@ -1,7 +1,7 @@
 .. _k8s_dev:
 
 ======================================
-Kubernetes Develop Atlas
+Kubernetes Develop
 ======================================
 
 .. toctree::

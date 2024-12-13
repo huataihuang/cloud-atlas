@@ -1,7 +1,7 @@
 .. _linux:
 
 =================================
-Linux Atlas
+Linux
 =================================
 
 Linux是云计算的主流基础操作系统，除了微软的Azure，其他主要的云计算服务商(Amazon AWS, Goolgle Cloud, Alibaba Cloud ...)都构建在各自定制的Linux上。

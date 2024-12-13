@@ -1,13 +1,14 @@
-.. _lua:
+.. _pgsql_admin:
 
 =================================
-Lua
+PostgreSQL 管理
 =================================
+
 
 .. toctree::
    :maxdepth: 1
 
-   lua_startup.rst
+   pgadmin.rst
 
 .. only::  subproject and html
 

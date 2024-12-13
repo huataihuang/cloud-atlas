@@ -1,7 +1,7 @@
 .. _django:
 
 =================================
-Django Atlas
+Django
 =================================
 
 Django是Python编写的开源Web应用框架，结构清晰，应用广泛。在云计算领域中，著名的开源云计算平台 :ref:`openstack` 和 :ref:`ovirt` 都采用了Django实现。

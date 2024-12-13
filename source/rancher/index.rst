@@ -1,7 +1,7 @@
 .. _rancher:
 
 =================================
-Rancher Atlas
+Rancher
 =================================
 
 Rancher是由 `Rancher公司 <https://rancher.com/>`_ (SUSE子公司)开发的 :ref:`kubernetes` 管理平台，也就是对标 :ref:`openshift` 的PaaS平台。

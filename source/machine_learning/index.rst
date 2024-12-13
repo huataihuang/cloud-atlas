@@ -1,7 +1,7 @@
 .. _machine_learning:
 
 =================================
-Machine Learning Atlas
+Machine Learning
 =================================
 
 `Q-engineering <https://qengineering.eu/>`_ 提供了大量的学习案例，自1997年创建后，积累了很多视觉计算项目

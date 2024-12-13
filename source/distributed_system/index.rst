@@ -1,7 +1,7 @@
 .. _distributed_system:
 
 =================================
-Distributed System Atlas
+Distributed System
 =================================
 
 .. toctree::

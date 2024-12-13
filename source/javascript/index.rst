@@ -1,7 +1,7 @@
 .. _javascript:
 
 =================================
-JavaScript Atlas
+JavaScript
 =================================
 
 .. toctree::
