@@ -265,6 +265,11 @@ IPMI不仅可以本机执行，也可以通过网络访问方式执行 ( ``-I la
 .. literalinclude:: use_ipmi/chassis_power_cycle
    :caption: ``chassis power cycle`` 电源硬重启(reset)
 
+- 检查服务器电源状态:
+
+.. literalinclude:: use_ipmi/chassis_status
+   :caption: ``chassis status`` 检查服务器状态
+
 常用IMPI功能
 ---------------
 

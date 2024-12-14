@@ -27,4 +27,69 @@ M4编译报错(limits.h)
    :caption: 编译m4报错
    :emphasize-lines: 7,18
 
-这个报错参考 `Problems with  compiling the M4 packet for my LFS system (LFS 10.1)  <https://www.linuxquestions.org/questions/linux-newbie-8/problems-with-compiling-the-m4-packet-for-my-lfs-system-lfs-10-1-a-4175699442/>`_ ，也就是LFS faq中提到的，是由于GCC提供的 ``limits.h`` 没有被包含在Glibc中导致。有两个地方需要修复，分别是 :ref:`lfs_gcc_1` 和 Glibc 。
+这个报错参考 `Problems with  compiling the M4 packet for my LFS system (LFS 10.1)  <https://www.linuxquestions.org/questions/linux-newbie-8/problems-with-compiling-the-m4-packet-for-my-lfs-system-lfs-10-1-a-4175699442/>`_ ，是因为忘记执行 ``生成完整的limits.h`` 步骤导致的，返回到 :ref:`lfs_gcc_1` 执行一次::
+
+   cd $LFS/sources
+   VERSION=14.2.0
+   cd gcc-${VERSION}
+
+.. literalinclude:: lfs_gcc_1/limits.h
+   :caption: 生成完整的limits.h
+   :language: bash
+
+然后重新编译 M4 就可以成功
+
+安装Ncurses
+=============
+
+.. literalinclude:: lfs_cross_build_tools/ncurses
+   :caption: 安装Ncurses
+
+安装Bash
+==============
+
+.. literalinclude:: lfs_cross_build_tools/bash
+   :caption: 安装Bash
+
+安装Coreutils
+====================
+
+.. literalinclude:: lfs_cross_build_tools/coreutils
+   :caption: 安装Coreutils
+
+安装Diffutils
+==================
+
+.. literalinclude:: lfs_cross_build_tools/diffutils
+   :caption: 安装Diffutils
+
+安装File
+============
+
+.. literalinclude:: lfs_cross_build_tools/file
+   :caption: 安装File
+
+安装Findutils
+================
+
+.. literalinclude:: lfs_cross_build_tools/findutils
+   :caption: 安装Findutils
+
+安装Gawk
+==================
+
+.. literalinclude:: lfs_cross_build_tools/gawk
+   :caption: 安装Gawk
+
+安装Grep
+================
+
+.. literalinclude:: lfs_cross_build_tools/grep
+   :caption: 安装Grep
+
+安装Gzip
+============
+
+.. literalinclude:: lfs_cross_build_tools/gzip
+   :caption: 安装Gzip
+

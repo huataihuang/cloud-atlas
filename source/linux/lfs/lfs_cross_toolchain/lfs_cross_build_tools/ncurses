@@ -1,0 +1,38 @@
+cd $LFS/sources
+
+VERSION=6.5
+
+tar xf ncurses-${VERSION}.tar.gz
+cd ncurses-${VERSION}
+
+# 配置时优先查找 gawk 命令
+sed -i s/mawk// configure
+
+# 在宿主系统构建"tic"程序:
+mkdir build
+pushd build
+  ../configure
+  make -C include
+  make -C progs tic
+popd
+
+# 编译Ncures
+./configure --prefix=/usr                \
+            --host=$LFS_TGT              \
+            --build=$(./config.guess)    \
+            --mandir=/usr/share/man      \
+            --with-manpage-format=normal \
+            --with-shared                \
+            --without-normal             \
+            --with-cxx-shared            \
+            --without-debug              \
+            --without-ada                \
+            --disable-stripping
+
+make
+
+# 安装
+make DESTDIR=$LFS TIC_PATH=$(pwd)/build/progs/tic install
+ln -sv libncursesw.so $LFS/usr/lib/libncurses.so
+sed -e 's/^#if.*XOPEN.*$/#if 1/' \
+    -i $LFS/usr/include/curses.h

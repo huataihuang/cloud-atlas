@@ -1,0 +1,21 @@
+cd $LFS/sources
+
+VERSION=9.5
+
+tar xf coreutils-${VERSION}.tar.xz
+cd coreutils-${VERSION}
+
+./configure --prefix=/usr                     \
+            --host=$LFS_TGT                   \
+            --build=$(build-aux/config.guess) \
+            --enable-install-program=hostname \
+            --enable-no-install-program=kill,uptime
+
+make
+make DESTDIR=$LFS install
+
+# 将程序移动到它们最终安装时的正确位置。在临时环境中这看似不必要，但一些程序会硬编码它们的位置，因此必须进行这步操作：
+mv -v $LFS/usr/bin/chroot              $LFS/usr/sbin
+mkdir -pv $LFS/usr/share/man/man8
+mv -v $LFS/usr/share/man/man1/chroot.1 $LFS/usr/share/man/man8/chroot.8
+sed -i 's/"1"/"8"/'                    $LFS/usr/share/man/man8/chroot.8
