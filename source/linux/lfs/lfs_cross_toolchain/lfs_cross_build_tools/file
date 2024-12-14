@@ -1,0 +1,25 @@
+cd $LFS/sources
+
+VERSION=5.45
+
+tar xf file-${VERSION}.tar.gz
+cd file-${VERSION}
+
+# 宿主系统 file 命令的版本必须和正在构建的软件包相同，才能在构建过程中创建必要的特征数据文件。运行以下命令，构建 file 命令的一个临时副本：
+mkdir build
+pushd build
+  ../configure --disable-bzlib      \
+               --disable-libseccomp \
+               --disable-xzlib      \
+               --disable-zlib
+  make
+popd
+
+# 编译 File
+./configure --prefix=/usr --host=$LFS_TGT --build=$(./config.guess)
+
+make FILE_COMPILE=$(pwd)/build/src/file
+make DESTDIR=$LFS install
+
+# 移除对交叉编译有害的 libtool 档案文件：
+rm -v $LFS/usr/lib/libmagic.la

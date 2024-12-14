@@ -15,3 +15,4 @@ Kubernetes结合虚拟化技术的实现：
 
    gvisor/index
    kubevirt/index
+   kata/index
