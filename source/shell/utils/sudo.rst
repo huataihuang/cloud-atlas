@@ -85,6 +85,48 @@ sudo缓慢问题
 
 看到一个巧妙的 ``!!`` 用法，实际上就是 :ref:`bash` 的一个 ``event designator`` 使用，表示历史列表中命令。实际上就是执行上一次 ``sudo`` 命令
 
+.. _sudoers_multiple_entries:
+
+sudoers 多个匹配顺序生效，后面的匹配配置覆盖前面
+===============================================================
+
+一个网友提出的 `openconnect 免输入 root 密码问题 #3 <https://github.com/huataihuang/cloud-atlas-draft/issues/3>`_ ，在 macOS 上 :ref:`homebrew` 安装的 :ref:`openconnect_vpn` ，参考我的文档配置 ``/etc/sudoers`` 如下:
+
+.. literalinclude:: sudo/sudoers_nowork
+   :caption: 配置 ``/etc/sudoers`` 免密码使用 openconnect 不生效(在默认配置中添加了一行)
+   :emphasize-lines: 2
+
+不生效的原因是:
+
+- 如果有多行 ``/etc/sudoers`` 配置匹配上一个用户，则规则是依次生效的
+- 如果有多个匹配项，那么使用最后一个匹配配置
+
+参考 ``man sudoers`` 中有如下解释::
+
+   When multiple entries match for a user, they are applied in order.
+   Where there are multiple matches, the last match is used (which is not
+   necessarily the most specific match).
+
+对于上述没有生效的(错误顺序)的 ``/etc/sudoers`` 配置，此时执行 ``sudo -l`` 可以看到当前 ``admin`` 组用户，也就是我自己的权限如下:
+
+.. literalinclude:: sudo/sudo_list
+   :caption: ``sudo -l`` 显示我自己的的权限，注意所有命令都要密码的配置在 ``openconnect`` 不要密码配置后面
+
+可以看到对于 ``sudo`` 而言，要求所有命令都需要密码的配置在后面覆盖了前面 ``openconnect`` 无需密码的配置，所以导致期望中的 ``openconnect`` 无需密码不生效。
+
+解决的方法是 修订 ``/etc/sudoers`` 配置中的配置顺序，即修改成:
+
+.. literalinclude:: sudo/sudoers_work
+   :caption: 调整 ``/etc/sudoers`` 配置顺序，免密码使用 openconnect 配置在所有命令都需要密码之后，这样就能生效
+   :emphasize-lines: 3
+
+此时检查 ``sudo -l`` 输出内容就是:
+
+.. literalinclude:: sudo/sudo_list_ok
+   :caption: ``sudo -l`` 显示我自己的的权限，注意 ``openconnect`` 无需密码权限在后面覆盖ALL已经生效
+
+此时，其他需要 ``sudo`` 执行的系统命令依然会提示要密码，但是 ``openconnect`` 就不再需要密码。
+
 参考
 ====
 
@@ -93,3 +135,4 @@ sudo缓慢问题
 -  `How do I edit /etc/sudoers from a script? <https://stackoverflow.com/questions/323957/how-do-i-edit-etc-sudoers-from-a-script>`_
 - `Switching user using sudo <https://researchhubs.com/post/computing/linux-cmd/sudo-command.html>`_
 - `What does the command "sudo !!" mean? <https://superuser.com/questions/247894/what-does-the-command-sudo-mean>`_
+- `Why is sudoers NOPASSWD option not working? <https://askubuntu.com/questions/100051/why-is-sudoers-nopasswd-option-not-working>`_
