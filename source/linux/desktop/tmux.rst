@@ -154,12 +154,24 @@ tmux-config
 .. literalinclude:: tmux/tmux.conf
    :language: bash
    :caption: ~/.tmux.conf配置状态条配色
+   :emphasize-lines: 2-4
 
 此外，通过以下命令可以获取所有终端支持的色彩配置:
 
 .. literalinclude:: tmux/color.sh
    :language: bash
    :caption: color.sh脚本获取终端支持的色彩
+
+修改 ``{prefix}`` 键 ``ctrl+a``
+----------------------------------
+
+我的工作中不仅在远程服务器上使用 ``tmux`` ，也在本地使用 ``tmux`` ，而且会嵌套: 在本地的某个tmux窗口中访问远程服务器的 ``tmux`` ，所以我把本地 ``{prefix}`` 前导键修订成 ``ctrl+a``
+
+.. literalinclude:: tmux/tmux.conf
+   :language: bash
+   :caption: ~/.tmux.conf配置 ``{prefix}`` 键 ``ctrl+a``
+   :emphasize-lines: 7-10
+
 
 案例
 ------
@@ -174,7 +186,15 @@ tmux-config
    git clone https://github.com/samoshkin/tmux-config.git
    ./tmux-config/install.sh
 
- 并且结合macOS上的iTerm2使用非常方便。
+并且结合macOS上的iTerm2使用非常方便。
+
+.. note::
+
+   不过 `samoshkin/tmux-config <https://github.com/samoshkin/tmux-config>`_ 改动的默认配置实在太多，我感觉要重新熟悉不同的快捷键非常麻烦。我还是使用默认的tmux配置，尽量形成肌肉记忆。所以我实际还是放弃了 `samoshkin/tmux-config <https://github.com/samoshkin/tmux-config>`_
+
+.. note::
+
+   `samoshkin/tmux-config <https://github.com/samoshkin/tmux-config>`_ 在我的macOS(Intel架构macOS Sequoia 15.2)依然有 `.tmux.conf:41: syntax error and .tmux.conf:100: unknown key: if #38 <https://github.com/samoshkin/tmux-config/issues/38>`_ 错误，所以还是需要手工修订 ``~/.tmux.conf`` 
 
 参考
 =======
@@ -189,3 +209,4 @@ tmux-config
 - `Adjusting screen split pane sizes in tmux <https://superuser.com/questions/863295/adjusting-screen-split-pane-sizes-in-tmux>`_
 - `Tmux 使用教程 <https://www.ruanyifeng.com/blog/2019/10/tmux.html>`_
 - `tmux bottom status bar color change <https://unix.stackexchange.com/questions/60968/tmux-bottom-status-bar-color-change>`_
+- `tmux简介（附修改前缀键ctrl+a的方法） <https://developer.aliyun.com/article/789729>`_

@@ -21,4 +21,3 @@ Lima简介
   - `Lima FAQ: “How does Lima work?” <https://lima-vm.io/docs/faq/#how-does-lima-work>`_
 
 - `GitHub: lima-vm/lima <https://github.com/lima-vm/lima>`_
-

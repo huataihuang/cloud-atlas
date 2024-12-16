@@ -60,6 +60,20 @@ zsh已经是macOS推荐的内置shell，Oh-my-zsh提供了定制框架，能够�
 
 这里 ``~/.zshrc`` 中用户目录配置需要修改成你自己的home目录。
 
+.. note::
+
+   `github:Danielshow/BoxSetting <https://github.com/Danielshow/BoxSetting>`_ 中的 ``vimrc`` 有两个设置和我的习惯不一致，所以我修订了 ``~/.vimrc`` :
+
+   将原来的 ``~/.vimrc`` :
+
+   .. literalinclude:: vim_tmux_iterm_zsh/vimrc_origin
+      :caption: `github:Danielshow/BoxSetting <https://github.com/Danielshow/BoxSetting>`_ 中的 ``vimrc``
+      :emphasize-lines: 2,5
+
+   .. literalinclude:: vim_tmux_iterm_zsh/vimrc
+      :caption: :ref:`vim_indentline` 定义配置
+      :emphasize-lines: 3,5,9
+
 - 安装npm（参考 :ref:`nodejs_dev_env` ） - 参考原文使用npm安装 `spaceship-prompt <https://github.com/denysdovhan/spaceship-prompt>`_ ::
 
    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
