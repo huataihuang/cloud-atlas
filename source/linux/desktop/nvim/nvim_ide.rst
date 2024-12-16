@@ -102,6 +102,15 @@ NeoVim IDE
 配色(Colorscheme)
 ====================
 
+.. note::
+
+   `Monokai Pro <https://monokai.pro>`_ 开发的 ``Monokai`` color scheme 是开发IDE中最流行的语法高亮配色，在 `THE HISTORY OF Monokai <https://monokai.pro/history>`_ 一文中有详细的介绍:
+
+   - 2006年荷兰设计师兼开发者Wimer Hazenberg开发出最初的Monokai，主要是TextMate on macOS上暗黑背景的活泼色彩
+   - 随后被各个主要IDE所接纳，并且用于终端色彩
+   - 2017年发布了Monokai Pro，进一步采用了现代色彩系列，并且包含了用户接口设计和定制图标，提供了色彩过滤器，例如 ``Spectrum`` , ``Ristretto`` 和 ``Monokai Classic``
+   - 2024年发布了Monokai Pro Light，采用了新的 ``Sun`` filter，适配了明亮环境，也就是说经过多年发展，Monokai已经完成了主流的 dark 和 light 两种环境适配
+
 在完成了上文 :ref:`lazy.nvim` 配置之后，就可以安装配色插件，这里参考原文使用了 `monokai.nvim <https://github.com/tanvirtin/monokai.nvim>`_ 插件，并且选择了我对比之后认为较为美观的 ``monokai`` 风格:
 
 - 修订 ``~/.config/nvim/lua/plugins.lua`` ，增加安装 ``monokai.nvim`` 的配置行:

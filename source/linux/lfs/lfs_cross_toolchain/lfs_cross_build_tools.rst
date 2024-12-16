@@ -93,3 +93,14 @@ M4编译报错(limits.h)
 .. literalinclude:: lfs_cross_build_tools/gzip
    :caption: 安装Gzip
 
+安装Make
+===========
+
+.. literalinclude:: lfs_cross_build_tools/make
+   :caption: 安装Make
+
+安装Patch
+==============
+
+.. literalinclude:: lfs_cross_build_tools/patch
+   :caption: 安装Patch

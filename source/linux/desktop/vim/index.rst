@@ -14,6 +14,7 @@ Vim
    vimrc/index
    vim_autocompletion.rst
    vim_auto_indent.rst
+   vim_indentline.rst
    vim_fold.rst
    vim-go.rst
    light_vim.rst
