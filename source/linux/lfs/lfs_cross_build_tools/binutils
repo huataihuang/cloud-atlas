@@ -1,0 +1,30 @@
+cd $LFS/sources
+
+VERSION=2.43.1
+
+rm -rf binutils-${VERSION
+tar xf binutils-${VERSION}.tar.xz
+cd binutils-${VERSION}
+
+sed '6009s/$add_dir//' -i ltmain.sh
+
+mkdir -v build
+cd       build
+
+../configure                   \
+    --prefix=/usr              \
+    --build=$(../config.guess) \
+    --host=$LFS_TGT            \
+    --disable-nls              \
+    --enable-shared            \
+    --enable-gprofng=no        \
+    --disable-werror           \
+    --enable-64-bit-bfd        \
+    --enable-new-dtags         \
+    --enable-default-hash-style=gnu
+
+make
+make DESTDIR=$LFS install
+
+# 移除对交叉编译有害的 libtool 档案文件，同时移除不必要的静态库
+rm -v $LFS/usr/lib/lib{bfd,ctf,ctf-nobfd,opcodes,sframe}.{a,la}

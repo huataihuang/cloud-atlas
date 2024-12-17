@@ -1,0 +1,58 @@
+cd $LFS/sources
+
+VERSION=14.2.0
+
+rm -rf gcc-${VERSION}
+tar xf gcc-${VERSION}.tar.xz
+cd gcc-${VERSION}
+
+mpfr_VERSION=4.2.1
+tar -xf ../mpfr-${mpfr_VERSION}.tar.xz
+mv -v mpfr-${mpfr_VERSION} mpfr
+
+gmp_VERSION=6.3.0
+tar -xf ../gmp-${gmp_VERSION}.tar.xz
+mv -v gmp-${gmp_VERSION} gmp
+
+mpc_VERSION=1.3.1
+tar -xf ../mpc-${mpc_VERSION}.tar.gz
+mv -v mpc-${mpc_VERSION} mpc
+
+# 在 x86_64 上构建时，修改存放 64 位库的默认路径为 "lib"
+case $(uname -m) in
+  x86_64)
+    sed -e '/m64=/s/lib64/lib/' \
+        -i.orig gcc/config/i386/t-linux64
+ ;;
+esac
+
+# 覆盖 libgcc 和 libstdc++ 头文件的构建规则，以允许在构建它们时启用 POSIX 线程支持
+sed '/thread_header =/s/@.*@/gthr-posix.h/' \
+    -i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
+
+mkdir -v build
+cd       build
+
+../configure                                       \
+    --build=$(../config.guess)                     \
+    --host=$LFS_TGT                                \
+    --target=$LFS_TGT                              \
+    LDFLAGS_FOR_TARGET=-L$PWD/$LFS_TGT/libgcc      \
+    --prefix=/usr                                  \
+    --with-build-sysroot=$LFS                      \
+    --enable-default-pie                           \
+    --enable-default-ssp                           \
+    --disable-nls                                  \
+    --disable-multilib                             \
+    --disable-libatomic                            \
+    --disable-libgomp                              \
+    --disable-libquadmath                          \
+    --disable-libsanitizer                         \
+    --disable-libssp                               \
+    --disable-libvtv                               \
+    --enable-languages=c,c++
+
+make
+make DESTDIR=$LFS install
+
+ln -sv gcc $LFS/usr/bin/cc

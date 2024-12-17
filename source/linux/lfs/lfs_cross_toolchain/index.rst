@@ -14,8 +14,6 @@ LFS 交叉工具链
    lfs_kernel_api_header.rst
    lfs_glibc.rst
    lfs_libstdc++.rst
-   lfs_cross_build_tools.rst
-
 
 
 .. only::  subproject and html

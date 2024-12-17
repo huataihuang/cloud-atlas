@@ -8,8 +8,8 @@ vim indentLine插件
 
 :ref:`vim_tmux_iterm_zsh` 使用了 `github:Danielshow/BoxSetting <https://github.com/Danielshow/BoxSetting>`_ 的配置，所以复制过来的 ``~/.vimrc`` 有如下配置:
 
-.. literalinclude:: vim_tmux_iterm_zsh/vimrc_origin
-   :caption: `github:Danielshow/BoxSetting <https://github.com/Danielshow/BoxSetting>`_ 中的 ``vimrc``
+.. literalinclude:: ../../../apple/macos/vim_tmux_iterm_zsh/vimrc_origin
+   :caption: BoxSetting 中的 ``vimrc``
    :emphasize-lines: 2,5
 
 这里的配置是针对 `github: Yggdroot/indentLine <https://github.com/Yggdroot/indentLine>`_ 插件的，该插件通过细垂直先显示代码的缩进级别，有助于视觉上更好地组织代码。
@@ -21,7 +21,7 @@ vim indentLine插件
 
 并且可以定义多级别不同标识字符(我修订了 `github:Danielshow/BoxSetting <https://github.com/Danielshow/BoxSetting>`_ 配置)
 
-.. literalinclude:: vim_tmux_iterm_zsh/vimrc
+.. literalinclude:: ../../../apple/macos/vim_tmux_iterm_zsh/vimrc
    :caption: :ref:`vim_indentline` 定义配置
    :emphasize-lines: 3,5,9
 
