@@ -36,7 +36,7 @@ LFS的目标架构是 AMD/Intel 的 x86(32位) 和 x86_64(64位) CPU (需要修�
 32位 vs. 64位
 ----------------
 
-- LFS官方文档是构建纯粹的64位系统，也就是值运行64位可执行程序 
+- LFS官方文档是构建纯粹的64位系统，也就是值运行64位可执行程序
 - 如果要构建 ``multi-lib`` 系统(同时支持32位和64位)则需要两次编译很多应用(考虑到现代硬件需要巨大的内存，远超4GB，所以我也按照官方文档构建 **纯粹64位系统** 以便获得一个精简的能够用于物理主机host底座的OS)
 
 .. _lfs_wget:
@@ -175,7 +175,7 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 
 .. note::
 
-   对于LFS稳定版，可以从 `LFS官方镜像网站直接下载打包好的软件包文件 <https://www.linuxfromscratch.org/lfs/mirrors.html#files>`_ 
+   对于LFS稳定版，可以从 `LFS官方镜像网站直接下载打包好的软件包文件 <https://www.linuxfromscratch.org/lfs/mirrors.html#files>`_
 
 .. note::
 
@@ -220,7 +220,7 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 
       # groupadd
       -bash: /usr/sbin/groupadd: No such file or directory
-    
+
    ``ssh`` 登陆也会提示bash不存在::
 
       Last login: Tue Dec 10 10:59:43 2024 from 192.168.7.221
@@ -277,7 +277,7 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 - ``PATH=/usr/bin`` 许多现代 Linux 发行版合并了 /bin 和 /usr/bin。在这种情况下，标准 PATH 变量应该被设定为 /usr/bin
 - ``if [ ! -L /bin ]; then PATH=/bin:$PATH; fi`` 如果 /bin 不是符号链接，则它需要被添加到 PATH 变量中
 - ``PATH=$LFS/tools/bin:$PATH`` 将 $LFS/tools/bin 附加在默认的 PATH 环境变量之前，一旦安装了新的程序，shell 就能立刻使用它们
-- ``CONFIG_SITE=$LFS/usr/share/config.site`` 如果没有设定这个变量，configure 脚本可能会从宿主系统的 /usr/share/config.site 加载一些发行版特有的配置信息。覆盖这一默认路径，避免宿主系统可能造成的污染。 
+- ``CONFIG_SITE=$LFS/usr/share/config.site`` 如果没有设定这个变量，configure 脚本可能会从宿主系统的 /usr/share/config.site 加载一些发行版特有的配置信息。覆盖这一默认路径，避免宿主系统可能造成的污染。
 - ``export ...`` 设定了一些变量，为了让所有子 shell 都能使用这些变量
 
 对于多CPU core的主机，可以并行执行make，所以在 ``.bashrc`` 添加以下配置(如果不希望所有cpu core被使用，则将 ``$(nproc)`` 替换成希望使用的cpu core数量:
@@ -285,6 +285,20 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 .. literalinclude:: lfs_prepare/makeflags
    :caption: 为make程序设置使用的cpu core数量
    :language: bash
+
+.. note::
+
+   `LFS optimize.txt <https://www.linuxfromscratch.org/hints/downloads/files/optimization.txt>`_ 介绍了类似 :ref:`gentoo_linux` 配置 ``make.conf`` 的优化方法。也就是可以进一步配置GCC optimize级别以及生成针对CPU架构优化的执行程序。
+
+   所以，我参考 :ref:`install_gentoo_on_mbp` 的配置，修订了上述 make 的参数
+
+   `Is optimisation level -O3 dangerous in g++? <https://stackoverflow.com/questions/11546075/is-optimisation-level-o3-dangerous-in-g>`_ 讨论了O3级别优化，可以参考
+
+   `gentoo linux wiki: GCC optimization <https://wiki.gentoo.org/wiki/GCC_optimization>`_ 有详细的说明，建议参考
+
+   不过，我注意到实际运行编译参数是 ``-g -O2 -O3 -mach=native ...`` 那么究竟是 ``O3`` 还是 ``O2`` 优化呢？
+
+   参考 `GCC官方文档: Options That Control Optimization <https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html>`_ : ``If you use multiple -O options, with or without level numbers, the last such option is the one that is effective.`` ，也就是说，后一个 ``-O`` 参数实际生效，也就是 ``-O3``
 
 最后确保构建临时工具所需环境就绪，强制bash shell读取刚才创建的配置文件:
 

@@ -33,7 +33,7 @@ M4编译报错(limits.h)
    VERSION=14.2.0
    cd gcc-${VERSION}
 
-.. literalinclude:: lfs_gcc_1/limits.h
+.. literalinclude:: lfs_cross_toolchain/lfs_gcc_1/limits.h
    :caption: 生成完整的limits.h
    :language: bash
 
@@ -104,3 +104,38 @@ M4编译报错(limits.h)
 
 .. literalinclude:: lfs_cross_build_tools/patch
    :caption: 安装Patch
+
+安装Sed
+============
+
+.. literalinclude:: lfs_cross_build_tools/sed
+   :caption: 安装Sed
+
+安装Tar
+=============
+
+.. literalinclude:: lfs_cross_build_tools/tar
+   :caption: 安装Tar
+
+安装Xz
+==============
+
+.. literalinclude:: lfs_cross_build_tools/xz
+   :caption: 安装Xz
+
+安装Binutils - 第二遍
+========================
+
+Binutils 构建系统依赖附带的 libtool 拷贝链接内部静态库，但源码包内附带的 libiberty 和 zlib 不使用 libtool。这个区别可能导致构建得到的二进制程序和库错误地链接到宿主发行版的库。绕过这个问题:
+
+.. literalinclude:: lfs_cross_build_tools/binutils
+   :caption: 安装Binutils - 第二遍
+
+安装GCC - 第二遍
+=======================
+
+如同第一次构建 GCC 时一样，需要使用 GMP、MPFR 和 MPC 三个包。解压它们的源码包，并将它们移动到 GCC 要求的目录名
+
+.. literalinclude:: lfs_cross_build_tools/gcc
+   :caption: 安装GCC - 第二遍(部分步骤和第一遍不认同)
+   :emphasize-lines: 29-31

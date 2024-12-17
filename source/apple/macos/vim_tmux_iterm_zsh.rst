@@ -67,7 +67,7 @@ zsh已经是macOS推荐的内置shell，Oh-my-zsh提供了定制框架，能够�
    将原来的 ``~/.vimrc`` :
 
    .. literalinclude:: vim_tmux_iterm_zsh/vimrc_origin
-      :caption: `github:Danielshow/BoxSetting <https://github.com/Danielshow/BoxSetting>`_ 中的 ``vimrc``
+      :caption: BoxSetting 中的 ``vimrc``
       :emphasize-lines: 2,5
 
    .. literalinclude:: vim_tmux_iterm_zsh/vimrc
