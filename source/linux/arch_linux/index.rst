@@ -37,6 +37,7 @@ Arch Linux
    archlinux_wine.rst
    archlinux_build_kernel.rst
    archlinux_kernel.rst
+   archlinux_novnc.rst
 
 .. only::  subproject and html
 

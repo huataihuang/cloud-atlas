@@ -75,6 +75,18 @@ macOS安装
 
 不过，由于MacOS软件包没有证书授权，所以需要在 `macOS的安全设置中允许运行Xpra <https://lapcatsoftware.com/articles/unsigned.html>`_
 
+- 现在我使用 :ref:`homebrew` 安装 ``xpra`` :
+
+.. literalinclude:: xpra_startup/brew_install
+   :caption: 使用 ``brew`` 安装Xpra
+
+但是安装以后无法运行，提示 ``Xpra is damaged and can’t be opened. You should move it to the Trash`` ，解决方法参考 `解决报错 “App” is damaged and can’t be opened. You should move it to the Trash (Mac) <https://blog.csdn.net/Xurui_Luo/article/details/107908238>`_ :
+
+.. literalinclude:: xpra_startup/macos_xpra_fix_damaged
+   :caption: 修复macOS提示xpra已经损坏的报错
+
+很神奇就能运行了
+
 服务器端
 =============
 
@@ -161,7 +173,7 @@ Linux使用xpra
 .. note::
 
    最好使用 ``screen`` 来运行上述程序，避免退出
-   
+
 - 显示当前主机运行的xpra服务器::
 
    xpra list
