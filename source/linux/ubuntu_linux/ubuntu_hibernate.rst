@@ -54,7 +54,7 @@ Ubuntu Hibernate休眠
 .. literalinclude:: ubuntu_hibernate/grub
    :caption: 编辑 ``/etc/default/grub`` 传递hibernate resume参数
 
-- 编辑 ``/etc/initramfs-tools/conf.d/resume`` 
+- 编辑 ``/etc/initramfs-tools/conf.d/resume``
 
 .. literalinclude:: ubuntu_hibernate/resume
    :caption: 编辑 ``/etc/initramfs-tools/conf.d/resume`` 为 initramfs 传递resume参数
@@ -94,6 +94,59 @@ Ubuntu Hibernate休眠
 .. note::
 
   `How To Enable Hibernation On Ubuntu (When Using A Swap File) <https://www.linuxuprising.com/2021/08/how-to-enable-hibernation-on-ubuntu.html>`_ 还提供了一些非root用户使用hibernate的配置方法，我没有实践。如有需要请参考原文
+
+异常排查
+=========
+
+``systemctl hibernate`` 之后，我开启电源，发现服务器确实启动后进行了镜像解压缩，也就是从swap分区中将先前 ``hibernate`` 的内存中状态恢复过来:
+
+.. literalinclude:: ubuntu_hibernate/hibernate_restore_image_load
+   :caption: 从 ``hibernage`` 状态恢复时控制台输出信息显示保存在磁盘中的镜像已经完全恢复
+   :emphasize-lines: 17,18
+
+但是稍等几秒钟，出现了 :ref:`mce` 错误:
+
+.. literalinclude:: ubuntu_hibernate/hibernate_mce
+   :caption: ``hibernage`` 状态恢复后立即出现 :ref:`mce` 错误
+
+此时服务器自动断电，在控制台吐出如下信息:
+
+.. literalinclude:: ubuntu_hibernate/hibernate_mce_power_off
+   :caption: ``hibernage`` 恢复时出现 :ref:`mce` 错误并自动断电
+
+然后自动重启，重启时控制台输出的自检信息:
+
+.. literalinclude:: ubuntu_hibernate/hibernate_mce_power_on
+   :caption: ``hibernage`` 恢复时出现 :ref:`mce` 错误并自动断电，然后自动启动时控制台显示的自检信息
+
+虽然在 ``dmesg -T`` 系统日志中看不到出错信息，也没有在 :ref:`edac` 状态中看出端倪，不过从 :ref:`hpe_dl360_gen9` 的 :ref:`hp_ilo` WEB控制平台检查 ``Integrated Management Log`` 可以看到如下MCE错误记录:
+
+.. csv-table:: 服务器 ``Integrated Management Log`` 中MCE错误记录
+      :file: ubuntu_hibernate/mce.csv
+      :widths: 10, 10, 10, 10, 10, 50
+      :header-rows: 1
+
+昨天和前天的 hibernate 也同样有错误
+
+.. csv-table:: 服务器 ``Integrated Management Log`` 中 **昨天** MCE错误记录
+      :file: ubuntu_hibernate/mce_1.csv
+      :widths: 10, 10, 10, 10, 10, 50
+      :header-rows: 1
+
+.. csv-table:: 服务器 ``Integrated Management Log`` 中 **前天** MCE错误记录
+      :file: ubuntu_hibernate/mce_2.csv
+      :widths: 10, 10, 10, 10, 10, 50
+      :header-rows: 1
+
+之前在 :ref:`dl360_gen9_pci_bus_error` 也有PCIe错误，当时通过插拔内存似乎恢复了。
+
+我google一下， `HP支持论坛的Uncorrectable Machine Check Exception一个帖子提到的情况 <https://community.hpe.com/t5/proliant-servers-ml-dl-sl/uncorrectable-machine-check-exception/td-p/7008326>`_ 启发了我:
+
+- 看起来PCIe错误导致的MCE，而PCIe错误关联的处理器有 Processor 1 也有 Processor 2(两个处理器同时硬件故障可能性极低)
+- 感觉时PCIe上连接的设备触发的问题，在 ``hibernate`` 恢复时响应出现了问题导致主机判断为MCE错误
+- 怀疑 :ref:`intel_optane_m10` 最近添加在PCIe转接卡上，这个设备初始化非常诡异，之前有无法识别的问题，可能会在 ``hibernate`` 恢复时无法恢复到休眠前状态，导致触发 :ref:`mce` 错误
+
+虽然可以通过硬件替换，逐个排除PCIe上设备是否和 ``hibernate`` 时 :ref:`mce` 错误有关，但是我现在暂时没有时间继续折腾。目前看平时运行时是稳定的，只在 ``hibernate`` 恢复时触发异常，待后续观察或者有时间再排查。
 
 参考
 ======

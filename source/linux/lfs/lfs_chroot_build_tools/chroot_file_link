@@ -1,0 +1,64 @@
+# 历史上，Linux 曾在 /etc/mtab 维护已经挂载的文件系统的列表。现代内核在内部维护该列表，并通过 /proc 文件系统将它展示给用户。为了满足一些仍然使用 /etc/mtab 的工具，执行以下命令，创建符号链接
+ln -sv /proc/self/mounts /etc/mtab
+
+# 创建一个基本的 /etc/hosts 文件，一些测试套件，以及 Perl 的一个配置文件将会使用它
+cat > /etc/hosts << EOF
+127.0.0.1  localhost $(hostname)
+::1        localhost
+EOF
+
+# 为了使得 root 能正常登录，而且用户名 “root” 能被正常识别，必须在文件 /etc/passwd 和 /etc/groups 中写入相关的条目
+cat > /etc/passwd << "EOF"
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/dev/null:/usr/bin/false
+daemon:x:6:6:Daemon User:/dev/null:/usr/bin/false
+messagebus:x:18:18:D-Bus Message Daemon User:/run/dbus:/usr/bin/false
+uuidd:x:80:80:UUID Generation Daemon User:/dev/null:/usr/bin/false
+nobody:x:65534:65534:Unprivileged User:/dev/null:/usr/bin/false
+EOF
+
+# 执行以下命令，创建 /etc/group 文件
+cat > /etc/group << "EOF"
+root:x:0:
+bin:x:1:daemon
+sys:x:2:
+kmem:x:3:
+tape:x:4:
+tty:x:5:
+daemon:x:6:
+floppy:x:7:
+disk:x:8:
+lp:x:9:
+dialout:x:10:
+audio:x:11:
+video:x:12:
+utmp:x:13:
+cdrom:x:15:
+adm:x:16:
+messagebus:x:18:
+input:x:24:
+mail:x:34:
+kvm:x:61:
+uuidd:x:80:
+wheel:x:97:
+users:x:999:
+nogroup:x:65534:
+EOF
+
+# 一些软件包需要一个 locale
+localedef -i C -f UTF-8 C.UTF-8
+
+# 一些测试需要使用一个非特权用户
+echo "tester:x:101:101::/home/tester:/bin/bash" >> /etc/passwd
+echo "tester:x:101:" >> /etc/group
+install -o tester -d /home/tester
+
+# 重新登陆shell
+exec /usr/bin/bash --login
+
+# login、agetty 和 init 等程序使用一些日志文件，以记录登录系统的用户和登录时间等信息
+# 初始化日志文件，并为它们设置合适的访问权限
+touch /var/log/{btmp,lastlog,faillog,wtmp}
+chgrp -v utmp /var/log/lastlog
+chmod -v 664  /var/log/lastlog
+chmod -v 600  /var/log/btmp

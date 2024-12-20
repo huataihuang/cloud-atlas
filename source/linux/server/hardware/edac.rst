@@ -10,8 +10,10 @@ EDAC 诊断系统硬件故障
 
    EDAC和服务器硬件架构相关，只支持x86架构系统。
 
-mcelog
-===============
+.. _mce:
+
+MCE(Machine-Check Exception)
+===============================
 
 ``mcelog`` 记录了在现代x86 Linxu系统上的硬件的 ``主机检查`` （主要是内存，IO和CPU的硬件错误）日志。当硬件报告了主机自检错误，内核会立即执行操作（例如杀死进程等）然后mcelog就会解码这些错误并且进行一些高级的错误响应，例如屏蔽故障的内存、CPU，或者触发事件。另外，mcelog也能够通过记录日志来处理修正后的错误。
 
@@ -173,7 +175,7 @@ rasdaemon可以之际命令启动，此时会在后台运行，并不断通过sy
 
    只要配置好label，今后物理主机DIMM内存一旦故障，就可以根据EDAC输出的labels定位到哪个插槽上的内存故障，就很容易通知IDC机房现场技术支持维修替换
 
-   **很不幸，我没有搜索到 HP服务器的 DIMM labels 配置文件** 网上倒是能够搜索到dell和suppermicro的 ``RASDAEMON Motherboard DIMM labels Database file`` 
+   **很不幸，我没有搜索到 HP服务器的 DIMM labels 配置文件** 网上倒是能够搜索到dell和suppermicro的 ``RASDAEMON Motherboard DIMM labels Database file``
 
 - 获取主板厂商和型号名:
 
