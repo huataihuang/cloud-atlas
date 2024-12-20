@@ -149,4 +149,5 @@ Helm安装
 
 - `metrics-server (GitHub) <https://github.com/kubernetes-sigs/metrics-server>`_
 - `Kubectl Top Pod/Node | How to get & read resource utilization metrics of K8s? <https://signoz.io/blog/kubectl-top/#what-is-kubectl-top-command>`_
-- `Metrics server throwing X509 error in logs, fails to return Node or Pod metrics #1025 <https://github.com/kubernetes-sigs/metrics-server/issues/1025>`_ 
+- `Metrics server throwing X509 error in logs, fails to return Node or Pod metrics #1025 <https://github.com/kubernetes-sigs/metrics-server/issues/1025>`_
+- `通过 Metrics Server 查看 Kubernetes 资源指标 <https://www.cnblogs.com/-k8s/p/18076869>`_

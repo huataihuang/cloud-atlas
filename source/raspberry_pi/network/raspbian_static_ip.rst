@@ -10,6 +10,13 @@ Raspbian配置静态IP
 
    2024年10月我的实践发现默认系统没有使用 ``dhcpcd`` ，也就导致本文经验无法使用。不过，使用 ``nmtui`` 交互可以非常容易配置。待我后续再仔细研究一下底层实现原理。
 
+   但是， :ref:`archlinux_wpa_supplicant` 是采用 ``dhcpcd`` 分配IP地址的，所以可以使用本文方法为 :ref:`arch_linux` 的无线网络分配静态地址
+
+.. _dhcpcd_static_ip:
+
+dhcpcd分配静态IP
+===================
+
 .. note::
 
    Raspberry Pi官方提供的Raspbian系统是基于Debian的定制系统，在配置网络上和常用的Ubuntu有一些差异，使用了dhcpcd服务来管理网络。
@@ -22,15 +29,15 @@ Raspberry Pi使用 :ref:`dhcpcd` 配置所有网络接口的TCP/IP。这个 dhcp
 
    实际上，很多发行版都使用 :ref:`dhcpcd` 来为网络接口动态分配IP，特別是无线网络 :ref:`wpa_supplicant` 认证完成后，就会通过 :ref:`dhcpcd` 来完成IP地址分配。如果你需要静态分配IP地址(例如本文)，或者部分设置为静态配置(例如 :ref:`dhcpcd_set_static_dns` )
 
-静态IP地址
-==========
+.. _dhcpcd_lan_static_ip:
 
-如果需要禁用接口自动配置采用静态IP，则配置 ``/etc/dhcpcd.conf`` ::
+dhcpcd有线网络静态IP地址
+--------------------------
 
-   interface eth0
-   static ip_address=192.168.6.110/24
-   static routers=192.168.6.9
-   static domain_name_servers=202.96.209.133 202.96.209.5
+如果需要禁用接口自动配置采用静态IP，则配置 ``/etc/dhcpcd.conf`` :
+
+.. literalinclude:: raspbian_static_ip/lan_dhcpcd.conf
+   :caption: 有线网络使用dhcpcd分配静态IP地址
 
 .. note::
 
@@ -39,6 +46,17 @@ Raspberry Pi使用 :ref:`dhcpcd` 配置所有网络接口的TCP/IP。这个 dhcp
 早期的Raspberry Pi系统使用 ``/etc/network/interfaces`` 来配置网络接口：如果在该配置文件中存在一个接口，就会覆盖 ``/etc/dhcpcd.conf`` 的配置。
 
 如果在Raspberry Pi系统中使用图形桌面，则有一个 ``lxplug-network`` 提供修改 ``dhcpcd`` 的功能，也包括设置静态IP地址。这个 ``lxplug-network`` 工具基于 ``dhcpcd-ui`` 。
+
+.. _dhcpcd_wlan_static_ip:
+
+dhcpcd无线网络静态IP地址
+---------------------------
+
+在 :ref:`archlinux_wpa_supplicant` 配置中，修改 ``/etc/dhcpcd.conf`` 配置文件添加如下内容可以为无线网络分配静态IP地址:
+
+.. literalinclude:: raspbian_static_ip/wlan_dhcpcd.conf
+   :caption: 无线网络使用dhcpcd分配静态IP地址
+
 
 参考
 =========

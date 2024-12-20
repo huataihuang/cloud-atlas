@@ -32,7 +32,7 @@ Linux轻量级浏览器
 
 结合 :ref:`run_sway` 我尝试不同的支持 :ref:`wayland` 的浏览器，对比使用选择 ``falkon`` 作为主要替代 ``chromium`` 的轻量级浏览器:
 
-- 配合 :ref:`dwm` 或 :ref:`i3` 
+- 配合 :ref:`dwm` 或 :ref:`i3`
 - 现代化的 WebKit 引擎，基于 QT5，速度轻快而且能够完成 ``chromium`` 的工作(目前大量的网站基于chrome技术构建，所以兼容性极为重要)
 - 对 :ref:`wayland` 支持较佳(因为QT5已经是支持wayland)，可以充分发挥图形化性能
 - 能够在 :ref:`sway` 环境完美支持 :ref:`fcitx` 中文输入
@@ -47,6 +47,8 @@ Linux轻量级浏览器
 Midori一度停止开发，所以当前Ubuntu并没有直接提供apt安装，但是可以通过snap安装或者源代码编译安装。
 
 我个人使用经验来看Midori带来的使用体验不佳，页面加载速度不如chrome，并且感觉比较消耗内存。功能使用上也比较简陋，所以我最终放弃。
+
+补充: 2019年Midori被Astian Foundation收购，收购以后该项目web引擎改为采用 :ref:`firefox` 的Gecko引擎，也就是说其实和Firefox已经等同
 
 - Falkon
 
@@ -69,6 +71,15 @@ Otter浏览器同样也是基于Qt框架实现，依赖和前述的Falkon和Qute
 Netsurf使用C编写，并且它独立实现了底层引擎而不是套用chrome/firefox/QtWebEngin/WebKit这样的引擎。我比较喜欢这种干净功能简洁的程序。
 
 不过Netsurf非常小众，在Arch Linux上可以简单通过 ``pacman -S netsurf`` 安装，但是对于其他发行版则需要自己手工编译安装。
+
+- `Dillo <https://en.wikipedia.org/wiki/Dillo>`_
+
+Dillo 是用于古老计算机和嵌入式系统的小型化web浏览器，只支持平面HTML/XHTML(CSS渲染)以及图像，但是完全不支持脚本( **卒** ，不支持 :ref:`javascript` 意味着无法浏览现代网页)。
+
+比较特别的是，这个浏览器使用了一种非常迷你轻量级 `fltk <://en.wikipedia.org/wiki/FLTK>`_ GUI库(目前仍在活跃开发):
+
+  - 使用FLTK的Linnux发行版 `Nanolinux <https://sourceforge.net/projects/nanolinux/>`_ 仅仅14MB的发行版包括了基本的应用软件(最后更新是 2016-10-08)，也包含了 `Dillo <https://en.wikipedia.org/wiki/Dillo>`_ 浏览器
+
 
 参考
 ==========

@@ -12,6 +12,7 @@ Arch Linux
    archlinux_on_thinkpad_x220.rst
    archlinux_on_thinkpad_x220_u_disk.rst
    archlinux_on_mba.rst
+   kinto.rst
    archlinux_init.rst
    archlinux_chinese_mirrorlist.rst
    archlinux_config_ip.rst

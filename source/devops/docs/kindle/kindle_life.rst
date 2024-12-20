@@ -33,3 +33,8 @@ Kindle以朴素的黑白文字世界让我们能够专注于相当有价值的�
 
 - 在 `amazon美国 <https://amazon.com>`_ 注册美区账号
 - 在amazon中国通过 ``管理我的内容和设备`` 功能，下载电子书，然后通过 :ref:`calibre_remove_drm` 再 :ref:`convert_doc_to_kindle` ，这样就可以继续在kindle中阅读自己购 买的书籍
+
+Kindle入门
+============
+
+`书伴网站 <https://bookfere.com/>`_ 是非常全面的kindle指南网站，其中 `Kindle 新手入门 <https://bookfere.com/novice>`_ 内容详实，全方面介绍了kindle使用、维护以及电子书制作、管理等技巧
