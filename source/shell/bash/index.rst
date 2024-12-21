@@ -22,6 +22,7 @@ Bash
    convert_csv_to_json.rst
    remove_last_n_characters_from_a_string_in_bash.rst
    shell_array.rst
+   suspend_process.rst
 
 .. only::  subproject and html
 

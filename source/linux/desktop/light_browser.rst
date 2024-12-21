@@ -79,7 +79,10 @@ Dillo 是用于古老计算机和嵌入式系统的小型化web浏览器，只�
 比较特别的是，这个浏览器使用了一种非常迷你轻量级 `fltk <://en.wikipedia.org/wiki/FLTK>`_ GUI库(目前仍在活跃开发):
 
   - 使用FLTK的Linnux发行版 `Nanolinux <https://sourceforge.net/projects/nanolinux/>`_ 仅仅14MB的发行版包括了基本的应用软件(最后更新是 2016-10-08)，也包含了 `Dillo <https://en.wikipedia.org/wiki/Dillo>`_ 浏览器
+  - `FLWM <https://flwm.sourceforge.net/>`_ 轻量级窗口管理器，非常小(安装以后200KB左右)，是 `Tiny Core Linux <http://tinycorelinux.net/>`_ (2024年依然在活跃开发)默认窗口管理器
+  - `EDE <https://edeproject.org/>`_ 轻量级桌面环境，类似*nix系统，也使用 FLTK GUI toolkit来提供跨平台一致性外观
 
+注意 Dillo 使用的 FLTK 是 :ref:`x_window` 架构，所以在 :ref:`sway` :ref:`wayland` 环境，除非开启 ``Xwayland`` 兼容模式，否则无法运行
 
 参考
 ==========
