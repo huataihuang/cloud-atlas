@@ -21,6 +21,7 @@ Info-Service
    streaming_media/index
    video_cms/index
    kodi/index
+   jellyfin/index
    matrix/index
 
 .. only::  subproject and html
