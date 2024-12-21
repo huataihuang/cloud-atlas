@@ -23,6 +23,8 @@ ZFS管理的主要手册可以参考:
    zfs_startup.rst
    zfs_startup_zcloud.rst
    zfs_create_destory_zpool.rst
+   zfs_raidz.rst
+   zfs_export_import.rst
    zfs_mount.rst
    zfs_share.rst
    zfs_compression.rst
