@@ -31,9 +31,10 @@ Ubuntu/Debian安装pip和venv
 arch安装pip和venv
 --------------------
 
-- 默认python即是python3，安装 ``python-pip`` 软件包::
+- 默认python即是python3，安装 ``python-pip`` 软件包:
 
-   pacman -S python-pip
+.. literalinclude:: virtualenv/arch_pip_venv
+   :caption: arch linux环境设置virtualenv
 
 macOS安装pip和venv
 --------------------
@@ -41,7 +42,7 @@ macOS安装pip和venv
 - macOS可以随着 Python3 安装 pip3 ，建议通过 :ref:`homebrew` 安装最新版本:
 
 .. literalinclude:: virtualenv/brew_install_pip3_venv
-   :language: bash 
+   :language: bash
    :caption: 在 :ref:`macos` 环境安装 ``pip3`` 以及 ``venv``
 
 Python 2 virtualenv
@@ -74,7 +75,7 @@ CentOS 7通过Yum安装（EPEL源）
        from ..app_data import make_app_data
      File "/usr/lib/python2.7/site-packages/virtualenv/app_data/__init__.py", line 9, in <module>
        from platformdirs import user_data_dir
-   ImportError: No module named platformdirs   
+   ImportError: No module named platformdirs
 
 这是因为操作系统自带的 ``pip2`` 版本过于陈旧，甚至直接执行 ``pip2.7 install --upgrade pip`` 都会报错::
 
@@ -90,9 +91,9 @@ CentOS 7通过Yum安装（EPEL源）
            def read(rel_path: str) -> str:
                             ^
        SyntaxError: invalid syntax
-       
+
        ----------------------------------------
-   Command "python setup.py egg_info" failed with error code 1 in /tmp/pip-build-wfciDf/pip 
+   Command "python setup.py egg_info" failed with error code 1 in /tmp/pip-build-wfciDf/pip
 
 - 解决的方法是手工下载安装pip的脚本::
 
@@ -118,7 +119,7 @@ CentOS 8通过dnf安装python 2virtualenv
 - 安装python2的virtualenv::
 
    cd ~
-   python2 -m virtualenv venv2 
+   python2 -m virtualenv venv2
 
 - 激活virtualenv::
 
