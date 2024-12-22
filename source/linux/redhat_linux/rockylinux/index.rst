@@ -8,6 +8,7 @@ Rocky Linux
    :maxdepth: 1
 
    almalinux_vs_rockylinux.rst
+   rockylinux_novnc.rst
 
 .. only::  subproject and html
 

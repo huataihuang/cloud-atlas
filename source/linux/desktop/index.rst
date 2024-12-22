@@ -10,6 +10,8 @@ Linux桌面
    x_window/index
    chinese/index
    rdp/index
+   xpra/index
+   vnc/index
    wayland/index
    sway/index
    suckless/index
@@ -17,7 +19,6 @@ Linux桌面
    lxqt/index
    enlightment/index
    kde/index
-   xpra/index
    vim/index
    nvim/index
    vscode/index
@@ -33,7 +34,7 @@ Linux桌面
    mupdf.rst
    remote_linux_desktop.rst
    light_browser.rst
-   netsurf.rst 
+   netsurf.rst
    synergy.rst
    hidclient.rst
    terminal_emulator.rst

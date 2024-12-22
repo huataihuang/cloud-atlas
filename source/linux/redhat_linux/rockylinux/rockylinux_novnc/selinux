@@ -1,0 +1,23 @@
+cat << EOF > vncsession.te
+
+# create new
+module vncsession 1.0;
+
+require {
+        type default_t;
+        type xdm_home_t;
+        type vnc_session_t;
+        class dir { add_name create write };
+        class file { create open write };
+}
+
+#============= vnc_session_t ==============
+allow vnc_session_t default_t:dir { add_name write };
+allow vnc_session_t default_t:file { create open write };
+allow vnc_session_t xdm_home_t:dir create;
+
+EOF
+
+checkmodule -m -M -o vncsession.mod vncsession.te
+semodule_package --outfile vncsession.pp --module vncsession.mod
+semodule -i vncsession.pp

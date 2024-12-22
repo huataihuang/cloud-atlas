@@ -15,6 +15,7 @@ RedHat Linux 系统管理
    firewalld.rst
    centos_local_repo.rst
    centos_local_http_repo.rst
+   enable_selinux.rst
 
 .. only::  subproject and html
 

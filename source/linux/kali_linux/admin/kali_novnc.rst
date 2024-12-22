@@ -42,9 +42,10 @@
 
    x11vnc -display :0 -autoport -nopw -bg -xkb -ncache -ncache_cr -quiet -forever -listen localhost
 
-所以尝试修改上述命令，将 ``-localhost`` 放到参数最后，果然也解决了仅监听在回环地址上::
+所以尝试修改上述命令，将 ``-localhost`` 放到参数最后，果然也解决了仅监听在回环地址上:
 
-   x11vnc -display :0 -autoport -nopw -bg -xkb -ncache -ncache_cr -quiet -forever -localhost
+.. literalinclude:: kali_novnc/x11vnc
+   :caption: 启动 ``x11vnc`` 监听在回环地址上
 
 - 再次检查端口监听::
 
@@ -55,9 +56,10 @@
    LISTEN 0      32         127.0.0.1:5900        0.0.0.0:*     users:(("x11vnc"<Plug>PeepOpenid=4582,fd=8))
    LISTEN 0      32             [::1]:5900           [::]:*     users:(("x11vnc"<Plug>PeepOpenid=4582,fd=9))
 
-- 运行 noVNC ::
+- 运行 noVNC :
 
-   /usr/share/novnc/utils/launch.sh --listen localhost:8081 --vnc localhost:5900
+.. literalinclude:: kali_novnc/novnc
+   :caption: 运行noVNC连接本地运行的x11vnc
 
 .. note::
 
