@@ -48,6 +48,9 @@ Rocky Linux noVNC
 
    实践验证配置 ``~/.vnc/config`` 无效，所以还是采用修订 ``/etc/tigervnc/vncserver-config-defaults``
 
+异常排查
+--------
+
 这里我遇到一个启动报错，检查日志:
 
 .. literalinclude:: rockylinux_novnc/tigervnc_systemd_error
@@ -56,6 +59,17 @@ Rocky Linux noVNC
 参考 `VNC service does not start when user home directory is in a custom path <https://access.redhat.com/solutions/7060135>`_  原来 tigervnc 实现原生 :ref:`systemd` 支持，服务是通过 ``vncsession`` 启动，而 ``vncsession`` 是通过特定的SELinux上下文来获得用户目录的
 
 **乌龙了** 我配置错 ``/etc/tigervnc/vncserver.users`` ，我的系统只设置了 ``admin`` 用户，没有配置 ``huatai`` 用户，所以导致了上述服务启动错误。前面启用SELinux的配置可能也可以取消
+
+另一个异常排查是启动没有报错，但是看不到 ``vncserver`` 进程，检查 ``systemctl status vncserver@:1`` 显示启动后立即停止了，但是不是报错:
+
+.. literalinclude:: rockylinux_novnc/tigervnc_systemd_error_deactivated
+   :caption: vncserver启动后立即结束，显示 ``Deactivated successfully``
+   :emphasize-lines: 7,12
+
+`vncserver@:1.service starts and then stops immediately <https://bbs.archlinux.org/viewtopic.php?id=272789>`_ 给了我启发: 是没有为vncserver的个人用户账号设置密码导致的，也就是说，这里我用了 ``admin`` 用户，但是没有给这个账号设置VNC密码。使用以下命令为 ``admin`` 设置密码:
+
+.. literalinclude:: rockylinux_novnc/vncpasswd
+   :caption: ``vncpasswd`` 设置账号密码后就能解决启动立即退出问题
 
 安装noVNC
 ============
