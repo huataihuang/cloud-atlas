@@ -4,13 +4,59 @@
 NGINX反向代理https
 ============================
 
+架构说明
+=========
 
-nginx的 access.log 日志::
+我的实践是构建 `docs.cloud-atlas.io <https://docs.cloud-atlas.io>`_ :
 
-   140.205.147.167 - - [31/Mar/2023:14:52:25 +0800] "\x16\x03\x01\x02\x00\x01\x00\x01\xFC\x03\x03]T\xE1\x82\xED\xF7!\xEE\x19G\xEEG\xEC\xBB\xB7\x0F]x7S\xB5\xB2\xD3\xEB8e/\x9Ae\x89" 400 157 "-" "-" "-"
-   140.205.147.167 - - [31/Mar/2023:14:52:25 +0800] "\x16\x03\x01\x02\x00\x01\x00\x01\xFC\x03\x03\x07\xA4\x8A\x84\xAC\xC1\x98\xE0\xC5\xE6\xB70\xB6\xE9\xBE\x0B(\x807\x94\x8B\x7F\x14\xC8\xFC\x0B\xDD>\x03*" 400 157 "-" "-" "-"
-   140.205.147.167 - - [31/Mar/2023:14:52:25 +0800] "\x16\x03\x01\x00}\x01\x00\x00y\x03\x01~\xE5om\xA3I\x15E\xAC`%p\x95v\x13\xFBo?\x16\x18\xD8\x8B)\xD1\xE9\xB7\xFF\x05\xEB\xAE\xA9\xAA\x00\x00\x14\xC0" 400 157 "-" "-" "-"
-   140.205.147.167 - - [31/Mar/2023:14:52:25 +0800] "\x16\x03\x01\x02\x00\x01\x00\x01\xFC\x03\x03F}\xD5\xEB0A\xCCa\xBF+\x0F\xA7\x8C#D\xB9?+\xF2\xA1T\x8FW\xF7\xC6B\xB35\x1C\xD3\xBCL \x14Y5\xD7\xC8P*\x104\xDB\xE9\xD2Z\xE1\x10'^\x00\x18J\xD0\x08\xE8\xC5\xCE=\xEBI\xA1\x80C\xED\x00*\x9A\x9A\x13\x01\x13\x02\x13\x03\xC0,\xC0+\xCC\xA9\xC00\xC0/\xCC\xA8\xC0" 400 157 "-" "-" "-"
-   140.205.147.167 - - [31/Mar/2023:14:52:25 +0800] "\x16\x03\x01\x02\x00\x01\x00\x01\xFC\x03\x03\x1A'\xAB\xCB&\xCF\xF4\xEB\xB9\xFA\xF2\x97a\xB6\xD9t,\x88 `7\x0E'\xBD\xF9\x00\x08\xE7\xC0BJ\xE2 \x1B\xCC\xD5\xB0\x05y*b\xDA5hkyzG\x10\x91\xBDX\xFF\x16\xCE^1>\x80n\x98F?;7\x00,\x9A\x9A\x13\x01\x13\x02\x13\x03\xC0,\xC0+\xCC\xA9\xC00\xC0/\xCC\xA8\xC0" 400 157 "-" "-" "-"
-   140.205.147.167 - - [31/Mar/2023:14:52:25 +0800] "\x16\x03\x01\x00}\x01\x00\x00y\x03\x01D_\xFAGXn\xBB8\xE3\xE4\x9An/&OW\x97A\x19[Y\x87\xCF%`\xCD\x13\xA07\xECN\xC1\x00\x00\x14\xC0" 400 157 "-" "-" "-"
-   140.205.147.167 - - [31/Mar/2023:14:52:34 +0800] "GET /api/live/ws HTTP/1.1" 400 12 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15" "-"
+- HTTPS反向代理部署在阿里云上: 因为阿里云有稳定的公网带宽
+- HTTP服务器部署在 :ref:`pi_cluster` : 部署在家庭内部的微型 :ref:`raspberry_pi` 系统
+
+  - 核心服务器完全是自己部署，可以自由扩展服务器集群规模而没有云计算的高昂费用
+  - 所有软硬件都由自己打造，可以充分锻炼 ``一个人的数据中心`` 技术堆栈
+  - 个人家庭宽带没有公网IP，通过 :ref:`ctunnel` 打通阿里云公网服务器到家庭内部集群的通道
+
+安装Nginx
+=============
+
+- :ref:`debian` 系安装Nginx:
+
+.. literalinclude:: nginx_reverse_proxy_https/install_nginx
+   :caption: :ref:`debian` 系安装Nginx
+
+配置Nginx
+===============
+
+.. note::
+
+   需要简单配置Nginx的服务域名 :ref:`nginx_virtual_host` 这样后续执行 ``certbot`` 会自动修订配置完成TLS/SSL配置修订。
+
+.. warning::
+
+   如果服务器在墙内云上，如果没有备案， ``Cetbot`` 配置时反向访问HTTP 80端口会被云厂商拦截导致配置失败。请备案后执行，或者在海外服务器上配置后再迁移。
+
+Let's Encrypt证书
+==================
+
+.. note::
+
+   首先需要确保域名( ``docs.cloud-atlas.io`` )已经指向了反向代理服务器，也就是我的阿里云公网服务器IP
+
+   这个步骤非常重要: Let's Encrypt就是通过域名指向的服务器来确保分发证书是合法的
+
+- 安装 ``Certbot`` :
+
+.. literalinclude:: nginx_reverse_proxy_https/install_certbot_debian
+   :caption: :ref:`debian`  安装 ``Certbot``
+
+.. literalinclude:: nginx_reverse_proxy_https/install_certbot_rocky
+   :caption: :ref:`centos` / :ref:`rockylinux` 安装 ``Certbot``
+
+反向代理
+==========
+
+参考
+======
+
+- `Configuring an Nginx HTTPS Reverse Proxy on Ubuntu Bionic <https://www.scaleway.com/en/docs/tutorials/nginx-reverse-proxy/>`_
+- `Rocky Linux: Generating SSL Keys - Let's Encrypt <https://docs.rockylinux.org/guides/security/generating_ssl_keys_lets_encrypt/>`_
