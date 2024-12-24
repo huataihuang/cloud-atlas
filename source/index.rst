@@ -5,14 +5,14 @@
 
 .. _cloud_atlas:
 
-云图 -- 云计算图志
+云图 -- 云计算图志: ``探索``
 =======================================
 
 I have a dream!
 
 开源技术赋予我们站在巨人的肩膀上做到更高更强的可能，成长为 ``全栈工程师`` 。我想通过开源技术来构建 ``one personal cloud`` ，实现完整的数据中心的构建和运维，实现IaaS，PaaS，SaaS。从存储、网络、虚拟化，从操作系统到数据库，从Web服务到消息中间件，只要是基础的服务，结合DevOps的自动化能力来实现持续集成、持续交付。
 
-「云图」- Cloud Atlas 
+「云图」- Cloud Atlas
 
 名字来源于一部关于自由的电影 「 `云图 <http://movie.douban.com/subject/3530403/>`_ 」
 
@@ -30,14 +30,28 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
 
    如果你按照我的文档无法完成，请在文章下的评论系统留言，我们一起讨论并完善指南
 
-.. note::
+``Discovery``
+---------------
 
-   之前和一个网友聊天，谈到我撰写的 ``Cloud Atlas`` 有点像 `Thoughtworks技术雷达 <https://www.thoughtworks.com/zh-cn/radar>`_ 提供云计算相关的技术指南。当然Thoughtworks在技术咨询领域为我们提供了广阔的视野，我期望能够借鉴Thoughtworks的见解，并进一步成为可落实的技术指南。
+2024年底，我将这部 「云图 -- 云计算图志」 修订命名为 「云图 -- 云计算图志: ``探索`` 」:
+
+- 正式启用了 `cloud-atlas.io <https://cloud-atlas.io>`_ 域名，我将重新构建 `docs.cloud-atlas.io <https://docs.cloud-atlas.io>`_ :
+
+  - 本项目将作为其中的 ``Discovery`` 分册: 完全面向中文技术文档，继续探索云计算相关技术
+  - 从2025年开始撰写一本新的实践指南，作为 「云图 -- 云计算图志」 的下一全新迭代:
+
+    - 采用中英文双语言撰写
+    - 从0开始记录自己构建 `cloud-atlas.io <https://cloud-atlas.io>`_ 的真实实践
+    - 完整的对外服务的真实的云计算
+    - **名字还没有想好**
 
 阅读
 =========
 
-请访问 `readthedocs平台上的云图 <https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html>`_ 以便获得最佳阅读体验。
+请访问:
+
+- `readthedocs平台上的云图 <https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html>`_ 第三方托管
+- `docs.cloud-atlas.io 构建 "云图 -- 云计算图志: 探索" <https://docs.cloud-atlas.io/discovery>`_ 自建网站，也就是本书的现实世界的实现
 
 致谢
 =========
