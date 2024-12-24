@@ -25,6 +25,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    nginx_reverse_proxy_troubleshooting.rst
    nginx_reverse_proxy_nodejs.rst
    nginx_reverse_proxy_https.rst
+   nginx_config_include.rst
    nginx_redirect_url.rst
    nginx_webdav.rst
    auth/index
