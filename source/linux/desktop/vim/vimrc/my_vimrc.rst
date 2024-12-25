@@ -146,7 +146,7 @@ YouCompleteMe插件
 
 - 需要注意，默认 :ref:`kali_linux` 安装的是 ``vim.basic`` ::
 
-   $ ls -lh /etc/alternatives/vim            
+   $ ls -lh /etc/alternatives/vim
    lrwxrwxrwx 1 root root 18 Feb 10 04:06 /etc/alternatives/vim -> /usr/bin/vim.basic
 
 这个基础版本vim没有内建支持Python::
@@ -159,7 +159,7 @@ YouCompleteMe插件
 
     - 建议安装 ``vim-nox``
 
-  - 或者 ``vim-pytonjedi`` (会依赖安装 ``vim-nox`` ) 
+  - 或者 ``vim-pytonjedi`` (会依赖安装 ``vim-nox`` )
 
     - `jedi-vim - awesome Python autocompletion with VIM <https://github.com/davidhalter/jedi-vim>`_ (一个内建了自动代码完成库 `Jedi <http://github.com/davidhalter/jedi>`_ 的VIM)
     - 查看 `cm-core / YouCompleteMe <https://github.com/ycm-core/YouCompleteMe>`_ 项目就可以看到 ``YouCompleteMe`` 自身就是包含 ``a Jedi-based completion engine for Python 2 and 3``
@@ -221,9 +221,9 @@ YouCompleteMe插件
 
 由于 ``npm`` 需要访问 ``npmjs.com`` 已经被GFW屏蔽( ``npm.org`` 没有屏蔽，但是重定向到 ``npmjs.com`` )，所以也要 :ref:`npm_proxy` :
 
-.. literalinclude:: ../../../../nodejs/startup/npm_proxy/alias_npm_proxy.sh
+.. literalinclude:: ../../../../nodejs/startup/npm_proxy/npm_proxy
    :language: bash
-   :caption: alias设置npm代理
+   :caption: 设置npm代理
 
 配置 ``git`` 代理:
 
@@ -258,4 +258,4 @@ YouCompleteMe插件
 
 - `The (Ultimate) Vim(rc) Guide, with plugins <https://cyberchris.xyz/blog/2019/10/20/vim-guide>`_
 - `Vim’s absolute, relative and hybrid line numbers <https://jeffkreeftmeijer.com/vim-number/>`_
-- `YouCompleteMe unavailable: requires Vim compiled with Python (2.6+ or 3.3+) support #2573 <https://github.com/ycm-core/YouCompleteMe/issues/2573>`_ 
+- `YouCompleteMe unavailable: requires Vim compiled with Python (2.6+ or 3.3+) support #2573 <https://github.com/ycm-core/YouCompleteMe/issues/2573>`_
