@@ -20,12 +20,12 @@ import sphinx_rtd_theme
 
 # -- Project information -----------------------------------------------------
 
-project = 'Cloud Atlas'
+project = 'Cloud Atlas: Discovery'
 copyright = '2018 - now, Huatai Huang'
 author = 'Huatai Huang'
 
 # The short X.Y version
-version = '1.0'
+version = '1.1'
 # The full version, including alpha/beta/rc tags
 release = 'beta'
 

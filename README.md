@@ -2,7 +2,10 @@
 
 > 这是一个不断迭代改进的开源技术分享项目，我想以每获得100个GitHub Star作为0.1版本的递进，不断完善这本技术书。
 
-请访问 [readthedocs平台上的云图](https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html) 以便获得最佳阅读体验。
+请访问:
+
+- [readthedocs平台上的云图](https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html) 以便获得最佳阅读体验。
+- [「云图 – 云计算图志: 探索 」](https://docs.cloud-atlas.io/discovery) 我的自建网站，也就是云图在现实中的实现
 
 ## 这本书的目标
 
@@ -24,6 +27,15 @@
 > 如果你按照我的操作文档无法完成，请在文章下的评论系统留言，我们一起讨论并完善指南
 
 2018年4月1日
+
+## 再次起航
+
+本书项目从 「云图 – 云计算图志」 修订命名为 「云图 – 云计算图志: 探索 」:
+
+- 从0开始构建 [cloud-atlas.io](https://cloud-atlas.io) 网站，「云图 – 云计算图志: 探索 」将作为 [docs.cloud-atlas.io](https://docs.cloud-atlas.io) 的一部分 [「云图 – 云计算图志: 探索 」](https://docs.cloud-atlas.io/discovery)
+- 在现实中完成一个Cloud Atlas项目
+
+2024年12月25日
 
 ## Star History
 

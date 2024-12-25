@@ -16,4 +16,14 @@ archlinux Sway图形桌面和中文环境
 .. literalinclude:: archlinux_aur/install_yay
    :caption: 编译安装yay
 
+安装
+===========
 
+- 安装 ``sway-im`` :
+
+.. literalinclude:: archlinux_aur/install_sway-im
+   :caption: 安装 ``sway-im``
+
+.. note::
+
+   近期没有再折腾，暂时记录一下，后续有机会再补充
