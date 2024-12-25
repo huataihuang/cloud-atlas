@@ -14,10 +14,10 @@ Node.js开发环境
 
 .. _install_nvm:
 
-安装nvm
-==========
+安装(更新)nvm
+===============
 
-- 执行安装脚本:
+- 执行安装脚本(更新也是使用相同方法):
 
 .. literalinclude:: nodejs_dev_env/install_nvm
    :language: bash
@@ -31,11 +31,17 @@ Node.js开发环境
 
 .. note::
 
-   也可以下载脚本再进行安装(主要原因是nvm脚本仓库网站被GFW屏蔽了， :strike:`下载以后再安装就可以绕过这个问题` )::
+   也可以下载脚本再进行安装(主要原因是nvm脚本仓库网站被GFW屏蔽了， :strike:`下载以后再安装就可以绕过这个问题` ):
 
-      curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.2/install.sh -o install_nvm.sh
+   .. literalinclude:: nodejs_dev_env/install_nvm_local
+      :language: bash
+      :caption: 通过本地下载安装脚本来安装nvm
 
-   不过，如果GFW阻塞了安装，还是要找一个能够正常访问internet的主机安装好 ``nvm`` 之后，把整个 ``~/.nvm`` 复制到目标运行主机上再执行 ``nvm install node --lts`` (nodejs官方网站没有被屏蔽，所以可以正常安装) 
+   不过，如果GFW阻塞了安装，还是要找一个能够正常访问internet的主机安装好 ``nvm`` 之后，把整个 ``~/.nvm`` 复制到目标运行主机上再执行 ``nvm install node --lts`` (nodejs官方网站没有被屏蔽，所以可以正常安装)
+
+.. note::
+
+   现在我推荐使用 :ref:`curl_proxy` ，例如比较简单的 ``socks5代理`` 来完成安装
 
 - 然后执行命令 ``nvm`` 可以看到输出就是正常完成了安装(注意，使用 ``which nvm`` 是看不到该命令的)
 
@@ -121,7 +127,7 @@ Node.js开发环境
 
    nvm alias default 14.15.4
 
-则默认切换到使用 ``v14.15.4`` 
+则默认切换到使用 ``v14.15.4``
 
 版本兼容性
 ==============

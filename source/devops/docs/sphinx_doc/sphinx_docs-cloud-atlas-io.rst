@@ -4,9 +4,13 @@
 docs.cloud-atlas.io 文档的sphinx
 =================================
 
-2024年3月，我启动新的文档撰写项目 `cloud-atlas-io/docs <https://github.com/cloud-atlas-io/docs>`_ 作为个人数据中心项目的文档。这个文档项目将继续采用 Sphinx docs ，同时我将实践:
+(放弃):strike:`2024年3月` ，我启动新的文档撰写项目 `cloud-atlas-io/docs <https://github.com/cloud-atlas-io/docs>`_ 作为个人数据中心项目的文档。这个文档项目将继续采用 Sphinx docs ，同时我将实践:
+
+2024年底，我重新开始 docs.cloud-atlas.io 项目，构建多语言、多版本Sphinx，我准备参考一些好的practice来完成，所以需要做一些测试
 
 - :ref:`sphinx_openstackdocstheme`
+- `My Sphinx Best Practice Guide for Multi-version Documentation in Different Languages <https://www.codingwiththomas.com/blog/my-sphinx-best-practice-for-a-multiversion-documentation-in-different-languages>`_ 支持多种语言和版本，经验分享
+- `How to manage translations for Sphinx projects <https://docs.readthedocs.io/en/stable/guides/manage-translations-sphinx.html>`_ 自动的多语言翻译(使用 `Transifex <https://www.transifex.com/>`_ 引擎实现)
 
 初始化
 ===========
@@ -31,7 +35,7 @@ docs.cloud-atlas.io 文档的sphinx
 
    我的文档项目初始化设置采用了 ``source`` 和 ``build`` 分离的设置
 
-- 修改 ``conf.py`` 配置，启用  ``openstackdocs`` 
+- 修改 ``conf.py`` 配置，启用  ``openstackdocs``
 
 .. literalinclude:: sphinx_openstackdocstheme/conf.py
    :caption: 修订 ``conf.py`` 启用 ``openstackdocstheme``

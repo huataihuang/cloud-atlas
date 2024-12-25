@@ -9,6 +9,7 @@ Jellyfin - 开源媒体系统(服务)
 
    intro_jellyfin.rst
    install_jellyfin_pi.rst
+   mkv_in_browser.rst
 
 .. only::  subproject and html
 

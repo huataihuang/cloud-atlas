@@ -10,7 +10,7 @@
 运行Next.js的要求是:
 
 - :ref:`nodejs` 16.14 或更高版本
-- macOS, Windows (宝库 WSL)和Linux
+- macOS, Windows (包括 WSL)和Linux
 
 安装步骤
 =========
@@ -73,7 +73,28 @@
 
 .. figure:: ../../../_static/javascript/react/nextjs/nextjs_start_dev.png
 
+创建 ``app`` 目录
+==================
+
+Next.js 使用文件系统路由( ``file-system routing`` )，也就是说如何在应用程序中路由取决于你如何组织文件:
+
+.. literalinclude:: install_nextjs/app_tree
+   :caption: 简单的 Next.js ``app`` 目录
+
+简单的 ``app`` 目录下创建2个文件(如果是上述自动部署则已经自动创建):
+
+- ``app/layout.tsx`` 是确定页面布局的文件:
+
+.. literalinclude:: install_nextjs/layout.tsx
+   :caption: ``app/layout.tsx``
+
+- ``app/page.tsx`` 是页面内容
+
+.. literalinclude:: install_nextjs/page.tsx
+   :caption: ``app/page.tsx``
+
 参考
 =======
 
 - `Jamstack - Next.js <https://jamstack.org/generators/next/>`_ Jamstack提供了很多 `Jamstack web网站案例 <https://github.com/vercel/next.js/tree/canary/examples>`_
+- `next.js docs: Installation <https://nextjs.org/docs/app/getting-started/installation>`_

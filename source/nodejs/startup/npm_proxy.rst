@@ -8,14 +8,9 @@
 
 我采用 ``alias`` 方式配置 ``npm`` 使用代理服务器:
 
-.. literalinclude:: npm_proxy/alias_npm_proxy.sh
+.. literalinclude:: npm_proxy/npm_proxy
    :language: bash
-   :caption: alias设置npm代理
-
-其他辅助配置(可选)::
-
-   npm config set strict-ssl false
-   npm config set registry "http://registry.npmjs.org/"
+   :caption: 设置npm代理
 
 参考
 ======
