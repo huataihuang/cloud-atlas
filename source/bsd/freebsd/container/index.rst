@@ -1,15 +1,13 @@
-.. _freebsd_virtual:
+.. _freebsd_container:
 
 =================================
-FreeBSD虚拟化
+FreeBSD容器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   bhyve/index
-   wine/index
-   linuxulator.rst
+   run_linux_containers_on_freebsd.rst
 
 .. only::  subproject and html
 

@@ -9,7 +9,8 @@ FreeBSD起步
 
    freebsd_on_intel_mac.rst
    freebsd_shutdown.rst
-   freebsd_static_ip.rst   
+   freebsd_static_ip.rst
+   freebsd_init.rst
 
 .. only::  subproject and html
 

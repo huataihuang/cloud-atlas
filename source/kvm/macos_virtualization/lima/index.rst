@@ -9,6 +9,7 @@ Lima: Linux Machines
 
    intro_lima.rst
    lima_startup.rst
+   lima_run_freebsd.rst
 
 
 .. only::  subproject and html

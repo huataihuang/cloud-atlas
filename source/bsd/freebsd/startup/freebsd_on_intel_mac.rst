@@ -34,6 +34,16 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
    :language: bash
    :caption: 使用dd命令将img文件写入U盘
 
+- 如果下载的是 ``mini-memstick.img`` 则使用如下命令:
+
+.. literalinclude:: freebsd_on_intel_mac/dd_img
+   :language: bash
+   :caption: 最小化安装镜像
+
+.. note::
+
+   如果可以还是下载完整版本镜像，因为最小化镜像虽然下载快，但是安装过程所有内容都需要从网上下载，导致安装非常花时间。
+
 安装
 =====
 
@@ -45,6 +55,12 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
 
 - 安装过程没有什么特别，就是最小化安装，然后重启。重启以后可以看到 :ref:`mbp15_late_2013` 上的WiFi是无法识别的，这是因为Broadcom无线驱动私有化，不能包含在FreeBSD安装中。需要 :ref:`freebsd_wifi` 设置，在没有设置无线网络之前，可以使用一个USB以太网卡连接一台Linux主机，并执行 :ref:`iptables_masquerade` 来提供互联网访问，以便进一步设置FreeBSD(配置 :ref:`freebsd_static_ip` )
 
+默认安装选择的安装组件推荐:
+
+- 在默认基础上，额外选择 ``src`` 即可，因为驱动需要内核源代码编译安装
+- 不要选择 ``kernel-dbg`` 、 ``lib32`` 、 ``src`` 以外的组件，这3个组件外的其他程序都需要联网安装，非常缓慢。其他软件包可以在操作系统安装完成后安装
+- 我的安装取消了 ``lib32`` 是因为我想构建一个完全64位系统
+
 
 参考
 ======
@@ -54,4 +70,5 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
 - `FreeBSD on a MacBook Pro <https://gist.github.com/mpasternacki/974e29d1e3865e940c53>`_
 - `BSD and Linux on an Intel Mac <https://acadix.biz/freebsd-intel-mac.php>`_
 - `FREEBSD, MAC MINI AND ZFS <https://www.codeimmersives.com/tech-talk/freebsd-mac-mini-and-zfs/>`_
-- `Install FreeBSD with XFCE and NVIDIA Drivers [2021] <https://nudesystems.com/install-freebsd-with-xfce-and-nvidia-drivers/>`_ 提供了完整的安装步骤截图，并且介绍 :ref:`linuxulator` 
+- `Install FreeBSD with XFCE and NVIDIA Drivers [2021] <https://nudesystems.com/install-freebsd-with-xfce-and-nvidia-drivers/>`_ 提供了完整的安装步骤截图，并且介绍 :ref:`linuxulator`
+- `FreeBSD中文社区「FreeBSD 从入门到跑路」: 第 2.0 节 FreeBSD 安装图解 <https://book.bsdcn.org/di-2-zhang-an-zhuang-freebsd/di-2.0-jie-tu-jie-an-zhuang>`_ 非常清晰的入门教程
