@@ -14,6 +14,7 @@ FreeBSD
    desktop/index
    network/index
    virtual/index
+   container/index
 
 
 .. only::  subproject and html

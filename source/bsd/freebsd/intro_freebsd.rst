@@ -18,7 +18,7 @@ FreeBSD 非凡的特性
 
 FreeBSD 基于加州大学伯克利分校计算机系统研究组 (CSRG) 发布的 4.4BSD-Lite， 继承了 BSD 系统开发的优良传统。 除了 CSRG 优秀的工作之外， FreeBSD 项目花费了非常多的时间来优化调整系统， 使其在真实负载情况下拥有最好的性能和可靠性。
 
-因为 FreeBSD 自身的源代码是完全公开的， 所以对于特定的应用程序或项目，可以对系统进行最大限度的定制。 
+因为 FreeBSD 自身的源代码是完全公开的， 所以对于特定的应用程序或项目，可以对系统进行最大限度的定制。
 
 FreeBSD 是一个免费使用且带有完整源代码的基于 4.4BSD-Lite 的系统， 它广泛运行于 Intel i386™、i486™、Pentium®、 Pentium® Pro、 Celeron®、 Pentium® II、 Pentium® III、 Pentium® 4(或者兼容系统)、 Xeon™、 和 Sun UltraSPARC® 的计算机系统上。 它主要以 加州大学伯克利分校 的 CSRG 研究小组的软件为基础，并加入了 NetBSD、OpenBSD、386BSD 以及来自 自由软件基金会 的一些东西。除了最基本的系统软件，FreeBSD 还提供了一个拥有成千上万广受欢迎的程序组成的软件的 Ports Collection。
 
@@ -59,10 +59,14 @@ FreeBSD 也被用来支持 Internet 上一些最大的站点， 包括:
 
 - `RIP Tutorial <https://riptutorial.com/>`_ 提供了很多学习语言的资料，也汇总了一些很有用的FreeBSD资料:
 
-  - `RIP Tutorial: FreeBSD Build from source <https://riptutorial.com/freebsd/topic/7062/build-from-source>`_ 
+  - `RIP Tutorial: FreeBSD Build from source <https://riptutorial.com/freebsd/topic/7062/build-from-source>`_
   - `RIP Tutorial: FreeBSD Jails <https://riptutorial.com/freebsd/topic/7070/freebsd-jails>`_
   - `RIP Tutorial: FreeBSD Packages and Ports management <https://riptutorial.com/freebsd/topic/7069/packages-and-ports-management>`_
   - `RIP Tutorial: FreeBSD Set up the FreeBSD development environment <https://riptutorial.com/freebsd/topic/6136/set-up-the-freebsd-development-environment>`_
+
+- `FreeBSD中文社区「FreeBSD从入门到跑路」 <https://book.bsdcn.org/>`_ 非常详尽的中文入门学习资料，非常好
+
+  - `FreeBSD中文社区 <https://book.bsdcn.org>`_ 最近才发现有不少有用的翻译资料和自制教程，是FreeBSD推广的良好教材，学习...
 
 参考
 =======

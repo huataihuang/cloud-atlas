@@ -1,15 +1,11 @@
-.. _freebsd_virtual:
+.. _bhyve:
 
 =================================
-FreeBSD虚拟化
+bhyve(BSD hypervisor)
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   bhyve/index
-   wine/index
-   linuxulator.rst
 
 .. only::  subproject and html
 
