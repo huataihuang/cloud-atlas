@@ -11,9 +11,10 @@ FreeBSD提供了Linux二进制程序兼容，也就是 ``Linuxulator`` ，可以
    kldload linux
    kldload linux64
 
-要使配置持久化，则修改 ``/etc/rc.conf`` 添加::
+要使配置持久化，则修改 ``/etc/rc.conf`` 添加:
 
-   linux_enable="YES"
+.. literalinclude:: linuxulator/rc.conf
+   :caption: 配置 ``/etc/rc.conf`` 持久化激活 ``Linuxulator``
 
 执行以下命令在系统中安装CentOS 7软件包源的Linux子系统::
 
