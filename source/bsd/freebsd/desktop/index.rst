@@ -8,6 +8,8 @@ FreeBSD桌面
    :maxdepth: 1
 
    freebsd_nvidia-driver.rst
+   freebsd_nvidia.rst
+   freebsd_wayland_sway.rst
    freebsd_xfce4.rst
    freebsd_sway.rst
    freebsd_hikari.rst

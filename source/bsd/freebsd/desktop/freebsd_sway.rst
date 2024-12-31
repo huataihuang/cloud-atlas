@@ -97,36 +97,20 @@ Sway配置
 
    sway
 
-可能出现报错::
+出现报错:
 
-   ...
-   00:00:10.109 [wlr] [backend/backend.c:217] Found 0 GPUs, cannot create backed
-   00:00:10.109 [wlr] [backend/backend.c:386] Failed to open any DRM device
-   00:00:10.109 [sway/server.c:56] Unable to create backend
-   ...
+.. literalinclude:: freebsd_sway/sway_error
+   :caption: 启动sway报错，没有找到GPU
 
-太难了，我尝试参考 `NVIDIA (495) on sway tutorial + questions (Arch-based distros) <https://forums.developer.nvidia.com/t/nvidia-495-on-sway-tutorial-questions-arch-based-distros/192212>`_ 做了各种尝试，例如配置::
+**终于找到原因了** 说来也简单，但是折腾了我好久。我在两次尝试FreeBSD sway失败后，考虑到自己主要是做后端开发运维，在桌面花费太多时间了，所以改为部署 :ref:`freebsd_xfce4` 。因为XFce4对 :ref:`wayland` 还是试验性支持，FreeBSD更是演进缓慢，所以实际上XFce4是传统的 :ref:`x_window` ，也就是通过 Xorg 运行。我猛然发现，原来在安装了 :ref:`freebsd_nvidia` 之后，Xorg居然也不能启动。还好Xorg有一个详细的启动日志检查 ``/var/log/Xorg.0.log`` 会看到如下错误:
 
-   export XDG_RUNTIME_DIR=/var/run/user/`id -u`
+.. literalinclude:: freebsd_nvidia-driver/version_error
+   :caption: 我的笔记本显卡太老不能使用最新的550版本驱动
 
+太乌龙了，原来解决的方法就是简单回滚安装旧版本 ``nvidia-driver`` :
 
-   #export LIBVA_DRIVER_NAME=nvidia
-   #export MOZ_ENABLE_WAYLAND=1
-   #export GDK_BACKEND=wayland
-   #export QT_QPA_PLATFORM=wayland-egl
-   #export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-
-   export CLUTTER_BACKEND=wayland
-   export SDL_VIDEODRIVER=wayland
-   export XDG_SESSION_TYPE=wayland
-   export QT_QPA_PLATFORM=wayland
-   export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-   export MOZ_ENABLE_WAYLAND=1
-   export GBM_BACKEND=nvidia-drm
-   export __GLX_VENDOR_LIBRARY_NAME=nvidia
-   export WLR_NO_HARDWARE_CURSORS=1
-
-但都没有解决这个问题
+.. literalinclude:: freebsd_nvidia-driver/rollback_nvidia
+   :caption: 回滚 ``nvidia-driver`` 到 ``470.161.03`` 版本以适配 ``GeForce GT 750M Mac Edition``
 
 看了一下 `FreeBSD Handbook: 5.10 Wayland on FreeBSD <https://docs.freebsd.org/en/books/handbook/x11/#x-wayland>`_ 提到有3种Wayland Compositor:
 
@@ -134,7 +118,7 @@ Sway配置
 - Hikari
 - Sway
 
-其中 `hikari - A Wayland Compositor <https://hikari.acmelabs.space>`_ 声明是在FreeBSD上开发，但也支持Linux。并且有人提到使用非常顺畅，所以我改为尝试 :ref:`freebsd_hikari`
+其中 `hikari - A Wayland Compositor <https://hikari.acmelabs.space>`_ 声明是在FreeBSD上开发，但也支持Linux。并且有人提到使用非常顺畅，后续我也将尝试 :ref:`freebsd_hikari`
 
 参考
 =====

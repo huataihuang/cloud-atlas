@@ -186,10 +186,13 @@ wifibox架构解析
 - 在Alpine Linux中使用 ``aports`` 只读root文件系统，并使用 ``9P`` 挂载物理主机和 ``/tmp`` 目录来写入变量和可选的组件(mDNSResponder, tcpdump 等)
 - 包含了无线配置和诊断工具(iw, rfkill, iptables)
 
-主要配置文件
---------------
+.. figure:: ../../../_static/bsd/freebsd/network/wifibox-1.png
 
--
+.. figure:: ../../../_static/bsd/freebsd/network/wifibox-2.png
+
+.. figure:: ../../../_static/bsd/freebsd/network/wifibox-3.png
+
+.. figure:: ../../../_static/bsd/freebsd/network/wifibox-4.png
 
 wifibox完善配置
 =================
