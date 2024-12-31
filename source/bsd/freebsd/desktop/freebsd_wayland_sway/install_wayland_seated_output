@@ -1,0 +1,56 @@
+=====
+Message from wayland-1.23.1:
+
+--
+Wayland requires XDG_RUNTIME_DIR to be defined to a path that will
+contain "wayland-%d" unix(4) sockets. This is usually handled by
+consolekit2 (via ck-launch-session) or pam_xdg (via login).
+=====
+Message from seatd-0.8.0_1:
+
+--
+libseat is used to get DRM master and input devices for non-root users.
+On Wayland this is only necessary when starting a compositor under KMS
+console (e.g., /dev/ttyv0 backed by /dev/dri/card0). Nested sessions like
+"Wayland on X11" or "Wayland on Wayland" don't need extra configuration.
+
+By default libseat tries to find the first working backend. To override
+set LIBSEAT_BACKEND via environ(7). Available backends and try order:
+
+* "seatd" - seatd-launch(1) or seatd rc.d(8) service
+* "consolekit2" - ck-launch-session(1) or pam_ck_connector(8)
+
+"seatd" backend requires membership in "video" group to be allowed to
+use setuid bit in seatd-launch(1) or connect to seatd(1) socket.
+
+  # pw groupmod video -m <user>
+  $ exit # log out to refresh group permissions
+
+For example, to start a wlroots-based compositor replace "sway" with
+your compositor (e.g., "hikari", "wayfire", "labwc", "river") then run
+
+  $ seatd-launch sway
+
+Alternatively, configure and run seatd(1) as system service
+
+  # sysrc seatd_enable=YES
+  # service seatd start
+  $ sway
+
+To use ConsoleKit2 run
+
+  # pkg install consolekit2 basu
+  # sysrc -x seatd_enable
+  # service seatd stop
+  # sysrc dbus_enable=YES
+  # service dbus start
+  $ ck-launch-session sway
+
+where "ck-launch-session" can be dropped after
+
+  # echo "session optional pam_ck_connector.so" >>/etc/pam.d/system
+  $ exit # log out to re-trigger PAM
+
+Known issues:
+- Garbage on console due to missing K_OFF, see
+  https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=272095

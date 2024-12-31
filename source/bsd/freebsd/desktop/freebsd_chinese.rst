@@ -12,36 +12,44 @@ FreeBSD中文环境配置和 :ref:`linux_chinese` 相似，分文2部分:
 安装
 =====
 
-- 安装中文字体::
+- 安装中文字体:
 
-   pkg install wqy-fonts-20100803_10,1
+.. literalinclude:: freebsd_chinese/wqy
+   :caption: 安装文泉驿中文字体
 
-- 安装fcitx5::
+- 安装fcitx5:
 
-   pkg install fcitx5 fcitx5-configtool fcitx5-gtk fcitx5-qt zh-fcitx5-chinese-addons
+.. literalinclude:: freebsd_chinese/fcitx
+   :caption: 安装fcitx5输入框架和输入法(我选择安装rime管须鼠输入法)
+
+.. note::
+
+   一定要安装 ``fcitx5-gtk3`` ， ``fcitx5`` 需要这个组件才能弹出(显示)输入中文候选字。如果没有安装这个组件，虽然配置都正确，但是 ``ctrl+space`` 是无法看到中文输入框也看不到 ``rime`` 的托盘图标。
+
+   我主要使用gtk程序( :ref:`firefox` )所以仅安装GTK输入模块
+
+安装提示:
+
+.. literalinclude:: freebsd_chinese/fcitx_output
+   :caption: 安装fcitx5提示信息
 
 配置
 =====
 
-- ``~/.xinitrc`` ::
+- 按照安装提示，在 ``~/.cshrc`` 中添加:
 
-   setenv LC_CTYPE "zh_CN.UTF-8"
-   setenv GTK_IM_MODULE "fcitx5"
-   setenv GTK3_IM_MODULE "fcitx5"
-   setenv QT_IM_MODULE "fcitx5"
-   setenv QT4_IM_MODULE "fcitx5"
-   setenv xmodifiers "@im=fcitx5"
-   setenv LC_ALL "zh_CN.UTF-8"
+.. literalinclude:: freebsd_chinese/cshrc
+   :caption: 在 ``~/.cshrc`` 中添加 ``fcitx`` 配置
 
-- ``~/.xprofile`` ::
+我为了少安装依赖，实际上是复制了另外一台 :ref:`arch_linux` 上配置文件过来使用(安装 ``fcitx5-configtool`` 需要安装QT依赖)，需要复制两个目录配置:
 
-   export XIM=fcitx5
-   export GTK_IM_MODULE=fcitx5
-   export QT_IM_MODULE=fcitx5
-   export XIM_PROGRAM=fcitx5
-   export XMODIFIERS="@im=fcitx5"
+  - ``~/.config/fcitx5`` ( :download:`fcitx5.tar.gz <../../../_static/bsd/freebsd/desktop/fcitx5.tar.gz>` ) : ``fcitx5`` 框架配置
+  - ``~/.local/share/fcitx5/rime`` ( :download:`rime.tar.gz <../../../_static/bsd/freebsd/desktop/rime.tar.gz>` ) : ``rime`` 输入法配置(之所以复制这个目录是因为我发现在FreeBSD上安装了rime之后，不知道为何输入拼音总是出现非全拼的结果，我不知道怎么调整配置，只好也从另一台 :ref:`arch_linux` 上将配置复制过来，就解决了问题)
 
-重新登陆桌面，然后运行 ``fcitx5-configtool`` 添加中文输入法并重启fcitx5就可以输入中文。
+- 复制启动配置(也可能不需要):
+
+.. literalinclude:: freebsd_chinese/desktop
+   :caption: 复制 ``fcitx5`` 的Desktop启动配置
 
 参考
 =====

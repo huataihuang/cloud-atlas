@@ -146,8 +146,9 @@ Python 3 venv
 
 .. note::
 
-   我使用 :ref:`kali_linux` 作为开发环境，采用上述方式完成环境设置。
+   ``csh`` 的 ``source`` 必须是 ``activate.csh`` ，否则会报错::
 
+      Badly placed ()'s.'
 
 - 一段时间之后，可能需要升级pip以及安装的所有软件包:
 
