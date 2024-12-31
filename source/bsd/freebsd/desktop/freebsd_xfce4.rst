@@ -41,6 +41,19 @@ FreeBSD XFCE桌面
 .. literalinclude:: freebsd_xfce4/install
    :caption: 安装Xfce4
 
+.. note::
+
+   参考 `FreeBSD从入门到跑路: 第 4.20 节 声卡设置 <https://book.bsdcn.org/di-4-zhang-zhuo-mian-an-zhuang/di-4.20-jie-sheng-ka-yu-wang-ka-she-zhi>`_ **FreeBSD 大部分软件的音频输出驱动为 oss。有些默认是 pulseaudio(比如 firefox)**
+
+   安装了 ``xfce4-pulseaudio-plugin`` 可以很方便调整音频，特别是切换音频通道。不过，也可以通过命令行切换:
+
+   .. literalinclude:: freebsd_xfce4/sndstat
+      :caption: 检查当前声卡设备, ``default`` 行就是当前使用默认设备(音频从这个设备输出)
+      :emphasize-lines: 5
+
+   .. literalinclude:: freebsd_xfce4/switch_snd
+      :caption: 修改输出的设备。最后的数字是对应的 pcm 后面的数字
+
 安装信息:
 
 .. literalinclude:: freebsd_xfce4/install_output
