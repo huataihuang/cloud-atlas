@@ -46,6 +46,8 @@ FreeBSD中文环境配置和 :ref:`linux_chinese` 相似，分文2部分:
   - ``~/.config/fcitx5`` ( :download:`fcitx5.tar.gz <../../../_static/bsd/freebsd/desktop/fcitx5.tar.gz>` ) : ``fcitx5`` 框架配置
   - ``~/.local/share/fcitx5/rime`` ( :download:`rime.tar.gz <../../../_static/bsd/freebsd/desktop/rime.tar.gz>` ) : ``rime`` 输入法配置(之所以复制这个目录是因为我发现在FreeBSD上安装了rime之后，不知道为何输入拼音总是出现非全拼的结果，我不知道怎么调整配置，只好也从另一台 :ref:`arch_linux` 上将配置复制过来，就解决了问题)
 
+     - 补充: 经过反复验证，发现rime输入法在FreeBSD上还需要安装 ``zh-rime-essay`` ，似乎就是因为缺乏这个软件包才导致输入时候有非常奇怪的非预期词汇
+
 - 复制启动配置(也可能不需要):
 
 .. literalinclude:: freebsd_chinese/desktop
@@ -55,3 +57,4 @@ FreeBSD中文环境配置和 :ref:`linux_chinese` 相似，分文2部分:
 =====
 
 - `FreeBSD installation of FCITX5 configuration <https://www.programmerall.com/article/17882455371/>`_
+- `FreeBSD从入门到跑路: 第 5.1 节 Fcitx 输入法框架 <https://book.bsdcn.org/di-5-zhang-shu-ru-fa-ji-chang-yong-ruan-jian/di-5.1-jie-fcitx-shu-ru-fa-kuang-jia>`_
