@@ -18,6 +18,19 @@ Nginx处理CORS(跨站资源共享)
    :caption: NGINX添加允许 https://utteranc.es ``CORS``
    :emphasize-lines: 15
 
+不过，还是存在一点问题，如果访问用户登陆过github，那么 ``utteranc.es`` 还会调用 ``api.github.com`` ，所以实际上我们需要设置多个domain的CORS。为了能够方便配置，采用 :ref:`nginx_config_include` 包含一个domain的map来解决:结合两个配置文件
+
+- ``/etc/nginx/conf.d/cloud-atlas.io.conf`` :
+
+.. literalinclude:: nginx_cors/cloud-atlas.io_include.conf
+   :caption: 通过 :ref:`nginx_config_include` 引入map来添加 CORS
+   :emphasize-lines: 1,17
+
+- ``/etc/nginx/includes/origin_map.conf`` :
+
+.. literalinclude:: nginx_cors/origin_map.conf
+   :caption: ``origin_map.conf`` 配置了一个NGINX map
+
 全面放开nginx的CORS配置
 ==========================
 
@@ -32,3 +45,7 @@ Nginx处理CORS(跨站资源共享)
 - `wikipedia: Cross-origin resource sharing <https://en.wikipedia.org/wiki/Cross-origin_resource_sharing>`_
 - `How to enable CORS in Nginx proxy server? <https://stackoverflow.com/questions/45986631/how-to-enable-cors-in-nginx-proxy-server>`_
 - `Wide open nginx CORS configuration <https://michielkalkman.com/snippets/nginx-cors-open-configuration/>`_
+- `Navigating CORS: Enabling Multi-Origin Integration with NGINX <https://medium.com/@imesh20616/navigating-cors-enabling-multi-origin-integration-with-nginx-ca80eb8de0b8>`_ 快速构建map，配置多域名CORS
+- `nginx config to enable CORS with origin matching <https://stackoverflow.com/questions/54313216/nginx-config-to-enable-cors-with-origin-matching>`_ 更精细化控制方法
+- `How to allow access via CORS to multiple domains within nginx <https://stackoverflow.com/questions/36582199/how-to-allow-access-via-cors-to-multiple-domains-within-nginx>`_ 可以使用map或者通过if判断
+- `Kubernetes Ingress-nginx CORS: How to allow multiple Origins? <https://stackoverflow.com/questions/73874334/kubernetes-ingress-nginx-cors-how-to-allow-multiple-origins>`_ 在k8s上部署nginx ingress时配置多域名CORS
