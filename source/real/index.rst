@@ -21,6 +21,7 @@ Real
    network/index
    mobile_work/index
    mobile_cloud/index
+   bsd_cloud/index
 
 .. only::  subproject and html
 

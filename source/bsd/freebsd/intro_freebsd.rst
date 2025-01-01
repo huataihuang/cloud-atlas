@@ -57,6 +57,8 @@ FreeBSD 也被用来支持 Internet 上一些最大的站点， 包括:
 学习资料
 ===========
 
+- `FreeBSD Handbook <https://docs.freebsd.org/en/books/handbook/>`_ 官方手册，全面系统且更新
+
 - `RIP Tutorial <https://riptutorial.com/>`_ 提供了很多学习语言的资料，也汇总了一些很有用的FreeBSD资料:
 
   - `RIP Tutorial: FreeBSD Build from source <https://riptutorial.com/freebsd/topic/7062/build-from-source>`_

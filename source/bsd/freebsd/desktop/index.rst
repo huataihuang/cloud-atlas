@@ -17,6 +17,9 @@ FreeBSD桌面
    tuning_freebsd_for_mbp.rst
    freebsd_vnc.rst
    freebsd_synergy.rst
+   freebsd_nvim.rst
+   freebsd_dev_lsp.rst
+   freebsd_vscode_code-server.rst
 
 .. only::  subproject and html
 
