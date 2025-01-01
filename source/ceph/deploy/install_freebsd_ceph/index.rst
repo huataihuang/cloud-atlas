@@ -1,14 +1,17 @@
-.. _freebsd_container:
+.. _install_freebsd_ceph:
 
 =================================
-FreeBSD容器
+FreeBSD云计算部署Ceph
 =================================
+
+.. note::
+
+   在 :ref:`freebsd_thin_jail` 中部署Ceph
 
 .. toctree::
    :maxdepth: 1
 
-   jail/index
-   run_linux_containers_on_freebsd.rst
+   freebsd_ceph_infra.rst
 
 .. only::  subproject and html
 

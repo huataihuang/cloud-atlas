@@ -13,6 +13,7 @@ Ceph 部署
    install_ceph_manual/index
    install_ceph_manual_zdata/index
    install_mobile_cloud_ceph/index
+   install_freebsd_ceph/index
 
 .. only::  subproject and html
 
