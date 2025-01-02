@@ -31,6 +31,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    nginx_redirect_url.rst
    nginx_webdav.rst
    auth/index
+   nginx_favicon.rst
 
 .. only::  subproject and html
 
