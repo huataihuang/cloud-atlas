@@ -14,6 +14,18 @@ FreeBSD Jail管理
 .. literalinclude:: freebsd_jail_admin/jls_output
    :caption: 列出运行的jails输出举例
 
+另外， ``--libxo`` 参数可以通过 ``libxo`` 库显示其他类型格式，如 ``JSON`` , ``HTML`` 等
+
+显示 ``JSON`` 格式输出:
+
+.. literalinclude:: freebsd_jail_admin/jls_json
+   :caption: ``JSON`` 格式列出运行的jails
+
+- 启动和停止jail- 使用 ``service`` 命令:
+
+.. literalinclude:: freebsd_jail_admin/jail_start_stop
+   :caption: 启动和停止jail
+
 - 访问jail:
 
 .. literalinclude:: freebsd_jail_admin/jexec
@@ -41,9 +53,3 @@ FreeBSD Jail管理
    :caption: 在jail内部创建admin
 
 在 ``dev`` 主机的用户 ``admin`` 添加ssh key，现在就可以像普通虚拟机一样远程ssh登录到容器内部了
-
-初始化 ``dev`` 开发环境
-============================
-
-.. literalinclude:: freebsd_jail_admin/dev_init
-   :caption: 为容器 ``dev`` 创建开发环境

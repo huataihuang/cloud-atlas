@@ -25,6 +25,11 @@
   - `斯坦福大学2014机器学习教程中文笔记目录 <http://www.ai-start.com/ml2014/>`_
   - `深度学习笔记目录 <http://www.ai-start.com/dl2017/>`_
 
+- 李沐『动手学习深度学习』: 
+
+  - `『动手学习深度学习』课程主页 <https://courses.d2l.ai/zh-v2>`_
+  - `『动手学习深度学习』教材 <https://zh-v2.d2l.ai/>`_
+  - `B站:跟李沐学AI视频 <https://space.bilibili.com/1567748478/channel/series>`_
 
 网友整理资料汇总
 =================

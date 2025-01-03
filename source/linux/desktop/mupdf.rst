@@ -26,7 +26,10 @@ MuPDF
    :widths: 30,70
    :header-rows: 1
 
+上述有些快捷键我在FreeBSD mupdf中没有验证成功，例如 ``F1`` , ``o`` 等
+
 参考
 ======
 
-- `MuPDF OpenGL viewer <https://mupdf.com/docs/manual-mupdf-gl.html>`_ Linux平台交互使用界面操作说明
+- `MuPDF OpenGL viewer <https://mupdf.com/docs/manual-mupdf-gl.html>`_ Linux平台交互使用界面操作说明(不过原官网这篇文档找不到了)
+- `manual mupdf-gl <https://www.jianshu.com/p/8e225bfb7a23>`_ 简书上搬运的官网manual
