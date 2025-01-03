@@ -11,6 +11,7 @@
 
    dl_learn_tips.rst
    intro_dl.rst
+   dl_env.rst
    ../startup/install_anaconda.rst
    ../startup/ml_python.rst
    transformer.rst

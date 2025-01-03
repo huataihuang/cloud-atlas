@@ -12,6 +12,8 @@
    ml_basics.rst
    ml_training.rst
    install_anaconda.rst
+   install_conda.rst
+   install_conda_freebsd.rst
    ml_python.rst
 
 .. only::  subproject and html

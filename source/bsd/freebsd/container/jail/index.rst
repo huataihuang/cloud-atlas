@@ -15,6 +15,7 @@ FreeBSD Jail
    freebsd_vnet_jail.rst
    freebsd_linux_jail.rst
    freebsd_jail_admin.rst
+   freebsd_jail_destroy.rst
    freebsd_jail_init.rst
 
 .. only::  subproject and html
