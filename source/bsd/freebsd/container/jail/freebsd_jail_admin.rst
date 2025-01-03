@@ -21,10 +21,18 @@ FreeBSD Jail管理
 .. literalinclude:: freebsd_jail_admin/jls_json
    :caption: ``JSON`` 格式列出运行的jails
 
+则输出内容为JSON格式，方便使用程序自动化处理:
+
+.. literalinclude:: freebsd_jail_admin/jls_json_output
+   :caption: ``JSON`` 格式列出运行的jails
+
 - 启动和停止jail- 使用 ``service`` 命令:
 
-.. literalinclude:: freebsd_jail_admin/jail_start_stop
-   :caption: 启动和停止jail
+.. literalinclude:: freebsd_jail_admin/jail_start
+   :caption: 启动jail
+
+.. literalinclude:: freebsd_jail_admin/jail_stop
+   :caption: 停止jail
 
 - 访问jail:
 
@@ -47,9 +55,12 @@ FreeBSD Jail管理
 .. literalinclude:: freebsd_jail_admin/pkg
    :caption: 在jail内部安装sudo
 
-- 在 ``dev`` jail中创建用户组和用户 admin:
+.. note::
 
-.. literalinclude:: freebsd_jail_admin/user
-   :caption: 在jail内部创建admin
+   为方便登录jail容器，执行 :ref:`freebsd_jail_init` 构建一个ssh登录，admin用户使用的开发环境
 
-在 ``dev`` 主机的用户 ``admin`` 添加ssh key，现在就可以像普通虚拟机一样远程ssh登录到容器内部了
+- 在创建好 ``dev`` jail 内部帐号 ``admin`` 之后，就可以使用该站搞 ``jexec`` 进入容器:
+
+.. literalinclude:: freebsd_jail_admin/jexec_admin
+   :caption: 以 ``admin`` 访问 ``dev`` jail
+
