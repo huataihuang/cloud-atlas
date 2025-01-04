@@ -47,6 +47,12 @@
 
    Red Hat官方文档风格也非常类似，但是不是采用 :ref:`sphinx_doc` ，而是类似WordPress的较为小众的 `Drupal <https://www.drupal.org/>`_
 
+.. note::
+
+   `FreeBSD doc <https://github.com/freebsd/freebsd-doc>`_ 项目说明了 `FreeBSD Handbook <https://docs.freebsd.org/en/books/handbook/>`_ 主要采用 `Asciidoctor <https://asciidoctor.org/>` (一种 :ref:`ruby` 文字处理器，类似 :ref:`sphinx_doc` 比较复杂) (部分是 :ref:`hugo` )实现的。
+
+   FreeBSD社区还为 `FreeBSD Document Project(FDP) <https://docs.freebsd.org/en/books/fdp-primer/overview/>`_ 提供了完整的撰写指南。
+
 我的实践
 =========
 
