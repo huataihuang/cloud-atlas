@@ -56,10 +56,14 @@ Jail配置文件
 有两种方法配置jails:
 
 - 方法一: 在 ``/etc/jail.conf`` 中为每个jail添加一个条目
-- 方法二: 在 ``/etc/jail.conf.d/`` 目录中为每个jail创建一个文件 (我采用这个方法，适合管理大量的jails)
+- 方法二: 在 ``/etc/jail.conf.d/`` 目录中为每个jail创建一个文件 ( :strike:`我采用这个方法` ，适合管理大量的jails)
 
 .. literalinclude:: freebsd_jail_host/jail.conf
    :caption: 在 ``/etc/jail.conf`` 中添加一行配置来包含所有在 ``/etc/jail.conf.d/`` 目录下以 ``.conf`` 结尾的配置
+
+我发现其实结合方法一和方法二可能是更好的方案:
+
+
 
 典型Jail配置
 --------------
