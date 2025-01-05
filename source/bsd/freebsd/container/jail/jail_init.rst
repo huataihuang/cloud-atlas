@@ -1,10 +1,10 @@
-.. _freebsd_jail_init:
+.. _jail_init:
 
 =======================
-FreeBSD Jail环境初始化
+Jail环境初始化
 =======================
 
-和 :ref:`freebsd_init` 类似，在 :ref:`freebsd_thin_jail` 环境中按照自己的要求进行初始安装
+和 :ref:`freebsd_init` 类似，在 :ref:`thin_jail` 环境中按照自己的要求进行初始安装
 
 .. note::
 
@@ -19,7 +19,7 @@ ssh初始化
 
 - 在 ``dev`` jail中创建用户组和用户 admin:
 
-.. literalinclude:: freebsd_jail_init/user
+.. literalinclude:: jail_init/user
    :caption: 在jail内部创建admin
 
 在 ``dev`` 主机的用户 ``admin`` 添加ssh key，现在就可以像普通虚拟机一样远程ssh登录到容器内部了
@@ -29,7 +29,7 @@ devops初始化
 
 安装必要运维工具:
 
-.. literalinclude:: freebsd_jail_init/devops
+.. literalinclude:: jail_init/devops
    :caption: 安装运维工具
 
 python初始化
@@ -37,12 +37,12 @@ python初始化
 
 - 安装python和pip:
 
-.. literalinclude:: freebsd_jail_init/python
+.. literalinclude:: jail_init/python
    :caption: 安装python
 
 - Python :ref:`virtualenv` :
 
-.. literalinclude:: freebsd_jail_init/virtualenv
+.. literalinclude:: jail_init/virtualenv
    :caption: python :ref:`virtualenv`
 
 .. note::

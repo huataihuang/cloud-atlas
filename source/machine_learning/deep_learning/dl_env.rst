@@ -11,7 +11,7 @@
 我的运行环境
 ===============
 
-- 部署 :ref:`freebsd_thin_jail` ，启动名为 ``dev`` 的Jail容器
+- 部署 :ref:`thin_jail` ，启动名为 ``dev`` 的Jail容器
 - ``dev`` Jail中安装 Python 3 :ref:`virtualenv`
 
 

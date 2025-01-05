@@ -1,7 +1,7 @@
-.. _freebsd_jail_host:
+.. _jail_host:
 
 ==========================
-FreeBSD Jail Host主机配置
+Jail Host主机配置
 ==========================
 
 .. note::
@@ -13,7 +13,7 @@ FreeBSD Jail Host主机配置
 
 - 执行以下命令配置在系统启动时启动Jails:
 
-.. literalinclude:: freebsd_jail_host/enable_jail
+.. literalinclude:: jail_host/enable_jail
    :caption: 配置在系统启动时启动Jails
 
 Jail网络
@@ -36,12 +36,12 @@ Jail目录树
 
 Jail文件的位置没有规定，可以是 ``/jail`` , ``/usr/jail`` 或 ``/usr/local/jail`` ，在FreeBSD Handbook中采用的是 ``/usr/local/jails`` 目录:
 
-.. literalinclude:: freebsd_jail_host/jails_dir_zfs
+.. literalinclude:: jail_host/jails_dir_zfs
    :caption: 创建jails目录( :ref:`zfs` )
 
 对jail也可以使用传统的UFS:
 
-.. literalinclude:: freebsd_jail_host/jails_dir_ufs
+.. literalinclude:: jail_host/jails_dir_ufs
    :caption: 创建jails目录(传统文件系统 UFS )
 
 上面除了 ``/usr/local/jails`` 目录外，其他目录还有:
@@ -58,23 +58,34 @@ Jail配置文件
 - 方法一: 在 ``/etc/jail.conf`` 中为每个jail添加一个条目
 - 方法二: 在 ``/etc/jail.conf.d/`` 目录中为每个jail创建一个文件 ( :strike:`我采用这个方法` ，适合管理大量的jails)
 
-.. literalinclude:: freebsd_jail_host/jail.conf
+.. literalinclude:: jail_host/jail.conf
    :caption: 在 ``/etc/jail.conf`` 中添加一行配置来包含所有在 ``/etc/jail.conf.d/`` 目录下以 ``.conf`` 结尾的配置
-
-我发现其实结合方法一和方法二可能是更好的方案:
-
-
 
 典型Jail配置
 --------------
 
-.. literalinclude:: freebsd_jail_host/typical_jail.conf
+.. literalinclude:: jail_host/typical_jail.conf
    :caption: 典型的jail配置
+
+公共配置 并使用 ``/etc/jail.conf.d/`` 目录配置差异化
+--------------------------------------------------------
+
+我发现其实结合方法一和方法二可能是更好的方案:
+
+- ``/etc/jail.conf`` 为所有jail配置的共同通用部分，并 ``include`` ``/etc/jail.conf.d/`` 目录中差异化部分:
+
+.. literalinclude:: jail_host/jail_common.conf
+   :caption: ``/etc/jail.conf`` 为所有jail配置的共同通用部分
+
+- 然后在 ``/etc/jail.conf.d/`` 目录下的配置只需要设置主机名和IP地址，类似
+
+.. literalinclude:: jail_host/jail_d2l.conf
+   :caption: ``/etc/jail.conf.d`` 目录下配置只需要配置差异部分
 
 开始创建
 ===========
 
 Host 准备工作已经完成，现在开始创建:
 
-- :ref:`freebsd_thick_jail`
-- :ref:`freebsd_thin_jail`
+- :ref:`thick_jail`
+- :ref:`thin_jail`
