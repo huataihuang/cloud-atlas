@@ -1,4 +1,4 @@
-.. _freebsd_service_jail:
+.. _service_jail:
 
 =======================
 FreeBSD Service Jail

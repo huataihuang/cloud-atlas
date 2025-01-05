@@ -1,7 +1,7 @@
-.. _intro_freebsd_jail:
+.. _intro_jail:
 
 ===========================
-FreeBSD Jail概要
+Jail概要
 ===========================
 
 FreeBSD Jail是一个增强FreeBSD系统安全性的工具，自FreeBSD 4.x开始，Jail在可用性、性能、可靠性和安全性方面不断改进。
@@ -16,7 +16,7 @@ Jail改进了 ``chroot`` 的安全性:
 Jail类型
 ==========
 
-:ref:`freebsd_thick_jail`
+:ref:`thick_jail`
 ------------------------------
 
 Thick Jail(厚Jail)是传统形式的Jail: 在Thick Jail中，基本系统被完整复制到Jail环境中:
@@ -32,7 +32,7 @@ Thick Jail的缺点也和其完整基本系统有关:
 - 资源开销大: 由于每个Jail都维护自己独立的基础系统，所以比Thin Jail占用更多资源
 - 维护成本高: 每个Thick Jail都要单独维护和更新
 
-:ref:`freebsd_thin_jail`
+:ref:`thin_jail`
 -----------------------------
 
 Thin Jail(薄Jail)使用OpenZFS快照或者NullFS挂载从模板共享基础系统，这样每个Thin Jail仅复制基础系统的最小子集:
@@ -50,7 +50,7 @@ Thin Jail的缺点:
 - 安全问题: 一个Thin Jail出现安全异常会影响其他Jail或主机系统
 - 依赖冲突: 如果多个容器需要不同的本本的相同库或软件，则管理依赖关系会很复杂，例如确保兼容就很困难
 
-:ref:`freebsd_service_jail`
+:ref:`service_jail`
 ------------------------------
 
 Service Jail是FreeBSD 15开始引入的新型Jail，这种Service Jail和主机系统共享完整的文件系统树(也就是Service Jail的root路径就是主机的 ``/`` )，因此Service Jail可以访问和修改主机上的任何文件，并与主机共享相同的用户帐号。
@@ -63,18 +63,18 @@ Service Jail是FreeBSD 15开始引入的新型Jail，这种Service Jail和主机
 
    目前我使用的FreeBSD 14.x 还不具备Service Jail，所以等以后再实践
 
-:ref:`freebsd_vnet_jail`
+:ref:`vnet_jail`
 ----------------------------
 
 FreeBSD VNET Jail是一种 **虚拟化** 环境，对其中运行的进程的网络资源进行隔离和控制:
 
 - 通过对VNET Jail创建单独的网络堆栈，确保Jail内网络流量与主机系统和其他Jail隔离
 - 确保高级别网络隔离和安全性
-- 可以为VNET Jail创建成 :ref:`freebsd_thick_jail` 或 :ref:`freebsd_thin_jail` 
+- 可以为VNET Jail创建成 :ref:`thick_jail` 或 :ref:`thin_jail` 
 
 VNET Jail是一种专门针对网络的Jail，可以补充 ``thick jail`` 和 ``thin jail`` 的不足
 
-:ref:`freebsd_linux_jail`
+:ref:`linux_jail`
 ------------------------------
 
 Linux Jail允许在Jail中运行Linux二进制程序，通过引入 :ref:`linuxulator` 兼容层，可以让某些Linux系统调用和库转换在FreeBSD内核上执行。Linux Jail的目的是不需要单独的Linux虚拟机或者环境情况下，在FreeBSD上执行Linux软件。

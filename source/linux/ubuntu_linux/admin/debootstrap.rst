@@ -20,6 +20,10 @@ debootstrap
    :language: bash
    :caption: 使用 ``debootstrap`` 构建 Ubuntu 22.04 (代码名 ``jammy`` )
 
+.. note::
+
+   ``debootstrap`` 可以用来构建 ``debian`` 系的子系统，既包括 ``debian`` 也包括 ``ubuntu`` 
+
 参考
 =====
 
