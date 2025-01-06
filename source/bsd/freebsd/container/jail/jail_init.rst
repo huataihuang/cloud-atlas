@@ -17,6 +17,11 @@ ssh初始化
 
 为方便进入容器，并且以 ``admin`` 普通用户进入，为后续开发环境构建提供通用平台
 
+- jail中需要安装 ``sudo``
+
+.. literalinclude:: jail_init/sudo
+   :caption: 为 ``d2l`` jail 安装sudo
+
 - 在 ``dev`` jail中创建用户组和用户 admin:
 
 .. literalinclude:: jail_init/user

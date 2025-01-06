@@ -161,3 +161,4 @@ Python 3 venv
 
 - `How to Install Pip on CentOS 7 <https://www.liquidweb.com/kb/how-to-install-pip-on-centos-7/>`_
 - `Installing packages using pip and virtual environments <https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/>`_
+- `How To Install Python 3 and Set Up a Programming Environment on Debian 11 <https://www.digitalocean.com/community/tutorials/how-to-install-python-3-and-set-up-a-programming-environment-on-debian-11>`_
