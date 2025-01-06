@@ -130,11 +130,20 @@ FreeBSD 可以使用 :ref:`linuxulator` 和 ``debootstrap`` 在jail中运行Linu
 .. literalinclude:: linux_jail/d2l.conf
    :caption: Linux Jail差异部分配置在 ``/etc/jail.conf.d/d2l.conf``
 
+.. note::
+
+   在 ``d2l.conf`` 配置中，最后两行挂载文件系统采用了 ``nullfs`` ，这是一种回环文件系统，用于在host主机和jail之间共享文件: 多个jail可以挂载相同的host主机目录
+
 启动Linux Jail
 ================
 
 .. literalinclude:: linux_jail/start_d2l
    :caption: 启动 ``d2l`` Linux Jail
+
+完成启动 ``d2l`` Linux Jail之后，在Host物理主机上可以看到容器挂载了Linux对应的设备文件系统以及procfs系统，所以此时在Host物理主机上执行 ``df -h`` 会看到:
+
+.. literalinclude:: linux_jail/host_df
+   :caption: 在Host主机上 ``df -h`` 可以看到Linux的设备兼容层已经挂载
 
 注意，对于Linux Jail的使用其实分两部分:
 
@@ -152,3 +161,82 @@ FreeBSD 可以使用 :ref:`linuxulator` 和 ``debootstrap`` 在jail中运行Linu
 
 但是执行 ``ls /etc/`` 就可以看到该目录下都是 ``debian`` 相关配置文件，例如 ``cat /etc/debian_version`` 可以看到版本是 ``12.8`` 。接下来的操作就好像是在 :ref:`debian` 中进行，例如可以执行 ``apt update`` 更新debian系统
 
+此时检查Linux环境:
+
+.. literalinclude:: linux_jail/uname
+   :caption: 使用 ``uname`` 检查Linux环境
+
+输出类似:
+
+.. literalinclude:: linux_jail/uname_output
+   :caption: 使用 ``uname`` 检查Linux环境输出案例
+
+異常排查
+=============
+
+普通用户身份无法使用网络
+--------------------------
+
+我发现一个问题，我在 :ref:`linux_jail_init` 中为jail中创建了一个 ``admin`` 帐号(并设置了 ``sudo`` ):
+
+.. literalinclude:: linux_jail_init/admin
+   :caption: Linux jail中创建用户组和用户admin
+
+但是这个 ``admin`` 用户默认无法使用网络，例如 ``ping www.baidu.com`` 提示错误:
+
+.. literalinclude:: linux_jail_init/admin_sock_error
+   :caption: Linux jail中普通用户无法使用网络错误
+
+只有通过 ``sudo ping www.baidu.com`` 才行。
+
+这个问题仅在 ``chroot /compat/debian /bin/bash`` 之后才存在，如果没有进入Linux环境，仅仅是FreeBSD :ref:`thin_jail` 环境普通用户是完全正常使用网络的。
+
+也就是说Linux Jail中普通用户无法使用网络?
+
+通过 ``getcap`` 命令可以获得程序能力设置属性( `getcap: command not found <https://www.thegeekdiary.com/getcap-command-not-found/>`_ )，不过，在linux jail环境中， ``getcap`` 执行没有效果(无返回内容)
+
+`Pinging from a base user wsl tumbleweed 5.15.90.1-microsoft-standard-WSL2 <https://www.reddit.com/r/openSUSE/comments/14neo41/pinging_from_a_base_user_wsl_tumbleweed/>`_ 看起来Windows的WSL环境中普通用户也不能执行 ``ping`` 。
+
+参考 `ping as non-root fails due to missing capabilities #143 <https://github.com/grml/grml-live/issues/143>`_ 我尝试:
+
+.. literalinclude:: linux_jail_init/setcap
+   :caption: 通过 ``setcap`` 为ping程序手工设置能力
+
+但是设置失败:
+
+.. literalinclude:: linux_jail_init/setcap_error
+   :caption: 通过 ``setcap`` 为ping程序手工设置能力，但是失败
+
+- ``admin`` 用户使用 ``ssh`` 程序正常，可以远程访问其他系统
+
+- 似乎和UDP协议相关会失败，而TCP协议似乎正常:
+
+  - 尝试 ``dig www.baidu.com`` 提示 ``communications error to 192.168.0.1#53: connection refused`` ，但是 ``nslookup www.baidu.com`` 能常常解析
+  - 尝试 ``nc -v 192.168.0.1 53`` 显示TCP的53端口正常打开 ``Connection to 192.168.0.1 53 port [tcp/domain] succeeded!`` ，但是指定UDP协议 ``nc -uv 192.168.0.1 53`` 则直接返回无输出
+
+.. note::
+
+   这个问题还在排查，目前仅发现是普通用户 ``admin`` 身份使用网络异常，其他执行脚本则正常(例如 :ref:`install_conda` 运行下载后的脚本安装正常)
+
+``/home/admin`` 属主是root(错误)
+------------------------------------
+
+当 ``admin`` 用户通过ssh登录到Jail中(尚未 ``chroot`` 进入debian linux)，在尝试向 ``/compat/debian/home/admin`` 目录内复制文件，发现没有权限。检查发现 ``/compat/debian/home/admin`` 目录的属主是 ``root`` ，所以手工修订:
+
+.. literalinclude:: linux_jail/fix_home
+   :caption: 修订 ``/compat/debian/home/admin`` 目录属主
+
+这里可能有一个问题，Linux系统 :ref:`debootstrap` 没有设置 ``/compat/debian/home/admin`` 内任何内容，这是因为当时目录存在，所以 ``useradd`` 命令没有使用 ``-m`` 参数，也就没有复制任何初始profile相关文件。这在后续 :ref:`install_conda` 时就没有为用户设置好环境。
+
+所以可能需要在一开始就修复好目录，或者直接删除掉目录，创建 ``admin`` 帐号时通过 ``useradd`` 构建
+
+改进的思路
+=============
+
+我期望在多个 Linux Jail 之间使用共享的 :ref:`debootstrap` 数据，思路是使用 :ref:`share_folder_between_jails`
+
+参考
+======
+
+- `ping as non-root fails due to missing capabilities #143 <https://github.com/grml/grml-live/issues/143>`_ 
+- `Setting up a (Debian) Linux jail on FreeBSD <https://forums.freebsd.org/threads/setting-up-a-debian-linux-jail-on-freebsd.68434/>`_ 一篇非常详细的Linux Jail实践

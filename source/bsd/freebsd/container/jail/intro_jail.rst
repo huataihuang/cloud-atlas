@@ -83,4 +83,4 @@ Linux Jail允许在Jail中运行Linux二进制程序，通过引入 :ref:`linuxu
 =======
 
 - `FreeBSD Handbook: Chapter 17. Jails and Containers <https://docs.freebsd.org/en/books/handbook/jails/>`_
-- `FreeBSD Handbook中文版: 第 17 章 Jails 和容器 <https://free.bsd-doc.org/zh-cn/books/handbook/jails/#thick-jails>`_
+- `FreeBSD Handbook中文版: 第 17 章 Jails 和容器 <https://free.bsd-doc.org/zh-cn/books/handbook/jails/>`_

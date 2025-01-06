@@ -17,6 +17,10 @@ FreeBSD Jail
    jail_admin.rst
    jail_destroy.rst
    jail_init.rst
+   linux_jail_init.rst
+   share_folder_between_jails.rst
+   share_zfs_dataset_between_jails.rst
+   freebsd_chroot.rst
 
 .. only::  subproject and html
 

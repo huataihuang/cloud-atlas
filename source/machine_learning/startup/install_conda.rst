@@ -51,6 +51,53 @@ Anaconda vs. Miniconda vs. Miniforge vs. Conda vs. pip
 
    Conda只提供Linux/Windows/macOS的安装，所以 :ref:`install_conda_freebsd` 需要通过Linux兼容系统来运行
 
+我在 :ref:`dl_env` 使用了 :ref:`freebsd` :ref:`linux_jail` 运行环境来安装Coda，也就是容器環境的 :ref:`debian` ，選擇 ``Miniconda``
+
+系統要求
+-----------
+
+- Conda支持操作系統:
+
+  - :ref:`windows`
+  - :ref:`macos`
+  - :ref:`linux`
+
+- 磁盤空間需求:
+
+  - Miniconda 或 Miniforge: 400MB
+  - Anaconda: 3GB
+
+- Python版本要求: Python 3.9或以上
+
+.. note::
+
+   实际上 Conda 是一个完整的运行环境，自己带了Python。从 `Anaconda Download <https://www.anaconda.com/download/success>`_ 官方下载的安装包解压缩以后在用户目录下形成了一个 ``~/conda`` (我指定该安装目录)，其中就包含了自带的 ``Python 3.12.8`` 。也就是官方下载安装上注明的Python版本。
+
+   也就是说，实际上运行主机不需要安装Python， ``Conda`` 环境完整提供了运行所需的一切，只不过 ``Conda`` 是编译好的二进制执行环境，就类似于 :ref:`docker` 这样的自包含All的运行环境。
+
+安裝
+-------
+
+`Anaconda Download <https://www.anaconda.com/download/success>`_ 提供了Anaconda和Miniconda安裝下載(腳本)
+
+.. literalinclude:: install_conda/install_miniconda
+   :caption: 安裝miniconda
+
+在同意了license之后，按照提示进行安装
+
+.. literalinclude:: install_conda/install_miniconda_interact
+   :caption: 交互方式安装
+   :emphasize-lines: 11,26
+
+注意，我这里最后让conda安装程序自动修改用户shell profile，这样 ``/home/admin/.bashrc`` 会自动加入以下内容:
+
+.. literalinclude:: install_conda/bashrc_conda
+   :language: bash
+   :caption: Miniconda自动修改 ``~/.bashrc``
+
+.. note::
+
+   如果安装最后步骤让conda安装程序自动修订 ``~/.bashrc`` ，那么下次登录系统是会自动进入 :ref:`virtualenv` 环境，此时就可以直接执行 ``conda`` 命令，例如 ``conda list`` 检查已经安装的conda组件。
 
 参考
 =======

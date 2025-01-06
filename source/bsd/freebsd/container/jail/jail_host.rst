@@ -82,6 +82,14 @@ Jail配置文件
 .. literalinclude:: jail_host/jail_d2l.conf
    :caption: ``/etc/jail.conf.d`` 目录下配置只需要配置差异部分
 
+如何处理jail启动顺序
+---------------------
+
+我在 `No internet access from inside jail! <https://forums.freebsd.org/threads/no-internet-access-from-inside-jail.78576/>`_ 看到配置jail启动顺序的方法，值得借鉴:
+
+.. literalinclude:: jail_host/jail_start_stop_order
+   :caption: ``/etc/rc.conf`` 可以控制jail启停顺序
+
 开始创建
 ===========
 
@@ -89,3 +97,9 @@ Host 准备工作已经完成，现在开始创建:
 
 - :ref:`thick_jail`
 - :ref:`thin_jail`
+
+参考
+======
+
+- `FreeBSD Handbook: Chapter 17. Jails and Containers <https://docs.freebsd.org/en/books/handbook/jails/>`_
+- `FreeBSD Handbook中文版: 第 17 章 Jails 和容器 <https://free.bsd-doc.org/zh-cn/books/handbook/jails/>`_
