@@ -11,7 +11,7 @@
 我的运行环境
 ===============
 
-- 部署 :ref:`linux_jail` ，启动名为 ``d2l`` 的Jail容器
+- 部署 :ref:`linux_jail` (必须同时配置 :ref:`vnet_jail` VNET网络堆栈，否则 :ref:`jupyter` 运行会因为Linux兼容层缺乏 socket 支持而失败) ，启动名为 ``d2l`` 的Jail容器
 - 为方便工作，完成 :ref:`linux_jail_init` ，通过ssh登录容器以后 ``chroot`` 进入 :ref:`debian` 运行环境
 
 安装Coda
@@ -78,6 +78,11 @@
 .. literalinclude:: dl_env/d2l-zh_run
    :caption: 在 ``d2l-zh`` 下载代码和执行
 
+如果一切正常(我在 :ref:`freebsd_jail` 环境中折腾了很久，终于通过 :ref:`linux_jail` + :ref:`vnet_jail` 运行成功)，就可以看到 ``jupyter`` 启动后监听在 ``8888`` 端口，就可以通过浏览器访问 http://127.0.0.1:8888
+
+.. note::
+
+   由于我是在 Jail 环境中运行 Jupyter Notebook，所以需要设置 :ref:`jupyter_remote`
 
 参考
 ======

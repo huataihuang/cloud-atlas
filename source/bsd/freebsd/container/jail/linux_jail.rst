@@ -191,7 +191,7 @@ FreeBSD 可以使用 :ref:`linuxulator` 和 ``debootstrap`` 在jail中运行Linu
 
 这个问题仅在 ``chroot /compat/debian /bin/bash`` 之后才存在，如果没有进入Linux环境，仅仅是FreeBSD :ref:`thin_jail` 环境普通用户是完全正常使用网络的。
 
-也就是说Linux Jail中普通用户无法使用网络?
+:strike:`也就是说Linux Jail中普通用户无法使用网络?`
 
 通过 ``getcap`` 命令可以获得程序能力设置属性( `getcap: command not found <https://www.thegeekdiary.com/getcap-command-not-found/>`_ )，不过，在linux jail环境中， ``getcap`` 执行没有效果(无返回内容)
 
@@ -218,6 +218,48 @@ FreeBSD 可以使用 :ref:`linuxulator` 和 ``debootstrap`` 在jail中运行Linu
 
    这个问题还在排查，目前仅发现是普通用户 ``admin`` 身份使用网络异常，其他执行脚本则正常(例如 :ref:`install_conda` 运行下载后的脚本安装正常)
 
+`No internet access from inside jail! <https://forums.freebsd.org/threads/no-internet-access-from-inside-jail.78576/>`_ 提到设置 ``allow.raw_sockets;`` :
+
+.. literalinclude:: linux_jail/d2l_raw_sockets.conf
+   :caption: 在Linux Jail ``/etc/jail.conf.d/d2l.conf`` 中添加允许 ``raw_sockets``
+   :emphasize-lines: 2
+
+但是启动 ``d2l`` 容器之后，Linux的普通用户依然无法使用 ``ping`` 和 ``dig`` 这样的UDP程序。
+
+在没有 ``chroot /compat/debian /bin/bash`` 之前的FreeBSD Jail中可以检查Jail是否允许 ``raw_sockets``
+
+.. literalinclude:: linux_jail/sysctl
+   :caption: 在FreeBSD Jail中(还没有chroot) ``sysctl`` 检查 ``allow_raw_sockets``
+
+输出显示:
+
+.. literalinclude:: linux_jail/sysctl_output
+   :caption: 在FreeBSD Jail中(还没有chroot) ``sysctl`` 检查 ``allow_raw_sockets`` ，输出显示1表示允许
+
+注意，默认情况下，在Host主机执行 ``sysctl security.jail.allow_raw_sockets`` 可以看到 ``security.jail.allow_raw_sockets: 0`` ，也就是默认不允许 ``raw_sockets`` 。以上在FreeBS Jail中输出显示 ``1`` 是因为我在 ``d2l.conf`` 配置中添加了 ``allow_raw_sockets;``
+
+确实发现，在Linux Jail中，无法正常使用 ``ifconfig`` 和 ``ip`` 命令(在 `How to have network access inside a Linux jail? <https://forums.freebsd.org/threads/how-to-have-network-access-inside-a-linux-jail.76460/>`_ 讨论中提到了在Linux Jail中使用 ``ip`` 命令总是错误 ``Cannot open netlink socket: Address family not supported by protocol`` )
+
+.. literalinclude:: linux_jail/ifconfig
+   :caption: Linux Jail无法使用 ``ifconfig``
+   :emphasize-lines: 16,19-21,33
+
+同样，由于没有socks支持，运行 :ref:`jupyter` :
+
+.. literalinclude:: linux_jail/juypter_socket_error
+   :caption: 在Linux Jail中运行 :ref:`jupyter` 出现socket报错
+
+简单小结
+~~~~~~~~~~
+
+**简单规律就是在Linux Jail中** :
+
+- TCP协议栈是较为完整的
+- 不支持UDP协议栈: DNS查询需要DNS服务器支持TCP查询协议(UDP查询会失败 ``connection refused`` )
+- ``root`` 用户可以使用ICMP(ping)，但是普通用户不能
+- Linux Jail没有socket支持，所以部分需要绑定sockets的服务，如 ``juypter`` 无法启动
+- 可能的解决方案: 采用 :ref:`vnet_jail` 来实现独立完整的网络堆栈
+
 ``/home/admin`` 属主是root(错误)
 ------------------------------------
 
@@ -238,5 +280,8 @@ FreeBSD 可以使用 :ref:`linuxulator` 和 ``debootstrap`` 在jail中运行Linu
 参考
 ======
 
+- `(Solved)How to have network access inside a Linux jail? <https://forums.freebsd.org/threads/how-to-have-network-access-inside-a-linux-jail.76460/>`_ 这个讨论非常详细，是解决Linux Jail普通用户网络问题的线索
+- `(Solved)No internet access from inside jail! <https://forums.freebsd.org/threads/no-internet-access-from-inside-jail.78576/>`_
 - `ping as non-root fails due to missing capabilities #143 <https://github.com/grml/grml-live/issues/143>`_ 
 - `Setting up a (Debian) Linux jail on FreeBSD <https://forums.freebsd.org/threads/setting-up-a-debian-linux-jail-on-freebsd.68434/>`_ 一篇非常详细的Linux Jail实践
+

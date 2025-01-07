@@ -1,0 +1,1 @@
+jupyter notebook --generate-config
