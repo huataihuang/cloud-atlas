@@ -9,6 +9,7 @@ FreeBSD容器
 
    jail/index
    run_linux_containers_on_freebsd.rst
+   bastille/index
 
 .. only::  subproject and html
 

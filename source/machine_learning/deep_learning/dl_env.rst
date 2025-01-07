@@ -14,6 +14,13 @@
 - 部署 :ref:`linux_jail` (必须同时配置 :ref:`vnet_jail` VNET网络堆栈，否则 :ref:`jupyter` 运行会因为Linux兼容层缺乏 socket 支持而失败) ，启动名为 ``d2l`` 的Jail容器
 - 为方便工作，完成 :ref:`linux_jail_init` ，通过ssh登录容器以后 ``chroot`` 进入 :ref:`debian` 运行环境
 
+可能需要的依赖编译环境，可以安装 ``build-essential`` 软件包精简安装( :ref:`debian_init` ):
+
+.. literalinclude:: ../../linux/debian/debian_init/debian_init_vimrc_dev
+   :caption: 安装vim以及服务器开发所需软件集
+
+`动手学深度学习 v2 - 从零开始介绍深度学习算法和代码实现 <https://space.bilibili.com/1567748478/channel/seriesdetail?sid=358497>`_ 教程中李沐安装的是python 3.8，我这里替换为 python-dev (包含了 python) 
+
 安装Coda
 ==============
 
@@ -83,6 +90,31 @@
 .. note::
 
    由于我是在 Jail 环境中运行 Jupyter Notebook，所以需要设置 :ref:`jupyter_remote`
+
+异常排查
+===========
+
+我在学习 `B站: 动手学深度学习 v2 > 03 安装 <https://www.bilibili.com/video/BV18p4y1h7Dr?spm_id_from=333.788.player.player_end_recommend_autoplay&vd_source=9e81a12fc8eb4223ba7650a40a5ce9a7>`_ ，参考李沐课程，加载某个 ``.ipynb`` 文件时页面会提示错误: ``Error Starting Kernel! NetworkError when attempting to fetch resource.``
+
+检查后端 ``jupyter`` 终端输出信息可以看到出现异常时:
+
+.. literalinclude:: dl_env/thread
+   :caption: 加载 ``.jpynb`` 后台异常
+
+此时在系统dmesg日志中会添加一条:
+
+.. literalinclude:: dl_env/dmesg
+   :caption: ``jupyter`` 进程被杀死的系统日志
+
+在google的AI提示: 如果在jail内部创建一个线程遇到这个错误，可能需要调整jail配置允许必要的系统调用。不过，AI的建议是很泛泛的，只是针对这个现象而不是具体的报错。
+
+AI举了一个例子，例如允许 clone() 系统调用，则配置 ``allow.sysvipc = 1;`` (这个配置在Jail中运行 :ref:`pgsql` 需要，不过现在应该使用分离的3个配置(我这里记录备用):
+
+ .. literalinclude:: dl_env/pgsql_jail.conf
+    :caption: 在Jail中运行 :ref:`pgsql` 需要配置
+
+
+
 
 参考
 ======

@@ -37,7 +37,16 @@ Systemd引入了 ``systemd units`` 概念，这些通过位于目录中的单元
 ``/etc/systemd/system/``      由系统管理员创建和管理的Systemd单元。这个目录比运行时创建的systemd单元优先级高
 ============================= ==============================================================================
 
+不使用 ``systemd`` ?
+======================
 
+目前主流的Linux发行版都已经转向使用 ``systemd`` ，特别是有些桌面(GNOME)和 ``systemd`` 强绑定导致发行版不得不支持。不过，依然有一些 "小众" 发行版给予用户选择的权利:
+
+- :ref:`gentoo_linux` 可以在安装时选择 ``OpenRC`` 作为init
+- :ref:`lfs` 可以部署 ``sysv`` 版本
+- `antiX Linux <https://antixlinux.com/>`_ 基于 :ref:`debian` 的轻量级发行版提供了 **systemd-free** 部署(我还没有使用过这个发行版)
+
+当然，还有著名的 :ref:`freebsd` 完全不使用 ``systemd``
 
 参考
 ======

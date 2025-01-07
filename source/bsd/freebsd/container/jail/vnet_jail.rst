@@ -103,7 +103,13 @@ VNET Jail 只是在网络堆栈有特殊配置，其他部分和 :ref:`thick_jai
 
 .. note::
 
-   **不过 VNET Linux 的网络依然不支持 UDP 协议，也不支持普通用户的ICMP**
+   :trick:`不过 VNET Linux 的网络依然不支持 UDP 协议，也不支持普通用户的ICMP`
+
+.. warning::
+
+   我突然发现我可能搞错了，并不是Jail网络不支持UDP协议或者ICMP，有可能是Jail默认的安全限制。
+
+   在 ``man jail 8`` 中有众多的 ``allow.*`` 配置，其中就有限制 ``allow.raw_sockets`` raw sockets 用于很多网络子系统配置和交互，会导致一些特殊问题。总之，太多配置选项需要挖掘。
 
 参考
 ======
