@@ -21,6 +21,7 @@ FreeBSD Jail
    share_folder_between_jails.rst
    share_zfs_dataset_between_jails.rst
    freebsd_chroot.rst
+   pgsql_in_jail.rst
 
 .. only::  subproject and html
 
