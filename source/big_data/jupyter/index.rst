@@ -11,6 +11,7 @@ Jupyter - 数据科学开发平台
    install_jupyter.rst
    jupyter_slideshow.rst
    jupyter_startup.rst
+   jupyter_remote.rst
 
 .. only::  subproject and html
 

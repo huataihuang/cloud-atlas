@@ -90,6 +90,8 @@ Jail配置文件
 .. literalinclude:: jail_host/jail_start_stop_order
    :caption: ``/etc/rc.conf`` 可以控制jail启停顺序
 
+另一种方式参考 `(Solved)No internet access from inside jail! <https://forums.freebsd.org/threads/no-internet-access-from-inside-jail.78576/>`_ 在配置 ``httpd`` Jail时添加 ``depend=mariadb`` 同时移除 ``jail_reverse_stop="YES"`` ，也有同样效果。
+
 开始创建
 ===========
 
