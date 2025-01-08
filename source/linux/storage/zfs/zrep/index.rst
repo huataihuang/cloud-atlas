@@ -1,18 +1,13 @@
-.. _zfs:
+.. _zrep:
 
 =================================
-ZFS
+ZREP
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_zfs.rst
-   install/index
-   infra/index
-   admin/index
-   tunning/index
-   zrep/index
+   zrep_arch.rst
 
 .. only::  subproject and html
 

@@ -33,6 +33,11 @@ Jail思考
 - ZFS是大杀器:
 
   - 通过ZFS的快照copy和clone来构建Jail存储
+
+    - ``RELEASE`` => ``RELEASE@base`` 快照
+    - ``RELEASE@base`` 快照 => Clone出 ``base-ssh`` (这里只是一个案例，实际上可以按照生产应用来命名，例如数据库 ``pgsql-17.2`` 表示后续发布 :ref:`pgsql` 17.2版本 ) 并构建用户环境，所有修订完成后进行发布(也就是快照)
+    - ``base-ssh@20250108-01`` 快照 => Clone出 **发布的Jails** ``dev-1``
+
   - **需要有一个工具进行大规模部署和运维** :ref:`openstack` / :ref:`openshift` ?
   - 大规模的数据备份和恢复，需要有演练方案
 
