@@ -4,6 +4,8 @@
 在FreeBSD Jail中运行PostgreSQL
 ==================================
 
+此外通过 :ref:`bastille` 可以快速 :ref:`pgsql_jail_with_bastille` 
+
 参考
 =======
 

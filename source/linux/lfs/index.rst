@@ -25,6 +25,7 @@ LFS(Linux from scratch)
    lfs_cross_toolchain/index
    lfs_cross_build_tools.rst
    lfs_chroot_build_tools.rst
+   lfs_plan.rst
 
 .. only::  subproject and html
 

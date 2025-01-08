@@ -8,6 +8,7 @@ FreeBSD Jail
    :maxdepth: 1
 
    intro_jail.rst
+   jail_think.rst
    jail_host.rst
    thick_jail.rst
    thin_jail.rst
