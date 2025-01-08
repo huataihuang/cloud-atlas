@@ -53,3 +53,21 @@ OpenZFS快照Thin Jail
 
 .. literalinclude:: thin_jail/start
    :caption: 启动2个Thin Jail
+
+.. warning::
+
+   OpenZFS快照Thin Jail实际上有一个 **致命限制** : ``ZFS snapshot是不可更改的``
+
+   虽然 ``snapshot => clone`` 极大地节约了磁盘空间，但是如果需要更新OpenZFS snapshot Thin Jails，需要:
+
+   - destroy 所有的 clone，也就是销毁Thin Jails
+   - 更新ZFS卷，也就是上文案例中的 ``zroot/jails/templates/14.2-RELEASE`` ，当然可以是再建立一个卷，例如 ``zroot/jails/templates/14.3-RELEASE``
+   - 重新走一遍 ZFS snapshot => ZFS clone ，来构建Thin Jails
+
+   也就是说，这是一个重建的过程，和 :ref:`docker` 的镜像发布非常相似: 不存在更新snapshot从而达到所有clone自动更新的效果
+
+   好处是和 :ref:`docker` 容器镜像发布是一个原理，如果你熟悉容器管理，其实就是一样的技术。在大规模部署时，假设类似 :ref:`kubernetes` ，可以采用滚动销毁旧Jail，然后从新的snapshot上clone出新的Jail来实现升级。
+
+   相关讨论可以参考 `Upgrade thin jail with ZFS snapshot <https://forums.freebsd.org/threads/upgrade-thin-jail-with-zfs-snapshot.95508/>`_
+
+
