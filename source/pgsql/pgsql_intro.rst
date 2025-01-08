@@ -61,6 +61,11 @@ PostgreSQL有非常丰富的在线文档:
 - `Planet PostgreSQL <https://planet.postgresql.org>`_ 
 - `PostgreSQL Wiki <https://wiki.postgresql.org/wiki/Main_Page>`_
 
+学习资料:
+
+- `《PostgreSQL 内参：深入解析运行原理》 <https://postgres-internals.cn/>`_ `xiongcccc <https://github.com/xiongcccc>`_ 翻译自 Egor Rogov 所著的 `《PostgreSQL 14 Internals》 <https://postgrespro.com/community/books/internals>`_  ，是深入学习PostgreSQL原理(也是数据库原理)的电子书。不过，这本书不是入门书，需要有基本的PostgreSQL使用和管理基础，但非常推荐。
+- `PostgreSQL官方网站电子书(索引) <https://www.postgresql.org/docs/books/>`_ 提供了PostgreSQL相关电子书列表，可以选择学习
+
 参考
 =======
 

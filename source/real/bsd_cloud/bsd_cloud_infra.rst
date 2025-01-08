@@ -12,6 +12,6 @@ FreeBSD云计算架构
 
 .. csv-table:: FreeBSD云计算主机分配
    :file: bsd_cloud_infra/hosts.csv
-   :widths: 20, 10, 10, 10, 20, 30
+   :widths: 20, 20, 60
    :header-rows: 1
 

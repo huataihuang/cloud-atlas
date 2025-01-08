@@ -11,7 +11,7 @@ Plantronics BackBeat FIT 3100蓝牙运动耳机
 
 - 音质尚可，感觉比我的 :ref:`jabra_sport_pulse` 要好不少(没有那么沉闷的音染)
 - "真无线": 所以没有 :ref:`jabra_sport_pulse` 那种有绳摩擦的听筒效应，而且半开放耳塞，适合运动时佩戴
-- 如`如何评价缤特力发布的Plantronics BackBeat FIT 3100无线耳塞? <https://www.zhihu.com/question/294375004>`_ ，在歌曲播放停止时有短暂电流声（底噪），不过可能只会在非常安静环境下才会感觉到，运动佩戴时无感。
+- `如何评价缤特力发布的Plantronics BackBeat FIT 3100无线耳塞? <https://www.zhihu.com/question/294375004>`_ ，在歌曲播放停止时有短暂电流声（底噪），不过可能只会在非常安静环境下才会感觉到，运动佩戴时无感。
 - 确实存在蓝牙干扰问题，副耳机容易受到周围蓝牙干扰比较头疼
 
 由于长期使用，到2023年电池已经耗竭，已经支撑不到半小时了，考虑参考 `拆解报告：plantronics缤特力 BackBeat FIT 3100 运动真无线耳机 <https://baijiahao.baidu.com/s?id=1654579813134691866>`_ 更换电池: 这套设备的电池是标准的第三方锂电池，或许万能淘宝能够提供。
