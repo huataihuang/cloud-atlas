@@ -1,0 +1,2 @@
+kldload vmm
+kldload nmdm

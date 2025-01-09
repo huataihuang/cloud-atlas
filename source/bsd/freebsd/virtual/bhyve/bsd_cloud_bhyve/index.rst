@@ -1,15 +1,14 @@
-.. _bhyve:
+.. _bsd_cloud_bhyve:
 
 =================================
-bhyve(BSD hypervisor)
+FreeBSD云计算虚拟化bhyve
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   bhyve_startup.rst
-   k8s_on_freebsd_bhyve.rst
-   bsd_cloud_bhyve/index
+   bsd_cloud_bhyve_infra.rst
+
 
 .. only::  subproject and html
 

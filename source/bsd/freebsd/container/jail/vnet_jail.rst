@@ -103,7 +103,7 @@ VNET Jail 只是在网络堆栈有特殊配置，其他部分和 :ref:`thick_jai
 
 .. note::
 
-   :trick:`不过 VNET Linux 的网络依然不支持 UDP 协议，也不支持普通用户的ICMP`
+   :strike:`不过 VNET Linux 的网络依然不支持 UDP 协议，也不支持普通用户的ICMP`
 
 .. warning::
 
@@ -116,3 +116,4 @@ VNET Jail 只是在网络堆栈有特殊配置，其他部分和 :ref:`thick_jai
 
 - `FreeBSD Handbook: 17.2.3. VNET Jails <https://free.bsd-doc.org/zh-cn/books/handbook/jails/#vnet-jails>`_
 - `FreeBSD Manual Pages: IF_BRIDGE(4) <https://man.freebsd.org/cgi/man.cgi?query=bridge&sektion=4&format=html>`_
+- `FreeBSD Jails And Networking <https://etherealwake.com/2021/08/freebsd-jail-networking/>`_ 一篇分析FreeBSD Jail网络的好文，补充了Handbook

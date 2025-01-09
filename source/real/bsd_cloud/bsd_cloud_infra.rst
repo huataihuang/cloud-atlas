@@ -10,7 +10,7 @@ FreeBSD云计算架构
 - 主要通过 :ref:`freebsd_jail` 来模拟集群
 - 部分涉及Linux核心内核无法使用Jail则采用 :ref:`bhyve` 虚拟化集群
 
-.. csv-table:: FreeBSD云计算主机分配
+.. csv-table:: FreeBSD云计算Jail主机分配
    :file: bsd_cloud_infra/hosts.csv
    :widths: 20, 20, 60
    :header-rows: 1
