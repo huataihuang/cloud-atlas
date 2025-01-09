@@ -128,10 +128,65 @@ NullFS thin Jail
 .. literalinclude:: thin_jail/create_directories_nullfs
    :caption: 创建目录
 
+这里有一个报错，在 ``mv var`` 到 ``skeleton`` ZFS数据集下时会报错，显示其中 ``var/empty`` 目录没有权限删除: ``mv var/empty: Operation not permitted`` ，我后来是通过将上一级目录重命名来解决的 ``mv var var.bak``
+
 - 执行以下命令创建软连接
 
 .. literalinclude:: thin_jail/skeleton_link
    :caption: 创建 ``skeleton`` 软连接     
+
+- 在 ``skeleton`` 就绪之后，需要将数据复制到 jail 目录(如果是UFS文件系统)，对于ZFS则非常方便使用快照:
+
+.. literalinclude:: thin_jail/zfs_snapshot_nullfs
+   :caption: 将刚才建立的 ``skeleton`` 创建快照，也就是用于jail
+
+完成后可以看到相关的ZFS数据集如下:
+
+.. literalinclude:: thin_jail/zfs_nullfs_df
+   :caption: 完成后可以看到ZFS挂载(df)
+
+- 创建一个 base template的目录，这个目录是 ``skeleton`` 挂载所使用的根目录:
+
+.. literalinclude:: thin_jail/nullfs-base_dir
+   :caption: 创建一个jail所使用的模板目录
+
+- 之前构建 ``d2l`` ZFS snapshot Thin Jail时，共用 ``/etc/jail.conf`` :
+
+.. literalinclude:: thin_jail/jail.conf
+   :caption: 共用的 ``/etc/jail.conf``
+
+以及 ``/etc/jail.conf.d/dev.conf`` (其中网络部分是 :ref:`vnet_jail` 配置，可忽略):
+
+.. literalinclude:: thin_jail/dev.conf
+   :caption: ``/etc/jail.conf.d/dev.conf`` 配置
+   :emphasize-lines: 7,30
+
+- 注意，这里配置引用了一个针对nullfs的fstab配置，所以还需要创建一个 ``/usr/local/jails/dev-nullfs-base.fstab``
+
+.. literalinclude:: thin_jail/fstab
+   :caption: ``/usr/local/jails/dev-nullfs-base.fstab`` 配置 ``dev`` Jail的nullfs挂载
+
+- 启动 ``dev`` :
+
+.. literalinclude:: thin_jail/start_dev
+   :caption: 启动 ``dev`` jail
+
+然后通过 ``rexec dev`` 进入jail进行观察，就会明白 ``NullFS`` 构建的 :ref:`thin_jail` 巧妙之处:
+
+.. literalinclude:: thin_jail/exec_dev
+   :caption: 进入 ``dev`` 检查
+   :emphasize-lines: 13,14,22,26,28
+
+NullFS简析
+--------------
+
+在 ``NullFS`` Jail中，只有特定的从数据集 ``14.2-RELEASE-base`` 移出到 ``14.2-RELEASE-skeleton`` 并被快照clone成 ``skeleton`` 的数据才是可读写的。这部分通过软连接和 **只读** 挂载的 ``14.2-RELEASE-base`` 关联。
+
+``通过数据集 14.2-RELEASE-base 只读挂载确保Jail不会修改基础软件，同时由于是数据集，所以可以在Host进行滚动更新``
+
+这里有一个非常巧妙的构思:  ``13.2-RELEASE-skeleton@base`` 将部分需要根据每个jail变化的部分单独摘除出来( ``/etc`` / ``/usr/local`` / ``root`` / ``/tmp`` / ``/var`` )，这样后续clone出来的这部分每个jail都可以各自读写没有障碍。
+
+如果需要为所有Jail部署相同的软件和配置，例如 ``sudo`` 和 ``ssh`` ，则可以在 ``chroot`` ``14.2-RELEASE-base`` 目录下进行安装更新，完成后只要对 ``13.2-RELEASE-skeleton`` 做依次快照 ``@base`` ，那么这部分增加的软件配置会被所有NullFS Jail使用。唯一的缺点是，这部分非 ``base`` 的软件包安装是使用ZFS snapshot，是不能自动为每个Jail更新的，这部分定制需要在每个Jail中对 ``clone`` 内容进行更新( ``snapshot`` 是死的，更新需要重建所有Jail，这也是没有办法的办法，相当于底座替换)
 
 参考
 ======

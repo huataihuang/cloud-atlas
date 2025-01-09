@@ -1,15 +1,15 @@
-.. _bhyve:
+.. _bsd_cloud_jail:
 
 =================================
-bhyve(BSD hypervisor)
+FreeBSD Cloud Jail
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   bhyve_startup.rst
-   k8s_on_freebsd_bhyve.rst
-   bsd_cloud_bhyve/index
+   bsd_cloud_jail_infra.rst
+   cloud_jail_host.rst
+   dev_jail.rst
 
 .. only::  subproject and html
 

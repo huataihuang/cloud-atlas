@@ -21,9 +21,10 @@ FreeBSD Jail
    linux_jail_init.rst
    share_folder_between_jails.rst
    share_zfs_dataset_between_jails.rst
-   dev_jail.rst
+   zfs-jail.rst
    freebsd_chroot.rst
    pgsql_in_jail.rst
+   bsd_cloud_jail/index
 
 .. only::  subproject and html
 
