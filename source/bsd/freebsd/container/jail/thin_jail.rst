@@ -132,3 +132,9 @@ NullFS thin Jail
 
 .. literalinclude:: thin_jail/skeleton_link
    :caption: 创建 ``skeleton`` 软连接     
+
+参考
+======
+
+- `FreeBSD Handbook: Chapter 17. Jails and Containers > 17.5. Thin Jails <https://docs.freebsd.org/en/books/handbook/jails/#thin-jail>`_
+- `Issue while following the handbook to create a Thin Jail using NullFS <https://forums.freebsd.org/threads/issue-while-following-the-handbook-to-create-a-thin-jail-using-nullfs.91015/>`_
