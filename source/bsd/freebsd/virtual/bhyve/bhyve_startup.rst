@@ -125,6 +125,20 @@ VNC客户端连接
 .. literalinclude:: bhyve_startup/stop_vm
    :caption: 停止虚拟机
 
+- 启动虚拟机:
+
+.. literalinclude:: bhyve_startup/start_vm
+   :caption: 启动虚拟机
+
+- 简单的启动脚本:
+
+.. literalinclude:: bhyve_startup/start_vm.sh
+   :caption: 启动虚拟机的简单脚本
+
+可以设置在系统重启后执行的crontab::
+
+   @reboot /path/to/startdebianvm
+
 参考
 ======
 
