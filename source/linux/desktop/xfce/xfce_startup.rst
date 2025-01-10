@@ -342,6 +342,16 @@ flameshot
 
    pacman -S flameshot
 
+ristretto
+----------------
+
+`Ristretto <https://docs.xfce.org/apps/ristretto/getting-started>`_ 是xfce4默认内置图片浏览器，非常轻量级，速度极快。
+
+pinta(取消)
+--------------
+
+`Pinta <https://www.pinta-project.com/>`_ 是开源的画笔软件，跨平台支持。不过，使用 ``mono`` 开发，安装需要274MB( :ref:`freebsd` 平台)，所以没有太大需求我就不安装了。
+
 mupdf
 ----------------
 
