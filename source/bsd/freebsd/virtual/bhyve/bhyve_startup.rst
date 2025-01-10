@@ -108,12 +108,18 @@ VNC客户端连接
 
 安装结束前，最后一步需要返回并选择 ``Execute a shell`` 加载一个终端，然后需要将debian的efi文件复制出来给FreeBSD加载:
 
-.. figure:: ../../../../_static/bsd/freebsd/virtual/bhyve/fix_grub-1.jpg
+.. figure:: ../../../../_static/bsd/freebsd/virtual/bhyve/debian_installation_goback.png
 
-.. figure:: ../../../../_static/bsd/freebsd/virtual/bhyve/fix_grub-2.jpg
+.. figure:: ../../../../_static/bsd/freebsd/virtual/bhyve/debian_installation_shell.png
+
+.. figure:: ../../../../_static/bsd/freebsd/virtual/bhyve/debian_installation_shell_1.png
 
 .. literalinclude:: bhyve_startup/efi
-   :caption: 复制debian的efi
+   :caption: 在shell窗口执行 ``复制debian的efi``
+
+.. note::
+
+   复制后的 efi 文件名是 ``bootx64.efi``
 
 启动
 =======
@@ -134,6 +140,8 @@ VNC客户端连接
 
 .. literalinclude:: bhyve_startup/start_vm.sh
    :caption: 启动虚拟机的简单脚本
+
+注意，在终端执行虚拟机启动脚本，关闭终端会导致虚拟机退出，所以需要使用 :ref:`tmux` 这样的终端管理器执行
 
 可以设置在系统重启后执行的crontab::
 
