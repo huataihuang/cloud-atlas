@@ -32,6 +32,58 @@ CTunnel
 .. literalinclude:: rstunnel/install_netcat
    :caption: 安装 ``netcat`` 来获得 ``nc``
 
+`nc` 返回124状态码
+--------------------
+
+我在主机上配置了每分钟执行一次 ``ctunnel`` ，发现没有正常检测出SSH tunnel的异常: 从外部访问NGINX显示 ``502 Bad Gateway`` ，说明SSH tunnel异常了。
+
+登陆服务器检查，发现ssh进程存在(但应该是不工作了):
+
+.. literalinclude:: rstunnel/ssh_process
+   :caption: 显示ssh进程依然存在
+
+而是，确实是可以正常 ``ssh`` 进入服务器(速度很快)，这说明SSH连接是正常的。
+
+但是，根据我的配置，SSH端口转发却无法工作了:
+
+- 从远端NGINX服务器上反向访问代理端口 ``127.0.0.1:24180`` 端口，这里使用 ``telnet`` 模拟访问，显示立即被断开:
+
+.. literalinclude:: rstunnel/telnet
+   :cpation: telnet测试反向代理端口
+   :emphasize-lines: 3
+
+手工执行了一次 ``timeout 3 nc localhost 3128`` ，然后检查 ``echo $?`` 发现返回码是 ``124``
+
+我搞错了，原来通过 ``timeout 3`` 来执行，按照 ``man timeout`` 解释，如果命令超时，并且 ``--preserve-status`` 没有设置，就会返回退出码 ``124`` 。由于 ``nc localhost 3128`` 实际上成功以后是不结束的，通过 ``timeout 3`` 来结束，那么正常情况下拿到的就是 ``124`` 。
+
+实际上脚本是通过如下检测:
+
+.. literalinclude:: rstunnel/check_cmd
+   :caption: nc检测命令
+
+我检查发现这种只检查正向端口转发并不能反映反向端口转发的状态。例如，这里检查 ssh 登陆服务器是正常的，正向端口转发 3128 也是正常的，但是反向端口转发就是失败的。
+
+所以脚本要修订为先远程登陆到服务器执行反向端口转发检查:
+
+.. literalinclude:: rstunnel/remote_check_cmd
+   :caption: ssh到远程服务器上反向nc检测命令
+
+此时，如果远程服务器反向端口转发异常，会返回:
+
+.. literalinclude:: rstunnel/remote_check_cmd_output
+   :caption: ssh到远程服务器上反向nc检测命令输出
+
+修订了 ``ctunnel`` ，在上述失败情况下杀掉ssh进程重连。
+
+不过，我发现一个问题，ssh登陆到远程服务器上检查，如果网络联通，会有两个返回值，一个失败一个成功:
+
+.. literalinclude:: rstunnel/remote_check_cmd_output_fail_success
+   :caption: ssh到远程服务器上反向nc检测命令输出有两个返回，什么意思？
+
+为什么ssh反向 ``RemoteForward`` 端口明明是打开的，为何会有两条记录，一个失败一个成功？
+
+我验证发现，似乎这种SSH端口转发情况下，都会出现一条失败( ``(tcp) failed: Connection refused`` )，然后接下来就是成功记录( ``port [tcp/*] succeeded!`` )，不过不影响最后的检查结果( ``$?=0`` )
+
 参考
 =======
 

@@ -26,6 +26,7 @@ Go
    yaml.rst
    protobuf.rst
    yaml_not_find_expected_key.rst
+   wails/index
 
 .. only::  subproject and html
 
