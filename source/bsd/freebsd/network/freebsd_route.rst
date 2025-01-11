@@ -9,33 +9,33 @@ FreeBSD的路由设置方法和 :ref:`linux` 略有不同
 - 检查路由:
 
 .. literalinclude:: freebsd_route/netstat
-   :catpion: 检查路由
+   :caption: 检查路由
 
 输出类似:
 
 .. literalinclude:: freebsd_route/netstat_output
-   :catpion: 路由输出案例
+   :caption: 路由输出案例
    :emphasize-lines: 5,6
 
 - 上述没有指定协议类型会同时输出IPv4和IPv6，为了能够区分，可以使用 ``-4`` 参数来只显示IPv4路由
 
 .. literalinclude:: freebsd_route/netstat-4
-   :catpion: 检查IPv4路由
+   :caption: 检查IPv4路由
 
 输出:
 
 .. literalinclude:: freebsd_route/netstat-4_output
-   :catpion: 检查IPv4路由
+   :caption: 检查IPv4路由
 
 - 命令行设置默认路由:
 
 .. literalinclude:: freebsd_route/route_default
-   :catpion: 设置默认路由
+   :caption: 设置默认路由
 
 - 命令行删除默认路由:
 
 .. literalinclude:: freebsd_route/route_delete_default
-   :catpion: 删除默认路由
+   :caption: 删除默认路由
 
 配置
 =======

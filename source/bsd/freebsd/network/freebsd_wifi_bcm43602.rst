@@ -246,7 +246,7 @@ wifibox完善配置
 
 .. literalinclude:: freebsd_wifi_bcm43602/iptables
    :caption: 虚拟机iptables增加22端口映射
-   :emphasize-lines: 18
+   :emphasize-lines: 18,20
 
 .. note::
 
