@@ -242,7 +242,7 @@ wifibox完善配置
 .. literalinclude:: freebsd_wifi_bcm43602/wpa_supplicant.conf
    :caption: 配置 ``/usr/local/etc/wifibox/wpa_supplicant/wpa_supplicant.conf`` 无线网络
 
-- 物理主机 ``/usr/local/etc/wifibox/appliance/iptables`` 添加一条映射22端口
+- 物理主机 ``/usr/local/etc/wifibox/appliance/iptables`` 添加映射到Host主机22端口
 
 .. literalinclude:: freebsd_wifi_bcm43602/iptables
    :caption: 虚拟机iptables增加22端口映射
@@ -250,7 +250,7 @@ wifibox完善配置
 
 .. note::
 
-   今后所有需要访问FreeBSD物理主机服务端口的外网进入流量，都需要在这个 ``iptables`` 中添加 ``PREROUTING``
+   今后所有需要访问FreeBSD物理主机服务端口的外网进入流量，都需要在这个 ``iptables`` 中添加规则。方法和 :ref:`iptables_port_forwarding` 相同。
 
 - 附加: 如果要支持 ``AMD-Vi/IOMMU`` ，则因为 ``AMD-Vi passthrough`` 默认是 ``disabled`` 的，还需要在 ``/boot/loader.conf`` 中添加:
 
