@@ -1,8 +1,17 @@
 .. _freebsd_wifi:
 
-====================
-FreeBSD无线网络
-====================
+====================================
+FreeBSD无线网络(失败过程记录归档)
+====================================
+
+.. warning::
+
+   之前尝试安装FreeBSD驱动没有成功，我现在review了一下当时的操作，感觉还是在加载内核配置上存在问题。最近看到 `FreeBSD从入门到跑路: 第 14.2 节 WiFi >> 博通（broadcom）网卡驱动 <https://book.bsdcn.org/di-14-zhang-wang-luo-guan-li/di-14.2-jie-wifi#bo-tong-broadcom-wang-ka-qu-dong>`_ 介绍了如何安装驱动方法。我又仔细看了一下 `FreeBSD Broadcom Wi-Fi Improvements <https://landonf.org/code/freebsd/Broadcom_WiFi_Improvements.20180122.html>`_ 最后一段，提到了Retian MacBook Pro 2016，其中使用的 Broadcom FullMAC设备(BCM4350)不能被 ``bwn`` 驱动支持。但是， ``bhnd`` 驱动是从 Broadcom 的 ISC-licensed ``brcmfmac`` Linux驱动移植过来，似乎可能会支持。
+
+   Anyway，我可能会重新做一次尝试 :ref:`freebsd_broadcom_wifi_bcm43602` 
+
+以下归档
+=============
 
 .. note::
 

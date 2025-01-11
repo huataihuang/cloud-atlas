@@ -48,6 +48,7 @@ macOS
    macos_recovery.rst
    reset_mac.rst
    fix_macbook_stuck_shift.rst
+   xbar.rst
 
 .. only::  subproject and html
 
