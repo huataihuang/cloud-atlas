@@ -22,6 +22,12 @@ Darwin Containers简介
 - :ref:`bindfs`
 - :ref:`rund` - :ref:`containerd` 的转换器(shim) 用于在Darwin上运行Darwin容器
 
+.. note::
+
+   如果仅仅是想本地运行一个 ``jail`` ，那么只需要 :ref:`darwin-jail` 就能够实现。并且也非常容易使用 ``crane`` 工具来打包镜像 ``Darwin image``
+
+   ``Darwin Containers`` 是为了能够通过 :ref:`containerd` 或 :ref:`docker` 来运行 ``Darwin image`` ，这样就能以标准化容器方式来使用镜像，方便大规模部署和使用。( **但不是必须的** )
+
 参考
 =======
 

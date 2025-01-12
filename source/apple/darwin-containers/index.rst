@@ -8,6 +8,7 @@ Darwin Containers
    :maxdepth: 1
 
    intro_darwin-containers.rst
+   darwin-containers_startup.rst
    macfuse.rst
    fuse-t.rst
    bindfs.rst
