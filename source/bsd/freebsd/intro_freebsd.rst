@@ -73,6 +73,8 @@ FreeBSD的硬件支持不如 :ref:`linux` 广泛，但是主流架构的服务�
 
 - `FreeBSD Handbook <https://docs.freebsd.org/en/books/handbook/>`_ 官方手册，全面系统且更新
 
+- `Design and Implementation of the FreeBSD Operating System, The, 2nd Edition <https://www.informit.com/store/design-and-implementation-of-the-freebsd-operating-9780321968975>`_  `InfoQ: FreeBSD 操作系统设计与实现，内容回顾与作者采访 <https://www.infoq.cn/article/freebsd-design-implementation-review>`_ 采访作者对这本书内容对概述
+
 - `RIP Tutorial <https://riptutorial.com/>`_ 提供了很多学习语言的资料，也汇总了一些很有用的FreeBSD资料:
 
   - `RIP Tutorial: FreeBSD Build from source <https://riptutorial.com/freebsd/topic/7062/build-from-source>`_

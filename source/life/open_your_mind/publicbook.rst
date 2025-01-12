@@ -16,6 +16,12 @@
 古登堡项目
 =============
 
+.. note::
+
+   `Download Classic Works of Plague Fiction: From Daniel Defoe & Mary Shelley, to Edgar Allan Poe <https://www.openculture.com/2020/03/download-classic-works-of-plague-fiction.html>`_ Josh Jones撰写的这篇关于瘟疫小说经典作品的介绍，是我在寻找安妮.曼宁小说时发现的。也是古登堡数字图书中关于瘟疫电子书的索引。
+
+   回想其不久前那三年，上海一片死寂，现代文明突然暂停之下的恐惧，触景生情也使得我们会对这类小说中微小任务的共情。
+
 我是偶然读到 `她默默无闻地生活，无声无息地离世，然后悄然被世界遗忘 <https://mp.weixin.qq.com/s/MX9Eung3X6dYYwM1p36a1g>`_ 触动之下，想要阅读一下 `安妮.曼宁 <https://en.wikipedia.org/wiki/Anne_Manning_(novelist)>`_ 的英文原著。我发现，原来世界上第一个数字图书馆 `Project Gutenberg <https://gutenberg.org/>`_ (古登堡计划)已经整理汇总了超过7万多本公版电子书:
 
 谷登堡计划（Project Gutenberg，缩写：PG），由志愿者参与，致力于将文化作品数字化和归档，并鼓励创作和发行电子书。该工程于1971年开始进行，是最早的数字图书馆。项目中大部分书籍都是公有领域书籍的原本，谷登堡计划确保这些原本自由流通、自由文件格式，有利于长期保存，并可在各种计算机上阅读。
