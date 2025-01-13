@@ -8,6 +8,7 @@ macOS平台VMware
    :maxdepth: 1
 
    vmware_fusion.rst
+   vmware_macos_on_macos.rst
    vmware_nested_virtual.rst
    vmware_fusion_clone_vm.rst
 

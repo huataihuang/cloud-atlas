@@ -8,7 +8,7 @@ Darwin Containers快速起步
 ===========
 
 - 操作系统必须时 Catalina 或更新版本
-- 关闭 `System Integrity Protection <https://developer.apple.com/documentation/security/disabling-and-enabling-system-integrity-protection>`_ ，因为SIP比允许 ``chroot`` :
+- 关闭 `System Integrity Protection <https://developer.apple.com/documentation/security/disabling-and-enabling-system-integrity-protection>`_ ，因为SIP不允许 ``chroot`` :
 
 System Integrity Protection (SIP) 时macOS的保护机制，拒绝非授权代码执行，系统只授权从App Store下载的应用运行，或者授权开发者认证的应用或者用户直接分发应用。默认不允许其他所有应用。
 

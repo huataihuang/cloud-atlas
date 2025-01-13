@@ -8,9 +8,16 @@ darwin-jail
 
 .. warning::
 
-   实际构建的 ``darwinjail`` 环境还是比较占用空间的， :strike:`我在 Sequoia 15.2 上构建占用了 7.3G` 具体占用空间似乎取决于当前系统已经安装的软件情况。我感觉需要在操作系统初始安装以后就搞这个 ``darwin-jail`` ，并且制作镜像保存起来，以便后续使用。
+   实际构建的 ``darwinjail`` 环境还是比较占用空间的， Sequoia 15.2 上构建占用了 ``7.3G`` ( 我尝试在新安装虚拟机macOS中完成，但 ``darwinjail`` 只复制基础目录，确实占据了 ``7.3G`` )。
 
    还远远比不上 :ref:`freebsd_jail` 灵活的 :ref:`thin_jail` (基于 :ref:`zfs` 或 NullFS)。但是能够打包镜像，并且储备用于其他工作环境，还是比较有意思的。
+
+准备工作
+==========
+
+由于第一次在本地主机上制作 ``darwin-jail`` 并不顺利，制作出来超大占用空间，并且没有普通用户目录(其实当时我不知道 ``chroot`` 可以指定用户身份)，所以我第二次做了准备工作: 使用 :ref:`vmware_fusion` 安装了一个干净的 macOS 系统。
+
+- 完成 :ref:`vmware_macos_init`
 
 部署和使用
 =============
@@ -29,7 +36,9 @@ darwin-jail
 
    ``chroot`` 目录中没有包含用户目录，也没有用户账号，所以需要 :ref:`macos_user_account_cmd` 创建(但是我目前执行创建错误 ``Operation failed with error: eParameterError`` 待排查)
 
-   怎么搞定普通用户账号？没有普通用户账号，运行 :ref:`homebrew` 是个大问题
+   怎么搞定普通用户账号？没有普通用户账号，运行 :ref:`homebrew` 是个大问题:
+
+   解决方法是使用 ``sudo chroot -u admin`` 来执行，这样进入chroot环境后就是指定用户 ``admin``
 
 将Darwin rootfs作为Docker镜像
 ================================
@@ -49,3 +58,5 @@ darwin-jail
 =======
 
 - `GitHub: darwin-containers/darwin-jail <https://github.com/darwin-containers/darwin-jail>`_
+- `How to run a command in a chroot jail not as root and without sudo? <https://stackoverflow.com/questions/3737008/how-to-run-a-command-in-a-chroot-jail-not-as-root-and-without-sudo>`_
+- `GitHub: keith/dyld-shared-cache-extractor <https://github.com/keith/dyld-shared-cache-extractor>`_ 解释了macOS使用 ``dyld-shared-cache`` 的背景
