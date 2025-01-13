@@ -12,7 +12,14 @@ Thunderbolt从第三代开始使用USB Type-C接口，大大扩展了通用性�
 
 我的 :ref:`mbp15_2018` 就是采用第三代 Thunderbolt 技术，使用非常方便:
 
+使用案例
+==========
+
+- 如果使用 :ref:`mac_mini_2024` 就不必加钱升级万兆以太网口，可以通过Thunderbolt连线连接两台Mac mini构建集群: `Use IP over Thunderbolt to connect Mac computers <https://support.apple.com/guide/mac-help/ip-thunderbolt-connect-mac-computers-mchld53dd2f5/>`_
+
 参考
 ======
 
 - `Wikipedia: Thunderbolt <https://zh.wikipedia.org/zh-hans/Thunderbolt>`_
+- `Use IP over Thunderbolt to connect Mac computers <https://support.apple.com/guide/mac-help/ip-thunderbolt-connect-mac-computers-mchld53dd2f5/>`_ Mac User Guide中指导通过雷雳连接两台Mac的方法
+- `How to network two MacBook Pros together via Thunderbolt 3 [Video] <https://9to5mac.com/2016/11/22/macbook-pro-thunderbolt-3-bridge-network-video/>`_ 通过雷雳连接两台Mac的视频指导

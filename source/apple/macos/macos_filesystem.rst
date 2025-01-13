@@ -25,6 +25,18 @@ APFS是针对闪存和固态驱动器设计的文件系统，并针对 ``HFS+`` 
   - 所有文件和目录都被一个二进制搜索树结构所管理，也就是文件和目录的 ``B-Trees`` (类似 :ref:`btrfs` ?)
   - 树的节点(nodes)存储键和值(keys and values)
 
+.. note::
+
+   `GitHub: linux-apfs/linux-apfs-rw <https://github.com/linux-apfs/linux-apfs-rw>`_ 提供了在Linux环境试验性的APFS读写支持，在主要发行版有集成，或许APFS可以作为共享文件系统来使用。
+
+   `GitHub: libyal/libfsapfs <https://github.com/libyal/libfsapfs>`_ 提供了对APFS v2的只读支持
+
+   `GitHub: sgan81/apfs-fuse <https://github.com/sgan81/apfs-fuse>`_ 提供AFPFS只读FUSE驱动，在主流发行版可以获得安装
+
+   `Paragon Software <https://www.paragon-software.com/>`_ 在 4-Clause BSD License 提供了一个SDK支持只读方式访问APFS驱动器。此外这家公司提供一个Windows上的商业软件Paragon's APFS for Windows可以读写APFS。
+
+
+
 .. _hfs+:
 
 HFS+
@@ -47,3 +59,4 @@ HFS+文件系统采用了日志机制来防止结构损坏:
 =====
 
 - `The file systems of macOS <https://www.ufsexplorer.com/articles/macos-file-systems/>`_
+- `Wikipedia: Apple File System <https://en.wikipedia.org/wiki/Apple_File_System>`_

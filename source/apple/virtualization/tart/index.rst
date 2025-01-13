@@ -8,6 +8,7 @@ Tart - 虚拟化工具集
    :maxdepth: 1
 
    intro_tart.rst
+   tart_startup.rst
    orchard/index
 
 .. only::  subproject and html

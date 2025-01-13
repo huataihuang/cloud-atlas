@@ -22,16 +22,20 @@ Studio环境中的VMware Fusion
 
    好消息!!!
 
-   2024年5月，VMware宣布 **对于个人用户** `VMware Fusion Pro: Now Available Free for Personal Use <https://blogs.vmware.com/teamfusion/2024/05/fusion-pro-now-available-free-for-personal-use.html>`_ ；并且 `VMware Workstation Pro: Now Available Free for Personal Use <https://blogs.vmware.com/workstation/2024/05/vmware-workstation-pro-now-available-free-for-personal-use.html>`_ :
+   2024年5月，VMware宣布 **对于个人用户** `VMware Fusion Pro: Now Available Free for Personal Use <https://blogs.vmware.com/teamfusion/2024/05/fusion-pro-now-available-free-for-personal-use.html>`_ ；并且 `VMware Workstation Pro: Now Available Free for Personal Use <https://blogs.vmware.com/workstation/2024/05/vmware-workstation-pro-now-available-free-for-personal-use.html>`_ (官宣文档中包含了下载入口，点击后登陆注册账号就可以下载):
 
    - 个人用户版本 VMware Fusion Pro / VMware Workstation Pro 和订阅版本完全一致，唯一区别是免费版本会显示“本产品仅供个人使用”
    - 预计作为虚拟化巨头， `VMware 将其 Workstation Pro 和 Fusion Pro 产品免费提供给个人使用 <https://www.solidot.org/story?sid=78167>`_ 将扩大其影响力，并和广泛用于云计算的开源的 :ref:`kvm` 竞争
+
+   `VMware Fusion 13.6.2 for Mac - 领先的免费桌面虚拟化软件 <https://sysin.org/blog/vmware-fusion-13/>`_ 提供了百度网盘共享，不过需要注意从官方获取SHA校验检查下载的软件包再安装。
 
 .. note::
 
    根据 `VMware Fusion Pro: Now Available Free for Personal Use <https://blogs.vmware.com/teamfusion/2024/05/fusion-pro-now-available-free-for-personal-use.html>`_ 说明，用户需要升级到 13.5.2 之后才能使用VMware提供的免费个人版本。
 
-   不过，由于我现在使用的笔记本 :ref:`mba13_early_2014` 过于古老，使用的Big Sur 11.7.10 过于古老，所以暂时无法实践。等后续我使用较好的硬件再做尝试...
+   不过，由于我现在使用的笔记本 :ref:`mba13_early_2014` 过于古老，使用的Big Sur 11.7.10 过于古老，无法使用最新版本
+
+   我现在改为在 :ref:`mbp15_2018` 安装最新 ``Sequoia 15.2`` 来安装运行 VMware Fusion
 
 VMware Fusion
 ===============
