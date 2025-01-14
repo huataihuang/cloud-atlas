@@ -17,6 +17,18 @@ macOS 恢复安装
   - ``Option-Command-R`` 恢复安装和硬件兼容的最新(最高)macOS版本
   - ``Shift-Option-Command-R`` 恢复安装购买Mac电脑时随主机提供的macOS版本(通常比较旧)，但是有可能苹果官网已经下线安装镜像而无法安装
 
+.. note::
+
+   命令行进入Recovery Mode的方法是:
+
+   .. literalinclude:: macos_recovery/recovery_mode
+      :caption: 命令行进入recovery模式
+
+   在Recovery Mode中完成维护工作，则执行以下命令删除firmware变量，这样下次重启就进入常规启动模式:
+
+   .. literalinclude:: macos_recovery/normal_mode
+      :caption: 命令行恢复常规启动模式
+
 其他修复相关启动组合键
 ========================
 

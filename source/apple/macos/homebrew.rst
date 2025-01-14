@@ -278,6 +278,26 @@ brew很好地弥补了 macOS 的开源软件版本滞后的短板，强烈建议
 
    默认情况下 ``/usr/local/bin`` 的PATH优先级较高，所以通常会找到homebrew的对应应用程序，例如 ``python3`` ``pip3`` 等
 
+.. _sequoia_homebrew:
+
+Sequoia安装homebrew
+======================
+
+最近一次安装，发现在 ``git fetch`` 指令时候报错，不论我启用了http proxy还是直接访问都是如此:
+
+.. literalinclude:: homebrew/git_fetch_error
+   :caption: ``brew`` 安装时git报错
+   :emphasize-lines: 8
+
+这个问题实际上是网络不稳定导致的，网上大致的建议是采用VPN访问。不过，我已经启动了 :ref:`squid_socks_peer` 也尝试了 :ref:`ssh_tunneling_dynamic_port_forwarding` ，照理应该能够解决这个问题。但是反复报错让我不胜烦恼。
+
+参考 `Solving "error: RPC failed; curl 92 HTTP/2 stream 5 was not closed cleanly: CANCEL (err 8)" During Homebrew Installation <https://dev.to/styt/solving-error-rpc-failed-curl-92-http2-stream-5-was-not-closed-cleanly-cancel-err-8-during-homebrew-installation-4f0f>`_ 思路，将 ``git`` 的 HTTP版本从 ``HTTP/2`` 降低到 ``HTTP/1.1`` 可以缓解网络不良的问题，简单命令如下:
+
+.. literalinclude:: homebrew/brew_git_http1.1
+   :caption: 将git的HTTP协议降低到 ``1.1`` 来解决Homebrew安装过程中网络不稳定的问题
+
+然后重新安装就发现能够正常完成了。
+
 .. _big_sur_homebrew:
 
 Big Sur安装homebrew
@@ -367,3 +387,4 @@ openssl卡在make test
 
 - `How to use pip with socks proxy? <https://stackoverflow.com/questions/22915705/how-to-use-pip-with-socks-proxy>`_
 - `How can I check the version of a package online before installing? <https://apple.stackexchange.com/questions/224276/how-can-i-check-the-version-of-a-package-online-before-installing>`_
+- `Solving "error: RPC failed; curl 92 HTTP/2 stream 5 was not closed cleanly: CANCEL (err 8)" During Homebrew Installation <https://dev.to/styt/solving-error-rpc-failed-curl-92-http2-stream-5-was-not-closed-cleanly-cancel-err-8-during-homebrew-installation-4f0f>`_

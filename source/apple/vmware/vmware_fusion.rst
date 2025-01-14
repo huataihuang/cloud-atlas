@@ -29,6 +29,14 @@ Studio环境中的VMware Fusion
 
    `VMware Fusion 13.6.2 for Mac - 领先的免费桌面虚拟化软件 <https://sysin.org/blog/vmware-fusion-13/>`_ 提供了百度网盘共享，不过需要注意从官方获取SHA校验检查下载的软件包再安装。
 
+.. warning::
+
+   坏消息!!!
+
+   我实践发现 VMware Fusion 在最新的 macOS ``Sequoia 15.2`` 上性能不佳，磁盘性能很弱，网络性能更是卡到怀疑人生。也许免费策略下，VMware修补bug和升级的动力小了很多，市场压力也使得其减少了桌面端投入。
+
+   只能说勉强能用，优点是使用方便，缺点也是非常明显的。有能力的化，还是直接使用开源解决方案 :ref:`lima` 和 :ref:`tart` 为好。
+
 .. note::
 
    根据 `VMware Fusion Pro: Now Available Free for Personal Use <https://blogs.vmware.com/teamfusion/2024/05/fusion-pro-now-available-free-for-personal-use.html>`_ 说明，用户需要升级到 13.5.2 之后才能使用VMware提供的免费个人版本。
