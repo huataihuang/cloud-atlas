@@ -30,6 +30,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    nginx_config_include.rst
    nginx_redirect_url.rst
    nginx_webdav.rst
+   nginx_config_tips.rst
    auth/index
    nginx_favicon.rst
 

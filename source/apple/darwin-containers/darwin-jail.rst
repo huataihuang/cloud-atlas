@@ -19,6 +19,8 @@ darwin-jail
 
 - 完成 :ref:`vmware_macos_init`
 
+- 完成 :ref:`homebrew_init` : 主要是为了能够一次性打包需要的工具软件，避免在jail中依赖 XCode command line tools
+
 部署和使用
 =============
 
@@ -39,6 +41,25 @@ darwin-jail
    怎么搞定普通用户账号？没有普通用户账号，运行 :ref:`homebrew` 是个大问题:
 
    解决方法是使用 ``sudo chroot -u admin`` 来执行，这样进入chroot环境后就是指定用户 ``admin``
+
+补充工作
+-----------
+
+- 将 :ref:`homebrew_init` 制作的 ``brew.tar.gz`` 复制到 jail 根目录下解压缩
+
+- 配置 ``~/.zprofile`` :
+
+.. literalinclude:: darwin-jail/zprofile
+   :caption: ``~/.zprofile`` 添加 :ref:`homebrew` 路径，并过滤掉 ``df`` 命令无法获取的属性报错
+
+- 配置 ``~/.gitconfig`` :
+
+.. literalinclude:: darwin-jail/.gitconfig
+   :caption: 配置git
+
+- :strike:`由于jail无法访问外部数据，对于需要处理的数据目录需要存放到jail中，然后在外面建立一个软链接方便查看` 需要 :ref:`bindfs` 进行目录映射
+
+- 需要进一步学习 :ref:`macos_apfs_cli`
 
 将Darwin rootfs作为Docker镜像
 ================================
