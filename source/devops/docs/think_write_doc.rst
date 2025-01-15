@@ -17,12 +17,20 @@
 
 如果网站确实使用了某个CMS系统，那么 `What CMS <https://whatcms.org/>`_ 提供了非常简单的检查方法: 输入网址就能够侦测该网站使用了哪个CMS平台。不过，如果网站是静态生成，例如 :ref:`sphinx_doc` ，那么这个标准的CMS检测工具就无能为力。
 
+或者在 `HTTP Archive <https://httparchive.org/>`_ 跟踪Web构建
+
+`Core Web Vitals Technology Report(cwvtech.report) <https://lookerstudio.google.com/u/0/reporting/55bc8fad-44c2-4280-aa0b-5f3f0cd3d2be/page/M6ZPC?params=%7B%22df44%22:%22include%25EE%2580%25800%25EE%2580%2580IN%25EE%2580%2580WordPress%25EE%2580%2580Next.js%25EE%2580%2580Nuxt.js%25EE%2580%2580Gatsby%25EE%2580%2580Astro%25EE%2580%2580SvelteKit%25EE%2580%2580Remix%22%7D>`_ 提供了网站技术占比，可以作为趋势参考
+
 .. note::
 
    参考 `How to Tell What Website Builder Was Used  <https://dorik.com/blog/how-to-tell-what-website-builder-was-used>`_
 
 倾向
 =======
+
+.. note::
+
+   2025年1月，我现在思考 :ref:`docs_as_code` ，会采用不同的 ``Markdown`` 工具来构建新的文档网站。
 
 我比较中意的网站风格是:
 
@@ -96,3 +104,8 @@ Sphinx Doc是我撰写 :ref:`cloud_atlas` 的文档平台，我是模仿Kernel D
    `Jamstack <https://jamstack.org/>`_ 是网页托管领域独角兽 `Netlify <https://www.netlify.com/>`_ 的旗下产品。由于专注于CMS和Site，其网站提供了相关信息参考。
 
    - 参考 `Vercel 和 Netlify ，两大20亿美金估值的独角兽，在网页托管领域的崛起史 <https://zhuanlan.zhihu.com/p/525979886>`_
+
+参考
+=======
+
+- `Markdown, Asciidoc, or reStructuredText - a tale of docs-as-code <https://www.dewanahmed.com/markdown-asciidoc-restructuredtext/>`_ docs-as-code 有众多选择，实在有些吃惊

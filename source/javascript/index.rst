@@ -12,6 +12,7 @@ JavaScript
    functional_programming/index
    react/index
    typescript/index
+   nextjs/index
    patternfly/index
 
 .. only::  subproject and html
