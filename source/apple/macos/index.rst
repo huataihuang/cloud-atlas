@@ -30,6 +30,7 @@ macOS
    macos_studio.rst
    macos_share_file.rst
    homebrew.rst
+   homebrew_init.rst
    homebrew_python.rst
    install_disabled_homebrew_package.rst
    multi_jdk_on_macos.rst
@@ -41,6 +42,7 @@ macOS
    restore_launchpad.rst
    macos_ftdi_serial.rst
    macos_vnc.rst
+   macos_user_account_cmd.rst
    macos_filesystem.rst
    macos_apfs_case-sensitive.rst
    macos_apfs_cli.rst

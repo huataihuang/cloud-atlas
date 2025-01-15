@@ -19,12 +19,12 @@
 
 - 安装 ``nvm`` :
 
-.. literalinclude:: ../../../nodejs/startup/nodejs_dev_env/install_nvm
+.. literalinclude:: ../../nodejs/startup/nodejs_dev_env/install_nvm
    :caption: 安装 ``nvm`` 管理Node.js版本
 
 - 安装 :ref:`nodejs` :
 
-.. literalinclude:: ../../../nodejs/startup/nodejs_dev_env/nvm_install_nodejs
+.. literalinclude:: ../../nodejs/startup/nodejs_dev_env/nvm_install_nodejs
    :caption: 使用 ``nvm`` 安装Node.js
 
 自动安装
@@ -71,7 +71,7 @@
 
 此时可以使用浏览器访问 http://localhost:3000/ 可以看到一个简单页面(其中提供了一些导航到官网的文档、模版等)
 
-.. figure:: ../../../_static/javascript/react/nextjs/nextjs_start_dev.png
+.. figure:: ../../_static/javascript/react/nextjs/nextjs_start_dev.png
 
 创建 ``app`` 目录
 ==================

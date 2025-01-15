@@ -12,6 +12,7 @@ DevOps 文档
    :maxdepth: 1
 
    think_write_doc.rst
+   docs_as_code.rst
    write_doc.rst
    static_website.rst
    obsidian.rst
@@ -22,6 +23,7 @@ DevOps 文档
    jekyll/index
    hugo/index
    hexo/index
+   nextra/index
    kindle/index
    kobo/index
    pandoc.rst

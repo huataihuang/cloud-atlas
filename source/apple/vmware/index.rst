@@ -9,6 +9,7 @@ macOS平台VMware
 
    vmware_fusion.rst
    vmware_macos_on_macos.rst
+   vmware_macos_init.rst
    vmware_nested_virtual.rst
    vmware_fusion_clone_vm.rst
 

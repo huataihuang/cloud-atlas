@@ -37,6 +37,9 @@ devops初始化
 .. literalinclude:: jail_init/devops
    :caption: 安装运维工具
 
+构建 :ref:`nvim_ide`
+=======================
+
 python初始化
 ===============
 
