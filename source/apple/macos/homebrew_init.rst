@@ -28,6 +28,20 @@ Homebrew初始化
    :language: bash
    :caption: 配置 ``~/.zshrc`` 添加Ruby配置路径
 
+同样， :ref:`curl` 也需要添加配置路径，类似上面的 :ref:`macos_install_ruby`
+
+.. literalinclude:: homebrew_init/curl_env
+   :caption: 配置 curl 环境变量以便能够优先使用
+
+不过，对于我目前只有Intel架构的 :ref:`mbp15_2018` ，上述环境配置 ``~/.zprofile`` 只需要简化成:
+
+.. literalinclude:: homebrew_init/env
+   :caption: 简化的env配置 ``~/.zprofile``
+
+.. note::
+
+   不过我还是需要完成 "进一步安装和设置" 后再打包，因为我需要一个方便的开发环境
+
 完成上述安装基础工具之后 ``brew`` 命令就是自包含依赖工具，可以直接将 ``/usr/local`` 目录打包放到 :ref:`darwin-jail` 中使用了:
 
 .. literalinclude:: homebrew_init/brew_tar
@@ -77,3 +91,11 @@ nvim插件安装错误排查
 .. literalinclude:: homebrew_init/python-lsp-server_error
    :caption: python-lsp-server 安装报错
 
+重新在常规环境中安装正常，上述问题没有再现
+
+- ruby-lsp安装失败:
+
+.. literalinclude:: homebrew_init/ruby-lsp_error
+   :caption: ruby-lsp 安装报错
+
+这个报错是因为macOS系统自带的ruby版本过低导致的，需要通过 ``ruby install ruby`` 安装社区最新版本，然后配置好环境 ``PATH`` 变量使得默认使用 :ref:`homebrew` 提供的最新版本ruby就能解决
