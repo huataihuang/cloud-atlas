@@ -12,6 +12,7 @@ Linux NVMe
    samsung_pm9a1.rst
    samsung_pm9a1_rtl9210b.rst
    update_samsung_pm9a1_firmware.rst
+   samsung_storage_tools.rst
    samsung_pm9a1_timeout_failure.rst
    kioxia_exceria_g2.rst
    crucial_p3.rst

@@ -51,7 +51,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
 请访问:
 
 - `readthedocs平台上的云图 <https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html>`_ 第三方托管
-- `docs.cloud-atlas.io 构建 "云图 -- 云计算图志: 探索" <https://docs.cloud-atlas.io/discovery>`_ 自建网站，也就是本书的现实世界的实现
+- `docs.cloud-atlas.io <https://docs.cloud-atlas.io>`_ 构建 `「云图 -- 云计算图志: 探索」 <https://docs.cloud-atlas.io/discovery>`_ 自建网站，也就是本书的现实世界的实现
 
 致谢
 =========

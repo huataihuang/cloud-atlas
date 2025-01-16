@@ -23,6 +23,7 @@ Info-Service
    kodi/index
    jellyfin/index
    matrix/index
+   diagram/index
 
 .. only::  subproject and html
 

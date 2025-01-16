@@ -1,16 +1,13 @@
-.. _ruby:
+.. _iam:
 
 =================================
-Ruby
+Identity Access Management(IAM)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   think_ruby.rst
-   startup/index
-   rails/index
-   crystal/index
+   intro_iam.rst
 
 .. only::  subproject and html
 

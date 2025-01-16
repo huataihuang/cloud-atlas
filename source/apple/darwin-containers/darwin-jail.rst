@@ -24,6 +24,24 @@ darwin-jail
 部署和使用
 =============
 
+- 建议先安装 XCode command line tools，然后打包  ``/Library/Developer/CommandLineTools`` 目录
+
+这样不仅具备了 :ref:`clang` (gcc是clang的别名),也包含了 :ref:`swift` ，就不需要在 :ref:`homebrew` 中再安装llvm了 -  参考 `如何在 mac 电脑上轻量化地写C <https://zhuanlan.zhihu.com/p/58425193>`_
+
+不过，在 ``darwin-jail`` 中执行 ``gcc --version`` 提示信息:
+
+.. literalinclude:: darwin-jail/gcc_confstr_error
+   :caption: ``gcc --version`` 提示信息提示错误
+
+这个报错是因为 ``getconf DARWIN_USER_TEMP_DIR`` 就有提示错误  ``getconf: confstr: DARWIN_USER_TEMP_DIR: Input/output error``
+
+我在正常的环境中执行上述命令，可以到哪看到 ``DARWIN_USER_TEMP_DIR`` 对应的目录 ``/var/folders/fb/1zwz4_152_g8lv6w4m6zq78r0000gn/T/`` ，实际上是因为在jail中无法写入 ``/var/folders`` 导致的报错
+
+则在jail中也补上:
+
+.. literalinclude:: darwin-jail/temp
+   :caption: 为jail中用户补上tmp目录
+
 - 执行:
 
 .. literalinclude:: darwin-jail/darwinjail_chroot
