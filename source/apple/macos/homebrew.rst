@@ -262,8 +262,9 @@ brew很好地弥补了 macOS 的开源软件版本滞后的短板，强烈建议
    - macOS内置awk和sed，但是语法和GNU版本有差异，编写Linux上运行脚本采用较为通用的GNU版本
    - :ref:`openconnect_vpn` 客户端方便翻越GFW
    - :ref:`keepassxc` 是跨平台开源密码管理器
-   - iterm2提供了最佳终端，可以采用 :ref:`vim_tmux_iterm_zsh`
-   - Homebrew提供了 :ref:`docker_desktop` 集成安装，可以方便实现Docker官方版本安装部署
+   - :strike:`iterm2提供了最佳终端` ，可以采用 :ref:`vim_tmux_iterm_zsh` (资源消耗太大，放弃)
+   - 采用 :ref:`kitty` 作为终端，兼顾快速和便捷
+   - Homebrew提供了 :ref:`docker_desktop` 集成安装，可以方便实现Docker官方版本安装部署(现在改为使用 :ref:`colima` )
    
 安装了homebrew :ref:`vim` 或 :ref:`nvim` 之后，会依赖安装多种开发语言，其中包括 :ref:`python` 3的最新版本，比macOS内置版本更好，所以建议切换到homebrew版本:
 

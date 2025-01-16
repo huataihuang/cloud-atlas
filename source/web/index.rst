@@ -26,6 +26,7 @@ Web是Internet最主要的服务，也是汇集主要云计算技术的应用服
    cache/index
    proxy/index
    load_balancer/index
+   iam/index
    waf/index
    webdav/index
    websocket/index
@@ -33,6 +34,7 @@ Web是Internet最主要的服务，也是汇集主要云计算技术的应用服
    firefox/index
    chrome/index
    curl/index
+   cloudflare/index
 
 .. only::  subproject and html
 

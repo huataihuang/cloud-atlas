@@ -1,16 +1,14 @@
-.. _ruby:
+.. _diagram:
 
 =================================
-Ruby
+示意图(Diagram)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   think_ruby.rst
-   startup/index
-   rails/index
-   crystal/index
+   diagrams.rst
+   excalidraw.rst
 
 .. only::  subproject and html
 

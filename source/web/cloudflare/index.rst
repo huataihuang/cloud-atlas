@@ -1,16 +1,16 @@
-.. _ruby:
+.. _cloudflare:
 
 =================================
-Ruby
+Cloudflare
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   think_ruby.rst
-   startup/index
-   rails/index
-   crystal/index
+   cloudflare_infra.rst
+   cloudflare_tunnel.rst
+   cloudflare_pages.rst
+   cloudflare_cdn.rst
 
 .. only::  subproject and html
 

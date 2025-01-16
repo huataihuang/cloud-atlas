@@ -29,7 +29,7 @@ macOS环境安装Ruby
    :language: bash
    :caption: 配置 ``~/.zshrc`` 添加Ruby配置路径
 
-- 然后执行 ``. ~/.zshrc`` 使之生效，或者重新启动Terminal终端模拟器，如 iTerm2
+- 然后执行 ``source ~/.zshrc`` 使之生效，或者重新启动Terminal终端模拟器，如 iTerm2
 
 - 执行 ``brew list`` 检查安装，可以看到安装了 ``ruby``
 
@@ -39,3 +39,4 @@ macOS环境安装Ruby
 =====
 
 - `Install Ruby 3.1 · macOS <https://mac.install.guide/ruby/13.html>`_
+- `Brew Install Ruby <https://mac.install.guide/ruby/13>`_
