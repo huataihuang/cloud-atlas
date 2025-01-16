@@ -15,16 +15,14 @@ darwin-jail
 准备工作
 ==========
 
-由于第一次在本地主机上制作 ``darwin-jail`` 并不顺利，制作出来超大占用空间，并且没有普通用户目录(其实当时我不知道 ``chroot`` 可以指定用户身份)，所以我第二次做了准备工作: 使用 :ref:`vmware_fusion` 安装了一个干净的 macOS 系统。
-
 - 完成 :ref:`vmware_macos_init`
 
-- 完成 :ref:`homebrew_init` : 主要是为了能够一次性打包需要的工具软件，避免在jail中依赖 XCode command line tools
+- 完成 :ref:`homebrew_init` : 建议安装完 ``XCode command line tools`` 并完成所有 :ref:`homebrew` 需要的软件之后再制作 ``darwin-jail`` ，这样能够完整包含所需工具以及依赖库。
 
 部署和使用
 =============
 
-- 建议先安装 XCode command line tools，然后打包  ``/Library/Developer/CommandLineTools`` 目录
+- (这步我现在通过调整 ``darwin-jails`` 配置来完辰统一打包)建议先安装 XCode command line tools，然后打包  ``/Library/Developer/CommandLineTools`` 目录
 
 这样不仅具备了 :ref:`clang` (gcc是clang的别名),也包含了 :ref:`swift` ，就不需要在 :ref:`homebrew` 中再安装llvm了 -  参考 `如何在 mac 电脑上轻量化地写C <https://zhuanlan.zhihu.com/p/58425193>`_
 

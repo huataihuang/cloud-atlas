@@ -14,6 +14,7 @@ Darwin Containers
    bindfs.rst
    rund.rst
    darwin-jail.rst
+   swift_in_darwin-jail.rst
 
 .. only::  subproject and html
 
