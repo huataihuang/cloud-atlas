@@ -13,6 +13,7 @@ JavaScript 快速起步
    css.rst
    json.rst
    debug_webpack.rst
+   es.next.rst
 
 .. only::  subproject and html
 

@@ -21,6 +21,7 @@ Vim
    vim_native_package_loading.rst
    vim_basic.rst
    vim_gz.rst
+   vim_ctags.rst
 
 .. only::  subproject and html
 
