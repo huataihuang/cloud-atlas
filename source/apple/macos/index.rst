@@ -52,6 +52,7 @@ macOS
    reset_mac.rst
    fix_macbook_stuck_shift.rst
    xbar.rst
+   kitty.rst
 
 .. only::  subproject and html
 
