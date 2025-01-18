@@ -1,0 +1,29 @@
+cd /sources
+
+binutils_VERSION=2.43.1
+
+tar xf binutils-${binutils_VERSION}.tar.xz
+cd binutils-${binutils_VERSION}
+
+mkdir -v build
+cd       build
+
+../configure --prefix=/usr       \
+             --sysconfdir=/etc   \
+             --enable-gold       \
+             --enable-ld=default \
+             --enable-plugins    \
+             --enable-shared     \
+             --disable-werror    \
+             --enable-64-bit-bfd \
+             --enable-new-dtags  \
+             --with-system-zlib  \
+             --enable-default-hash-style=gnu
+
+make tooldir=/usr
+
+# 确实有失败，通过 grep '^FAIL:' $(find -name '*.log') 列出失败，文档中说明: Gold 测试套件中，有十二项测试在构建 GCC 时启用 --enable-default-pie 和 --enable-default-ssp 的情况下会失败
+make -k check
+
+make tooldir=/usr install
+rm -fv /usr/lib/lib{bfd,ctf,ctf-nobfd,gprofng,opcodes,sframe}.a

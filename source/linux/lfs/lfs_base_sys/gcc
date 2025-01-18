@@ -1,0 +1,52 @@
+cd /sources
+
+gcc_VERSION=14.2.0
+tar xf gcc-${gcc_VERSION}.tar.xz
+cd gcc-${gcc_VERSION}
+
+# 在 x86_64 上构建时，修改存放 64 位库的默认路径为 “lib”
+case $(uname -m) in
+  x86_64)
+    sed -e '/m64=/s/lib64/lib/' \
+        -i.orig gcc/config/i386/t-linux64
+  ;;
+esac
+
+mkdir -v build
+cd       build
+
+../configure --prefix=/usr            \
+             LD=ld                    \
+             --enable-languages=c,c++ \
+             --enable-default-pie     \
+             --enable-default-ssp     \
+             --enable-host-pie        \
+             --disable-multilib       \
+             --disable-bootstrap      \
+             --disable-fixincludes    \
+             --with-system-zlib
+
+make
+
+# 虽然多数宿主发行版 (和最终的 LFS 系统中)，默认的硬上限值已经是无限大，但手工调整限制无论如何都不会造成损害
+ulimit -s -H unlimited
+
+# 移除或修复若干已知会失败的测试
+sed -e '/cpython/d'               -i ../gcc/testsuite/gcc.dg/plugin/plugin.exp
+sed -e 's/no-pic /&-no-pie /'     -i ../gcc/testsuite/gcc.target/i386/pr113689-1.c
+sed -e 's/300000/(1|300000)/'     -i ../libgomp/testsuite/libgomp.c-c++-common/pr109062.c
+sed -e 's/{ target nonpic } //' \
+    -e '/GOTPCREL/d'              -i ../gcc/testsuite/gcc.target/i386/fentryname3.c
+
+# 以非特权用户身份测试编译结果，但出错时继续执行其他测试
+chown -R tester .
+su tester -c "PATH=$PATH make -k check"
+
+# 输入以下命令提取测试结果的摘要
+../contrib/test_summary
+
+make install
+
+# GCC 构建目录目前属于用户 tester，导致安装的头文件目录 (及其内容) 具有不正确的所有权。将所有者修改为 root 用户和组
+chown -v -R root:root \
+    /usr/lib/gcc/$(gcc -dumpmachine)/${gcc_VERSION}/include{,-fixed}

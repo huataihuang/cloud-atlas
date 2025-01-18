@@ -1,0 +1,23 @@
+cd /sources
+
+gmp_VERSION=6.3.0
+tar xf gmp-${gmp_VERSION}.tar.xz
+cd gmp-${gmp_VERSION}
+
+./configure --prefix=/usr    \
+            --enable-cxx     \
+            --disable-static \
+            --docdir=/usr/share/doc/gmp-${gmp_VERSION}
+
+make
+make html
+
+# 测试套件是关键 无论如何都不要跳过测试过程
+# 测试编译结果
+make check 2>&1 | tee gmp-check-log
+
+# 执行以下检查任务，务必确认测试套件中至少 199 项测试通过
+awk '/# PASS:/{total+=$3} ; END{print total}' gmp-check-log
+
+make install
+make install-html

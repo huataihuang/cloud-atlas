@@ -1,0 +1,33 @@
+cd /sources
+
+bzip2_VERSION=1.0.8
+tar xf bzip2-${bzip2_VERSION}.tar.gz
+cd bzip2-${bzip2_VERSION}
+
+# 应用一个补丁，以安装该软件包的文档
+patch -Np1 -i ../bzip2-${bzip2_VERSION}-install_docs-1.patch
+
+# 保证安装的符号链接是相对的
+sed -i 's@\(ln -s -f \)$(PREFIX)/bin/@\1@' Makefile
+# 确保手册页被安装到正确位置
+sed -i "s@(PREFIX)/man@(PREFIX)/share/man@g" Makefile
+
+# 执行以下命令，准备编译 Bzip2
+make -f Makefile-libbz2_so
+make clean
+
+make
+make PREFIX=/usr install
+
+# 安装共享库
+cp -av libbz2.so.* /usr/lib
+ln -sv libbz2.so.${bzip2_VERSION} /usr/lib/libbz2.so
+
+# 安装链接到共享库的 bzip2 二进制程序到 /bin 目录，并将两个和 bzip2 完全相同的文件替换成符号链接
+cp -v bzip2-shared /usr/bin/bzip2
+for i in /usr/bin/{bzcat,bunzip2}; do
+  ln -sfv bzip2 $i
+done
+
+# 删除无用的静态库
+rm -fv /usr/lib/libbz2.a
