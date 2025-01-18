@@ -1,0 +1,38 @@
+cd /sources
+
+glibc_VERSION=2.40
+tar xf glibc-${glibc_VERSION}.tar.xz
+cd glibc-${glibc_VERSION}
+
+
+patch -Np1 -i ../glibc-${glibc_VERSION}-fhs-1.patch
+
+mkdir -v build
+cd       build
+
+echo "rootsbindir=/usr/sbin" > configparms
+
+../configure --prefix=/usr                            \
+             --disable-werror                         \
+             --enable-kernel=4.19                     \
+             --enable-stack-protector=strong          \
+             --disable-nscd                           \
+             libc_cv_slibdir=/usr/lib
+
+make
+make check
+
+# 避免安装是报告/etc/ld.so.conf 不存在(无害信息)
+touch /etc/ld.so.conf
+# 跳过一个过时的，对于现代的 Glibc 构型会失败的完整性检查
+sed '/test-installation/s@$(PERL)@echo not running@' -i ../Makefile
+
+make install
+
+# 改正 ldd 脚本中硬编码的可执行文件加载器路径
+sed '/RTLDLIST=/s@/usr@@g' -i /usr/bin/ldd
+
+# 安装locale，locale不是必须的，但是一些软件包测试套件需要其完成重要的测试
+# 我这里尝试只安装2个locale，如果不行再按照原文档安装必要的最小集合locale
+localedef -i C -f UTF-8 C.UTF-8
+localedef -i ja_JP -f SHIFT_JIS ja_JP.SJIS 2> /dev/null || true

@@ -1,0 +1,22 @@
+cd /sources
+
+readline_VERSION=8.2.13
+tar xf readline-${readline_VERSION}.tar.gz
+cd readline-${readline_VERSION}
+
+# 重新安装 Readline 会导致旧版本的库被重命名为 <库名称>.old
+# 某些情况下会触发 ldconfig 的一个链接 bug
+# 修复:
+sed -i '/MV.*old/d' Makefile.in
+sed -i '/{OLDSUFF}/c:' support/shlib-install
+# 防止在共享库中硬编码库文件搜索路径 (rpath)
+sed -i 's/-Wl,-rpath,[^ ]*//' support/shobj-conf
+
+./configure --prefix=/usr    \
+            --disable-static \
+            --with-curses    \
+            --docdir=/usr/share/doc/readline-${readline_VERSION}
+
+make SHLIB_LIBS="-lncursesw"
+make SHLIB_LIBS="-lncursesw" install
+install -v -m644 doc/*.{ps,pdf,html,dvi} /usr/share/doc/readline-${readline_VERSION}

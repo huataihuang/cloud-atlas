@@ -1,0 +1,50 @@
+cd /sources
+
+tcl_VERSION=8.6.14
+tcl_MAIN_VERSION=8.6
+
+tar xf tcl${tcl_VERSION}-src.tar.gz
+cd tcl${tcl_VERSION}
+
+SRCDIR=$(pwd)
+cd unix
+./configure --prefix=/usr           \
+            --mandir=/usr/share/man \
+            --disable-rpath
+
+make
+
+sed -e "s|$SRCDIR/unix|/usr/lib|" \
+    -e "s|$SRCDIR|/usr/include|"  \
+    -i tclConfig.sh
+
+tcdc_VERSION=1.1.7
+sed -e "s|$SRCDIR/unix/pkgs/tdbc${tcdc_VERSION}|/usr/lib/tdbc${tcdc_VERSION}|" \
+    -e "s|$SRCDIR/pkgs/tdbc${tcdc_VERSION}/generic|/usr/include|"    \
+    -e "s|$SRCDIR/pkgs/tdbc${tcdc_VERSION}/library|/usr/lib/tcl${tcl_MAIN_VERSION}|" \
+    -e "s|$SRCDIR/pkgs/tdbc${tcdc_VERSION}|/usr/include|"            \
+    -i pkgs/tdbc${tcdc_VERSION}/tdbcConfig.sh
+
+itcl_VERSION=4.2.4
+sed -e "s|$SRCDIR/unix/pkgs/itcl${itcl_VERSION}|/usr/lib/itcl${itcl_VERSION}|" \
+    -e "s|$SRCDIR/pkgs/itcl${itcl_VERSION}/generic|/usr/include|"    \
+    -e "s|$SRCDIR/pkgs/itcl${itcl_VERSION}|/usr/include|"            \
+    -i pkgs/itcl${itcl_VERSION}/itclConfig.sh
+
+unset SRCDIR
+
+make test
+make install
+chmod -v u+w /usr/lib/libtcl${tcl_MAIN_VERSION}.so
+
+#安装 Tcl 的头文件
+make install-private-headers
+# 建立必要符号链接
+ln -sfv tclsh${tcl_MAIN_VERSION} /usr/bin/tclsh
+# 重命名一个与 Perl 手册页文件名冲突的手册页
+mv /usr/share/man/man3/{Thread,Tcl_Thread}.3
+# 安装文档(可选)
+cd ..
+tar -xf ../tcl${tcl_VERSION}-html.tar.gz --strip-components=1
+mkdir -v -p /usr/share/doc/tcl-${tcl_VERSION}
+cp -v -r  ./html/* /usr/share/doc/tcl-${tcl_VERSION}
