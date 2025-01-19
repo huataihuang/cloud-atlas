@@ -1,0 +1,27 @@
+cd /sources
+
+bash_VERSION=5.2.32
+tar xf bash-${bash_VERSION}.tar.gz
+cd bash-${bash_VERSION}
+
+./configure --prefix=/usr             \
+            --without-bash-malloc     \
+            --with-installed-readline \
+            bash_cv_strtold_broken=no \
+            --docdir=/usr/share/doc/bash-${bash_VERSION}
+make
+
+# 测试
+chown -R tester .
+su -s /usr/bin/expect tester << "EOF"
+set timeout -1
+spawn make tests
+expect eof
+lassign [wait] _ _ _ value
+exit $value
+EOF
+
+make install
+
+# 执行新编译的 bash 程序 (替换当前正在执行的版本)
+exec /usr/bin/bash --login

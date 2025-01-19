@@ -300,7 +300,106 @@ GCC 软件包包含 GNU 编译器集合，其中有 C 和 C++ 编译器
 .. literalinclude:: lfs_base_sys/gcc
    :caption: 安装GCC
 
+完成后通过以下方式验证确认编译和链接:
 
+.. literalinclude:: lfs_base_sys/gcc_check
+   :caption: 检查GCC安装
+
+输出不应报错，应该显示类似如下结果(不同平台的动态链接器名称可能不同):
+
+.. literalinclude:: lfs_base_sys/gcc_check_output
+   :caption: 检查GCC安装输出
+
+确认使用正确的启动文件:
+
+.. literalinclude:: lfs_base_sys/gcc_check_log
+   :caption: 检查GCC使用正确的启动文件
+
+确认编译器能正确查找头文件:
+
+.. literalinclude:: lfs_base_sys/gcc_check_log_1
+   :caption: 检查GCC正确查找头文件
+
+确认新的链接器使用了正确的搜索路径:
+
+.. literalinclude:: lfs_base_sys/gcc_check_log_2
+   :caption: 检查确认新的链接器使用了正确的搜索路径
+
+确认使用了正确的 libc:
+
+.. literalinclude:: lfs_base_sys/gcc_check_log_3
+   :caption: 确认使用了正确的 lib
+
+确认 GCC 使用了正确的动态链接器:
+
+.. literalinclude:: lfs_base_sys/gcc_check_log_4
+   :caption: 确认 GCC 使用了正确的动态链接器
+
+以上输出不应有错误或没有输出，否则就需要检查问题原因并修复才能继续
+
+在确认一切工作良好后，删除测试文件:
+
+.. literalinclude:: lfs_base_sys/gcc_clean
+   :caption: 删除测试文件
+
+最后移动一个位置不正确的文件:
+
+.. literalinclude:: lfs_base_sys/gcc_mv
+   :caption: 移动一个位置不正确的文件
+
+安装Ncurses
+==============
+
+- 安装Ncureses:
+
+.. literalinclude:: lfs_base_sys/ncureses
+   :caption: 安装Ncureses
+
+安装Sed
+=========
+
+- 安装Sed:
+
+.. literalinclude:: lfs_base_sys/sed
+   :caption: 安装Sed
+
+安装Psmisc
+=============
+
+Psmisc 软件包包含显示正在运行的进程信息的程序
+
+.. literalinclude:: lfs_base_sys/psmisc
+   :caption: 安装Psmisc
+
+安装Gettext
+==============
+
+Gettext 软件包包含国际化和本地化工具，它们允许程序在编译时加入 NLS (本地语言支持) 功能，使它们能够以用户的本地语言输出消息
+
+.. literalinclude:: lfs_base_sys/gettext
+   :caption: 安装Gettext
+
+安装Bison
+============
+
+Bison 软件包包含语法分析器生成器
+
+.. literalinclude:: lfs_base_sys/bison
+   :caption: 安装Bison
+
+安装Grep
+===========
+
+Grep 软件包包含在文件内容中进行搜索的程序
+
+.. literalinclude:: lfs_base_sys/grep
+   :caption: 安装Grep
+
+安装Bash
+===========
+
+.. literalinclude:: lfs_base_sys/bash
+   :caption: 安装Bash
 
 参考
 ========
