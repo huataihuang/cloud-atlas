@@ -1,0 +1,38 @@
+cd /sources
+
+ncurses_VERSION=6.5
+tar xf ncurses-${ncurses_VERSION}.tar.gz
+cd ncurses-${ncurses_VERSION}
+
+./configure --prefix=/usr           \
+            --mandir=/usr/share/man \
+            --with-shared           \
+            --without-debug         \
+            --without-normal        \
+            --with-cxx-shared       \
+            --enable-pc-files       \
+            --with-pkg-config-libdir=/usr/lib/pkgconfig
+
+make
+
+# 安装该软件包会直接覆盖文件 libncursesw.so.6.5
+# 这可能导致正在使用该库文件中的代码和数据的 shell 进程发生崩溃
+# 因此，需要使用 DESTDIR 进行安装，并正确地使用 install 命令安装库文件：
+make DESTDIR=$PWD/dest install
+install -vm755 dest/usr/lib/libncursesw.so.${ncurses_VERSION} /usr/lib
+rm -v  dest/usr/lib/libncursesw.so.${ncurses_VERSION}
+sed -e 's/^#if.*XOPEN.*$/#if 1/' \
+    -i dest/usr/include/curses.h
+cp -av dest/* /
+
+# 许多程序仍然希望链接器能够找到非宽字符版本的 Ncurses 库。通过使用符号链接和链接脚本，诱导它们链接到宽字符库
+for lib in ncurses form panel menu ; do
+    ln -sfv lib${lib}w.so /usr/lib/lib${lib}.so
+    ln -sfv ${lib}w.pc    /usr/lib/pkgconfig/${lib}.pc
+done
+
+# 确保那些在构建时寻找 -lcurses 的老式程序仍然能够构建
+ln -sfv libncursesw.so /usr/lib/libcurses.so
+
+# 安装 Ncurses 文档(可选)
+cp -v -R doc -T /usr/share/doc/ncurses-${ncurses_VERSION}
