@@ -1,0 +1,27 @@
+cd /sources
+
+openssl_VERSION=3.3.1
+tar xf openssl-${openssl_VERSION}.tar.gz
+cd openssl-${openssl_VERSION}
+
+./config --prefix=/usr         \
+         --openssldir=/etc/ssl \
+         --libdir=lib          \
+         shared                \
+         zlib-dynamic
+
+make
+
+# 一项名为 30-test_afalg.t 的测试失败可忽略(和Host内核没有启用提供CONFIG_CRYPTO_USER_API_SKCIPHER，AES-CBC 模式加密实现的选项相关)
+# 我的实践测试 70-test_key_share.t 失败 
+HARNESS_JOBS=$(nproc) make test
+
+# 安装
+sed -i '/INSTALL_LIBS/s/libcrypto.a libssl.a//' Makefile
+make MANSUFFIX=ssl install
+
+# 版本号添加到文档目录名，以和其他软件包保持一致
+mv -v /usr/share/doc/openssl /usr/share/doc/openssl-${openssl_VERSION}
+
+# 安装一些额外的文档(可选)
+cp -vfr doc/* /usr/share/doc/openssl-${openssl_VERSION}

@@ -1,0 +1,22 @@
+cd /sources
+
+ninja_VERSION=1.12.1
+tar xf ninja-${ninja_VERSION}.tar.gz
+cd ninja-${ninja_VERSION}
+
+# 由于默认ninja最大进程数是系统CPU核心数+2可能导致系统过载，所以可以通过环境变量来限制并行进程数
+export NINJAJOBS=4
+sed -i '/int Guess/a \
+  int   j = 0;\
+  char* jobs = getenv( "NINJAJOBS" );\
+  if ( jobs != NULL ) j = atoi( jobs );\
+  if ( j > 0 ) return j;\
+' src/ninja.cc
+
+# 构建Ninja
+python3 configure.py --bootstrap
+
+# 安装软件包
+install -vm755 ninja /usr/bin/
+install -vDm644 misc/bash-completion /usr/share/bash-completion/completions/ninja
+install -vDm644 misc/zsh-completion  /usr/share/zsh/site-functions/_ninja

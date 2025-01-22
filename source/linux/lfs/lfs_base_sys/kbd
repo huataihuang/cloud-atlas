@@ -1,0 +1,17 @@
+cd /sources
+
+kbd_VERSION=2.6.4
+tar xf kbd-${kbd_VERSION}.tar.xz
+cd kbd-${kbd_VERSION}
+
+# 退格和删除键的行为在 Kbd 软件包的不同按键映射中不一致。以下补丁修复 i386 按键映射中的这个问题
+patch -Np1 -i ../kbd-2.6.4-backspace-1.patch
+
+# 删除多余的 resizecons 程序 (它需要已经不存在的 svgalib 提供视频模式文件 —— 一般使用 setfont 即可调整控制台大小) 及其手册页
+sed -i '/RESIZECONS_PROGS=/s/yes/no/' configure
+sed -i 's/resizecons.8 //' docs/man/man8/Makefile.in
+
+./configure --prefix=/usr --disable-vlock
+make
+make check
+make install
