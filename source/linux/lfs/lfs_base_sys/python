@@ -1,0 +1,33 @@
+cd /sources
+
+python_VERSION=3.12.5
+tar xf Python-${python_VERSION}.tar.xz
+cd Python-${python_VERSION}
+
+./configure --prefix=/usr        \
+            --enable-shared      \
+            --with-system-expat  \
+            --enable-optimizations
+
+make
+
+# 这里限制测试最长运行实践是一些测试偶然会陷入无限等待状态
+# Total test files: run=493/489 failed=7 skipped=28 resource_denied=3 rerun=7
+make test TESTOPTS="--timeout 120"
+
+make install
+
+# 避免LFS引导并配置网络后出现指示用户泗洪PyPi提供的pip3(因为LFS将pip3作为Python 3的一部分所以不应该单独升级pip3)
+cat > /etc/pip.conf << EOF
+[global]
+root-user-action = ignore
+disable-pip-version-check = true
+EOF
+
+# 安装预先格式化的文档(可选)
+install -v -dm755 /usr/share/doc/python-${python_VERSION}/html
+
+tar --no-same-owner \
+    -xvf ../python-${python_VERSION}-docs-html.tar.bz2
+cp -R --no-preserve=mode python-${python_VERSION}-docs-html/* \
+    /usr/share/doc/python-${python_VERSION}/html

@@ -1,0 +1,87 @@
+cd /sources
+
+systemd_VERSION=256.4
+tar xf systemd-${systemd_VERSION}.tar.gz
+cd systemd-${systemd_VERSION}
+
+# 从默认的 udev 规则中删除不必要的组 render 和 sgx
+sed -i -e 's/GROUP="render"/GROUP="video"/' \
+       -e 's/GROUP="sgx", //' rules.d/50-udev-default.rules.in
+
+# 删除一条需要完整安装 Systemd 的 udev 规则
+sed '/systemd-sysctl/s/^/#/' -i rules.d/99-systemd.rules.in
+
+# 调整硬编码的网络配置文件路径，使之适合单独安装 udev
+sed '/NETWORK_DIRS/s/systemd/udev/' -i src/basic/path-lookup.h
+
+mkdir -p build
+cd       build
+
+meson setup ..                  \
+      --prefix=/usr             \
+      --buildtype=release       \
+      -D mode=release           \
+      -D dev-kvm-mode=0660      \
+      -D link-udev-shared=false \
+      -D logind=false           \
+      -D vconsole=false
+
+# 获取软件包提供的 udev 辅助程序列表并将其保存到环境变量中 (实际上并不需要导出该变量，但这使得以非特权用户身份进行构建或使用包管理器更容易)：
+export udev_helpers=$(grep "'name' :" ../src/udev/meson.build | \
+                      awk '{print $3}' | tr -d ",'" | grep -v 'udevadm')
+
+# 只构建 udev 需要的组件
+ninja udevadm systemd-hwdb                                           \
+      $(ninja -n | grep -Eo '(src/(lib)?udev|rules.d|hwdb.d)/[^ ]*') \
+      $(realpath libudev.so --relative-to .)                         \
+      $udev_helpers
+
+# 安装
+install -vm755 -d {/usr/lib,/etc}/udev/{hwdb.d,rules.d,network}
+install -vm755 -d /usr/{lib,share}/pkgconfig
+install -vm755 udevadm                             /usr/bin/
+install -vm755 systemd-hwdb                        /usr/bin/udev-hwdb
+ln      -svfn  ../bin/udevadm                      /usr/sbin/udevd
+cp      -av    libudev.so{,*[0-9]}                 /usr/lib/
+install -vm644 ../src/libudev/libudev.h            /usr/include/
+install -vm644 src/libudev/*.pc                    /usr/lib/pkgconfig/
+install -vm644 src/udev/*.pc                       /usr/share/pkgconfig/
+install -vm644 ../src/udev/udev.conf               /etc/udev/
+install -vm644 rules.d/* ../rules.d/README         /usr/lib/udev/rules.d/
+install -vm644 $(find ../rules.d/*.rules \
+                      -not -name '*power-switch*') /usr/lib/udev/rules.d/
+install -vm644 hwdb.d/*  ../hwdb.d/{*.hwdb,README} /usr/lib/udev/hwdb.d/
+install -vm755 $udev_helpers                       /usr/lib/udev
+install -vm644 ../network/99-default.link          /usr/lib/udev/network
+
+# 安装一些在 LFS 环境中很有用的自定义规则和支持文件
+tar -xvf ../../udev-lfs-20230818.tar.xz
+make -f udev-lfs-20230818/Makefile.lfs install
+
+# 安装手册页
+tar -xf ../../systemd-man-pages-256.4.tar.xz                            \
+    --no-same-owner --strip-components=1                              \
+    -C /usr/share/man --wildcards '*/udev*' '*/libudev*'              \
+                                  '*/systemd.link.5'                  \
+                                  '*/systemd-'{hwdb,udevd.service}.8
+
+sed 's|systemd/network|udev/network|'                                 \
+    /usr/share/man/man5/systemd.link.5                                \
+  > /usr/share/man/man5/udev.link.5
+
+sed 's/systemd\(\\\?-\)/udev\1/' /usr/share/man/man8/systemd-hwdb.8   \
+                               > /usr/share/man/man8/udev-hwdb.8
+
+sed 's|lib.*udevd|sbin/udevd|'                                        \
+    /usr/share/man/man8/systemd-udevd.service.8                       \
+  > /usr/share/man/man8/udevd.8
+
+rm /usr/share/man/man*/systemd*
+
+# 最后，移除 udev_helpers 变量
+unset udev_helpers
+
+# 硬件设备的相关信息被维护在 /etc/udev/hwdb.d 和 /usr/lib/udev/hwdb.d 目录中。Udev 需要将这些信息编译到二进制数据库 /etc/udev/hwdb.bin 中。初始化该数据库
+udev-hwdb update
+
+# 每次硬件信息有更新时，都要运行该命令

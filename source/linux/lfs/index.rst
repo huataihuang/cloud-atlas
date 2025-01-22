@@ -26,6 +26,12 @@ LFS(Linux from scratch)
    lfs_cross_build_tools.rst
    lfs_chroot_build_tools.rst
    lfs_base_sys.rst
+   lfs_sys_config.rst
+   lfs_boot.rst
+   lfs_finish.rst
+   lfs_curl.rst
+   lfs_sudo.rst
+   lfs_ssh.rst
    lfs_plan.rst
 
 .. only::  subproject and html

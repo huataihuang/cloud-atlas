@@ -1,0 +1,26 @@
+# 准备字体
+cd /sources
+wget https://unifoundry.com/pub/unifont/unifont-15.1.05/font-builds/unifont-15.1.05.pcf.gz
+
+grub_VERSION=2.12
+tar xf grub-${grub_VERSION}.tar.xz
+cd grub-${grub_VERSION}
+
+mkdir -pv /usr/share/fonts/unifont &&
+gunzip -c ../unifont-15.1.05.pcf.gz > /usr/share/fonts/unifont/unifont.pcf
+
+# 添加一个缺失的文件到tar包
+echo depends bli part_gpt > grub-core/extra_deps.lst
+
+./configure --prefix=/usr        \
+            --sysconfdir=/etc    \
+            --disable-efiemu     \
+            --enable-grub-mkfont \
+            --with-platform=efi  \
+            --target=x86_64      \
+            --disable-werror     &&
+unset TARGET_CC &&
+make
+
+make install
+mv -v /etc/bash_completion.d/grub /usr/share/bash-completion/completions

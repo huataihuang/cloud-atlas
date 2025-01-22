@@ -1,0 +1,29 @@
+cd /sources
+
+coreutils_VERSION=9.5
+tar xf coreutils-${coreutils_VERSION}.tar.xz
+cd coreutils-${coreutils_VERSION}
+
+# POSIX 要求 Coreutils 中的程序即使在多字节 locale 中也能正确识别字符边界。下面应用一个补丁，以解决 Coreutils 不满足该要求的问题，并修复其他一些国际化相关的 bug
+patch -Np1 -i ../coreutils-${coreutils_VERSION}-i18n-2.patch
+
+autoreconf -fiv
+FORCE_UNSAFE_CONFIGURE=1 ./configure \
+            --prefix=/usr            \
+            --enable-no-install-program=kill,uptime
+
+make
+
+# 先运行为root用户运行设计的测试
+make NON_ROOT_USERNAME=tester check-root
+# 再运行tester用户身份的其余测试
+groupadd -g 102 dummy -U tester
+chown -R tester .
+su tester -c "PATH=$PATH make -k RUN_EXPENSIVE_TESTS=yes check" \
+   < /dev/null
+groupdel dummy
+
+make install
+mv -v /usr/bin/chroot /usr/sbin
+mv -v /usr/share/man/man1/chroot.1 /usr/share/man/man8/chroot.8
+sed -i 's/"1"/"8"/' /usr/share/man/man8/chroot.8

@@ -1,0 +1,34 @@
+cd /sources
+
+util_linux_VERSION=2.40.2
+tar xf util-linux-${util_linux_VERSION}.tar.xz
+cd util-linux-${util_linux_VERSION}
+
+# --disable 和 --without 选项防止一些警告，它们与那些需要 LFS 中不存在的依赖项，或者和其他软件包安装的程序不兼容的组件的构建过程相关。
+./configure --bindir=/usr/bin     \
+            --libdir=/usr/lib     \
+            --runstatedir=/run    \
+            --sbindir=/usr/sbin   \
+            --disable-chfn-chsh   \
+            --disable-login       \
+            --disable-nologin     \
+            --disable-su          \
+            --disable-setpriv     \
+            --disable-runuser     \
+            --disable-pylibmount  \
+            --disable-liblastlog2 \
+            --disable-static      \
+            --without-python      \
+            --without-systemd     \
+            --without-systemdsystemunitdir        \
+            ADJTIME_PATH=/var/lib/hwclock/adjtime \
+            --docdir=/usr/share/doc/util-linux-${util_linux_VERSION}
+
+make
+
+# 警告: 这里不可以用root身份运行测试套件，可能会损害系统
+touch /etc/fstab
+chown -R tester .
+su tester -c "make -k check"
+
+make install
