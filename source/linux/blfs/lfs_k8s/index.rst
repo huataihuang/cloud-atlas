@@ -1,15 +1,13 @@
-.. _k8s_dev:
+.. _lfs_k8s:
 
 ======================================
-Kubernetes Develop
+LFS(Linux from scratch) Kubernetes
 ======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   why_k8s_dev.rst
-   kfs/index
-
+   think_lfs_k8s.rst
 
 .. only::  subproject and html
 

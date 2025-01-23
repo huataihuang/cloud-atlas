@@ -211,3 +211,19 @@ GRUB和EFI的最小化启动配置
 - 关键点是 ``set root`` 指定哪个磁盘文件系统来搜索内核，我最初照抄文档中 ``set root=(hd0,2)`` 存在的问题是我的服务器有多块硬盘，启动以后存在LFS的磁盘并不一定会固定是额卑微 ``hd0`` ，所以应该修订为 ``search --set=root --fs-uuid <内核所在文件系统的 UUID>``
 - 另一个关键点是 ``ESP`` 分区是挂载为 ``/boot`` 还是 ``/boot/efi`` ，这决定了内核获取从磁盘分区开始计算到底要不要包含 ``/boot`` (见上文)
 - **我已经修订上文的配置文件**
+
+最终完成
+===========
+
+最终成功后的服务器登陆后检查
+
+.. literalinclude:: lfs_boot/df
+   :caption: 磁盘使用
+   :emphasize-lines: 3,7
+
+可以看到一个基础的Linux系统只需要 ``1.6G`` 磁盘就可以运行起来
+
+.. literalinclude:: lfs_boot/meminfo
+   :caption: 内存使用
+
+:ref:`linux_memory_management` 需要分析
