@@ -1,14 +1,11 @@
-.. _k8s_dev:
+.. _kfs:
 
 ======================================
-Kubernetes Develop
+Kubernetes from Scratch(KFS)
 ======================================
 
 .. toctree::
    :maxdepth: 2
-
-   why_k8s_dev.rst
-   kfs/index
 
 
 .. only::  subproject and html
