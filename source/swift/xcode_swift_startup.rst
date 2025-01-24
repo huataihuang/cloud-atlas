@@ -27,3 +27,10 @@ Xcode启动后，需要添加一个Apple ID用于后续程序开发或发布:
 
 - 修改多行注释 ``/* ... */`` 的开头那行 ``/*`` ，改为 ``/*:`` ，则这段注释就是 **Markup** 格式
 - 选择Xcode菜单 ``Editor -> Show Rendered Markup`` ，则在源代码显示中，Markup格式注释会自动渲染，方便阅读
+
+:ref:`git` 平台集成
+======================
+
+`Putting Your Xcode Project on GitHub, Bitbucket, or GitLab <https://swiftdevjournal.com/putting-your-xcode-project-on-github-bitbucket-or-gitlab/>`_ :
+
+- 支持和 :ref:`gitlab` 集成，可以部署自建帮本管理系统

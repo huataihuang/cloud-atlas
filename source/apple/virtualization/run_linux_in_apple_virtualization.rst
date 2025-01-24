@@ -45,9 +45,25 @@
 
 .. figure:: ../../_static/apple/virtualization/run_linux_in_apple_virtualization-4.png
 
-- 点击 ``Build and run`` ，完成编译后运行，此时会在用户目录下创建一个 ``GUI Linux VM.bundle`` 目录存储虚拟机，并弹出一个对话框让你选择安装Linux的ISO镜像
+- 点击 ``Build and run`` ，完成编译后运行，此时会在用户目录下创建一个 ``GUI Linux VM.bundle`` 目录存储虚拟机，并弹出一个对话框让你选择安装Linux的ISO镜像。选择已经下载好的 ``debian-cd_current_amd64_iso-dvd_debian-12.9.0-amd64-DVD-1.iso`` ，此时虚拟机就进入了Linux图形安装界面
 
-待续...
+.. figure:: ../../_static/apple/virtualization/run_linux_in_apple_virtualization-5.png
+
+和常规debian安装相同，最后完成安装后点击安装界面最后的完成按钮，重启debian，就能在虚拟机环境中看到一个运行的debian。安装过程非常丝滑。
+
+安装以后可以执行 :ref:`debian_init` 构建一个可用开发工作环境
+
+在debian guest虚拟机中 ``shutdown`` 之后，就可以将我们前面步骤编译好的 ``GUILinuxVirtualMachineSampleApp.app`` 复制到 ``/Applications`` 目录下进行安装:
+
+- Xcode项目导航栏中的 ``Products >> GUILinuxVirtualMachineSampleApp.app`` 图标，选择 ``Show in Finder`` ，这样打开Finder文件管理器，可以看到目录下有一个非常小巧的文件 ``GUILinuxVirtualMachineSampleApp.app`` ，复制到 ``/Applications`` 目录下就完成了安装。这样后续就像启动一个应用程序一样，点击一下鼠标启动 ``debian`` 虚拟机 
+
+.. figure:: ../../_static/apple/virtualization/run_linux_in_apple_virtualization-6.png
+
+.. note::
+
+   这是一个非常简单的部署过程，借此机会能够一窥 :ref:`macos` 内置的Virtualization能力。
+
+   如果需要更为方便完美的部署运行方式，建议使用 :ref:`lima` ，同样支持 Apple Virtualization Framework ，所以能够得到相同的性能，但是更为便捷。
 
 参考
 =======

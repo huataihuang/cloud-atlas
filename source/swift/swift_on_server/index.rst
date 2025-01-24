@@ -1,17 +1,14 @@
-.. _swift:
+.. _swift_on_server:
 
 =================================
-Swift
+Swift服务器端开发
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   swift_on_linux.rst
-   vim_for_swift.rst
-   swift_apprentice.rst
-   xcode_swift_startup.rst
-   swift_on_server/index
+   intro_swift_on_server.rst
+   vapor/index
 
 
 .. only::  subproject and html

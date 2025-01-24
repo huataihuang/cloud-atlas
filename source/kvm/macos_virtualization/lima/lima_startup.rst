@@ -39,6 +39,12 @@ Lima依赖 :ref:`qemu` 7.0或更高版本，不过只在使用QEMU驱动时需�
 .. literalinclude:: lima_startup/lima_customization
    :caption: 从模版选择定制启动
 
+模版
+=======
+
+``lima`` 通过模版来指导启动的虚拟机镜像获得、文件系统挂载等。 `Lima操作系统模版 <https://lima-vm.io/docs/templates/>`_ 提供了官方支持的发行版莫辨，以及容器、 :ref:`kubernetes` 模版
+
+
 
 参考
 =====
