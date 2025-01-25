@@ -31,6 +31,10 @@ Lima依赖 :ref:`qemu` 7.0或更高版本，不过只在使用QEMU驱动时需�
 - 选则默认的 ``Proceed with the current configuration`` 就会下载 ``ubuntu-24.10`` 服务器镜像进行运行
 - 选择 ``Choose another template (docker, podman, archlinux, fedora, ...)`` 就可以选择不同的 `Lima操作系统模版 <https://lima-vm.io/docs/templates/>`_
 
+.. note::
+
+   为了方便起停虚拟机，可以安装 :ref:`xbar` 来方便交互
+
 定制
 --------
 
@@ -43,8 +47,6 @@ Lima依赖 :ref:`qemu` 7.0或更高版本，不过只在使用QEMU驱动时需�
 =======
 
 ``lima`` 通过模版来指导启动的虚拟机镜像获得、文件系统挂载等。 `Lima操作系统模版 <https://lima-vm.io/docs/templates/>`_ 提供了官方支持的发行版莫辨，以及容器、 :ref:`kubernetes` 模版
-
-
 
 参考
 =====

@@ -46,7 +46,9 @@ lima-xbar-plugin
 .. literalinclude:: xbar/lima-plugin
    :caption: 安装 ``lima-xbar-plugin`` 插件
 
-- 然后点击 ``xbar`` 的 ``Refresh All`` 菜单，就能够看到该插件生效，能够展示当前运行的 :ref:`lima` 虚拟机
+- 然后点击 ``xbar`` 的 ``Refresh All`` 菜单，就能够看到该插件生效，能够展示当前运行的 :ref:`lima` 虚拟机。例如，我完成 :ref:`lima_run_freebsd` 之后，就可以在 ``xbar`` 上看到运行虚拟机的状态，并且可以做一些简单起停操作:
+
+.. figure:: ../../_static/apple/macos/xbar_lima.png
 
 参考
 ========

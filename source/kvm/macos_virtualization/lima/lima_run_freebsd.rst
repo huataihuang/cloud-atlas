@@ -57,6 +57,11 @@ Lima运行FreeBSD虚拟机
 
    通过 :ref:`qemu` 虚拟化，lima可以运行FreeBSD虚拟机
 
+小结
+=======
+
+我的实践显示在 lima 中使用 ``VZ`` 虚拟化不能运行FreeBSD，但是我也有点疑惑，从之前查询到信息 `Running GUI FreeBSD in a virtual machine on a Mac <https://github.com/jlduran/RunningGUIFreeBSDInAVirtualMachineOnAMac>`_ (我准备尝试一下 :ref:`run_freebsd_in_apple_virtualization` )，使用 :ref:`apple_virtualization` 框架应该能够运行FreeBSD。具体是哪里出错，我还得再研究一下。
+
 参考
 =====
 

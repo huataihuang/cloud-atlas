@@ -53,6 +53,7 @@ macOS
    fix_macbook_stuck_shift.rst
    xbar.rst
    kitty.rst
+   macos_shared_library.rst
 
 .. only::  subproject and html
 
