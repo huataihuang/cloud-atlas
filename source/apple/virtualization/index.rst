@@ -8,6 +8,7 @@ Apple Virtualization
    :maxdepth: 1
 
    intro_apple_virtualization.rst
+   apple_hypervisor.rst
    run_linux_in_apple_virtualization.rst
    run_macos_in_apple_virtualization.rst
    run_freebsd_in_apple_virtualization.rst
