@@ -7,6 +7,7 @@ iOS
 .. toctree::
    :maxdepth: 1
 
+   ios_background_execution_limits.rst
    ios_terminal.rst
    a-shell/index
    ish/index

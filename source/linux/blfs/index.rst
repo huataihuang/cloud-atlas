@@ -8,6 +8,9 @@ BLFS(Beyond Linux from scratch)
    :maxdepth: 1
 
    think_blfs.rst
+   lfs_curl.rst
+   lfs_sudo.rst
+   lfs_ssh.rst
    lfs_virtualization/index                                                                                         
    lfs_container/index                                                                                              
    lfs_k8s/index

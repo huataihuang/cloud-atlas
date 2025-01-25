@@ -19,7 +19,7 @@ a-shell简介
 
 .. note::
 
-   档Unix工具被port到iOS(vim,TeX,Python...)，一些源代码执行系统命令会使用 ``system()`` 调用，此时变异会出现报错 ``error: 'system' is unavailable: not available on iOS`` 
+   当Unix工具被port到iOS(vim,TeX,Python...)，一些源代码执行系统命令会使用 ``system()`` 调用，此时变异会出现报错 ``error: 'system' is unavailable: not available on iOS`` 
 
    `ios_system <https://github.com/holzschu/ios_system/>`_ 项目提供了一个 ``system()`` 替代，在源代码头文件中添加以下内容::
 
@@ -39,6 +39,21 @@ a-shell简介
 - 内置了 :ref:`python` / :ref:`git` (clone程序)，也就是说，我可以用它来完成我的 Cloud-Atlas 撰写，也为一些Python开发提供了实验场所
 
 可以说，如果是使用 iPad 作为 :ref:`mobile_work` ，那么 ``a-shell`` 就是非常趁手的 "居家旅行，杀人灭口 必备良药" ( 《 `唐伯虎点秋香 <https://movie.douban.com/subject/1306249/>`_ 》经典台词)。
+
+使用体验
+===========
+
+我主要想使用 :ref:`ssh` ，但是在 ``a-shell`` 中还是有很大的限制:
+
+- 由于是容器化运行，登陆后的 ``$HOME`` 路径非常长，导致如果使用 :ref:`ssh_multiplexing` 会提示 ``ControlPath`` 过长超过104字符限制:
+
+.. literalinclude:: intro_a-shell/contralpath_too_long
+   :caption: ``ControlPath`` 过长报错
+
+- 无法建立 Unix Domain Socket，提示 ``Too Long for Unix Domain Socket`` ( `Overcoming 'Too Long for Unix Domain Socket' Errors in SSH Git Cloning <https://shihtiy.com/posts/too-long-for-Unix-domain-socket/>`_
+- 端口转发无效
+
+目前还没有探索出可行的方法，待解决
 
 参考
 ======

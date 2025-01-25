@@ -9,6 +9,7 @@ QEMU
 
    qemu_images.rst
    qemu_monitor.rst
+   run_debian_in_qemu.rst
 
 .. only::  subproject and html
 

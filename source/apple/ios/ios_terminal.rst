@@ -18,6 +18,7 @@ iOS 终端程序
   - 完整的最轻量级Linux发行版，特别适合移动设备，启动非常迅速，远比 :ref:`utm` 运行的 :ref:`arch_linux` :ref:`debian` 等大型发行版快速
   - 作为路由器、 :ref:`docker` 所选择的底层Linux发行版， :ref:`alpine_linux` 具备了非常完善的Linux能力
   - 官方虽然不断更新，但是毕竟需要做迁移定制，所以和 :ref:`alpine_linux` 最新版本依然有很大的gap
+  - 实践发现无法使用 ``iPhone mirror`` 功能来控制(我原本想能够快速输入)
   - 如果需要比 :ref:`a-shell` 更为复杂的本地开发环境，则非常推荐使用 :ref:`ish`
 
 - :ref:`utm` : 完整的 :ref:`qemu` 虚拟化解决方案，目标是运行各种操作系统，所以也意味着庞大复杂
