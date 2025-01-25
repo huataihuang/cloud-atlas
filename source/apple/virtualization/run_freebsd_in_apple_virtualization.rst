@@ -8,6 +8,16 @@
 
    我在学习和实践 :ref:`freebsd` ，但同时我又需要使用 :ref:`macos` 来完成日常开发工作，所以考虑通过Apple Virtualization框架来运行一个 :ref:`freebsd` 虚拟机
 
+   实践验证方法其实和 :ref:`run_linux_in_apple_virtualization` 完全一样，但是很不幸，FreeBSD在Virtualization framework运行下失败。
+
+.. warning::
+
+   目前我的实践Apple Virtualization无法运行FreeBSD ``14.2`` ，从 `UTM: FreeBSD 14.0-CURRENT does not boot #3487 <https://github.com/utmapp/UTM/issues/3487>`_ 来看，似乎这个问题从FreeBSD 14开始就无法正常启动。
+
+目前验证 :ref:`lima_run_freebsd` 使用 :ref:`qemu` 运行 FreeBSD ``14.2`` 是正常工作的，但是 ``VZ`` (Apple Virtualization) framework 看来无法支持FreeBSD。
+
+暂时放弃尝试...
+
 参考
 =======
 
