@@ -82,6 +82,127 @@ CPU microcode
 Bash Shell启动文件
 ======================
 
+有关bash的一些环境设置:
+
+- 交互式登录 shell 在成功登录后通过读取 ``/etc/passwd`` 文件使用 ``/bin/login`` 启动
+- shell通常读取 ``/etc/profile`` 和用户私有等效 ``~/.bash_profile`` 或 ``~/.profile``
+- 在 私有等效 ``~/.bash_profile`` 或 ``~/.profile`` 调用读取 ``~/.bashrc``
+- 通常自己 **定制内容** 应该存放在 ``~/.bashrc``
+- ``~/.bash_logout`` 在用户推出交互式登陆 shell 时被读取和执行(类似退出清理动作可以在这里设置)
+- 很多发行版使用 ``/etc/bashrc`` 进行非登陆shell的系统范围初始化，该文件通常还会从用户的 ``~/.bashrc`` 文件中调用而不是直接内置在bash本身中
+
+- 创建 ``/etc/profile``
+
+.. literalinclude:: after_lfs_config/profile
+   :caption: ``/etc/profile``
+
+- 创建 ``/etc/profile.d`` 目录
+
+.. literalinclude:: after_lfs_config/profile.d
+   :caption: ``/etc/profile.d`` 目录
+
+- ``/etc/profile.d/bash_completion.sh``
+
+.. note::
+
+   以下bash补全脚本会在bash环境中添加许多行(通常超过1000行)，并且很难用 ``set`` 命令检查简单的环境变量。省略词脚本不会映像bash使用tab键进行文件名补全的能力。
+
+   **我没有添加这个脚本**
+
+.. literalinclude:: after_lfs_config/bash_completion.sh
+   :caption: ``bash_completion.sh``
+
+确保目录存在:
+
+.. literalinclude:: after_lfs_config/bash_completion.d
+   :caption: 确保 ``/etc/bash_completion.d`` 目录存在
+
+- ``/etc/profile.d/dircolors.sh``
+
+这个脚本使用 ``~/.dircolors`` 和 ``/etc/dircolors`` 文件夹来控制目录列表中文件的颜色。可以控制 ``ls --color`` 等命令的色彩输出
+
+.. literalinclude:: after_lfs_config/dircolors.sh
+   :caption: ``/etc/profile.d/dircolors.sh``
+
+- ``/etc/profile.d/extrapaths.sh``
+
+这个脚本向 ``PATH`` 添加了一些用用的路径，并可用于定制所有用户可能需要的其他 ``PATH`` 相关环境变量(例如 ``LD_LIBRARY_PATH`` 等)
+
+.. literalinclude:: after_lfs_config/extrapaths.sh
+   :caption: ``/etc/profile.d/extrapaths.sh``
+
+- ``/etc/profile.d/readline.sh``
+
+这个脚本设置默认的 ``inputrc`` 配置文件
+
+.. literalinclude:: after_lfs_config/readline.sh
+   :caption: ``/etc/profile.d/readline.sh``
+
+- ``/etc/profile.d/umask.sh``
+
+设置 ``umask`` 值对于安全非常重要，这里对系统用户及当前用户名和组名不同时，默认组写权限关闭。
+
+.. literalinclude:: after_lfs_config/umask.sh
+   :caption: ``/etc/profile.d/umask.sh``
+
+- ``/etc/profile.d/i18n.sh``
+
+这个脚本设置本地语言支持所需的环境变量
+
+.. literalinclude:: after_lfs_config/i18n.sh
+   :caption: ``/etc/profile.d/i18n.sh``
+
+- ``/etc/bashrc``
+
+基础 ``/etc/bashrc`` ，请阅读文件中的注释
+
+.. literalinclude:: after_lfs_config/bashrc
+   :caption: ``/etc/bashrc``
+
+- ``~/.bash_profile``
+
+以下时一个基础的 ``~/.bash_profile`` ，如果希望每个新用户自动拥有这个文件，只需要将命令输出更为为 ``/etc/skel/.bash_profile`` ，并在运行命令后检查权限。然后可以将 ``/etc/.skel/.bash_profile`` 复制到现有用户(包括root)的祝目录，并是饿到甚至所有者和组
+
+.. literalinclude:: after_lfs_config/bash_profile
+   :caption: ``~/.bash_profile``
+
+- ``~/.bsashrc``
+
+.. literalinclude:: after_lfs_config/home_bashrc
+   :caption: ``~/.bashrc``
+
+- ``~/.bash_logout``
+
+这里是空白的 ``~/.bash_logout`` 模版。注意基本的 ``~/.bash_logout`` 并不包含 ``clear`` 命令，这是因为 ``clear`` 是由 ``/etc/issue`` 文件处理的
+
+.. literalinclude:: after_lfs_config/bash_logout
+   :caption: ``~/.bash_logout``
+
+- ``/etc/dircolors``
+
+如果要使用 ``dircolors`` 能力，则执行以下命令
+
+也可以在 ``/etc/skel`` 目录下添加同样的 ``.colors`` ，这样新用户就会自动拥有 ``~/.dircolors`` 文件以便用户自己定制目录颜色
+
+.. literalinclude:: after_lfs_config/dircolors
+   :caption: ``/etc/dircolors``
+
+``/etc/vimrc`` 和 ``~/.vimrc`` 文件
+=====================================
+
+- 基本的 ``/etc/vimrc`` 和 ``~/.vimrc`` 文件
+
+.. literalinclude:: after_lfs_config/vimrc
+   :caption: 基本的 ``/etc/vimrc`` 和 ``~/.vimrc``
+
+随机数生成
+===============
+
+通过 ``blfs-bootscripts-20240416`` 软件包安装 ``/etc/rc.d/init.d/random`` 初始化脚本
+
+.. literalinclude:: after_lfs_config/random
+   :caption: 安装 ``/etc/rc.d/init.d/random`` 初始化脚本
+
 参考
 =====
 
