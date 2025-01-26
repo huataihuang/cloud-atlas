@@ -32,6 +32,11 @@ LFS手册提供了一个很好的使用思路: 在Host主机中通过 :ref:`chro
 .. literalinclude:: lfs_use/bashrc
    :caption: 调整 ``~/.bashrc`` 将 ``$LFS`` 设置为 ``/chroot/lfs``
 
+- 参考 :ref:`thick_jail` 的思路，在物理主机上创建 ``/sketch`` 目录，将 ``/etc`` 目录下需要可以修订的配置文件复制到这个目录下并建立软链接，这样当 ``/etc`` 目录被 ``mountbind`` 到 ``$LFS`` 中以后，这些文件对于jail内部是可以自由修订的
+
+.. literalinclude:: lfs_use/sketch
+   :caption: 构建一个需要为每个jail定制的可修改目录 ``/sketch``
+
 - 创建设备目录:
 
 .. literalinclude:: lfs_chroot_build_tools/mkdir
@@ -119,3 +124,8 @@ chroot报错 ``No such file or directory``
 .. note::
 
    我已经将这个补充命令添加到前面的执行脚本命令中，如果你按照我的步骤，应该不再报错
+
+参考
+======
+
+- `chroot: failed to run command ‘/bin/bash’: No such file or directory <https://unix.stackexchange.com/questions/128046/chroot-failed-to-run-command-bin-bash-no-such-file-or-directory>`_ 这个回答关于chroot无法找到文件的解释是正确的
