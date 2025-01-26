@@ -29,6 +29,7 @@ LFS(Linux from scratch)
    lfs_sys_config.rst
    lfs_boot.rst
    lfs_finish.rst
+   lfs_use.rst
    lfs_plan.rst
 
 .. only::  subproject and html

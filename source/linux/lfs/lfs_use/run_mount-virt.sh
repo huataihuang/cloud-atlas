@@ -1,0 +1,1 @@
+bash ~/mount-virt.sh
