@@ -28,13 +28,13 @@ macOS区分大小写APFS
 
 - 在APFS上添加子卷:
 
-.. figure:: ../../_static/apple/macos/apfs_add_subvolume.png
+.. figure:: ../../../_static/apple/macos/apfs/apfs_add_subvolume.png
    
    添加子卷
 
 注意创建子卷要选择 ``APFS (Case-sensitive)`` 格式:
 
-.. figure:: ../../_static/apple/macos/apfs_add_subvolume_case_sensitive.png
+.. figure:: ../../../_static/apple/macos/apfs/apfs_add_subvolume_case_sensitive.png
    
    添加区分字符大小写的子卷
 

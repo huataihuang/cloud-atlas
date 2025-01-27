@@ -44,8 +44,7 @@ macOS
    macos_vnc.rst
    macos_user_account_cmd.rst
    macos_filesystem.rst
-   macos_apfs_case-sensitive.rst
-   macos_apfs_cli.rst
+   apfs/index
    extfs.rst
    vlc_play_bluray.rst
    macos_recovery.rst
