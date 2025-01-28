@@ -26,6 +26,22 @@ GUI
 - `lima-xbar-plugin <https://github.com/unixorn/lima-xbar-plugin>`_ 使用 :ref:`xbar` 的管理VM启动、停止、状态等
 - `lima-gui <https://github.com/afbjorklund/lima-gui>`_ 使用Qt开发的Lima管理器
 
+限制和不足
+============
+
+- Lima目前对USB设备共享支持不足(文档中没有关于如何共享Host主机的USB设备到虚拟机，根据issue搜索看来还没有支持):
+
+  - `[POC] USB sharing with host #1317 <https://github.com/lima-vm/lima/pull/1317>`_ 目前还是讨论草稿:
+
+    - 默认使用的VZ引擎( :ref:`apple_virtualization` )，但没有支持USB设备( `Apple Virtualization / USB Devices <https://developer.apple.com/documentation/virtualization/usb-devices?language=objc>`_ 显示底层虚拟框架是支持USB设备的，似乎Lima还没有相关开发)
+    - 如果使用 :ref:`qemu` 引擎，则可以通过 ``qemu-system-x86_64`` 命令参数 ``-device`` 将USB设备连接到虚拟机(启动VM前需要先连接USB设备并获取USB设备id) : 具体方法见 `Can I pass through a usb port via qemu command line <https://unix.stackexchange.com/questions/452934/can-i-pass-through-a-usb-port-via-qemu-command-line>`_
+
+.. note::
+
+   如果需要运行纯 ref:`qemu` 虚拟机，那么优先使用 :ref:`utm` (专注qemu虚拟化，交互方便)
+
+   如果在Apple Silicon硬件上运行，并且只使用 :ref:`linux` 和 :ref:`macos` 虚拟机，那么使用 :ref:`tart` 较好(完全 :ref:`apple_virtualization` 技术，且只专注Apple Silicon)
+
 参考
 =====
 

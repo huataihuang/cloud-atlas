@@ -6,7 +6,7 @@ Identity Access Management(IAM)简介
 
 .. note::
 
-   `GitHub: casbin/awesome-auth <https://github.com/casbin/awesome-auth>`_ 开源的 `Casbin.org <https://casbin.org/>`_ 维护了一个汇集 ``认证 & 授权 & SSO & IAM`` 开源项目列表，可以作为研究起点。
+   `GitHub: casbin/awesome-auth <https://github.com/casbin/awesome-auth>`_ 开源的 `Casbin.org <https://casbin.org>`_ 维护了一个汇集 ``认证 & 授权 & SSO & IAM`` 开源项目列表，可以作为研究起点。
 
    要实现 :ref:`info_service` 需要构建统一的 ``SSO & IAM`` 系统
 

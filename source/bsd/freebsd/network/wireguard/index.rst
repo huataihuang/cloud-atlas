@@ -1,17 +1,13 @@
-.. _freebsd_startup:
+.. _freebsd_wireguard:
 
 =================================
-FreeBSD起步
+FreeBSD WireGuard
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   freebsd_on_intel_mac.rst
-   freebsd_shutdown.rst
-   freebsd_static_ip.rst
-   freebsd_init.rst
-   freebsd_vm_init.rst
+   freebsd_wireguard_startup.rst
 
 .. only::  subproject and html
 
