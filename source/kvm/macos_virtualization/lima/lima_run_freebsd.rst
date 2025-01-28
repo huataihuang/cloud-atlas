@@ -4,6 +4,23 @@
 Lima运行FreeBSD虚拟机
 =======================
 
+为了方便兼顾 :ref:`swift` 开发，同时降低每次反复折腾 :ref:`linux_desktop` (特别是 :ref:`gentoo_sway_fcitx` 非常折腾)，我现在重新把桌面回归到 :ref:`macos` 。为了能够继续学习实践 :ref:`freebsd` 技术，改为采用 :ref:`lima` 虚拟机运行。不过，我也同时 :ref:`freebsd_on_intel_mac` ，确保能够在实际硬件和虚拟环境都能不断磨练FreeBSD相关技能。
+
+.. note::
+
+   由于Lima目前不支持USB设备支持，而我近期考虑在USB设备上构建 :ref:`lfs` ；并且，Lima实际上也是通过 :ref:`qemu` 来运行FreeBSD。我最终决定改为采用 :ref:`utm` 来统一运行虚拟化。
+
+   后续可能会继续在 :ref:`colima` 中使用Lima，原因主要考虑磁盘映射便捷。但也可能会继续使用 :ref:`utm`
+
+.. note::
+
+   本文记录我在 :ref:`lima` 尝试运行FreeBSD虚拟机的两种后端: :ref:`qemu` 和 :ref:`apple_virtualization` (VZ)。目前实践验证，FreeBSD 14.2 需要在 :ref:`qemu` 环境运行。
+
+   完成运行FreeBSD之后，则进行 :ref:`freebsd_vm_init` (相对 :ref:`freebsd_init` 会多一些环境设置步骤)
+
+lima的FreeBSD模版
+===================
+
 - 准备模版文件 ``/usr/local/share/lima/templates/freebsd.yaml`` (具体模版目录可能根据lima安装发布，如果配置文件没有放到正确位置 ``lima start`` 会提示找不到 ``.../freebsd.yaml`` ，则根据提示将配置文件复制到对应位置即可) :
 
 .. literalinclude:: lima_run_freebsd/freebsd.yaml
@@ -35,6 +52,10 @@ Lima运行FreeBSD虚拟机
 
 .. literalinclude:: lima_run_freebsd/start_freebsd_no_vm-type_output
    :caption: 不指定VZ启动freebsd
+
+.. note::
+
+   lima 1.0 开始，如果macOS >= 13.5 ，则新建实例默认使用 ``VZ`` ( :ref:`apple_virtualization` 后端)。见 `Lima Documentatation / Configuration guide / VM types <https://lima-vm.io/docs/config/vmtype/>`_
 
 - 修订启动，指定qemu
 

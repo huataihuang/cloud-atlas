@@ -49,7 +49,7 @@ CTunnel
 - 从远端NGINX服务器上反向访问代理端口 ``127.0.0.1:24180`` 端口，这里使用 ``telnet`` 模拟访问，显示立即被断开:
 
 .. literalinclude:: rstunnel/telnet
-   :cpation: telnet测试反向代理端口
+   :caption: telnet测试反向代理端口
    :emphasize-lines: 3
 
 手工执行了一次 ``timeout 3 nc localhost 3128`` ，然后检查 ``echo $?`` 发现返回码是 ``124``

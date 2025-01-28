@@ -14,6 +14,7 @@ FreeBSD网络
    freebsd_usb_tethering_wifi.rst
    freebsd_proxy.rst
    pfsense/index
+   wireguard/index
 
 .. only::  subproject and html
 
