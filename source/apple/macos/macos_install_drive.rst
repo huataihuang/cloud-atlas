@@ -20,8 +20,11 @@ Store中选择最新操作系统安装升级，但是在下载了安装软件之
 
 - 在终端执行以下命令创建启动安装U盘:
 
-.. literalinclude:: macos_install_drive/createinstallmedia
-   :caption: 创建启动安装U盘
+.. literalinclude:: macos_install_drive/createinstallmedia_big_sur
+   :caption: 创建Big Sur启动安装U盘
+
+.. literalinclude:: macos_install_drive/createinstallmedia_sequoia
+   :caption: 创建Sequoia启动安装U盘
 
 修改安全设置
 ================
