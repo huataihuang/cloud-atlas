@@ -8,9 +8,13 @@ Lima运行FreeBSD虚拟机
 
 .. note::
 
-   由于Lima目前不支持USB设备支持，而我近期考虑在USB设备上构建 :ref:`lfs` ；并且，Lima实际上也是通过 :ref:`qemu` 来运行FreeBSD。我最终决定改为采用 :ref:`utm` 来统一运行虚拟化。
+   由于Lima目前不支持USB设备支持，而我近期考虑在USB设备上构建 :ref:`lfs` ；并且，Lima实际上也是通过 :ref:`qemu` 来运行FreeBSD。 :strike:`我最终决定改为采用 utm 来统一运行虚拟化。`
 
-   后续可能会继续在 :ref:`colima` 中使用Lima，原因主要考虑磁盘映射便捷。但也可能会继续使用 :ref:`utm`
+   但是，目前不管是 Lima 还是 :ref:`utm` ，都没有实现 :ref:`apple_virtualization` 虚拟化下的USB设备支持。这导致不管怎样，都需要使用 :ref:`qemu` 来运行 :ref:`freebsd` 以及需要访问USB设备的 :ref:`linux` 虚拟机。
+
+   :ref:`utm` 的优点是图形化交互界面，完全和商业软件 :ref:`vmware_fusion` 对齐
+
+   我 :ref:`think_apple_virtualization` 之后，目前依然主力选择 :ref:`lima`
 
 .. note::
 
