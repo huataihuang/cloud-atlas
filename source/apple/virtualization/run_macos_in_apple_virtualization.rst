@@ -12,7 +12,7 @@ Apple Virtualization Framework官方提供支持两种操作系统作为Guest虚
 
 - 好玩: 可以在一个Mac设备中同时(或先后)运行历代macOS系统
 - 免费: 没有任何license费用，并且随着macOS升级能够同步得到更新
-- 测试友好: 可以在一台Mac硬件中运行各种 :ref:`macos` 版本，为测试开发的应用兼容性提供环境
+- 测试友好: 可以在一台Mac硬件中运行各种 :ref:`macos` 版本，为测试开发的应用兼容性提供环境 **并且不用担心高风险操作摧毁系统**
 - 一次部署随处运行: 可以构建一个纯净的 :ref:`macos` 并按需安装初始化，虚拟机可以迁移到任何兼容的macOS硬件上运行，随时恢复到最初始的工作环境(即使破坏了也可立即恢复)
 - 集成 `Using iCloud with macOS virtual machines <https://developer.apple.com/documentation/virtualization/using-icloud-with-macos-virtual-machines>`_ 可以实现虚拟机数据无缝迁移
 
@@ -20,9 +20,13 @@ Apple Virtualization Framework官方提供支持两种操作系统作为Guest虚
 
    之前我尝试在 :ref:`vmware_macos_on_macos` 部署macOS来构建 :ref:`darwin-jail` ，但是我发现 :ref:`vmware_fusion` 运行macOS虚拟机性能很差。而采用macOS内建的Virtualization理论上可以获得较好的虚拟性能。
 
+.. warning::
+
+   已经验证，很不幸:  ``Apple Virtualization Framework`` 的案例代码无法在 **Intel架构** 下运行 macOS，这应该也是目前开源社区都没有任何支持Intel架构原生运行macOS的原因。 **底层VZ框架不支持Intel架构运行macOS虚拟机** 
+
 .. note::
 
-   我计划在苹果发布 macOS 15.3 正式版时候进行这项测试，构建一个完整的开发测试环境
+   等我有新的 :ref:`mac_mini_2024` 我再来尝试实践...
 
 参考
 ======

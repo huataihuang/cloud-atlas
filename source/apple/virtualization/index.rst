@@ -7,7 +7,7 @@ Apple Virtualization
 .. toctree::
    :maxdepth: 1
 
-   intro_apple_virtualization.rst
+   think_apple_virtualization.rst
    apple_hypervisor.rst
    run_linux_in_apple_virtualization.rst
    run_macos_in_apple_virtualization.rst
