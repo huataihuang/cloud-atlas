@@ -77,6 +77,13 @@ darwin-jail
 
 - 需要进一步学习 :ref:`macos_apfs_cli`
 
+一些限制和问题
+================
+
+- 无法在 ``chroot`` 环境中使用 :ref:`tmux` 和 ``screen`` : ``tmux`` 直接退出， ``screen`` 则提示错误 ``Must be connected to a terminal.``
+
+参考 `How do I use the terminal SCREEN when chrooted? <https://superuser.com/questions/487013/how-do-i-use-the-terminal-screen-when-chrooted>`_ ，需要将 ``/dev/pts`` (pseudo-terminal文件系统 ``devpts`` 挂载到chroot内部。不过，方法是针对Linux的，我没有找到macOS下方法。
+
 将Darwin rootfs作为Docker镜像
 ================================
 
