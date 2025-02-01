@@ -4,6 +4,7 @@
 FreeBSD初始化
 ==================
 
+
 终端程序安装
 =============
 
@@ -18,6 +19,12 @@ FreeBSD初始化
 
 .. literalinclude:: freebsd_init/chsh
    :caption: 设置bash作为SHELL
+
+创建admin账号以及设置sudo
+============================
+
+.. literalinclude:: ../container/jail/jail_init/user
+   :caption: 创建admin
 
 桌面程序安装
 =================

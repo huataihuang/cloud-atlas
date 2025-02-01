@@ -10,6 +10,15 @@ FreeBSD虚拟机初始化
 
    部分初始化工作和 :ref:`freebsd_init` 重叠，步骤共用。
 
+更新和升级系统
+================
+
+系统安装以后可以通过以下命令更新升级
+
+.. literalinclude:: freebsd_init/upgrade
+   :caption: 更新升级FreeBSD
+
+
 终端程序安装
 =============
 
