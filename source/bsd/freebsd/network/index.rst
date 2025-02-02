@@ -10,6 +10,7 @@ FreeBSD网络
    freebsd_wifi.rst
    freebsd_wifi_bcm43602.rst
    freebsd_broadcom_wifi_bcm43602.rst
+   freebsd_static_ip.rst
    freebsd_route.rst
    freebsd_usb_tethering_wifi.rst
    freebsd_proxy.rst
