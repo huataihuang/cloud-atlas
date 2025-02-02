@@ -8,7 +8,7 @@ Raspbian配置静态IP
 
    ``raspi-config`` 只提供了无线配置，没有提供有线网络配置。有线网络配置可以通过 ``nmtui`` 交互工具来完成配置。
 
-   2024年10月我的实践发现默认系统没有使用 ``dhcpcd`` ，也就导致本文经验无法使用。不过，使用 ``nmtui`` 交互可以非常容易配置。待我后续再仔细研究一下底层实现原理。
+   2024年10月我的实践发现默认系统没有使用 ``dhcpcd`` ，也就导致本文经验无法使用。原来，现在 :ref:`debian` / :ref:`ubuntu_linux` 发行版开始改为使用 :ref:`networkmanager` 管理网络，所以使用 ``nmtui`` 交互可以非常容易配置，也可以采用 :ref:`raspbian_static_ip_nmcli` 
 
    但是， :ref:`archlinux_wpa_supplicant` 是采用 ``dhcpcd`` 分配IP地址的，所以可以使用本文方法为 :ref:`arch_linux` 的无线网络分配静态地址
 
