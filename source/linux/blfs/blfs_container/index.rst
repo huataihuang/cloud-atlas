@@ -1,13 +1,13 @@
-.. _lfs_k8s:
+.. _blfs_container:
 
 ======================================
-LFS(Linux from scratch) Kubernetes
+BLFS(Linux from scratch)容器
 ======================================
 
 .. toctree::
    :maxdepth: 1
 
-   think_lfs_k8s.rst
+   think_blfs_container.rst
 
 .. only::  subproject and html
 

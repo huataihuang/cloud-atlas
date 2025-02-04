@@ -9,6 +9,7 @@ WireGuard VPN
 
    intro_wireguard.rst
    deploy_wireguard.rst
+   udp2raw_wireguard.rst
 
 .. only::  subproject and html
 

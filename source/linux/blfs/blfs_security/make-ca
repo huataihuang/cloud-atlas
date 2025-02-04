@@ -1,0 +1,48 @@
+cd /sources
+
+make_ca_VERSION=1.14
+tar xf make-ca-${make_ca_VERSION}.tar.gz
+cd make-ca-${make_ca_VERSION}
+
+# make-ca脚本会瞎子啊和处理包含在 certdata.txt 文件中的证书作为p11-kit信任模块的信任发布者
+make install &&
+install -vdm755 /etc/ssl/local
+
+# 注意: 这步一定要确保成功，因为需要下载存放一个 /etc/ssl/certdata.txt
+# 这个 certdata.txt 将用于后续 Adding Additional CA Certificates
+# 注意: 这个命令执行失败是应为GFW屏蔽了Mozilla的证书下载服务器 https://hg.mozilla.org/ ，需要设置代理
+# 注意: 只有这个命令执行成功才能确保本地根证书正确，才能使用 curl 下载 HTTPS 文件
+/usr/sbin/make-ca -g
+
+# 需要周期性执行以下命令，所以需要先安装一个fcron以便能够定时执行
+# 然后执行以下命令创建定时任务
+mkdir /etc/cron.weekly
+cat > /etc/cron.weekly/update-pki.sh << "EOF" &&
+#!/bin/bash
+/usr/sbin/make-ca -g
+EOF
+chmod 754 /etc/cron.weekly/update-pki.sh
+
+# 添加CA证书 Adding Additional CA Certificates
+# 也就是更新之前 ``install -vdm755 /etc/ssl/local`` 在 ``/etc/ssl/local`` 目录下生成的
+# CAcert_Class_1_root.pem 和 CAcert_Class_3_root.pem
+# 初次安装这个步骤不需要，不过后续更新了 /etc/ssl/certdata.txt 则需要执行
+wget http://www.cacert.org/certs/root.crt &&
+wget http://www.cacert.org/certs/class3.crt &&
+openssl x509 -in root.crt -text -fingerprint -setalias "CAcert Class 1 root" \
+        -addtrust serverAuth -addtrust emailProtection -addtrust codeSigning \
+        > /etc/ssl/local/CAcert_Class_1_root.pem &&
+openssl x509 -in class3.crt -text -fingerprint -setalias "CAcert Class 3 root" \
+        -addtrust serverAuth -addtrust emailProtection -addtrust codeSigning \
+        > /etc/ssl/local/CAcert_Class_3_root.pem &&
+/usr/sbin/make-ca -r
+
+# 设置Python3使用系统证书，则添加以下变量
+mkdir -pv /etc/profile.d &&
+cat > /etc/profile.d/pythoncerts.sh << "EOF"
+# Begin /etc/profile.d/pythoncerts.sh
+
+export _PIP_STANDALONE_CERT=/etc/pki/tls/certs/ca-bundle.crt
+
+# End /etc/profile.d/pythoncerts.sh
+EOF

@@ -10,13 +10,17 @@ BLFS(Beyond Linux from scratch)
    think_blfs.rst
    after_lfs_config.rst
    blfs_security.rst
-   lfs_curl.rst
+   blfs_graphics_and_font_libraries.rst
+   blfs_networking_libraries.rst
+   blfs_python_modules.rst
+   blfs_general_libraries.rst
    blfs_file_systems.rst
    blfs_system_utilities.rst
-   lfs_virtualization/index                                                                                         
-   lfs_container/index                                                                                              
-   lfs_k8s/index
-   lfs_desktop/index
+   blfs_prgramming.rst
+   blfs_virtualization/index
+   blfs_container/index
+   blfs_k8s/index
+   blfs_desktop/index
 
 
 .. only::  subproject and html

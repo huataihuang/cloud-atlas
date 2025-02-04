@@ -4,6 +4,8 @@
 Nvidia Tesla T10 vs T4 GPU运算卡
 =================================
 
+.. _tesla_t10:
+
 Tesla T10
 ============
 
@@ -24,6 +26,16 @@ TU102图形处理器芯片面积为 754 mm²，包含18600 million(186亿)晶体
 - 使用1x8针电源获取电力，最大额定功耗为 150w
 - PCI-Express 3.0 x16
 - 尺寸: 267mm长， 111mm宽，单插槽被动冷却
+
+实际使用
+----------
+
+2025年春节入手了 Tesla T10，采用以下方案实践:
+
+- :ref:`blfs_qemu` 运行 :ref:`ovmf_tesla_t10`
+- :ref:`qemu_docker_tesla_t10` 在QEMU虚拟机中运行docker容器化使用Tesla T10，分别安装 ``CUDA driver`` 和 ``CUDA``
+- :ref:`vgpu` 方式将 :ref:`tesla_p10` 和 :ref:`tesla_t10` 划分为多块vGPU，分别提供给不同虚拟机
+- 构建 :ref:`kubernetes` 集群，实现规模化部署以及监控维护
 
 Tesla T4
 ===========

@@ -1,0 +1,41 @@
+cd /sources
+
+qemu_VERSION=9.0.2
+tar xf qemu-${qemu_VERSION}.tar.xz
+cd qemu-${qemu_VERSION}
+
+# 添加用户组名
+usermod -a -G kvm admin
+
+# qemu可以运行不同平台，当使用 --target-list 并使用逗号分隔的列表，则可以构建多个目标平台
+if [ $(uname -m) = i686 ]; then
+   QEMU_ARCH=i386-softmmu
+else
+   QEMU_ARCH=x86_64-softmmu
+fi
+
+
+mkdir -vp build &&
+cd        build &&
+
+../configure --prefix=/usr               \
+             --sysconfdir=/etc           \
+             --localstatedir=/var        \
+             --target-list=$QEMU_ARCH    \
+             --audio-drv-list=alsa       \
+             --disable-pa                \
+             --enable-slirp              \
+             --docdir=/usr/share/doc/qemu-${qemu_VERSION} &&
+
+unset QEMU_ARCH &&
+
+make
+
+make install
+
+#修订helper脚本属主，这个脚本将被 "bridge" 网络设备使用
+chgrp kvm  /usr/libexec/qemu-bridge-helper &&
+chmod 4750 /usr/libexec/qemu-bridge-helper
+
+# 为方便使用构建软链接
+ln -sv qemu-system-`uname -m` /usr/bin/qemu

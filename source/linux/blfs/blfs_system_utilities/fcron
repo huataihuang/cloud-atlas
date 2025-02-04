@@ -1,0 +1,35 @@
+cd /sources
+
+fcron_VERSION=3.2.1
+tar xf fcron-${fcron_VERSION}.src.tar.gz
+cd fcron-${fcron_VERSION}
+
+# Fcron使用syslog的cron机制来记录所有消息
+
+cat >> /etc/syslog.conf << "EOF"
+# Begin fcron addition to /etc/syslog.conf
+
+cron.* -/var/log/cron.log
+
+# End fcron addition
+EOF
+
+# 重启syslogd是配置生效
+/etc/rc.d/init.d/sysklogd reload
+
+# 出于安全原因，需要为fcron创建一个普通用户和组
+groupadd -g 22 fcron &&
+useradd -d /dev/null -c "Fcron User" -g fcron -s /bin/false -u 22 fcron
+
+# 修订文档的位置
+find doc -type f -exec sed -i 's:/usr/local::g' {} \;
+
+# 安装
+./configure --prefix=/usr          \
+            --sysconfdir=/etc      \
+            --localstatedir=/var   \
+            --without-sendmail     \
+            --with-boot-install=no \
+            --with-systemdsystemunitdir=no &&
+make
+make install

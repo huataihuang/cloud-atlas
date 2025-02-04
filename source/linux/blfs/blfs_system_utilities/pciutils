@@ -1,0 +1,27 @@
+cd /sources
+
+pciutils_VERSION=3.13.0
+tar xf pciutils-${pciutils_VERSION}.tar.gz
+cd pciutils-${pciutils_VERSION}
+
+# 避免安装pci.ids，防止和hwdata软件包冲突
+sed -r '/INSTALL/{/PCI_IDS|update-pciids /d; s/update-pciids.8//}' \
+    -i Makefile
+
+# 安装PCI工具
+make PREFIX=/usr                \
+     SHAREDIR=/usr/share/hwdata \
+     SHARED=yes
+
+make PREFIX=/usr                \
+     SHAREDIR=/usr/share/hwdata \
+     SHARED=yes                 \
+     install install-lib        &&
+
+chmod -v 755 /usr/lib/libpci.so
+
+# 然后再安装 hwdata 中的pci.ids文件
+hwdata_VERSION=0.385
+cd /sources/hwdata-${hwdata_VERSION}
+
+install -m 644 pci.ids /usr/share/hwdata

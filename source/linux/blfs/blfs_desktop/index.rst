@@ -1,13 +1,12 @@
-.. _lfs_container:
+.. _blfs_desktop:
 
 ======================================
-LFS(Linux from scratch)容器
+BLFS(Beyond Linux from scratch)桌面
 ======================================
 
 .. toctree::
    :maxdepth: 1
 
-   think_lfs_container.rst
 
 .. only::  subproject and html
 
