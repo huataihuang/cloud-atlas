@@ -4,6 +4,10 @@
 FreeBSD静态IP设置
 ==================
 
+.. note::
+
+   也可以参考 :ref:`freebsd_static_ip_startup`
+
 :ref:`freebsd_on_intel_mac` ，由于初始FreeBSD无法识别无线网卡，所以采用 :ref:`iptables_masquerade` 结合本文静态IP配置，先让FreeBSD能够连接Internet进行更新，并进一步配置 :ref:`freebsd_wifi` 。
 
 - 检查主机网络::

@@ -1,8 +1,8 @@
-.. _freebsd_static_ip:
+.. _freebsd_static_ip_startup:
 
-=====================
-FreeBSD配置静态IP
-=====================
+===========================
+FreeBSD配置静态IP快速起步
+===========================
 
 FreeBSD的静态IP地址配置位于 ``/etc/rc.conf`` ，这里假设有线网卡命名为 ``ue0`` (使用 ``ifconfig`` 可以观察到)
 

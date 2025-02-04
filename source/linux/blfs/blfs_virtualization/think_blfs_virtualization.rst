@@ -1,8 +1,8 @@
-.. _think_lfs_virtualization:
+.. _think_blfs_virtualization:
 
-==================================
-思考LFS(Linux from scratch)虚拟化
-==================================
+=============================================
+思考BLFS(Beyond Linux from scratch)虚拟化
+=============================================
 
 .. note::
 

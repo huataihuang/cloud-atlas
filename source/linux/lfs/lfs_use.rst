@@ -10,10 +10,10 @@
 
 我有自己的计划，在 :ref:`think_blfs` 中构想:
 
-- :ref:`lfs_virtualization`
-- :ref:`lfs_container`
-- :ref:`lfs_k8s`
-- :ref:`lfs_desktop`
+- :ref:`blfs_virtualization`
+- :ref:`blfs_container`
+- :ref:`blfs_k8s`
+- :ref:`blfs_desktop`
 
 主要基于我的工作中心是后端。
 

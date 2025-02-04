@@ -11,7 +11,7 @@
 
 .. note::
 
-   这是我最初写下的文字，记录我当时的想法。不过我现在改变了目标，我将尝试结合 :ref:`lfs_k8s` 来实践我最初的 "Kubernetes From Scratch (KFS)" 构想。
+   这是我最初写下的文字，记录我当时的想法。不过我现在改变了目标，我将尝试结合 :ref:`blfs_k8s` 来实践我最初的 "Kubernetes From Scratch (KFS)" 构想。
 
    以下这段我仅作为回顾
 
