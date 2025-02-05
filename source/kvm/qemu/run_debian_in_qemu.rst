@@ -12,10 +12,53 @@
 
 本文实践将在不同的软硬件环境中完成，并且会不断完善
 
+准备
+======
 
+- 创建镜像虚拟磁盘:
+
+.. literalinclude:: run_debian_in_qemu/qemu-img_qcow2
+   :caption: 创建 ``qcow2`` 格式磁盘镜像
+
+启动虚拟机
+===========
+
+- qemu运行参数 ``-vga std`` ，则启动 VNC :
+
+.. literalinclude:: run_debian_in_qemu/qemu_install_debian_vnc
+   :caption: 执行标准vga安装，显示VNC
+   :emphasize-lines: 11
+
+我的 :ref:`blfs_qemu` 编译只采用最基本库完成，但是我发现依然能够支持VNC启动。上述命令会立即将屏幕输出到VNC界面，此时可以使用VNC客户端连接以后，选择图形安装
+
+- 采用 ``console`` 字符模式安装虚拟机
+
+.. literalinclude:: run_debian_in_qemu/qemu_install_debian
+   :caption: 执行安装
+   :emphasize-lines: 11-13
+
+.. note::
+
+   :ref:`blfs_qemu` 需要 :ref:`blfs_qemu_bridge` 
+
+   我的 :ref:`blfs_qemu` 编译只采用最基本库完成
+
+这里遇到一个问题，在上述运行配置中我取消了图形界面，想从串口控制台安装(也就是选择安装菜单中 ``Install`` )，显示如下:
+
+.. figure:: ../../_static/kvm/qemu/qemu_console.png
+
+提示我选择 ``video mode`` ，但是我回车没有响应，后续再排查
+
+- 完成安装以后，则修订为如下命令运行虚拟机:
+
+.. literalinclude:: run_debian_in_qemu/qemu_run_debian
+   :caption: qemu运行debian系统
+   :emphasize-lines: 11-13
 
 参考
 ======
 
 - `QEMU and HVF <https://gist.github.com/aserhat/91c1d5633d395d45dc8e5ab12c6b4767>`_ 非常好的分享
 - `Install QEMU on OSX <https://gist.github.com/Jatapiaro/6a7c769a07911adc629e1604729d4c7a>`_
+- `Virtualisation with QEMU <https://documentation.ubuntu.com/server/how-to/virtualisation/qemu/>`_
+- `archlinux: QEMU <https://wiki.archlinux.org/title/QEMU>`_

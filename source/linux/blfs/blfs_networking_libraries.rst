@@ -47,11 +47,3 @@ curl
 .. literalinclude:: blfs_networking_libraries/curl
    :caption: 安装 curl
 
-wget
-==========
-
-.. literalinclude:: blfs_networking_libraries/wget
-   :caption: 安装 wget
-
-
-

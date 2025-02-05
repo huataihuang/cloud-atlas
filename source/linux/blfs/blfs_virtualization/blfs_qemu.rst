@@ -21,6 +21,10 @@ BLFS QEMU
   - ``libslirp`` 用于虚拟机，容器和相关工具的用户模式网络库，感觉有用，且只依赖 glib
   - ``sdl2`` Simple DirectMedia Layer Version 2: 跨平台用于编写多媒体软件，暂不安装
 
+.. note::
+
+   我只依赖编译安装了 ``libslirp`` ，不过实践验证使用并没有问题。包括VNC桌面也能够正常使用，见 :ref:`run_debian_in_qemu`
+
 内核
 ========
 
@@ -29,13 +33,61 @@ BLFS QEMU
 .. literalinclude:: blfs_qemu/kernel
    :caption: 内核支持
 
+- 编译内核
+
+.. literalinclude:: ../../lfs/lfs_boot/kernel_make                                                                           
+   :caption: 编译内核
+
 安装
 =======
 
-**待完成**
-
 .. literalinclude:: blfs_qemu/qemu
    :caption: 安装qemu
+
+.. _blfs_qemu_bridge:
+
+BLFS qemu使用bridge网络
+=========================
+
+案例采用 :ref:`run_debian_in_qemu` :
+
+.. literalinclude:: ../../../kvm/qemu/run_debian_in_qemu/qemu_install_debian
+   :caption: 执行安装
+
+添加qemu ACL配置
+-------------------
+
+.. warning::
+
+   必须步骤
+
+在BLFS的qemu章节，最后一段配置我最初忽略了，实际上和 :ref:`bridge_br0_config` 有一个对应的 ``qemu`` 配置 ``/etc/qemu/bridge.conf`` 通过以下命令构建:
+
+.. literalinclude:: blfs_qemu/bridge.conf
+   :caption: 生成bridge ``br0`` 对应配置指示qemu使用
+
+如果没有这个 ``/etc/qemu/bridge.conf`` 配置文件，那么在执行 ``qemu-system-x86_64 ... -net nic,model=virtio,macaddr=52:54:00:00:00:01 -net bridge,br=br0 ...`` 会提示报错:
+
+.. literalinclude:: blfs_qemu/bridge.conf_error
+   :caption: 缺少 ``/etc/qemu/bridge.conf`` 配置导致使用bridge的qemu命令报错
+
+加载tun内核模块
+----------------
+
+使用 bridge 网络时，需要访问 ``/dev/net/tun`` 设备，如果内核没有加载这个模块，会提示错误:
+
+.. literalinclude:: blfs_qemu/tun_error
+   :caption: 内核没有加载 ``tun`` 模块，则提示错误
+
+手工加载模块:
+
+.. literalinclude:: blfs_qemu/modprobe_tun
+   :caption: 内核加载 ``tun`` 模块
+
+配置启动加载模块:
+
+.. literalinclude:: blfs_qemu/tun.conf
+   :caption: 内核加载 ``tun`` 模块配置文件
 
 参考
 =====
