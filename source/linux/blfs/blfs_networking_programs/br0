@@ -1,0 +1,28 @@
+cd /sources/blfs-bootscripts-20240416
+
+# 安装 /usr/lib/services/bridge 服务
+make install-service-bridge
+
+# 以下执行命令在 eno1 网络设备上创建一个连接网桥，实际执行时按照具体情况调整接口和IP配置
+# 如果要对多个设备，则在 INTERFACE_COMPONENTS 使用空格分隔列表
+# 使用多个SERVICE也是可行的，例如 SERVICE="bridge dhcp"
+
+cat > /etc/sysconfig/ifconfig.br0 << "EOF"
+ONBOOT=yes
+IFACE=br0
+VIRTINT=yes
+SERVICE="bridge ipv4-static"  # Space separated
+IP=192.168.7.200              # 这个IP地址是eno1原先分配给网卡的静态IP
+GATEWAY=192.168.7.101
+PREFIX=24
+BROADCAST=192.168.7.255
+CHECK_LINK=no                 # Don't check before bridge is created
+STP=no                        # Spanning tree protocol, default no
+INTERFACE_COMPONENTS="eno1"   # Add to IFACE, space separated devices
+IP_FORWARD=true
+EOF
+
+# 由于 br0 替代了 eno1 的IP通讯，所以这里还要执行一步移除 eno1 配置(备份在自己的HOME目录)
+mkdir ~/backup
+mv /etc/sysconfig/ifconfig.eno1 ~/backup/
+# 重启系统

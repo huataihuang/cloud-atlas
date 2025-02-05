@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    priv_cloud_infra.rst
+   priv_cloud_infra_2025.rst
    priv_ntp.rst
    priv_dnsmasq_ics.rst
    priv_kvm.rst
