@@ -9,6 +9,7 @@ BLFS(Beyond Linux from scratch)虚拟化
 
    think_blfs_virtualization.rst
    blfs_qemu.rst
+   blfs_ovmf.rst
    qemu_docker_tesla_t10.rst
 
 .. only::  subproject and html

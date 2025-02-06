@@ -13,8 +13,10 @@ Gentoo 虚拟化
 
 大多数现代计算机架构都包括对硬件级别虚拟化的支持:
 
-- AMD 的 AMD-V (svm): ``grep --color -E "svm" /proc/cpuinfo``
-- Intel 的 Vt-x (vmx): ``grep --color -E "vmx" /proc/cpuinfo``
+- AMD 的 AMD-V (svm) / Intel 的 Vt-x (vmx):
+
+.. literalinclude:: gentoo_virtualization/grep_cpuinfo
+   :caption: 检查硬件虚拟化支持
 
 虚拟化扩展必须受处理器支持并在系统固件（通常是主板的固件菜单）中启用，以便可由 Guest 操作系统访问
 
@@ -28,7 +30,34 @@ Gentoo 虚拟化
 Kernel
 ========
 
-to be continue...
+- 在内核激活IOMMU的配置如下
+
+.. literalinclude:: gentoo_virtualization/kernel
+   :caption: 内核激活IOMMU支持
+
+.. note::
+
+   我的内核实践实际上是在 :ref:`blfs_qemu` 中完成，也就是构建 :ref:`lfs` 自定义内核，所以实际配置略有不同，见 :ref:`run_debian_gpu_passthrough_in_qemu` :
+
+   .. literalinclude:: ../../kvm/qemu/run_debian_gpu_passthrough_in_qemu/kernel
+      :caption: :ref:`lfs` 内核激活IOMMU支持
+
+注意，如果内核配置了 ``CONFIG_TRIM_UNUSED_KSYMS `` ( **Trim unused exported kernel symbols** )，一种内核安全裁剪功能，常用于嵌入式系统，那么需要多某些符号表设置白名单。否则会出现 ``Failed to add group <n> to KVM VFIO device: Invalid argument`` 错误消息。详见 `kernel 4.7.0 breaks pci passthrough [SOLVED] <https://forums.gentoo.org/viewtopic-t-1049040-start-0.html>`_ 和 `KVM/VFIO passthrough not working when TRIM_UNUSED_KSYMS is enabled <https://lore.kernel.org/kvm/13e90f87-9062-a7e4-99c0-5c6f5c16cad2@gmail.com/>`_ ( **我没有激活这个功能** ):
+
+.. literalinclude:: gentoo_virtualization/kernel_whitelist_symbols
+   :caption: 内核激活了 ``Trim unused exported kernel symbols`` 一定要设置符号白名单
+
+- 内核激活VFIO支持:
+
+.. literalinclude:: gentoo_virtualization/kernel_vfio
+   :caption: 内核激活VFIO支持
+
+.. note::
+
+   我的内核实践在 :ref:`blfs_qemu` 中完成 :ref:`run_debian_gpu_passthrough_in_qemu` 最新内核配置有所不同:
+
+   .. literalinclude:: ../../kvm/qemu/run_debian_gpu_passthrough_in_qemu/kernel_vfio
+      :caption: :ref:`lfs` 内核激活VFIO支持
 
 USE flags
 ================

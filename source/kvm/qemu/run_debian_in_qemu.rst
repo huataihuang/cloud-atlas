@@ -10,7 +10,9 @@
 - 使用有限的组件运行起全功能的Linux虚拟化
 - 为后续构建更为复杂的 :ref:`blfs_k8s` 提供基础
 
-本文实践将在不同的软硬件环境中完成，并且会不断完善
+.. note::
+
+   本文qemu运行没有支持uefi，所以磁盘分区是传统方式。要支持 :ref:`iommu` 之后才能支持GPU passthrough，也就是需要实现 :ref:`run_debian_gpu_passthrough_in_qemu`
 
 准备
 ======

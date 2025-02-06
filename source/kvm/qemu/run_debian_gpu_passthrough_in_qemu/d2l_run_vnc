@@ -1,0 +1,28 @@
+name=d2l
+
+qemu-system-x86_64 \
+    -nodefaults \
+    -enable-kvm \
+    -cpu host,kvm=off \
+    -bios /usr/share/OVMF/OVMF_CODE.fd \
+    -m 32G \
+    -smp cores=4 \
+    -device vfio-pci,host=82:00.0 \
+    -drive file=/sources/images/${name}.qcow,if=virtio \
+    -net nic,model=virtio,macaddr=52:54:00:00:00:01 -net bridge,br=br0 \
+    -vga std \
+    -vnc :0 \
+    -serial mon:stdio \
+    -name "${name}"
+
+# 默认终端提示
+# VNC server running on 127.0.0.1:5900
+# 如果需要VNC监听所有网络接口，则添加参数 -vnc :0 ，此时终端就看不到提示，但是使用VNC客户端可以连接
+
+# lspci -nnk -d 10de:1e37
+# 输出显示设备:
+82:00.0 3D controller [0302]: NVIDIA Corporation TU102GL [Tesla T10 16GB / GRID RTX T10-2/T10-4/T10-8] [10de:1e37] (rev a1)
+	Subsystem: NVIDIA Corporation Tesla T10 16GB [10de:1370]
+	Kernel driver in use: vfio-pci
+# 则在 qemu 运行参数中添加设备使用VFIO group id "82:00.0"
+# 即 -device vfio-pci,host=82:00.0 \

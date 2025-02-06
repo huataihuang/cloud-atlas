@@ -16,16 +16,15 @@ KVM中性能最好的磁盘IO是 ``pass-through`` ，即 ``IOMMU`` 技术。这�
 
 - 服务器BIOS激活 VT-d 
 
-- :ref:`ubuntu_linux` 内核默认已经编译支持了 ``IOMMU`` ，通过以下方式检查::
+- :ref:`ubuntu_linux` 内核默认已经编译支持了 ``IOMMU`` ，通过以下方式检查:
 
-   dmesg | grep -e DMAR -e IOMMU
+.. literalinclude:: intel_vt-d_startup/dmesg
+   :caption: 执行 dmesg 检查过滤IOMMU支持
 
 输出显示:
 
 .. literalinclude:: intel_vt-d_startup/dmesg_no_iommu.txt
-   :language: bash
-   :linenos:
-   :caption:
+   :caption: 输出IOMMU信息
 
 需要注意，此时还没有看到内核激活IOMMU，必须要看到 ``DMAR: IOMMU enabled`` 才是真正激活
 
