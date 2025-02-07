@@ -49,13 +49,15 @@
 
 .. figure:: ../../_static/kvm/qemu/qemu_console.png
 
-提示我选择 ``video mode`` ，但是我回车没有响应，后续再排查
+提示我选择 ``video mode`` ，但是我回车没有响应: 我在安装完成之后，执行 :ref:`debian_init_vm` 串口控制台配置之后，就能够在字符终端正常访问。
 
 - 完成安装以后，则修订为如下命令运行虚拟机:
 
 .. literalinclude:: run_debian_in_qemu/qemu_run_debian
    :caption: qemu运行debian系统
    :emphasize-lines: 11-13
+
+- :ref:`debian_init_vm` 调整虚拟机
 
 参考
 ======

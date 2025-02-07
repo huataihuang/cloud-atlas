@@ -96,6 +96,16 @@ SSH命令行端口转发
 
 这里 ``192.168.7.152`` 是我本地局域网主机的IP地址，提供将 ``3128`` 端口转发到 ``<SERVER_IP>`` 服务器的 ``127.0.0.1`` 接口的 ``3128`` 端口(该端口上有squid提供服务)
 
+``mux_client_forward`` 失败
+=============================
+
+有时候在使用 SSH port forwarding的时候，会看到提示:
+
+.. literalinclude:: ssh_tunneling/mux_client_forward_failed
+   :caption: SSH端口转发遇到 ``mux_client_forward`` 错误
+
+这个报错应该是之前 :ref:`ssh_multiplexing` 本地socks还存在，但是网络实际已经断开导致的。杀掉本地 ``[mux]`` 进程重连服务器。
+
 进阶
 =======
 

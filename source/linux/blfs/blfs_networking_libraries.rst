@@ -4,6 +4,24 @@
 BLFS Networking Libraries
 ===================================
 
+libevent
+=============
+
+由于我需要安装 :ref:`tmux` 依赖 ``libevent`` 和 ``ncurses`` 
+
+.. literalinclude:: blfs_networking_libraries/libevent
+   :caption: 安装 libevent
+
+libtirpc
+================
+
+.. note::
+
+   ``lsof`` 依赖 ``libtirpc``
+
+.. literalinclude:: blfs_networking_libraries/libtirpc
+   :caption: 安装 libtirpc
+
 libunistring
 =================
 

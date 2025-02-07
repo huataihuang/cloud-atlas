@@ -32,7 +32,8 @@ TU102图形处理器芯片面积为 754 mm²，包含18600 million(186亿)晶体
 
 2025年春节入手了 Tesla T10，采用以下方案实践:
 
-- :ref:`blfs_qemu` :ref:`run_debian_in_qemu` 使用 :ref:`ovmf_tesla_t10`
+- :ref:`blfs_qemu` :ref:`run_debian_in_qemu`
+- :ref:`gpu_passthrough_in_qemu_install_nvidia_cuda` 在虚拟机直接运行环境安装 ``CUDA``
 - :ref:`qemu_docker_tesla_t10` 在QEMU虚拟机中运行docker容器化使用Tesla T10，分别安装 ``CUDA driver`` 和 ``CUDA``
 - :ref:`vgpu` 方式将 :ref:`tesla_p10` 和 :ref:`tesla_t10` 划分为多块vGPU，分别提供给不同虚拟机
 - 构建 :ref:`kubernetes` 集群，实现规模化部署以及监控维护

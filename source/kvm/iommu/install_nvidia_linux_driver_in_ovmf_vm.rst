@@ -107,13 +107,11 @@ NVIDIA passthrough via ovmf需要Host主机内核参数 ``pci=realloc``
 
   - 单纯在虚拟机内核上配置 ``pci=realloc`` 是不够的(目前我的物理主机还开启着 ``pci=realloc`` ，等有时间我关闭物理主机内核 ``pci=realloc`` 验证一下我的猜想)
 
-在虚拟机内部修改 ``/etc/default/grub`` 将::
+在虚拟机内部修改 ``/etc/default/grub`` 添加参数 ``pci=realloc`` :
 
-   GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
-
-修改成::
-
-   GRUB_CMDLINE_LINUX_DEFAULT="pci=realloc quiet splash"
+.. literalinclude:: install_nvidia_linux_driver_in_ovmf_vm/grub
+   :caption: 修订 ``/etc/default/grub`` 添加 ``pci=realloc`` 参数
+   :emphasize-lines: 2
 
 然后执行::
 

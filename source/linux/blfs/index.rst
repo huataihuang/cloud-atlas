@@ -11,6 +11,7 @@ BLFS(Beyond Linux from scratch)
    after_lfs_config.rst
    blfs_security.rst
    blfs_graphics_and_font_libraries.rst
+   blfs_general_utilities.rst
    blfs_networking_libraries.rst
    blfs_networking_programs.rst
    blfs_python_modules.rst
