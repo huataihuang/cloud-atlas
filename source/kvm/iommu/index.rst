@@ -13,7 +13,6 @@ IOMMU
    iommu_grub_config.rst
    ovmf.rst
    ovmf_gpu_nvme.rst
-   ovmf_tesla_t10.rst
    boot_win_partition_in_kvm.rst
    install_nvidia_linux_driver_in_ovmf_vm.rst
    tainted_host-cpu.rst

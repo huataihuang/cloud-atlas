@@ -29,6 +29,7 @@ Machine Learning
    stable_diffusion/index
    fauxpilot/index
    codellama/index
+   deepseek/index
 
 .. only::  subproject and html
 

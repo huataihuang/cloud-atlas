@@ -195,10 +195,13 @@ OVMF qemu
 
 现在一切就绪，在虚拟机内部就好像物理主机一样可以直接使用 :ref:`tesla_t10` 了，下一步:
 
+- :ref:`gpu_passthrough_in_qemu_install_nvidia_linux_driver`
 - :ref:`qemu_docker_tesla_t10`
 
 参考
 =======
 
-- `gentoo linux: GPU passthrough with virt-manager, QEMU, and KVM <https://wiki.gentoo.org/wiki/GPU_passthrough_with_virt-manager,_QEMU,_and_KVM>`_
+- `gentoo linux wiki: GPU passthrough with virt-manager, QEMU, and KVM <https://wiki.gentoo.org/wiki/GPU_passthrough_with_virt-manager,_QEMU,_and_KVM>`_
 - `archlinux: PCI passthrough via OVMF <https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF>`_
+- `GitHub: bryansteiner/gpu-passthrough-tutorial <https://github.com/bryansteiner/gpu-passthrough-tutorial>`_
+- `GPU virtualization with QEMU/KVM <https://ubuntu.com/server/docs/gpu-virtualization-with-qemu-kvm>`_

@@ -10,6 +10,28 @@ Debian虚拟机精简系统初始化
 
    Debian/Ubuntu 不允许普通用户账号设置为 ``admin`` ，所以我设置一个普通账号 ``chief``
 
+串口设置
+============
+
+默认没有启用串口控制台，这导致虚拟机console无法使用，所以按照 :ref:`ubuntu_serial_console` 调整:
+
+- 创建一个 ``/etc/init/ttyS0.conf`` :
+
+.. literalinclude:: ../ubuntu_linux/admin/ubuntu_serial_console/ttyS0.conf
+   :caption: ``/etc/init/ttyS0.conf`` 配置getty
+
+- 修订 ``/etc/default/grub`` 配置 ``GRUB_CMDLINE_LINUX`` :
+
+.. literalinclude:: ../ubuntu_linux/admin/ubuntu_serial_console/grub
+   :caption: 修订 ``/etc/default/grub`` 配置 ``GRUB_CMDLINE_LINUX`` 添加控制台
+
+- 更新GRUB:
+
+.. literalinclude:: ../ubuntu_linux/admin/ubuntu_grub/update-grub
+   :caption: 更细GRUB
+
+重启系统后， :ref:`run_debian_in_qemu` 就能在运行 ``qemu`` 执行的命令行访问虚拟机控制台，方便运维
+
 系统仓库 ``sources.list``
 ============================
 

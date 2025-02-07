@@ -89,6 +89,13 @@ BLFS qemu使用bridge网络
 .. literalinclude:: blfs_qemu/tun.conf
    :caption: 内核加载 ``tun`` 模块配置文件
 
+BLFS qemu使用
+================
+
+- :ref:`run_debian_in_qemu` 常规安装
+- :ref:`run_debian_gpu_passthrough_in_qemu` 支持UEFI模式并使用 ``vfio-pci`` 实现GPU passthrough
+- :ref:`gpu_passthrough_in_qemu_install_nvidia_linux_driver`
+
 参考
 =====
 
