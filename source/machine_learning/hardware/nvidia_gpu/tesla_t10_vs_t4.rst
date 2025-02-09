@@ -30,7 +30,7 @@ TU102图形处理器芯片面积为 754 mm²，包含18600 million(186亿)晶体
 实际使用
 ----------
 
-2025年春节入手了 Tesla T10，采用以下方案实践:
+2025年春节 :strike:`入手了 Tesla T10` (最后因为购买的二手硬件问题 在 :ref:`gpu_passthrough_in_qemu_install_nvidia_cuda` 没有成功，最终退货)，采用以下方案实践:
 
 - :ref:`blfs_qemu` :ref:`run_debian_in_qemu`
 - :ref:`gpu_passthrough_in_qemu_install_nvidia_cuda` 在虚拟机直接运行环境安装 ``CUDA``
