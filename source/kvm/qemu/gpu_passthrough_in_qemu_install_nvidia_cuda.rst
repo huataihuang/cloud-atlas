@@ -76,7 +76,45 @@ QEMU运行GPU passthrough的虚拟机安装NVIDIA CUDA
 
 这个 ``uncorrectable ECC error`` 看起来是 VRAM 存在ECC校验硬件错误了，情况和 NVIDIA 论坛 `Problems with A100 and Ubuntu 22.04 <https://forums.developer.nvidia.com/t/problems-with-a100-and-ubuntu-22-04/275205>`_ 相似，硬件异常。
 
+**还存在疑惑**
 
+我尝试将 :ref:`tesla_t10` 从 :ref:`hpe_dl360_gen9` 的 ``PCIe 3`` 插槽换到 ``PCIe 1`` 
 
+一点乌龙
+---------
 
+这里有点乌龙，我忘记之前 :ref:`pcie_bifurcation` 将 ``PCIe 1`` 分为2个，结果发现 :ref:`tesla_t10` 在这种 :ref:`pcie_bifurcation` 通过 ``vfio-pci`` passthrough到虚拟机内部，执行启动会出现如下报错:
 
+.. literalinclude:: gpu_passthrough_in_qemu_install_nvidia_cuda/pcie_bifurcation_error
+   :caption: 忘记关闭 :ref:`pcie_bifurcation` 导致的qemu GPU passthrough虚拟机启动报错
+
+:ref:`tesla_t10` 插槽换到 ``PCIe 1``
+-------------------------------------
+
+将 :ref:`hpe_dl360_gen9` 的系统BIOS恢复默认重新设置后，关闭了 :ref:`pcie_bifurcation` ，现在 :ref:`tesla_t10` 插槽在 ``PCIe 1`` ，重新通过vfio-pci直接passthrough到虚拟机内部。这次VM启动后观察，发现同样报 ``uncorrectable ECC error`` :
+
+.. literalinclude:: gpu_passthrough_in_qemu_install_nvidia_cuda/dmesg_nvidia_drm_error_pcie1
+   :caption: :ref:`tesla_t10` 更换到 ``PCIe1`` 但虚拟机启动dmesg还是显示 ``uncorrectable ECC error``
+   :emphasize-lines: 13
+
+另外，观察到物理主机的控制台上显示报错:
+
+.. literalinclude:: gpu_passthrough_in_qemu_install_nvidia_cuda/nmi_iock_error
+   :caption: 物理主机控制台报错显示 NMI IOCK error
+
+改为物理主机使用 :ref:`tesla_t10` 对比
+===========================================
+
+由于我是在淘宝上购买的二手 :ref:`tesla_t10` ，所以硬件质量不能保证。但是我也不能确定是不是我的使用虚拟化运行问题，所以改为直接使用 :ref:`debian` 物理主机来使用这块 :ref:`tesla_t10` 。我甚至还重装了一遍 :ref:`debian`
+
+重启系统后，使用 ``lspci -vvv`` 可以看到这块 :ref:`tesla_t10` 使用了对应的nvidia驱动
+
+但是，系统 ``dmesg`` 日志还是显示 ``uncorrectable ECC error detected`` :
+
+.. literalinclude:: gpu_passthrough_in_qemu_install_nvidia_cuda/host_dmesg_error
+   :caption: 物理主机使用 :ref:`tesla_t10` 依然存在报错
+   :emphasize-lines: 75-80
+
+参考NVIDIA官方文档 `Xid Errors <https://docs.nvidia.com/deploy/xid-errors/index.html>`_ 其中  Xid Errors => ``140 Unrecovered ECC Error`` 表示 ``GPU driver has observed uncorrectable errors in GPU memory, in such a way as to interrupt the GPU driver’s ability to mark the pages for dynamic page offlining or row remapping``       
+
+**很不幸，这次实践最后没有完成** :ref:`tesla_t10` 硬件异常，最后退还给淘宝卖家了。等以后有机会再做探索...
