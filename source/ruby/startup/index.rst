@@ -16,8 +16,10 @@ Ruby起步
    ruby_in_browser.rst
    ruby_object.rst
    ruby_number.rst
+   ruby_comments.rst
    ruby_control.rst
    ruby_array_hash.rst
+   ruby_regular_expression.rst
 
 .. only::  subproject and html
 

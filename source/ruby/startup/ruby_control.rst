@@ -12,6 +12,12 @@ Ruby控制语句
 - 循环控制: 在某条件成立之前，反复执行A
 - 异常控制: 发生某种异常时，执行A
 
+.. note::
+
+   ruby的控制语句其实和 :ref:`shell` 差不多，但是做了一些更接近英语自然语言的精简，所以使用起来更自然一些。
+
+   你把它想象成用英语对话就行了
+
 条件控制
 =========
 
@@ -22,6 +28,10 @@ Ruby控制语句
 .. literalinclude:: ruby_control/if_then_else.rb
    :language: ruby
    :caption: if then else 条件判断控制案例
+
+.. note::
+
+   :ref:`shell` 中使用 ``fi`` 来结尾条件控制，有点尬。ruby直接说 ``end``
 
 while循环
 ============
@@ -39,7 +49,11 @@ times固定循环次数
    :language: ruby
    :caption: times 固定次数循环案例
 
-在 ``ruby`` 中 ``times`` 方法被称为迭代器( ``iterator`` )。此外， ``ruby`` 还提供了很多有特色的迭代器，例如 ``each`` 方法
+在 ``ruby`` 中 ``times`` 方法被称为迭代器( ``iterator`` )。
+
+此外， ``ruby`` 还提供了很多有特色的迭代器，例如 ``each`` 方法
+
+迭代器( ``iterator`` )标识的是循环( ``iterate`` )的容器( ``-or`` )；类似的，运算符( ``operator`` )也是运算( ``operate`` )的容器( ``-or`` )。总之，迭代器就是指用于执行循环处理的方法。
 
 参考
 ========

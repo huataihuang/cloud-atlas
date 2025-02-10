@@ -1,16 +1,13 @@
-.. _llm:
+.. _ollama:
 
 =================================
-LLM 大型语言模型
+ollama
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   llm_startup.rst
-   llama/index
-   ollama/index
-   langchain/index
+   intro_ollama.rst
 
 .. only::  subproject and html
 
