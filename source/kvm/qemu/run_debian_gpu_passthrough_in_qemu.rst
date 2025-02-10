@@ -195,7 +195,7 @@ OVMF qemu
 
 现在一切就绪，在虚拟机内部就好像物理主机一样可以直接使用 :ref:`tesla_t10` 了，下一步:
 
-- :ref:`gpu_passthrough_in_qemu_install_nvidia_linux_driver`
+- :ref:`gpu_passthrough_in_qemu_install_nvidia_cuda`
 - :ref:`qemu_docker_tesla_t10`
 
 参考
