@@ -51,7 +51,8 @@ bridge配置 ``br0``
 ------
 
 - :ref:`run_debian_in_qemu`
-- :ref:`ovmf_tesla_t10`
+- :ref:`run_debian_gpu_passthrough_in_qemu`
+- :ref:`gpu_passthrough_in_qemu_install_nvidia_cuda`
 - :ref:`qemu_docker_tesla_t10`
 
 wget

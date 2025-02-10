@@ -94,7 +94,7 @@ BLFS qemu使用
 
 - :ref:`run_debian_in_qemu` 常规安装
 - :ref:`run_debian_gpu_passthrough_in_qemu` 支持UEFI模式并使用 ``vfio-pci`` 实现GPU passthrough
-- :ref:`gpu_passthrough_in_qemu_install_nvidia_linux_driver`
+- :ref:`gpu_passthrough_in_qemu_install_nvidia_cuda`
 
 参考
 =====
