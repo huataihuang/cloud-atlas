@@ -8,7 +8,6 @@ LLaMa(Large Language Model Meta AI)
    :maxdepth: 1
 
    llama-2.rst
-   ../../codellama/index
 
 .. only::  subproject and html
 
