@@ -8,6 +8,7 @@ HPE服务器
    :maxdepth: 1
 
    hpe_dl360_gen9.rst
+   hpe_dl380_gen9.rst
    hpe_dl160_gen9.rst
    dl360+pi_one_machine.rst
    dl360_bios.rst

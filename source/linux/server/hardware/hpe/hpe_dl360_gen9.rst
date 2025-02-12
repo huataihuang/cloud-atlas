@@ -132,7 +132,7 @@ HPE ProLiant DL360 Gen9 服务器综合配置介于 :ref:`dell_r630` 和 :ref:`d
 
 .. csv-table:: HPE ProLiant DL360 Gen9 支持E5-2600 v3/v4处理器
    :file: hpe_dl360_gen9/hpe_dl360_gen9_cpu.csv
-   :widths: 25, 15, 10, 10, 10, 15, 15
+   :widths: 20,10,10, 10, 10, 10, 10, 20
    :header-rows: 1
 
 - 内存支持和 :ref:`dell_r640` 类似，同时支持不同类型(超越了Dell R630)

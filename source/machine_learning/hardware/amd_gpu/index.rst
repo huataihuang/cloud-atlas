@@ -1,18 +1,15 @@
-.. _ml_hardware:
+.. _amd_gpu:
 
 =================================
-机器学习硬件
+AMD GPU
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   dl_hardware.rst
-   nvidia_gpu/index
-   amd_gpu/index
-   hailo_ai/index
-   intel_ncs/index
-   benchmark_gpu.rst
+   amd_gpu_infra.rst
+   amd_firepro_s7150x2.rst
+
 
 .. only::  subproject and html
 

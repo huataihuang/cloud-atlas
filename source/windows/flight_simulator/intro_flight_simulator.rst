@@ -19,11 +19,22 @@ Azure的人工智能（AI）生成地球特征的三维表示，使用其云计�
 硬件平台
 ===========
 
-我购买了一块二手的 :ref:`tesla_p10` 运算卡，通过 :ref:`vgpu_unlock` 解锁了 :ref:`vgpu` 支持，可以在虚拟机中增强显示:
+- 我购买了一块二手的 :ref:`tesla_p10` 运算卡，通过 :ref:`vgpu_unlock` 解锁了 :ref:`vgpu` 支持，可以在虚拟机中增强显示:
 
-- Tesla P10 性能相当于 GeForce RTX 2070 Super，参考 `去世界任何角落 看想看的风景！微软模拟飞行2020显卡需求测试 <https://finance.sina.cn/tech/2021-05-01/detail-ikmxzfmk9887688.d.html?fromtech=1&vt=4&cid=38741&node_id=38741>`_ 可以看到RTX 2070 Super 在 2K 分辨率下的帧数是 ``49FPS`` (如果是4k则只有28FPS，无法流畅运行)，尚能饭否？
-- :ref:`vgpu` 显存分配准备从 6GB 开始( `NVIDIA GeForce RTX 2070 SUPER <https://www.techpowerup.com/gpu-specs/geforce-rtx-2070-super.c3440>`_ 是8GB显存 )，如果不足则调整为 12GB
-- :ref:`kvm` 虚拟机配置 32GB (嘿嘿， :ref:`hpe_dl360_gen9` 最高支持768GB内存哦)
+  - Tesla P10 性能相当于 GeForce RTX 2070 Super，参考 `去世界任何角落 看想看的风景！微软模拟飞行2020显卡需求测试 <https://finance.sina.cn/tech/2021-05-01/detail-ikmxzfmk9887688.d.html?fromtech=1&vt=4&cid=38741&node_id=38741>`_ 可以看到RTX 2070 Super 在 2K 分辨率下的帧数是 ``49FPS`` (如果是4k则只有28FPS，无法流畅运行)，尚能饭否？
+  - :ref:`vgpu` 显存分配准备从 6GB 开始( `NVIDIA GeForce RTX 2070 SUPER <https://www.techpowerup.com/gpu-specs/geforce-rtx-2070-super.c3440>`_ 是8GB显存 )，如果不足则调整为 12GB
+  - :ref:`kvm` 虚拟机配置 32GB (嘿嘿， :ref:`hpe_dl360_gen9` 最高支持768GB内存哦)
+
+- 准备入手 :ref:`amd_firepro_s7150x2` 来部署:
+
+  - :ref:`mxgpu` (也就是 :ref:`sr-iov` )实现GPU VF直通给Windows虚拟机
+
+    - `How to SR-IOV Mod the W7100 GPU <https://forum.level1techs.com/t/how-to-sr-iov-mod-the-w7100-gpu/164186>`_ 使用了修订版本的 `GitHub GPUOpen-LibrariesAndSDKs/MxGPU-Virtualization <https://github.com/GPUOpen-LibrariesAndSDKs/MxGPU-Virtualization>`_ (不知道最近几年 :ref:`mxgpu` 是否有其他更好的解决方案)
+
+  - 实现一个类似 :ref:`Looking Glass <https://looking-glass.io/>`_ 的远程运行 :ref:`windows` 桌面:
+
+    - ``Looking Glass`` 使用 SPICE 协议驱动实现的虚拟桌面的键盘/鼠标/音频，见 :ref:`Looking Glass Installation <https://looking-glass.io/docs/B6/install/>`_ ，具体工作原理见YouTube视频 `How Looking Glass works and why it was invented <https://www.youtube.com/watch?v=U44lihtNVVM>`_ ，但是其视频性能优于原生 SPICE video (待验证)，所以建议使用 ``Looking Glass`` (参考 `Im geting so tired (mxgpu, sr-iov) <https://forum.level1techs.com/t/im-geting-so-tired-mxgpu-sr-iov/155195>`_ 讨论)
+    - 另一种模式是使用 RDP client ，例如 ``Remmina`` Linux 客户端访问Windows桌面，但不知道哪种性能更好更稳定，待实践对比
 
 - 飞行摇杆: 待调研
 
