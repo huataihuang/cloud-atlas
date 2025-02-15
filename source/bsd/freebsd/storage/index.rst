@@ -1,22 +1,13 @@
-.. _freebsd:
+.. _freebsd_storage:
 
 =================================
-FreeBSD
+FreeBSD存储
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_freebsd.rst
-   startup/index
-   admin/index
-   build/index
-   desktop/index
-   network/index
-   storage/index
-   virtual/index
-   container/index
-
+   freebsd_disk.rst
 
 .. only::  subproject and html
 

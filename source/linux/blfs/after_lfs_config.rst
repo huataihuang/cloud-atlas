@@ -203,6 +203,31 @@ Bash Shell启动文件
 .. literalinclude:: after_lfs_config/random
    :caption: 安装 ``/etc/rc.d/init.d/random`` 初始化脚本
 
+串口控制台
+=============
+
+.. note::
+
+   这部分似乎在BLFS中没有涉及，但是我主要在服务器 :ref:`hpe_dl380_gen9` 上使用LFS，需要有一个串口控制台方便通过 :ref:`ipmitool` 管理
+
+   这部分设置主要参考 :ref:`debian` ，也就是在 :ref:`debian_vm_init` 中设置的方法。在 debian 中，虽然配置采用了 ``/usr/sbin/getty`` ，但实际上 ``getty`` 是 ``agetty`` 的一个软链接，而 ``agetty`` 已经在 :ref:`lfs` 部署中安装了，所以只需要配置即可
+
+- 为 ``agetty`` 创建一个软链接 ``getty`` ( :ref:`debian` 系统就是如此 ):
+
+.. literalinclude:: after_lfs_config/getty
+   :caption: 为 ``agetty`` 创建一个软链接 ``getty`` ，后续配置就可以继续使用 ``getty``
+
+
+- 创建一个 ``/etc/init/ttyS0.conf`` :
+
+.. literalinclude:: ../ubuntu_linux/admin/ubuntu_serial_console/ttyS0.conf
+   :caption: ``/etc/init/ttyS0.conf`` 配置getty
+
+- 修订 ``/boot/grub/grub.cfg`` 添加内核参数 ``console=tty0 console=ttyS0,115200n8`` (这里的案例在 :re:`run_debian_gpu_passthrough_in_qemu` 基础上完成，所以内核参数还有一部分是 :ref:`iommu` 配置 ):
+
+.. literalinclude:: after_lfs_config/grub.cfg
+   :caption: 内核参数添加 ``console=tty0 console=ttyS0,115200n8``
+
 参考
 =====
 
