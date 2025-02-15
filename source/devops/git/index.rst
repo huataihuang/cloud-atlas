@@ -19,6 +19,7 @@ git
    git-openssl.rst
    reduce_git_repo_size.rst
    git-flow.rst
+   git_clone_subdirectory.rst
 
 .. only::  subproject and html
 

@@ -20,6 +20,8 @@ Ruby起步
    ruby_control.rst
    ruby_array_hash.rst
    ruby_regular_expression.rst
+   ruby_argv.rst
+   ruby_file.rst
 
 .. only::  subproject and html
 

@@ -1,0 +1,42 @@
+gpart create -s GPT vtbd1
+# 提示信息
+# vtbd1 created
+
+gpart add -s 750G -t freebsd-ufs vtbd1
+# 提示信息
+# gpart: autofill: No space left on device
+# 原因是指定分配大小超出了可分配空间
+
+gpart add -t freebsd-ufs vtbd1
+# 再次创建分区但是不指定大小则全部分配，提示信息如下
+# vtbd1p1 added
+
+gpart show vtbd1
+# 检查分区，显示输出如下
+#=>        40  1572863920  vtbd1  GPT  (750G)
+#          40  1572863920      1  freebsd-ufs  (750G)
+
+gpart delete -i 1 vtbd1
+# 删除分区，这里 -i 1 表示分区索引1 ，提示信息如下
+#vtbd1p1 deleted
+
+gpart show vtbd1
+# 再次检查分区就看到是空白了
+#=>        40  1572863920  vtbd1  GPT  (750G)
+#          40  1572863920         - free -  (750G)
+
+gpart destroy vtbd1
+# 警告: 这个命令摧毁分区表，也就是抹去磁盘
+# 我实际没有执行
+
+gpart add -t freebsd-ufs vtbd1
+# 再次创建分区1
+
+newfs /dev/vtbd1p1
+# 创建文件系统
+
+mkdir /data
+echo "/dev/vtbd1p1  /data  ufs  rw  1 1" >> /etc/fstab
+mount /data
+# 挂载文件系统
+
