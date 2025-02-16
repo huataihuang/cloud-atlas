@@ -43,6 +43,12 @@ FirePro S7150 x2 是 AMD 于 2016 年 2 月 1 日推出的运算卡，基于Clou
   - 在机器学习中，单个GPU只有8G大大限制了大模型的运行参数，所以不利于训练和推理
   - 跨GPU的通许会降低GPU的运算能力，猜测可能降低1/3
 
+.. figure:: ../../../_static/machine_learning/hardware/amd_gpu/amd_firepro_s7150x2_front.jpg
+
+.. figure:: ../../../_static/machine_learning/hardware/amd_gpu/amd_firepro_s7150x2_bottom.jpg
+
+.. figure:: ../../../_static/machine_learning/hardware/amd_gpu/amd_firepro_s7150x2_back.jpg
+
 :ref:`tesla_p10` vs  AMD FirePro S7159 x2
 ============================================
 
@@ -50,6 +56,10 @@ FirePro S7150 x2 是 AMD 于 2016 年 2 月 1 日推出的运算卡，基于Clou
    :file: amd_firepro_s7150x2/firepro_s7159x2_spec.csv
    :widths: 25,25,25,25
    :header-rows: 1
+
+从理论数据来看 ``AMD FirePro S7159 x2`` 的 ``FP16`` 半精度性能要远好于 :ref:`tesla_p10` ，感觉在训练和推理上应该不差。不过，现在深度学习都针对N卡优化，有可能理论数据并不能代表性能。
+
+:ref:`pytorch` 最新2.0版本已经宣布支持AMD GPU，但是不清楚这么早期的卡是否能够支持，有待实践。
 
 资源
 =========
