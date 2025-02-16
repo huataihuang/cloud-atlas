@@ -34,6 +34,17 @@ Ruby对文件的读写处理其实和其他高级语言是相似的:
    - 一下子读取全部文件内容非常耗时
    - 由于读取的文件内容会暂时保存在内存中，所以遇到大文件时，程序可能会因此崩溃
 
+   为了避免上述问题，通常采用的方法是逐行处理文件内容
+
+逐行处理文件
+=============
+
+- 模拟 ``grep`` 的 ``simple_grep.rb`` :
+
+.. literalinclude:: ruby_file/simple_grep.rb
+   :language: ruby
+   :caption: ``simple_grep.rb``
+
 参考
 ========
 

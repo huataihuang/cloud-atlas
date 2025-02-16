@@ -4,7 +4,9 @@
 ollama简介
 ===============
 
-``Ollama`` 
+``Ollama`` 是一个使用 :ref:`golang` 开发的大模型运行工具，支持不同的后端 `Ollama Library <https://ollama.com/library>`_ 。由于使用方便，跨平台，目前很受入门用户的欢迎。
+
+
 
 参考
 ======

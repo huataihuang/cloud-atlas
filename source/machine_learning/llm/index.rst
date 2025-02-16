@@ -9,6 +9,7 @@ LLM 大型语言模型
 
    llm_startup.rst
    llama/index
+   vllm/index
    ollama/index
    langchain/index
 

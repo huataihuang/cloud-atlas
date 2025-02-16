@@ -22,6 +22,8 @@ Ruby起步
    ruby_regular_expression.rst
    ruby_argv.rst
    ruby_file.rst
+   ruby_func.rst
+   ruby_lib.rst
 
 .. only::  subproject and html
 
