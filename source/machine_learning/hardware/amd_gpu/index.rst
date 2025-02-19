@@ -9,6 +9,7 @@ AMD GPU
 
    amd_gpu_infra.rst
    amd_firepro_s7150x2.rst
+   rocm_quickstart.rst
 
 
 .. only::  subproject and html
