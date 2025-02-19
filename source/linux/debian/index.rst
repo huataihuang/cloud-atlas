@@ -11,6 +11,7 @@ Debian
    debian_init_vm.rst
    debian_programming.rst
    debian_alternatives.rst
+   debian_downgrade_kernel.rst
 
 .. only::  subproject and html
 

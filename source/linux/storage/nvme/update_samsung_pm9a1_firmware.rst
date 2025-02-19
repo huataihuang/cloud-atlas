@@ -67,6 +67,46 @@ Linux提供了一个名为 ``fwupdmgr`` 的客户端工具来管理firmware升�
 .. literalinclude:: update_samsung_pm9a1_firmware/fwupdmgr_update
    :caption: 执行firmware升级
 
+更新firmware
+=============
+
+在arch linux文档中有关于如何升级Samsung firmware的方法，见 `archlinux wiki: Solid state drive >> Firmware >> Samsung <https://wiki.archlinux.org/title/Solid_state_drive#Samsung>`_
+
+- 从 `三星官网下载bootable ISO image <https://www.samsung.com/semiconductor/minisite/ssd/download/tools.html>`_ ，需要按照设备型号下载: 
+
+  - 根据 ``lspci -nnk -d 144d:a80a`` 输出可以看到 ``NVMe SSD Controller PM9A1/PM9A3/980PRO`` 也就是这3种NVMe存储控制器采用同一种，所以我选择下载 ``980PRO`` 的启动iso
+  
+- 从ISO镜像中获取 ``initrd`` Linux镜像:
+
+.. literalinclude:: update_samsung_pm9a1_firmware/initrd
+   :caption: 从ISO镜像中获取 ``initrd`` Linux image
+
+.. note::
+
+   按照archlinux wiki文档，这里使用了一个名为 ``bsdtar`` 的tar工具，在 :ref:`debian` 系统中，这个工具是通过 ``libarchive-tools`` 提供的，安装 ``libarchive-tools`` 就能使用 ``bsdtar`` 。但debian手册中似乎没有区分 ``bsdtar`` 和 ``tar`` 。这个 ``bsdtar`` 是一个为了实现linux可移植的工具，可能是为了兼容旧版本tar。
+
+- 然后再从 ``initrd`` 中提取出 ``root/fumagician/`` ，这个目录就包含了firmware更新文件:
+
+.. literalinclude:: update_samsung_pm9a1_firmware/initrd_fumagician
+   :caption: 从 ``initrd`` 镜像中再提取出 ``root/fumagician/`` 目录(包含firmware更新文件)
+
+此时在 ``root/fumagician/`` 有以下4个文件::
+
+   5B2QGXA7.enc  DSRD.enc  fumagician  fumagician.sh
+
+- 运行 ``fumagician`` 来更新firmware
+
+.. literalinclude:: update_samsung_pm9a1_firmware/fumagician
+   :caption: 运行 ``fumagician`` 来更新三星存储firmware
+
+显示提示:
+
+.. literalinclude:: update_samsung_pm9a1_firmware/fumagician_output
+   :caption: 运行 ``fumagician`` 提示更新 Samsung SSD Firmware
+   :emphasize-lines: 35
+
+很不幸，我没有更新成功，看起来扫描NVMe存储没有成功
+
 参考
 =======
 

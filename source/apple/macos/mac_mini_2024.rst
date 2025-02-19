@@ -31,6 +31,11 @@ Mac Mini 2024
   - 256GB 固态硬盘 **起步**
   - ``RMB 4499`` (教育优惠仅需 ``RMB 3749`` )
 
+AI性能
+========
+
+`Performance of llama.cpp on Apple Silicon M-series #4167 <https://github.com/ggml-org/llama.cpp/discussions/4167>`_ 提供了一个Apple Silicon运行 :ref:`llama` 的 :ref:`llama-bench` 性能对比
+
 参考
 =======
 

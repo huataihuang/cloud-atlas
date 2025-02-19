@@ -1,16 +1,13 @@
-.. _llama:
+.. _llama_bench:
 
 =====================================
-LLaMa(Large Language Model Meta AI)
+LLaMa Bench
 =====================================
 
 .. toctree::
    :maxdepth: 1
 
-   llama-2.rst
-   install/index
-   llama_cpu_optimize.rst
-   bench/index
+   llama-bench.rst
 
 
 .. only::  subproject and html
