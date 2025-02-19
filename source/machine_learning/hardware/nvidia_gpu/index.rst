@@ -16,6 +16,7 @@ NVIDIA GPU
    nvidia_gpudirect_storage/index
    cuda_cores_vs._tensor_cores.rst
    gtx_1050_ti.rst
+   tesla_p4.rst
    tesla_p10.rst
    tesla_p100.rst
    tesla_t10_vs_t4.rst

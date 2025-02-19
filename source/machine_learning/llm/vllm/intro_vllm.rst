@@ -15,7 +15,7 @@ Ollama vs. vLLM
   - 如果有合适的GPU硬件，使用vLLM效率更高
   - vLLM主要使用 :ref:`python` 编写，核心则使用CUDA编程，代码据说非常高效整洁(待验证学习)
 
-- vLLM速度快于Ollama(根据参考文档vLLM处理速度是Ollama的2倍到很多倍)
+- vLLM速度快于Ollama(待验证)
 
 参考
 ======

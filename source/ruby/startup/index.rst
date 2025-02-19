@@ -24,6 +24,7 @@ Ruby起步
    ruby_file.rst
    ruby_func.rst
    ruby_lib.rst
+   ruby_object_var_const.rst
 
 .. only::  subproject and html
 

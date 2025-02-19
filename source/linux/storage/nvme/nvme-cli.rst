@@ -4,7 +4,7 @@
 nvme-cli用户工具
 =================
 
-由于数据中心需要很多监控SSD健康度和耐用度，以及更新firmware，安全擦除数据，读取设备日志等管理功能， NVMe组织 <https://nvmexpress.org/>`_ 开发了Linux用户空间命令行工具 ``nvme-cli`` ，可以在Linux系统中管理NVM-Express设备。
+由于数据中心需要很多监控SSD健康度和耐用度，以及更新firmware，安全擦除数据，读取设备日志等管理功能， `NVMe组织 <https://nvmexpress.org/>`_ 开发了Linux用户空间命令行工具 ``nvme-cli`` ，可以在Linux系统中管理NVM-Express设备。
 
 .. note::
 

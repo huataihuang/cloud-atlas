@@ -33,7 +33,9 @@ open-webui
 
 .. note::
 
-   ``open-webui`` 似乎安装依赖太多了，有待观察
+   ``open-webui`` 通过 ``pip`` 安装会依赖很多软件，不过我发现类似的 ``LibreChat`` ( `Install LibreChat Locally <https://www.librechat.ai/docs/local>`_ )更为复杂，手工安装还需要部署非常沉重的依赖，如 `MeiliSearch <https://github.com/meilisearch/meilisearch>`_ 。这种复杂的软件堆栈看起来是为了一种商业模式而建，对于个人使用非常不友好。
+
+   对于桌面应用，看起来 `chatbox <https://github.com/Bin-Huang/chatbox>`_ 社区版本已经非常合适。不过，我可能还需要继续寻找合适的轻量级WEB UI。
 
 `GitHub: open-webui/open-webui <https://github.com/open-webui/open-webui>`_ 是一个非常易于使用的AI交互界面，支持多种API，例如 Ollama 或者 OpenAI兼容 API。这是一个 :ref:`python` 程序，所以通过 :ref:`virtualenv` 以及 ``pip`` 非常容易安装运行:
 
