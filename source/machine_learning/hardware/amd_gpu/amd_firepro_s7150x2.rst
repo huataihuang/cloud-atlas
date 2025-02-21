@@ -64,9 +64,11 @@ FirePro S7150 x2 是 AMD 于 2016 年 2 月 1 日推出的运算卡，基于Clou
 资源
 =========
 
-- AMD官方 `FirePro™ S7150 X2 Drivers & Support <https://www.amd.com/en/support/downloads/drivers.html/graphics/firepro/firepro-s-series/firepro-s7150-x2.html>`_
+- AMD官方 `FirePro™ S7150 X2 Drivers & Support <https://www.amd.com/en/support/downloads/drivers.html/graphics/firepro/firepro-s-series/firepro-s7150-x2.html>`_ / `FirePro™ S7150 X2 驱动程序和支持 <https://www.amd.com/zh-cn/support/downloads/drivers.html/graphics/firepro/firepro-s-series/firepro-s7150-x2.html>`_
 
   - 官方提供的支持不同虚拟化平台的驱动，不过比较古早，不确定是否还能继续使用
+
+- AMD官方 `Radeon™ Software for Linux® Installation <https://amdgpu-install.readthedocs.io/en/latest/>`_
 
 - `AMD ROCm Software <https://www.amd.com/en/products/software/rocm.html>`_ 官方Portal
 

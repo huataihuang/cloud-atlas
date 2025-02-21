@@ -26,6 +26,10 @@ Ollama官方提供了极为简便的运行大模型方法，例如运行DeepSeek
 
 而且给出了详细的解释，看来 ``32b`` 的版本比之前测试的 ``7b`` 参数好了很多，至少给出了正确的编码结果( ``7b`` 是错误的)
 
+.. note::
+
+   如果没有指定 :ref:`ollama_nvidia_gpu` ，那么ollama可能完全是CPU模式运行的，所以如果主机已经安装了 :ref:`nvidia_gpu` 或 :ref:`amd_gpu` ，那么需要调整配置实现 :ref:`ollama_nvidia_gpu` 或 :ref:`ollama_amd_gpu`
+
 .. _open-webui:
 
 open-webui

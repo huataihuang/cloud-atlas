@@ -1,8 +1,24 @@
-.. _ollama_gpu:
+.. _ollama_nvidia_gpu:
 
-==========================
-Ollama使用GPU运行大模型
-==========================
+=================================
+Ollama使用NVIDIA GPU运行大模型
+=================================
+
+安装
+========
+
+- 安装 ``ollama`` 执行程序:
+
+.. literalinclude:: install_ollama/install_manual
+   :caption: 手工本地安装
+
+- 安装CUDA驱动( :ref:`gpu_passthrough_in_qemu_install_nvidia_cuda` )
+
+.. literalinclude:: ../../../kvm/qemu/gpu_passthrough_in_qemu_install_nvidia_cuda/cuda_toolkit_debian_repo
+   :caption: 在 :ref:`debian` 12操作系统添加NVIDIA官方软件仓库配
+
+配置
+=======
 
 当完成 :ref:`ollama_run_deepseek` 后，我发现默认情况下 ``Ollama`` 是使用CPU进行推理的:
 

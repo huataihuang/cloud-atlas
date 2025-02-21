@@ -4,7 +4,7 @@
 Systemd环境变量
 =================
 
-当需要向systemd传递环境变量参数时，例如，我在 :ref:`ollama_gpu` 实践中，需要向 ``ollama`` 服务进程传递环境变量:
+当需要向systemd传递环境变量参数时，例如，我在 :ref:`ollama_nvidia_gpu` 实践中，需要向 ``ollama`` 服务进程传递环境变量:
 
 .. literalinclude:: ../../../machine_learning/llm/ollama/ollama_gpu/ollama.service
    :caption: ``/etc/systemd/system/ollama.service`` 设置 ``ollama`` 服务运行环境变量
