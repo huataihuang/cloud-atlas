@@ -10,7 +10,8 @@ ollama
    intro_ollama.rst
    install_ollama.rst
    ollama_run_deepseek.rst
-   ollama_gpu.rst
+   ollama_nvidia_gpu.rst
+   ollama_amd_gpu.rst
 
 .. only::  subproject and html
 

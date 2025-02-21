@@ -23,7 +23,7 @@
 AMD GPU安装
 -------------
 
-AMD GPU的版本需要独立下载安装:
+要支持AMD GPU的版本再附加安装:
 
 .. literalinclude:: install_ollama/install_manual_amd
    :caption: 手工本地安装AMD GPU版本

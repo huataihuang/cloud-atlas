@@ -31,9 +31,9 @@ Azure的人工智能（AI）生成地球特征的三维表示，使用其云计�
 
     - `How to SR-IOV Mod the W7100 GPU <https://forum.level1techs.com/t/how-to-sr-iov-mod-the-w7100-gpu/164186>`_ 使用了修订版本的 `GitHub GPUOpen-LibrariesAndSDKs/MxGPU-Virtualization <https://github.com/GPUOpen-LibrariesAndSDKs/MxGPU-Virtualization>`_ (不知道最近几年 :ref:`mxgpu` 是否有其他更好的解决方案)
 
-  - 实现一个类似 :ref:`Looking Glass <https://looking-glass.io/>`_ 的远程运行 :ref:`windows` 桌面:
+  - 实现一个类似 `Looking Glass <https://looking-glass.io/>`_ 的远程运行 :ref:`windows` 桌面:
 
-    - ``Looking Glass`` 使用 SPICE 协议驱动实现的虚拟桌面的键盘/鼠标/音频，见 :ref:`Looking Glass Installation <https://looking-glass.io/docs/B6/install/>`_ ，具体工作原理见YouTube视频 `How Looking Glass works and why it was invented <https://www.youtube.com/watch?v=U44lihtNVVM>`_ ，但是其视频性能优于原生 SPICE video (待验证)，所以建议使用 ``Looking Glass`` (参考 `Im geting so tired (mxgpu, sr-iov) <https://forum.level1techs.com/t/im-geting-so-tired-mxgpu-sr-iov/155195>`_ 讨论)
+    - ``Looking Glass`` 使用 SPICE 协议驱动实现的虚拟桌面的键盘/鼠标/音频，见 `Looking Glass Installation <https://looking-glass.io/docs/B6/install/>`_ ，具体工作原理见YouTube视频 `How Looking Glass works and why it was invented <https://www.youtube.com/watch?v=U44lihtNVVM>`_ ，但是其视频性能优于原生 SPICE video (待验证)，所以建议使用 ``Looking Glass`` (参考 `Im geting so tired (mxgpu, sr-iov) <https://forum.level1techs.com/t/im-geting-so-tired-mxgpu-sr-iov/155195>`_ 讨论)
     - 另一种模式是使用 RDP client ，例如 ``Remmina`` Linux 客户端访问Windows桌面，但不知道哪种性能更好更稳定，待实践对比
 
 - 飞行摇杆: 待调研
