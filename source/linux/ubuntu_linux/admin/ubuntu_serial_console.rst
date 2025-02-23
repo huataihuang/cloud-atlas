@@ -21,10 +21,14 @@ Ubuntu 串口控制台
 配置 :ref:`ubuntu_grub` 传递内核参数
 ======================================
 
-- 修订 ``/etc/default/grub`` 配置 ``GRUB_CMDLINE_LINUX`` :
+- 修订 ``/etc/default/grub`` 配置 
+
+  - ``GRUB_CMDLINE_LINUX`` 向内核传递串口参数，这样Linux内核运行时会向串口输出终端信息以及登陆
+  - 增加GRUB串口配置，配置 ``GRUB_TERMINAL`` 和 ``GRUB_SERIAL_COMMAND`` 
 
 .. literalinclude:: ubuntu_serial_console/grub
    :caption: 修订 ``/etc/default/grub`` 配置 ``GRUB_CMDLINE_LINUX`` 添加控制台
+   :emphasize-lines: 2,5,6
 
 - 更新GRUB:
 
@@ -37,3 +41,4 @@ Ubuntu 串口控制台
 =====
 
 - `Ubuntu Community Help Wiki: SerialConsoleHowto <https://help.ubuntu.com/community/SerialConsoleHowto>`_
+- `How to get to the GRUB menu at boot-time using serial console? <https://askubuntu.com/questions/924913/how-to-get-to-the-grub-menu-at-boot-time-using-serial-console>`_

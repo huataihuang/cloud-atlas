@@ -90,12 +90,19 @@ IOMMU groups
 
 **IOMMU 组是可以传递给虚拟机的最小物理设备集**
 
-从上述输出中可以过滤出 :ref:`tesla_t10` 对应信息:
+- 从上述输出中可以过滤出 :ref:`tesla_t10` 对应信息:
 
 .. literalinclude:: run_debian_gpu_passthrough_in_qemu/tesla_t10_vfio-pci.ids
    :caption: 获取到的 :ref:`tesla_t10` 设备 ``vfio-pci.ids``
 
 输出信息中 ``10de:1e37`` 就是需要隔离(passthrough)的 :ref:`tesla_t10` 的 ``vfio-pci.ids``
+
+- 另外一块 :ref:`tesla_p10` 信息:
+
+.. literalinclude:: run_debian_gpu_passthrough_in_qemu/tesla_p10_vfio-pci.ids
+   :caption: 获取到的 :ref:`tesla_p10` 设备 ``vfio-pci.ids``
+
+对应 ``10de:11b39`` 就是隔离(passthrough) :ref:`tesla_p10` 的 ``vfio-pci.ids``
 
 VFIO
 =======
@@ -124,10 +131,19 @@ VFIO
 .. literalinclude:: run_debian_gpu_passthrough_in_qemu/lspci_output
    :caption: 获取 :ref:`tesla_t10` PCI IDs ，可以看到 ``10de:1e37`` 为 ``Tesla T10`` 的 PCI IDs
 
+- 类里，获取 :ref:`tesla_p10` PCI IDs:
+
+.. literalinclude:: run_debian_gpu_passthrough_in_qemu/lspci_p10
+   :caption: 获取 :ref:`tesla_p10` PCI IDs
+
 - 将绑定到 VFIO 的设备ID添加到模块加载参数中，如果有多个设备id，则用 ``,`` 分隔，例如 ``ids=1002:687f,1002:aaf8`` 。以下是我的配置绑定到VFIO的 :ref:`tesla_t10` :
 
 .. literalinclude:: run_debian_gpu_passthrough_in_qemu/vfio.conf
-   :caption: 将需要passthrough的设备IDs添加到VFIO的模块配置中
+   :caption: 将需要passthrough的 :ref:`tesla_t10` 设备IDs添加到VFIO的模块配置中
+
+.. literalinclude:: run_debian_gpu_passthrough_in_qemu/vfio_p10.conf
+   :caption: 将需要passthrough的 :ref:`tesla_p10` 设备IDs添加到VFIO的模块配置中
+
 
 这里有一个 :ref:`lfs` 自动加载模块的配置:
 
@@ -154,6 +170,17 @@ VFIO
 
 .. literalinclude:: run_debian_gpu_passthrough_in_qemu/lspci_vfio_output
    :caption: 通过 ``lspci`` 检查 :ref:`tesla_t10` IDs ``10de:1e37`` 使用了 ``vfio-pci`` 作为内核驱动
+   :emphasize-lines: 3
+
+- 检查确认模块 ``vfio-pci`` 是否正常连接了 :ref:`tesla_p10` IDs ``10de:1b39``
+
+.. literalinclude:: run_debian_gpu_passthrough_in_qemu/lspci_vfio_p10
+   :caption: 通过 ``lspci`` 检查 :ref:`tesla_p10` IDs ``10de:1b39`` 是否正确使用了 ``vfio-pci`` 模块
+
+正确的输出应该如下:
+
+.. literalinclude:: run_debian_gpu_passthrough_in_qemu/lspci_vfio_p10_output
+   :caption: 通过 ``lspci`` 检查 :ref:`tesla_t10` IDs ``10de:1b39`` 使用了 ``vfio-pci`` 作为内核驱动
    :emphasize-lines: 3
 
 一定要注意，这里GPU设备的内核驱动必须是 ``vfio-pci`` 才表明正确，这样才能passthrough给虚拟机使用

@@ -27,6 +27,7 @@ HPE服务器
    hp_ilo/index
    hpe_server_monitor.rst
    dl360_gen9_pci_bus_error.rst
+   nmi_iock_error.rst
 
 .. only::  subproject and html
 

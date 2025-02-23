@@ -137,7 +137,6 @@ GRUB和EFI的最小化启动配置
    上述 ``search --set=root ...`` 方法在主流发行版 :ref:`ubuntu_linux` 上就是这么设置的，可以参考
 
 
-
 挂载EFI变量文件系统(efivars)
 -------------------------------
 
@@ -187,6 +186,8 @@ GRUB和EFI的最小化启动配置
 
 .. literalinclude:: lfs_boot/grub.cfg
    :caption: 创建 ``/boot/grub/grub.cfg`` 配置文件
+
+这里我添加了2行配置GRUB串口输出，参考 `How does one set up a serial terminal and/or console in Red Hat Enterprise Linux? <https://access.redhat.com/articles/3166931>`_
 
 异常排查
 ============

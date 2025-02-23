@@ -227,6 +227,22 @@ Bash Shell启动文件
 
 .. literalinclude:: after_lfs_config/grub.cfg
    :caption: 内核参数添加 ``console=tty0 console=ttyS0,115200n8``
+   :emphasize-lines: 8
+
+.. warning::
+
+   这里我搬运了 :ref:`ubuntu_linux` 配置GRUB serail输出的配置部分(参考 `archlinux: Working with the serial console <https://wiki.archlinux.org/title/Working_with_the_serial_console#GRUB_first_stage_serial_console>`_ ):
+
+   .. literalinclude:: after_lfs_config/grub.cfg
+      :caption: GRUB配置serial输入输出
+      :emphasize-lines: 2-4
+
+   上述参数是从 :ref:`ubuntu_linux` 的 ``/etc/default/grub`` 配置通过 ``update-grub`` 命令生成的， ``/etc/default/grub`` 在Ubuntu中配置如下:
+
+   .. literalinclude:: after_lfs_config/ubuntu_grub
+      :caption: Ubuntu ``/etc/default/grub`` 配置GRUB串口
+
+   但是非常奇怪没有效果，待后续再排查
 
 参考
 =====

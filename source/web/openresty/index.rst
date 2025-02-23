@@ -1,18 +1,13 @@
-.. _llm:
+.. _openresty:
 
 =================================
-LLM 大型语言模型
+OpenResty
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   llm_startup.rst
-   llama/index
-   vllm/index
-   ollama/index
-   unsloth/index
-   langchain/index
+   intro_openresty.rst
 
 .. only::  subproject and html
 
