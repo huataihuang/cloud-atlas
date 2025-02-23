@@ -1,18 +1,13 @@
-.. _llm:
+.. _unsloth:
 
 =================================
-LLM 大型语言模型
+unsloth
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   llm_startup.rst
-   llama/index
-   vllm/index
-   ollama/index
-   unsloth/index
-   langchain/index
+   intro_unsloth.rst
 
 .. only::  subproject and html
 

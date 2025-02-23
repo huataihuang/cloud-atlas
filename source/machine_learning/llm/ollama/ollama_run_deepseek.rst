@@ -51,11 +51,20 @@ open-webui
 .. literalinclude:: ollama_run_deepseek/run_open-webui
    :caption: 运行 open-webui( :ref:`virtualenv` )
 
+.. note::
+
+   ``open-webui`` 只支持 ``OpenAI`` 和 ``Ollama`` 两种API，所以如果直接部署 :ref:`deploy_deepseek-r1_locally_cpu_arch` 使用 ``llama.cpp`` ，则无法直接使用 ``open-webui`` 。解决方法目前看有3种:
+
+   - 通过 ``Ollama`` 来运行 ``llama.cpp`` 模型，但是怎么解决自定义运行需要找到方法
+   - `GitHub: mpazdzioch/llamacpp-webui-glue <https://github.com/mpazdzioch/llamacpp-webui-glue>`_ ( `Llamacpp + WebUI with automatic model switching <https://www.reddit.com/r/LocalLLaMA/comments/1eb1sq0/llamacpp_webui_with_automatic_model_switching/>`_ ) 采用了一种巧妙的方法，在 ``open-webui`` 和 ``llama.cpp`` 之间部署 :ref:`openresty` ，通过 ``openresty`` 的内置 :ref:`lua` 定制一个OpenAI API转换层，来直接调用 ``llama.cpp`` 的API接口。值得学习借鉴
+   - ``llama.cpp`` 项目提供了一个 ``llama-server`` ，能够使用 ``OpenAI`` 兼容API方式提供调用，也就是说，完全可以去除 ``ollama`` 直接对接 ``open-webui`` ，不过现在可能还没有很好的文档指导。我在 :ref:`deploy_deepseek-r1_locally_cpu_arch` 中目前使用 ``llama-server`` 来提供服务，具体对接 ``OpenAI`` 兼容API的方法待实践
+
 使用GPU
 =========
 
 发现一个问题，虽然我的主机安装了24GB显存的 :ref:`tesla_p10` ，但是 ``Ollama`` 却用CPU完成推理，在 ``nvidia-smi`` 完全看不到GPU在工作。我可是特意选择了能够用20GB运行的 ``32b`` 参数大模型。
 
+解决方法是 :ref:`ollama_nvidia_gpu`
 
 参考
 ======

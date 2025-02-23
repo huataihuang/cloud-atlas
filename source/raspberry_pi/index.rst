@@ -19,6 +19,7 @@ Raspberry Pi
    storage/index
    display/index
    uart/index
+   usb_gadgets/index
    uefi/index
    performance/index
    debug/index

@@ -24,6 +24,17 @@ Debian虚拟机精简系统初始化
 
 .. literalinclude:: ../ubuntu_linux/admin/ubuntu_serial_console/grub
    :caption: 修订 ``/etc/default/grub`` 配置 ``GRUB_CMDLINE_LINUX`` 添加控制台
+   :emphasize-lines: 2
+
+.. note::
+
+   上述串口配置仅针对Linux Kernel，所以只有在Linux内核获得主机控制时才会有串口输出，这样就不包含grub自身的串口输出，会导致grub刚启动时看不到选择启动项的页面。所以还需要补充 ``grub`` 的串口配置
+
+- **补充** 增加GRUB串口配置，修订 ``/etc/default/grub`` 配置，配置 ``GRUB_TERMINAL`` 和 ``GRUB_SERIAL_COMMAND`` :
+
+.. literalinclude:: ../ubuntu_linux/admin/ubuntu_serial_console/grub
+   :caption: 修订 ``/etc/default/grub`` 配置 ``GRUB_TERMINAL`` 和 ``GRUB_SERIAL_COMMAND``
+   :emphasize-lines: 5,6
 
 - 更新GRUB:
 

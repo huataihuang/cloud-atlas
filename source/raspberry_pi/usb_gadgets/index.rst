@@ -1,18 +1,13 @@
-.. _llm:
+.. _pi_usb_gadgets:
 
 =================================
-LLM 大型语言模型
+树莓派USB gadgets
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   llm_startup.rst
-   llama/index
-   vllm/index
-   ollama/index
-   unsloth/index
-   langchain/index
+   usb_gadgets_on_pi_zero.rst
 
 .. only::  subproject and html
 
