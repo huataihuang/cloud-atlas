@@ -46,6 +46,14 @@ which
 .. literalinclude:: blfs_system_utilities/which
    :caption: which
 
+sysstat
+===============
+
+.. literalinclude:: blfs_system_utilities/sysstat
+   :caption: sysstat
+
+通过cron配置定时运行
+
 参考
 ======
 
