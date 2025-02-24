@@ -58,6 +58,16 @@ libslirp 是用户模式网络库，用于虚拟机，容器和不同工具
 .. literalinclude:: blfs_networking_libraries/libslirp
    :caption: 安装 libslirp
 
+nghttp2
+===========
+
+.. note::
+
+   - curl建议依赖
+   - cmake建议依赖
+
+.. literalinclude:: blfs_networking_libraries/nghttp2
+   :caption: 安装 nghttp2
 
 curl
 =========

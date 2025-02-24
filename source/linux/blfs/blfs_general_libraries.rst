@@ -4,6 +4,53 @@
 BLFS General Libraries
 ==========================
 
+icu
+=======
+
+International Components for Unicode (ICU) 为C/C++库提供Unicode和全球化支持，是所有平台广泛移植和给予应用程序相同结果的依赖库。libxml2建议依赖，感觉有用
+
+这个icu库大版本升级需要所有依赖库重新编译。
+
+.. literalinclude:: blfs_general_libraries/icu
+   :caption: icu
+
+libxml2
+============
+
+libxml2处理XML文件，目前看多个程序建议依赖，例如 nghttp2
+
+.. literalinclude:: blfs_general_libraries/libxml2
+   :caption: libxml2
+
+:strike:`LZO`
+==============
+
+LZO数据压缩类似于LZ4，不过LZ4速度更快，占用CPU少，所以 :ref:`zfs` 中使用了LZ4
+
+libarchive
+============
+
+处理压缩格式读写接口，CMake建议依赖，还是有不少软件会使用，所以安装
+
+.. literalinclude:: blfs_general_libraries/libarchive
+   :caption: libarchive
+
+libaio
+===========
+
+异步I/O依赖库，例如 ``fio`` 这样的工具依赖
+
+.. literalinclude:: blfs_general_libraries/libaio
+   :caption: libaio
+
+libuv
+==========
+
+多平台支持库，专注于异步I/O，主要使用的程序有 :ref:`nodejs` (建议依赖)，另外CMake也建议依赖，看起来安装较好，可以支持不少跨平台软件(跨平台软件可能不会直接使用aio)
+
+.. literalinclude:: blfs_general_libraries/libuv
+   :caption: libuv
+
 libtasn1
 ===========
 

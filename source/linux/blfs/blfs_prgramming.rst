@@ -61,3 +61,12 @@ Git
 
 .. literalinclude:: blfs_prgramming/git_ssl_backend_openssl
    :caption: 设置git使用openssl作为SSL后端
+
+CMake
+========
+
+CMake是代替configure的配置生成工具，我在编译 :ref:`llama` 时需要
+
+.. literalinclude:: blfs_prgramming/cmake
+   :caption: CMake
+
