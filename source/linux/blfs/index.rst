@@ -18,6 +18,7 @@ BLFS(Beyond Linux from scratch)
    blfs_general_libraries.rst
    blfs_file_systems.rst
    blfs_system_utilities.rst
+   blfs_linux-tools.rst
    blfs_prgramming.rst
    blfs_virtualization/index
    blfs_container/index
