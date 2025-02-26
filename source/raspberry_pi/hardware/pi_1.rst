@@ -16,9 +16,10 @@
 
 十年之后的今天(2022年)，我现在主要使用 :ref:`pi_4` 和 :ref:`pi_3` 来构建 :ref:`edge_cloud` 。不过，也考虑如何让这一代产品能够发挥一下余热，找寻一个合适的应用模式...
 
-我想到一个挑战的方式:
+我想到挑战的方式:
 
-构建 :ref:`the_most_smallest_cheapest_k8s`
+- 构建 :ref:`the_most_smallest_cheapest_k8s` : 最终没有成功
+- 构建 :ref:`pilfs` : 2025年计划待执行
 
 参考
 =======

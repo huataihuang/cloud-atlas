@@ -32,6 +32,8 @@ Linux是云计算的主流基础操作系统，除了微软的Azure，其他主�
    gentoo_linux/index
    lfs/index
    blfs/index
+   alfs/index
+   pilfs/index
    yocto/index
    debian/index
    ubuntu_linux/index

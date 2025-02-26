@@ -9,7 +9,7 @@ LLaMa(Large Language Model Meta AI)
 
    llama-2.rst
    install/index
-   llama_cpu_optimize.rst
+   llama_cpu_optimize/index
    bench/index
 
 
