@@ -21,7 +21,8 @@ extensions = [
         'sphinx.ext.graphviz',
         'sphinxnotes.strike',
         'sphinxcontrib.youtube',
-        'sphinxcontrib.video'
+        'sphinxcontrib.video',
+        'myst_parser'
 ]
 
 templates_path = ['_templates']

@@ -11,7 +11,11 @@ linux from scratch(LFS)简介
 - LFS教会你Linux系统如何工作
 - 构建LFS可以生成一个非常精巧的Linux系统
 - LFS具备扩展性
--  LFS提供了附加的安全
+- LFS提供了附加的安全
+
+另外，借用一句我在 :ref:`think_pilfs` 时看到 `Building Linux From Scratch on Raspberry Pi 1 <https://cspub.net/2023/03/22/building-lfs-on-raspberry-pi.html>`_ 的一句话:
+
+**“The more you know, the more you realize you don’t know.” - LFS once again confirms that it is truth.**
 
 如何构建 LFS 系统
 ===================

@@ -41,3 +41,19 @@ HPE DL360 Gen9服务器PCI Bus Error
 - 重新多次插拔出现报错的DIMM 内存，然后重新开机。果然，系统内存检测就完全正常，从 :ref:`hp_ilo` 的 ``System Information >> Memory Information`` 查看，可以看到刚才报错的DIMM内存条已经正常工作(状态 ``Good, In Use`` :
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/dl360_gen9_pci_bus_error-3.png
+
+再次发作
+=========
+
+在使用了一段时间之后，2025年2月，这台老掉牙的 :ref:`hpe_dl360_gen9` 终于拒绝启动。我马上买了一台 :ref:`hpe_dl380_gen9` 准系统来替换，当时推测是主板问题。而且确实CPU换到新的HP DL380 gen9能够正常启动。
+
+不过很不幸， 经过几天开关机，服务器再次拒绝启动，不过 iLO 管理界面可以登陆，检查 ``Integrated Management Log`` 显示报错
+
+.. csv-table:: HPE ``DL380`` gen9服务器PCI总线错误日志
+   :file: dl360_gen9_pci_bus_error/dl380_integrated_management_log.csv
+   :widths: 10, 10, 20, 10, 10, 10, 30
+   :header-rows: 1
+
+由于我已经更换了服务器主机(主板)，所以我怀疑不是主板故障，而是我的旧服务器CPU出现了异常。不过，我尝试将 :ref:`hpe_dl380_gen9` 的PCIe扩展板上第2个PCIe存储卡拿掉以后，暂时恢复了正常启动。但我怀疑还会出现故障。
+
+
