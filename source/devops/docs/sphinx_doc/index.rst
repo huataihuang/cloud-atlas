@@ -25,6 +25,7 @@ Sphinx文档
    sphinx_table.rst
    sphinx_image.rst
    sphinx_strike.rst
+   sphinx_markdown.rst
    sphinx_rss_feed.rst
    sphinx_embed_video.rst
    sphinx_embed_youtube.rst
