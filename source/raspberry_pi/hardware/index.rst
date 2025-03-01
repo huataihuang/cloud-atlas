@@ -10,6 +10,7 @@
    pi_1.rst
    pi_3.rst
    pi_zero.rst
+   pi_zero_net_ext.rst
    pi_4.rst
    pi_400.rst
    pi_cm4.rst
