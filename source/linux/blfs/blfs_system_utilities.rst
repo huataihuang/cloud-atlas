@@ -54,6 +54,29 @@ sysstat
 
 通过cron配置定时运行
 
+.. _blfs_numactl:
+
+numactl
+===========
+
+.. note::
+
+   ``numactl`` 不是BLFS官方手册包含，但是对于我维护服务器很有用，所以添加
+
+.. literalinclude:: blfs_system_utilities/numactl
+   :caption: numactl
+
+ipmitool
+=============
+
+.. note::
+
+   ``ipmitool`` 不是BLFS官方手册包含，但是对于我维护服务器很有用，所以添加
+
+.. literalinclude:: blfs_system_utilities/ipmitool
+   :caption: ipmitool
+
+
 参考
 ======
 

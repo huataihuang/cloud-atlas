@@ -17,8 +17,8 @@
 运行
 =====
 
-.. literalinclude:: deploy_deepseek-r1_locally_cpu_arch_lfs/run_model
-   :caption: 运行模型
+.. literalinclude:: deploy_deepseek-r1_locally_cpu_arch_lfs/run_model_err
+   :caption: 运行模型(不过缺少参数推理会报错,见下文修复)
 
 交互
 ========
@@ -53,7 +53,7 @@
 
 解决方法是加上运行参数 ``--cache-type-k q8_0``
 
-.. literalinclude:: deploy_deepseek-r1_locally_cpu_arch_lfs/run_model_fix
+.. literalinclude:: deploy_deepseek-r1_locally_cpu_arch_lfs/run_model
    :caption: 运行模型,修正参数
    :emphasize-lines: 3
 
