@@ -53,8 +53,6 @@ Intel Turbo Boost监控处理器当期使用情况，以及处理器是否接近
 
    我最终还是放弃了 ``performacne`` ，原因是默认高性能运行会导致 :ref:`hpe_dl360_gen9` 的散热风扇高速运转，噪音无法忍受。而使用 ``powersave`` 则非常安静，所以最终日常还是使用 ``powersave`` governor。
 
-
-
 参考
 =======
 

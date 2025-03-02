@@ -33,7 +33,8 @@ LLaMA在CPU架构上优化
 
    * :ref:`genindex`
 
-参考
-======
+.. note::
 
-- `Optimizing and Running LLaMA2 on Intel CPU <https://www.intel.com/content/www/us/en/content-details/791610/optimizing-and-running-llama2-on-intel-cpu.html>`_
+   Intel 公司提供了一种针对CPU优化的方法， `Optimizing and Running LLaMA2 on Intel CPU <https://www.intel.com/content/www/us/en/content-details/791610/optimizing-and-running-llama2-on-intel-cpu.html>`_ 采用了最新的 ``AVX_VNNI`` (矢量神经网络指令)，并且得到了 ``llama.cpp`` 支持( `Add AVX_VNNI support for intel x86 processors #4301 <https://github.com/ggml-org/llama.cpp/issues/4301>`_ )，可以加速LLM运行。不过，需要特定的CPU支持，简单来说就是 2019/2020年之后的 Intel 处理器才可能支持( `AVX-512 Vector Neural Network Instructions (VNNI) - x86 <https://en.wikichip.org/wiki/x86/avx512_vnni>`_ )
+
+
