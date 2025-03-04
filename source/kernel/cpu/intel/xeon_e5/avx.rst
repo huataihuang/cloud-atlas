@@ -59,4 +59,4 @@ CPU的单双精度计算机能力
 
 - `Wikipedia: Advanced Vector Extensions <https://en.wikipedia.org/wiki/Advanced_Vector_Extensions>`_
 - `CPU的计算机能力和AVX512指令集 <https://zhuanlan.zhihu.com/p/605920873>`_
-
+- `AVX512 <https://www.cnblogs.com/pam-sh/p/16210114.html>`_ 这篇非常详尽

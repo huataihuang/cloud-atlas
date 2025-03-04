@@ -21,7 +21,12 @@ NVIDIA的低功耗产品线 P4/T4/A2 给这个想法带来一些希望:
 - 淘宝上能够买到比较廉价的 ``OCuLink`` Dock，大约只需要300RMB
 - 二手的P4价格较低，虽然显存和主频受限，但是低功耗(70W)也为配合树莓派运行带来便利(省电呀)
 
-我发现类似的想法其实国外网友已经有一些实践案例，例如 `Jeff Geerling博客: #gpu <https://www.jeffgeerling.com/tags/gpu>`_ 有几篇关于外置显卡(eGPU)的文章，提供了借鉴。而我的想法是不求最高性能，力求在有限的功耗下实现基本的 :ref:`llm` 推理，我将分阶段完成实践和分享:
+我发现类似的想法其实国外网友已经有一些实践案例，例如 `Jeff Geerling博客: #gpu <https://www.jeffgeerling.com/tags/gpu>`_ 有几篇关于外置显卡(eGPU)的文章，提供了借鉴。而我的想法是不求最高性能，力求在有限的功耗下实现基本的 :ref:`llm` 推理。
+
+不过，**出于平衡LLM的模型以及避免重复投资** 我后来还是想充分使用我已经购买的 :ref:`tesla_p10` 来实现类似的方案:
+
+- NVIDIA Tesla P10具备 ``24GB`` 显存，能够运行较大规模的LLM ( ``deepseek-r1 32b`` )，而 Tesla P4只有8G显存，运行的LLM规模太小实用价值有限
+- 我准备改造一个ITX机箱来运行 :ref:`pi_cluster` 连接外接 :ref:`tesla_p10`
 
 参考
 ======

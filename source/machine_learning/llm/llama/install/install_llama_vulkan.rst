@@ -20,4 +20,4 @@ Vulkan架构安装LLaMA
 
 - `Issues with running Llama.cpp on Raspberry Pi 5 with Vulkan. #5237 <https://github.com/ggml-org/llama.cpp/issues/5237>`_
 - `Getting started with Vulkan on RPi? <https://forums.raspberrypi.com/viewtopic.php?t=344202>`_
-- `How do i install Vulkan drivers? <https://www.reddit.com/r/raspberry_pi/comments/18uw25h/how_do_i_install_vulkan_drivers/>`_
+- `How do i install Vulkan drivers? <https://www.reddit.com/r/raspberry_pi/comments/18uw25h/how_do_i_install_vulkan_drivers/>`_ 提供了安装vulkan驱动的信息
