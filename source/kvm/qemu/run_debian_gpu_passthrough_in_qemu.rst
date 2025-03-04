@@ -217,6 +217,36 @@ OVMF qemu
    :caption: 在虚拟机内部检查GPU
    :emphasize-lines: 1,11
 
+问题排查
+==========
+
+我在实践中，成功将上述 :ref:`tesla_t10` ( ``-device vfio-pci,host=82:00.0`` )PassThrough 给虚拟机，但是更换成 :ref:`tesla_p10` 之后，传递 ``-device vfio-pci,host=05:00.0`` 却导致虚拟机无法启动(始终显示 ``Guest has not initialized the display (yet)`` )
+
+检查系统日志显示， ``vfio-pci`` 添加 ``10de:1b39`` 是成功额，但是Guest始终无法初始化。
+
+奇怪的是，一旦去掉传递 ``-device vfio-pci,host=05:00.0`` 虚拟机就能够正常启动
+
+另外，如果我添加了 ``-device vfio-pci,host=05:00.0`` 参数，虽然虚拟机无法启动，但是物理主机中 ``dmesg`` 日志是显示::
+
+   [Sun Mar  2 23:42:42 2025] vfio-pci 0000:05:00.0: Enabling HDA controller
+
+没有看到报错信息，看起来 ``vfio-pci`` 是正常隔离的
+
+- 实在没有办法，但是我也有点怀疑是我的 :ref:`hpe_dl380_gen9` 硬件问题，因为之前偶然会出现有关PCIe的硬件报错导致无法启动，所以我尝试将 :ref:`tesla_p10` 更换一个PCIe插槽再次尝试
+
+- 更换PCIe插槽之后，执行 ``lspci -nn | grep -i nvidia`` 可以看到Tesla P10的 ``pcie.ids`` 不变，依然是 ``10de:1b39`` :
+
+.. literalinclude:: run_debian_gpu_passthrough_in_qemu/lspci_nn_output
+   :caption: 更换PCIe插槽之后 :ref:`tesla_p10` 的 ``pcie.ids`` 不变，但是group更改为 ``0b:00.0`` 
+
+- 修订启动 :ref:`qemu` 命令:
+
+.. literalinclude:: run_debian_gpu_passthrough_in_qemu/qemu
+   :caption: 更换PCIe插槽之后 ``qemu`` 使用不同的 ``vfio-pci`` 参数
+   :emphasize-lines: 10
+
+**还是没有解决启动问题，待查**
+
 下一步
 =========
 
