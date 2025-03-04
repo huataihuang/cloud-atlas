@@ -1,14 +1,13 @@
-.. _pi_machine_learning:
+.. _pi_egpu_ml:
 
 =================================
-树莓派机器学习
+树莓派外接GPU实现机器学习
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   pi_machine_learning_startup.rst
-   pi_egpu_ml/index
+   pi_egpu_ml_arch.rst
 
 .. only::  subproject and html
 

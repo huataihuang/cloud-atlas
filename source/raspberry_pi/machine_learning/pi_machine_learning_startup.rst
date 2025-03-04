@@ -8,6 +8,7 @@
 
 - :ref:`intel_ncs`
 - :ref:`hailo_ai`
+- :ref:`pi_egpu_ml`
 
 参考
 ======
