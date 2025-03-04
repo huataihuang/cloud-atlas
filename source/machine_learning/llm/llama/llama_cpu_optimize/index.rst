@@ -24,7 +24,7 @@ LLaMA在CPU架构上优化
    :maxdepth: 1
 
    llama_tunning_disable_ht
-
+   llama_tunning_disable_numa.rst
 
 .. only::  subproject and html
 
