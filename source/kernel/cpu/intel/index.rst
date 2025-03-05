@@ -13,4 +13,5 @@ Intel CPU架构
    intel_sgx/index
    intel_vroc/index
    xeon_e5/index
+   xeon_e/index
    intel_core/index

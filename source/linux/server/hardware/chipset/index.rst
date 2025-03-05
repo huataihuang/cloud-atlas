@@ -9,6 +9,8 @@
 
    pcie.rst
    intel_c610.rst
+   intel_c246.rst
+   nasse_c246.rst
    dimm_ram.rst
    
 .. only::  subproject and html
