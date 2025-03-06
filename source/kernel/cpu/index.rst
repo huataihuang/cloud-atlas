@@ -12,3 +12,4 @@ CPU
    cpu_prefetch.rst
    intel/index
    amd/index
+   cpu_fan.rst
