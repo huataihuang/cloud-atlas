@@ -8,4 +8,3 @@ Intel Core处理器
    :maxdepth: 1
 
    intel_core_numbers.rst
-   intel_core_fan.rst
