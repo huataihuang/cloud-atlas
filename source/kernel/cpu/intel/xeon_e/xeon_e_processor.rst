@@ -6,6 +6,8 @@ Intel Xeon E系列处理器
 
 Intel于2018年推出Xeon E-2100处理器，面向入门级服务器平台。这个系列Xeon E是之前E3-1200 v系列改名。包括2019年推出的Xeon E-2200处理器，都是属于Coffee Lake微内核处理器，基于14nm工艺。
 
+
+
 Xeon E系列处理器编号
 ======================
 
@@ -27,7 +29,7 @@ Xeon E系列处理器编号
 主板芯片
 ==========
 
-Xeon E系列对应使用 C242 或 :ref:`intel_c246` ，这样才能实现支持ECC内存。我选购了 :ref:`nasse_c246` 来配套 :ref:`xeon_e`
+Xeon E系列对应使用 C242 或 :ref:`intel_c246` ，这样才能实现支持ECC内存。我选购了 :ref:`nasse_c246` 来配套 :ref:`xeon_e-2274g`
 
 .. warning::
 

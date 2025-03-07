@@ -12,6 +12,7 @@ Intel CPU架构
    intel_qat/index
    intel_sgx/index
    intel_vroc/index
+   intel_rst/index
    xeon_e5/index
    xeon_e/index
    intel_core/index
