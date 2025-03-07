@@ -63,7 +63,7 @@ RAID级别和线性支持
 Linux RAID子系统
 ==================
 
-``mdraid`` 子系统是Linux软件RAID解决方案，该子系统使用自己的元数据格式，称为原生MD元数据。此外还支持外部元数据(RHEL9支持外部元数据 ``mdraid`` 来访问 Intel Rapid Storage (ISW) 或 Intel Matrix Storage Manager (IMSM) 设置和存储网络行业关联 (SNIA) 磁盘驱动器格式 (DDF))。
+``mdraid`` 子系统是Linux软件RAID解决方案，该子系统使用自己的元数据格式，称为原生MD元数据。此外还支持外部元数据(RHEL9支持外部元数据 ``mdraid`` 来访问 :ref:`intel_rst` 或 Intel Matrix Storage Manager (IMSM) 设置和存储网络行业关联 (SNIA) 磁盘驱动器格式 (DDF))。
 
 RAID思考
 ==========
