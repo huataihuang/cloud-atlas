@@ -147,8 +147,11 @@
 
    在尝试了 :ref:`debian_downgrade_kernel` 将内核降级到 ``5.15`` 之后，发现没有解决 :ref:`samsung_pm9a1` 识别问题。
 
-
 很不幸，看来还有什么细节差异没有找到，内核降级到 ``5.15`` 没有解决问题。
+
+补充信息: 在线服务器的系统日志中也曾发现过类似 ``Timeout`` 报错，似乎这种NVMe报错并非罕见::
+
+   kernel: nvme nvme0: Shutdown timeout set to 10 seconds
 
 我准备重新部署一个 :ref:`ovmf_gpu_nvme` 虚拟机，安装 :ref:`ubuntu_linux` 20.04 版本来重现当时能够使用 :ref:`samsung_pm9a1` 的场景
 
