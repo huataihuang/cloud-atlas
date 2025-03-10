@@ -12,6 +12,7 @@
    intel_c246.rst
    nasse_c246.rst
    dimm_ram.rst
+   ecc_ram.rst
    
 .. only::  subproject and html
 

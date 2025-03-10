@@ -4,7 +4,14 @@
 Colima容器化开发环境
 =====================
 
-折腾了几天，终于在colima环境中快速构建了一个基于 :ref:`debian` 的开发容器，综合整理作为快速指南: 以下为精简步骤
+.. note::
+
+   在colima环境中快速构建了一个基于 :ref:`debian` 的开发容器，综合整理作为快速指南
+
+- :ref:`macos` 中通过 :ref:`homebrew` 安装Colima:
+
+.. literalinclude:: colima_startup/brew_install_colima
+   :caption: 在 :ref:`macos` 平台安装colima
 
 - :ref:`colima_startup` 启动VZ虚拟机:
 
