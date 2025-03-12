@@ -8,7 +8,7 @@ Intel Xeon E-2274G是我在淘宝上找到的最便宜的内置GPU的 :ref:`xeon
 
 - 2019年Q2发布
 - Cofee Lake 微处理器架构
-- 14nm光刻工艺
+- ``14nm`` 光刻工艺
 - 4核心8线程(至强处理器相当于同时代的i7)
 - 基本频率 4.00 GHz / 最大睿频 4.90 GHz
 - 8 MB缓存
@@ -16,7 +16,7 @@ Intel Xeon E-2274G是我在淘宝上找到的最便宜的内置GPU的 :ref:`xeon
 - TDP功耗 ``83W``
 - 最高支持128G内存(但是需要BIOS更新，不是所有主板都支持)
 - 内存最高支持 DDR4-2666 (不过我原先购买的 :ref:`hpe_dl360_gen9` 配套的是 DDR4-2400)
-- 内置GPU: Intel UHD Graphics P630
+- 内置GPU: :ref:`intel_uhd_graphics_630`
 
   - 显卡基本频率 350 MHz
   - 显卡最大动态频率 1.20 GHz
