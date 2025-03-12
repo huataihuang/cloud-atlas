@@ -1,19 +1,15 @@
-.. _ml_hardware:
+.. _intel_gpu:
 
 =================================
-机器学习硬件
+Intel GPU
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   dl_hardware.rst
-   nvidia_gpu/index
-   amd_gpu/index
-   intel_gpu/index
-   hailo_ai/index
-   intel_ncs/index
-   benchmark_gpu.rst
+   intel_gpu_infra.rst
+   intel_uhd_graphics_630.rst
+
 
 .. only::  subproject and html
 
