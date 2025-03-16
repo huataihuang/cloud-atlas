@@ -10,6 +10,7 @@ Web Terminal
    intro_web_terminal.rst
    webssh.rst
    xtermjs.rst
+   socketio.rst
    
 .. only::  subproject and html
 

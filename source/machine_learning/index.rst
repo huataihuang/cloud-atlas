@@ -30,6 +30,7 @@ Machine Learning
    fauxpilot/index
    codellama/index
    deepseek/index
+   freebsd/index
 
 .. only::  subproject and html
 

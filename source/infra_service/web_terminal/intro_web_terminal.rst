@@ -14,3 +14,4 @@ Web Terminal简介
 ======
 
 - `16 Open-source free Self-hosted Web-based Terminals <https://medevel.com/16-list-self-hosted-terminals/>`_ 很多项目已经停止开发，我没有一一验证，目前仅尝试我所了解的几个
+- `How to create web-based terminals <https://dev.to/saisandeepvaddi/how-to-create-web-based-terminals-38d>`_ 一个非常好的解决方法，结合 :ref:`xtermjs` 和 :ref:`socketio` 实现WEB terminal
