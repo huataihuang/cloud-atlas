@@ -4,6 +4,15 @@
 三星PM9A1 NVMe存储初始化timeout无法识别
 =======================================
 
+.. warning::
+
+   从我的使用经验来看，这款 :ref:`samsung_pm9a1` 存在严重的质量问题，至少早期版本很有可能存在硬件和软件隐患，在某个触发条件下会导致控制器损坏。我的3个PM9A1故障让我对三星的OEM质量非常失望，几乎是粉转黑了。
+
+   另外在网上找到的信息:
+
+   - `作为三星 pm9a1 固态 0e 报错/数据损坏的早期、二度受害者，谈谈科学的预判和检测方法 <https://cn.v2ex.com/t/879433>`_
+   - `关于PM9A1和980Pro SLC Cache缓存异常的信息汇总 <https://www.163.com/dy/article/GKUEGPDQ0512MJDN.html>`_
+
 问题
 =======
 
@@ -91,7 +100,7 @@
 .. literalinclude:: samsung_pm9a1_timeout_failure/grub
    :language: bash
 
-但是都没有效果
+但是都没有效果: 这个设置参数是按照archlinux的文档参考 `[PATCH v2] nvme-pci: Fix the instructions for disabling power management <https://lore.kernel.org/r/all/20240711225952.5445-1-bvanassche@acm.org/T/>`_ ，其中提到的 "Samsung SSD 970 EVO PlusNVMe SSD" 环境fix似乎和我类似，但是我验证没有成功。
 
 我尝试对操作系统进行升级，但是意外发现系统宕机，终端显示出 NMI 错误。联想到最近出现的 :ref:`dl360_gen9_pci_bus_error` 以及反复和处理器processor 1相关的SATA磁盘报错，所以我怀疑处理器processor 1的PCIe通道可能确实是硬件故障了。
 
@@ -153,7 +162,23 @@
 
    kernel: nvme nvme0: Shutdown timeout set to 10 seconds
 
-我准备重新部署一个 :ref:`ovmf_gpu_nvme` 虚拟机，安装 :ref:`ubuntu_linux` 20.04 版本来重现当时能够使用 :ref:`samsung_pm9a1` 的场景
+ubuntu 20.04
+--------------
+
+重新部署安装 :ref:`ubuntu_linux` 20.04 版本，但是我发现内核是 ``vmlinuz-5.4.0-144`` ，即使升级也是 ``vmlinuz-5.4.0-208`` ，并没有解决识别 :ref:`samsung_pm9a1` 问题。在这个内核版本，我尝试添加了内核参数:
+
+.. literalinclude:: samsung_pm9a1_timeout_failure/grub
+   :language: bash
+
+也没有解决
+
+但是我发现和我之前笔记不同，内核没有达到 ``5.15/5.19`` ，似乎需要做一次升级: 执行 :ref:`upgrade_ubuntu` ，检查内核版本是 ``5.15.0-134-generic`` ( Ubuntu 22.04.5 LTS )
+
+太奔溃了，还是没有解决
+
+我发现在主机的BIOS设置中选择对NVMe设备进行test，异常的 :ref:`samsung_pm9a1` 测试控制器始终是 ``fail`` 状态，看来挽救的可能性非常小了。
+
+**已经寄了3个Samsung PM9A1了，大哭**
 
 参考
 ======

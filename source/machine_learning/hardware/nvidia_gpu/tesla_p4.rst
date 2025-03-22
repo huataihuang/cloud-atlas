@@ -23,10 +23,10 @@ NVIDIA的低功耗产品线 P4/T4/A2 给这个想法带来一些希望:
 
 我发现类似的想法其实国外网友已经有一些实践案例，例如 `Jeff Geerling博客: #gpu <https://www.jeffgeerling.com/tags/gpu>`_ 有几篇关于外置显卡(eGPU)的文章，提供了借鉴。而我的想法是不求最高性能，力求在有限的功耗下实现基本的 :ref:`llm` 推理。
 
-不过，**出于平衡LLM的模型以及避免重复投资** 我后来还是想充分使用我已经购买的 :ref:`tesla_p10` 来实现类似的方案:
+最终我购买了 Tesla P4 + 散热风扇，和 :ref:`tesla_p10` 一同安装在 :ref:`nasse_c246` 所使用的ITX小机箱中:
 
-- NVIDIA Tesla P10具备 ``24GB`` 显存，能够运行较大规模的LLM ( ``deepseek-r1 32b`` )，而 Tesla P4只有8G显存，运行的LLM规模太小实用价值有限
-- 我准备改造一个ITX机箱来运行 :ref:`pi_cluster` 连接外接 :ref:`tesla_p10`
+- NVIDIA Tesla P10具备 ``24GB`` 显存，能够运行较大规模的LLM ( ``deepseek-r1 32b`` )，连接 :ref:`nasse_c246` 的PCIe插槽，通过 :ref:`freebsd` 构建一个 :ref:`freebsd_machine_learning`
+- NVIDIA Tesla P4低功耗但 INT8 性能卓越，通过 ``OCuLink`` 连接 :ref:`pi_5` 用于AI生图和尝试边缘推理
 
 参考
 ======
