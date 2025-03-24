@@ -4,7 +4,36 @@
 在苹果Intel版Mac上安装FreeBSD
 ===============================
 
-我在 :ref:`mbp15_late_2013` :ref:`choose_freebsd` 实现个人开发学习环境，原因是旧版本苹果笔记本(Intel架构)能够很好支持不同操作系统，包括BSD。
+我在 :ref:`mbp15_late_2013` 和 :ref:`mba11_late_2010` 上 :ref:`choose_freebsd` 实现个人开发学习环境，原因是:
+
+- 旧版本苹果笔记本(Intel架构)硬件已经很陈旧了，无法运行最新的 :ref:`macos` ，但是能够很好支持 :ref:`linux` 和 FreeBSD，能够充分发挥硬件性能
+- FreeBSD是非常独特的操作系统，在网络和存储方面有着深厚的技术积累，和Linux各有千秋
+
+.. note::
+
+   我之前是在 :ref:`mbp15_late_2013` 安装FreeBSD，实践中尝试先安装macOS后安装FreeBSD，希望构建双启动系统。不过，我实践时选择ZFS文件系统，结果自动抹除了macOS(失败)。
+
+   第二次实践是在 :ref:`mba11_late_2010` 上安装单FreeBSD系统，力图构建一个轻量级图形 :ref:`mobile_work` 环境，以便我在旅途中能够继续完成工作。
+
+FreeBSD版本
+============
+
+已知 FreeBSD 有如下版本(或阶段): ``current --> alpha（进入 stable 分支）--> beta --> rc --> release``
+
+- alpha: alpha 是 current 进入 release 的第一步
+- rc
+- beta
+- release
+- current: current相对稳定后会推送到 stable，但是不保证二者没有大的 bug
+- stable: stable 的真实意思是该分支的 ABI（Application Binary Interface，应用程序二进制接口）是稳定的(但和Linux发行版的"稳定版"概念不同，反而是一种 **不稳定** 的 "开发版" )
+
+.. note::
+
+   只有 alpha、rc、beta 和 release（且是一级架构）才能使用命令 ``freebsd-update`` 更新系统，其余版本系统均需要通过源代码编译的方式（或使用二进制的 pkgbase）更新系统。
+
+   FreeBSD 开发计划准备删除命令 ``freebsd-update`` ，一律改用 ``pkgbase`` 
+
+   参见 `FreeBSD Manual Pages freebsd-update <https://man.freebsd.org/cgi/man.cgi?freebsd-update>`_
 
 安装准备
 =========
@@ -53,6 +82,16 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
 
 - 我发现我不熟悉FreeBSD默认的 ``gpart`` 工具，所以改为用 :ref:`arch_linux` 的启动U盘，借助Linux的 ``fdisk`` 工具删除掉macOS上空出的分区(即完全使得一部分磁盘空白)。此时再次从FreeBSD安装U盘启动，就可以正常运行Installer的 ``Guided Root-on-ZFS`` 设置。但是很不幸，Installer的 ``Guided Root-on-ZFS`` 设置会整个将磁盘数据抹去(也就是Installer首先确认磁盘有空间，有空间就可以运行 ``Guided Root-on-ZFS`` 设置，然而 ``Root-on-ZFS`` 设置是占据整个磁盘)
 
+在ZFS自动部署中，能够自动完成ZFS的RAID构建根文件系统 ``zroot`` 存储池，非常自动化非常方便
+
+.. literalinclude:: freebsd_on_intel_mac/zroot
+   :caption: :ref:`mba11_late_2010` 上的 ``zroot`` 存储池磁盘分布
+
+并且由于FreeBSD内置支持 :ref:`zfs` ，还可以在安装过程中组建 ``ZRAID`` ，例如以下案例是我在自己组建的工作站上使用4块 :ref:`kioxia_exceria_g2` ( ``2TB`` )构建 ``ZRAID1`` ，能够在保证系统数据冗余安全情况下获得 ``5.2TB`` 使用空间:
+
+.. literalinclude:: freebsd_on_intel_mac/zroot_raidz
+   :caption: 安装过程中使用4块磁盘构建RAIDZ
+
 - 安装过程没有什么特别，就是最小化安装，然后重启。重启以后可以看到 :ref:`mbp15_late_2013` 上的WiFi是无法识别的，这是因为Broadcom无线驱动私有化，不能包含在FreeBSD安装中。需要 :ref:`freebsd_wifi` 设置，在没有设置无线网络之前，可以使用一个USB以太网卡连接一台Linux主机，并执行 :ref:`iptables_masquerade` 来提供互联网访问，以便进一步设置FreeBSD(配置 :ref:`freebsd_static_ip` )
 
 默认安装选择的安装组件推荐:
@@ -61,6 +100,13 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
 - 不要选择 ``kernel-dbg`` 、 ``lib32`` 、 ``src`` 以外的组件，这3个组件外的其他程序都需要联网安装，非常缓慢。其他软件包可以在操作系统安装完成后安装
 - 我的安装取消了 ``lib32`` 是因为我想构建一个完全64位系统
 
+问题记录
+==========
+
+我在 :ref:`mba11_late_2010` 遇到一个问题，键盘使用存在断断续续的问题，我不确定是不是我更换的第三方键盘硬件问题还是FreeBSD的兼容问题，系统日志显示:
+
+.. literalinclude:: freebsd_on_intel_mac/dmesg_keyboard
+   :caption: 系统日志中关于键盘的报错
 
 参考
 ======
@@ -71,4 +117,4 @@ Intel架构的Mac设备提供了一个名为 ``bootcamp`` 的工具来帮助在M
 - `BSD and Linux on an Intel Mac <https://acadix.biz/freebsd-intel-mac.php>`_
 - `FREEBSD, MAC MINI AND ZFS <https://www.codeimmersives.com/tech-talk/freebsd-mac-mini-and-zfs/>`_
 - `Install FreeBSD with XFCE and NVIDIA Drivers [2021] <https://nudesystems.com/install-freebsd-with-xfce-and-nvidia-drivers/>`_ 提供了完整的安装步骤截图，并且介绍 :ref:`linuxulator`
-- `FreeBSD中文社区「FreeBSD 从入门到跑路」: 第 2.0 节 FreeBSD 安装图解 <https://book.bsdcn.org/di-2-zhang-an-zhuang-freebsd/di-2.0-jie-tu-jie-an-zhuang>`_ 非常清晰的入门教程
+- `FreeBSD中文社区「FreeBSD 从入门到跑路」: 第 2.1 节 FreeBSD 安装图解 <https://book.bsdcn.org/di-2-zhang-an-zhuang-freebsd/di-2.1-jie-tu-jie-an-zhuang>`_ 非常清晰的入门教程
