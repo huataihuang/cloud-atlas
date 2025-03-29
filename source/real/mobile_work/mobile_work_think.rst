@@ -48,7 +48,7 @@
 
     - 在Android系统中运行Linux
     - 使用Android原生的浏览器、IM软件等等，通过Andorid分屏功能实现切换帮助提高使用效率
-    - 云计算服务器运行 :reff:`web_terminal` ，客户端可以使用手机浏览器实现移动办公
+    - 云计算服务器运行 :ref:`web_terminal` ，客户端可以使用手机浏览器实现移动办公
 
       - 本地使用手机浏览器连接云计算的(租用)虚拟机运行的 :ref:`guacamole` 来实现web登陆系统，获得完整的桌面和ssh环境
 
