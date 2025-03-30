@@ -13,6 +13,8 @@ LLaMA 安装
    install_llama_cuda.rst
    install_llama_hip.rst
    install_llama_vulkan.rst
+   install_llama_intel_onemkl.rst
+   install_llama_arm_kleidiai.rst
    install_llama_android.rst
 
 

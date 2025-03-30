@@ -26,9 +26,21 @@ NVIDIA的低功耗产品线 P4/T4/A2 给这个想法带来一些希望:
 最终我购买了 Tesla P4 + 散热风扇，和 :ref:`tesla_p10` 一同安装在 :ref:`nasse_c246` 所使用的ITX小机箱中:
 
 - NVIDIA Tesla P10具备 ``24GB`` 显存，能够运行较大规模的LLM ( ``deepseek-r1 32b`` )，连接 :ref:`nasse_c246` 的PCIe插槽，通过 :ref:`freebsd` 构建一个 :ref:`freebsd_machine_learning`
-- NVIDIA Tesla P4低功耗但 INT8 性能卓越，通过 ``OCuLink`` 连接 :ref:`pi_5` 用于AI生图和尝试边缘推理
+- NVIDIA Tesla P4低功耗但 INT8 性能卓越，高达 ``22 TOPS`` (适合推理场景)，通过 ``OCuLink`` 连接 :ref:`pi_5` 用于AI生图和尝试边缘推理
+
+NVIDIA Tesla P4
+================
+
+
+
+.. csv-table:: Tesla P10 vs. P4
+   :file: tesla_p4/tesla_spec.csv
+   :widths: 20, 40, 40
+   :header-rows: 1
 
 参考
 ======
 
 - `LLMs accelerated with eGPU on a Raspberry Pi 5 <https://www.jeffgeerling.com/blog/2024/llms-accelerated-egpu-on-raspberry-pi-5>`_
+- `GPU Database Tesla P4 Specs <https://www.techpowerup.com/gpu-specs/tesla-p4.c2879>`_
+- `NVIDIA Tesla P4 GPU Datasheet <https://images.nvidia.com/content/pdf/tesla/184457-Tesla-P4-Datasheet-NV-Final-Letter-Web.pdf>`_
