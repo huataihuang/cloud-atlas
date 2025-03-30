@@ -8,7 +8,6 @@ BSD
    :maxdepth: 1
 
    introduce_bsd.rst
-   freebsd/index
    solaris.rst
    omnios/index
    smartos/index

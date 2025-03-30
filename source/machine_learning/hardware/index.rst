@@ -14,6 +14,7 @@
    hailo_ai/index
    intel_ncs/index
    benchmark_gpu.rst
+   vulkan.rst
 
 .. only::  subproject and html
 

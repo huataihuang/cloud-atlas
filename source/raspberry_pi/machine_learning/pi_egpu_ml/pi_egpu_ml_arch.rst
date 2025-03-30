@@ -10,14 +10,16 @@
 
 我在淘宝上看到过 ``QCULink`` 设备外接eGPU(另一种是用于苹果的 :ref:`thunderbolt` eGPU)，发现这种外接方案其实也可以用于 :ref:`pi_5` ，因为唯一的要求是具备 :ref:`pcie` 的 :ref:`m2` ，这个条件 :ref:`pi_5` 是满足的。
 
-我最初考虑低功耗的 :ref:`egpu_tesla_p4` ，但是考虑LLM模型对显存要求以及避免重复投资，最终方案准备利旧自己的 :ref:`tesla_p10` :
+我考虑过低功耗的 :ref:`egpu_tesla_p4` 和，但是利旧自己的 :ref:`tesla_p10` 最终采用了缓和模式:
 
 - :ref:`pi_cluster` 使用 :ref:`pi_5_pcie_4_m.2_ssd` 转接卡可以使用 ``QCULink``
 - 购买了一个mini的ITX机箱进行改造，容纳下:
 
   - ``3个`` :ref:`pi_5` + ``3个`` :ref:`pi_4` + ``3个`` :ref:`pi_3` 构建的 :ref:`pi_cluster`
-  - 通过 ``QCULink`` 将 :ref:`pi_5` 的一个 ``m.2`` 接口转接PCIe连接外挂的 :ref:`tesla_p10`
-  - ITX主板安装一个低功耗 x86 主机(通过软PCIe连接线外挂 :ref:`tesla_t10` )
+  - 通过 ``QCULink`` 将 :ref:`pi_5` 的一个 ``m.2`` 接口转接PCIe连接外挂的 :ref:`tesla_p4`
+  - ITX主板安装一个低功耗 x86 主机(通过软PCIe连接线外挂 :ref:`tesla_p10` )
+
+也就是说，最终我的运行架构会具备两个 :ref:`nvidia_gpu` 分别用于训练( :ref:`tesla_p10` )和推理( :ref:`tesla_p4` )
 
 电源
 =========

@@ -127,6 +127,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    raspberry_pi/index
    android/index
    bsd/index
+   freebsd/index
    apple/index
    windows/index
    real/index
