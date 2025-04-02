@@ -13,6 +13,11 @@ Apple Virtualization
    run_macos_in_apple_virtualization.rst
    run_freebsd_in_apple_virtualization.rst
    tart/index
+   lima/index
+   utm/index
+   osx_kvm.rst
+   darwinkvm.rst
+   xhyve.rst
 
 .. only::  subproject and html
 

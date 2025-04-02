@@ -10,7 +10,7 @@ Docker Desktop简介
 
    2023年底，我尝试采用开源的 :ref:`colima` 来代替 Docker Desktop，以便能够深入学习:
 
-   - :ref:`lima` 实现在 :ref:`macos` 平台使用 :ref:`macos_virtualization` 构建底层虚拟化
+   - :ref:`lima` 实现在 :ref:`macos` 平台使用 :ref:`apple_virtualization` 构建底层虚拟化
    - 开源的 :ref:`colima` 结合了很多工具可以参考学习
 
 Docker Desktop on Mac vs. Docker Toolbox

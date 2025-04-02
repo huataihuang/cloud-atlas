@@ -20,3 +20,20 @@ FreeBSD在底层技术上有稳定和靠靠的基础，但是缺乏厂商的硬�
 
   - 虽然FreeBSD难以直接构建 :ref:`machine_learning` 环境，但是借助虚拟化技术，依然可以构建一定规模的Linux集群模拟
   - 在Linux虚拟机中构建大规模 :ref:`kubernetes` 以及 :ref:`machine_learning` 实现
+
+规划
+=====
+
+- 操作系统部署:
+
+  - 安装 :ref:`ubuntu_linux` / :ref:`lfs` / :ref:`freebsd` 多重启动系统
+  - 使用3块NVMe存储构建 ZFS ``RAIDZ`` : 可以在3种操作系统切换共享，方便构建不同的解决方案
+  - 通过 :ref:`zfs` 为 :ref:`bhyve` 提供存储，运行Linux虚拟机
+
+- :ref:`install_freebsd_ceph`
+
+- 采用 bhyve PCI passthrough 来实现 :ref:`nvidia_gpu` 用于Linux，来构建 :ref:`machine_learning`
+
+- 能够切换到 :ref:`ubuntu_linux` / :ref:`lfs` 来构建 :ref:`vgpu` 采用少量GPU硬件来模拟分布式 :ref:`machine_learning` 训练和推理
+
+

@@ -38,8 +38,6 @@ Red Hat Enterprise Linux 8文档有关于虚拟化的指南，提供了比较详
    amd_rocm_gpu_in_kvm.rst
    amd_kvm/index
    arm_kvm/index
-   macos_virtualization/index
-   utm/index
    debug/index
 
 

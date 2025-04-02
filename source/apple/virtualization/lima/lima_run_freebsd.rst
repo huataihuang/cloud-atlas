@@ -78,7 +78,7 @@ lima的FreeBSD模版
 
 解决了，果然在 :ref:`macos` 环境下，使用 :ref:`qemu` 运行 :ref:`freebsd` 是成功的:
 
-.. figure:: ../../../_static/kvm/macos_virtualization/lima/lima_freebsd.png
+.. figure:: ../../../_static/apple/virtualization/lima/lima_freebsd.png
 
    通过 :ref:`qemu` 虚拟化，lima可以运行FreeBSD虚拟机
 
