@@ -30,6 +30,7 @@ Sphinx文档
    sphinx_embed_video.rst
    sphinx_embed_youtube.rst
    sphinx_embed_audio.rst
+   sphinx_embed_graphviz.rst
    sphinx_chinese_search.rst
    sphinx_typeerror.rst
    sphinx-extension.rst

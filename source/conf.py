@@ -25,6 +25,9 @@ extensions = [
         'myst_parser'
 ]
 
+# -- GraphViz configuration ----------------------------------
+graphviz_output_format = 'svg'
+
 templates_path = ['_templates']
 exclude_patterns = []
 
