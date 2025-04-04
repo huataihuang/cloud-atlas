@@ -32,7 +32,7 @@ Sphinx文档
    sphinx_embed_audio.rst
    sphinx_embed_graphviz.rst
    sphinx_chinese_search.rst
-   sphinx_typeerror.rst
+   sphinx_readthedocs_yaml.rst
    sphinx-extension.rst
    rtd_fail_import_extension.rst
    sphinx_footer.rst
