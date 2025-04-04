@@ -6,7 +6,7 @@ Read the Docs build失败: ``Could not import extension sphinxcontrib.video``
 
 最近在引入 :ref:`sphinx_embed_video` 和 :ref:`sphinx_embed_youtube`  到我的 Sphinx 项目，我在 ``source`` 目录下的 ``requirements.txt`` 加入了:
 
-.. literalinclude:: sphinx_typeerror/requirements.txt
+.. literalinclude:: sphinx_readthedocs_yaml/requirements.txt
    :caption: requirements.txt 加入模块
    :emphasize-lines: 6,7
 

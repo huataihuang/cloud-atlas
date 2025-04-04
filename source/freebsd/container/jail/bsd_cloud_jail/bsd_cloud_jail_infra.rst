@@ -18,6 +18,6 @@ FreeBSD云计算Jail架构
    后续随着经验的积累会逐步优化和调整。
 
 .. csv-table:: FreeBSD云计算主机分配
-   :file: ../../../../../real/bsd_cloud/bsd_cloud_infra/hosts.csv
+   :file: ../../../../real/bsd_cloud/bsd_cloud_infra/hosts.csv
    :widths: 20, 20, 60
    :header-rows: 1
