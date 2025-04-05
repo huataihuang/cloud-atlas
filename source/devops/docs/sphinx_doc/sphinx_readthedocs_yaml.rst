@@ -53,16 +53,28 @@ python版本指定升级以适配Sphinx
 .. literalinclude:: sphinx_readthedocs_yaml/graphviz_err
    :caption: 环境中缺乏 ``graphviz`` 工具时RTD报错
 
-类似上述指定python版本，我这里也指定graphviz的安装版本 ``2.42`` :
+类似上述指定python版本，我尝试指定graphviz的安装版本 ``2.42`` :
 
-.. literalinclude:: sphinx_readthedocs_yaml/readthedocs_now.yaml
+.. literalinclude:: sphinx_readthedocs_yaml/readthedocs_try.yaml
    :language: yaml
-   :caption: 指定环境安装 ``graphviz``
+   :caption: 尝试指定环境安装 ``graphviz``
+   :emphasize-lines: 13
 
+但是发现build失败，提示变量错误: 原来Read The Docs 只支持有限的变量: ``python, nodejs, ruby, rust, golang`` 
 
+.. literalinclude:: sphinx_readthedocs_yaml/readthedocs_try_fail
+   :caption: 不支持 ``python, nodejs, ruby, rust, golang`` 以外的变量
+
+原来在编译环境中只能指定语言的版本，如果需要安装软件包则使用另外一个分类 ``apt_packages`` 可以安装不同的软件包:
+
+.. literalinclude:: sphinx_readthedocs_yaml/readthedocs_apt.yaml
+   :language: yaml
+   :caption: 通过 ``apt_packages`` 安装 ``graphviz``
+   :emphasize-lines: 13,14
 
 
 参考
 =======
 
 - `Build Failed. TypeError: 'generator' object is not subscriptable #8616 <https://github.com/readthedocs/readthedocs.org/issues/8616>`_
+- `How to make ReadTheDocs build graphs using graphviz <https://stackoverflow.com/questions/77366687/how-to-make-readthedocs-build-graphs-using-graphviz>`_
