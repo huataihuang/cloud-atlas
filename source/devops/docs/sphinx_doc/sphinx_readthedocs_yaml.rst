@@ -45,6 +45,24 @@ Build Filed: TypeError: 'generator'...
 python版本指定升级以适配Sphinx
 ===============================
 
+最近一次重新安装了 :ref:`virtualenv` ，然后重新生成了 ``requirements.txt`` 配置(为了解决版本漏洞)。但是发现Read The Docs平台build失败，从build日志可以看到安装 ``Sphinx`` 失败:
+
+.. literalinclude:: sphinx_readthedocs_yaml/sphinx_error
+   :caption: 安装Sphinx失败
+
+但是为何线下我自己的sphinx ``make html`` 是正常的呢？
+
+注意到 ``Sphinx==8.2.3`` 显示的是大写字母的 ``Sphinx`` ，我本地的 :ref:`python` ``3.12.4`` ，而之前构建RTD时候指定了版本 ``3.7`` 。看来现在高版本的Sphinx，安装名从小写的 ``sphinx`` 改成了大写的 ``Sphinx`` 导致。
+
+那么，修订 ``.readthedocs.yaml`` 配置，升级对应 Python 版本:
+
+.. literalinclude:: sphinx_readthedocs_yaml/readthedocs_python.yaml
+   :language: yaml
+   :caption: 升级RTD环境的Python版本
+   :emphasize-lines: 12
+
+这样重建RTD就能够成功
+
 指定graphviz依赖
 ================
 

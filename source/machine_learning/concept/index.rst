@@ -9,6 +9,7 @@
 .. toctree::
    :maxdepth: 1
 
+   llm_token.rst
 
 .. only::  subproject and html
 
