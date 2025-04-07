@@ -1,19 +1,14 @@
-.. _llm:
+.. _qubes_os:
 
 =================================
-LLM 大型语言模型
+Qubes OS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   llm_learn_tips.rst
-   llm_startup.rst
-   llama/index
-   vllm/index
-   ollama/index
-   unsloth/index
-   langchain/index
+   intro_qubes_os.rst
+   xen/index
 
 .. only::  subproject and html
 

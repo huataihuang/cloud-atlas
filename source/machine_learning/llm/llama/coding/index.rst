@@ -1,17 +1,14 @@
-.. _llama:
+.. _llama_coding:
 
 =====================================
-LLaMa(Large Language Model Meta AI)
+LLaMA 辅助编程
 =====================================
 
 .. toctree::
    :maxdepth: 1
 
-   llama-2.rst
-   install/index
-   llama_cpu_optimize/index
-   bench/index
-   coding/index
+   llama_vim.rst
+   llama_vscode.rst
 
 
 .. only::  subproject and html

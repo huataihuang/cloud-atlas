@@ -40,6 +40,7 @@ Linux是云计算的主流基础操作系统，除了微软的Azure，其他主�
    suse_linux/index
    kali_linux/index
    tails_linux/index
+   qubes_os/index
    postmarketos/index
    container_os/index
    fedora_coreos/index

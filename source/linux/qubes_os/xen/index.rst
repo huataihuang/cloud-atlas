@@ -1,19 +1,11 @@
-.. _llm:
+.. _xen:
 
 =================================
-LLM 大型语言模型
+XEN
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   llm_learn_tips.rst
-   llm_startup.rst
-   llama/index
-   vllm/index
-   ollama/index
-   unsloth/index
-   langchain/index
 
 .. only::  subproject and html
 

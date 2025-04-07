@@ -31,6 +31,8 @@
   - `『动手学习深度学习』教材 <https://zh-v2.d2l.ai/>`_
   - `B站:跟李沐学AI视频 <https://space.bilibili.com/1567748478/channel/series>`_
 
+- `ArthurChiao's Blog <https://arthurchiao.art/>`_ 携程架构师的AI架构相关的翻译和AI文章解析，值得学习参考
+
 网友整理资料汇总
 =================
 

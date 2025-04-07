@@ -36,7 +36,11 @@
 
 在 `Missing librairies in /usr/lib on Big Sur? <https://forums.developer.apple.com/forums/thread/655588>`_ 找到一个启发，提到从 macOS Big Sur 11.0.1 开始，系统附带所有系统提供的库的内置动态连接起缓存，文件系统不在保存动态库的副本。
 
-是不是 ``darwin-jail`` 打包时候缺少了某部分缓存(还是没有安装XCode command line tools就打包导致缺少了部分)，待验证....
+是不是 ``darwin-jail`` 打包时候缺少了某部分缓存(还是没有安装XCode command line tools就打包导致缺少了部分)?
+
+.. note::
+
+   上述报错信息可以看到，在 macOS 上执行 ``chroot`` 实际上是通过 :ref:`app-sandbox` 提供的 :ref:`sandbox-exec` 来实现的，所以需要学习和研究 ``sandbox-exec`` 机制
 
 参考
 ======

@@ -1,4 +1,4 @@
-.. _macos_apfs_case-sensitive:
+.. _apfs_case-sensitive:
 
 ====================
 macOS区分大小写APFS
@@ -11,7 +11,7 @@ macOS区分大小写APFS
 
 验证方法可以采用类似如下:
 
-.. literalinclude:: macos_apfs_case-sensitive/check_filesystem_case_sensitive
+.. literalinclude:: apfs_case-sensitive/check_filesystem_case_sensitive
    :caption: 检查文件系统是否区分大小写，在 ``case insensitive`` 的APFS文件系统上现象
 
 创建新的 ``case sensitive`` 文件系统
