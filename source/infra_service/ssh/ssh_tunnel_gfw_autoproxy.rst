@@ -44,10 +44,10 @@ Firefox Socks Proxy
 
 - 勾选 ``Enable DNS over HTTPS`` - 这是为了使用受信任的DNS服务器而不是本地的DNS服务商(国内电信运营商的DNS是污染的)。当然，如果你操作系统已经设置了采用Google的DNS 8.8.8.8并且已经勾选过 ``Proxy DNS when using SOCKS v5`` ，则这步可以省略。
 
-.. figure:: ../_static/appendix/firefox_socks_proxy.png
+.. figure:: ../../_static/infra_service/ssh/firefox_socks_proxy.png
    :scale: 80 
 
-.. figure:: ../_static/appendix/firefox_socks_proxy_dns.png
+.. figure:: ../../_static/infra_service/ssh/firefox_socks_proxy_dns.png
    :scale: 80
 
 SwitchyOmega
@@ -59,19 +59,19 @@ SwitchyOmega是一个浏览器插件，用于自动切换代理。即部分被�
 
 - 设置 ``proxy`` profile，调整成自己实际的Proxy设置，别忘记最后还要 ``Apply changes``
 
-.. figure:: ../_static/appendix/switchy_omega_import_online_rule_setup_proxy.png
+.. figure:: ../../_static/infra_service/ssh/switchy_omega_import_online_rule_setup_proxy.png
    :scale: 65
 
 - 点击 ``auto switch`` 导航：
 
   - 添加在线规则列表，这个规则列表是以前网友搜集的被屏蔽地址列表，虽然是几年前的地址列表，但是可以作为配置的起步基础：
 
-  .. figure:: ../_static/appendix/switchy_omega_import_online_rule.png
+  .. figure:: ../../_static/infra_service/ssh/switchy_omega_import_online_rule.png
    :scale: 55
 
 地址从 https://raw.githubusercontent.com/gfwlist/gfwlist/master/gfwlist.txt 获取：
 
-  .. figure:: ../_static/appendix/switchy_omega_import_online_rule_setup.png
+  .. figure:: ../../_static/infra_service/ssh/switchy_omega_import_online_rule_setup.png
    :scale: 55
 
   - 注意：上面截图中 ``Rule list rules`` 对应的动作要修改成 ``proxy`` ，因为我们添加的地址列表都是被屏蔽地址，需要启用代理。另外，案例的2条记录可选删除。
@@ -80,17 +80,24 @@ SwitchyOmega是一个浏览器插件，用于自动切换代理。即部分被�
 
 - 上述 ``auto switch`` 设置的最终结果截图如下，如果匹配 ``gfwlist.txt`` 则使用proxy规则，其余默认则直接访问:
 
-  .. figure:: ../_static/appendix/switchy_omega_import_online_rule_setup_proxy_result.png
+  .. figure:: ../../_static/infra_service/ssh/switchy_omega_import_online_rule_setup_proxy_result.png
    :scale: 40
 
 - 如果在使用过程中，发现有页面资源不能加载，则点击 SigmaOmega 图标按钮，补充添加规则。
+
+China-Domain-Whitelist
+------------------------
+
+随着GFW对世界的屏蔽越来越严厉，动辄就需要通过点击 SigmaOmega 图标按钮，补充添加翻墙规则让人非常崩溃。这样就出现了一个反向操作方法，即默认执行翻墙策略(所有流量走代理)，而只对大陆的网站添加白名单规则(主要的可信信息源在海外)。
+
+`GitHub: pluwen/china-domain-allowlist <https://github.com/pluwen/china-domain-allowlist>`_ 就是采用上述方法的具体实现，可参考该项目完成 SigmaOmega 设置。
 
 SSH Tunnel
 ===========
 
 SSH Tunnel 原理请参考 `SSH TUNNEL <https://www.ssh.com/ssh/tunneling/>`_
 
-.. figure:: ../_static/appendix/ssh_tunnel.png
+.. figure:: ../../_static/infra_service/ssh/ssh_tunnel.png
    :scale: 50
 
 

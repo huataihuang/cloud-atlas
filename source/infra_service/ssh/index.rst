@@ -10,6 +10,7 @@ ssh服务
    ssh_key.rst
    ssh_tunneling.rst
    ssh_tunneling_remote_port_forwarding.rst
+   ssh_tunnel_gfw_autoproxy.rst
    autossh.rst
    rstunnel.rst
    ssh_tunneling_dynamic_port_forwarding.rst
