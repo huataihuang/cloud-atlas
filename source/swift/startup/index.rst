@@ -1,20 +1,14 @@
-.. _swift:
+.. _swift_startup:
 
 =================================
-Swift
+Swift起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   learning_swift.rst
-   swift_on_linux.rst
-   vim_for_swift.rst
-   swift_apprentice.rst
-   startup/index
-   swiftui/index
-   swift_on_server/index
-
+   xcode_swift_startup.rst
+   swift_types_contants_variables.rst
 
 .. only::  subproject and html
 
