@@ -36,4 +36,17 @@ Swift 根据 ``""`` (双引号)扩起的字符串来推断变量的类型是 ``�
    :language: swift
    :caption: 常量元组声明
 
+.. warning::
 
+   在没有给变量(variable)或常量(constant)赋值之前，Swift不允许你使用该变量或常量!
+
+字符串插入(String Interpolation)
+=================================
+
+Swift提供了一个 ``string interpolation`` (字符串插入)功能，可以用来结合常量和变量插入到一个字符串中，形成一个新的字符串。你可以简单把这个语法功能理解为字符串连接，但是不需要反复使用 ``+=`` 这样的连接方式，而显得非常自然:
+
+只需要在字符串中使用 ``\(变量或常量)`` 就可以在字符串中插入变量常量，就像写一个文档一样:
+
+.. literalinclude:: swift_types_contants_variables/string_interpolation.swift
+   :language: swift
+   :caption: 字符串插入(String Interpolation)

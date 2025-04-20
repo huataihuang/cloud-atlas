@@ -9,6 +9,7 @@
 .. toctree::
    :maxdepth: 1
 
+   meaning_of_travel.rst
    obvious_travel_advice.rst
    digital_nomad.rst
 
