@@ -8,6 +8,7 @@ FreeBSD存储
    :maxdepth: 1
 
    freebsd_disk.rst
+   gpart.rst
 
 .. only::  subproject and html
 

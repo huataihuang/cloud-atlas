@@ -86,6 +86,8 @@ FreeBSD的硬件支持不如 :ref:`linux` 广泛，但是主流架构的服务�
 
   - `FreeBSD中文社区 <https://book.bsdcn.org>`_ 最近才发现有不少有用的翻译资料和自制教程，是FreeBSD推广的良好教材，学习...
 
+- `GaryH Tech <https://www.youtube.com/@GaryHTech>`_ YouTube上专注介绍FreeBSD技术的频道，入门可以参考
+
 参考
 =======
 

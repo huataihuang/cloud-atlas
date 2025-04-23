@@ -20,6 +20,7 @@ git
    reduce_git_repo_size.rst
    git-flow.rst
    git_clone_subdirectory.rst
+   gitweb.rst
 
 .. only::  subproject and html
 
