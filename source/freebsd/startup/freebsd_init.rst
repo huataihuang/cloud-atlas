@@ -15,6 +15,11 @@ FreeBSD初始化
 .. literalinclude:: freebsd_init/devops
    :caption: 安装运维软件
 
+这里有一个 :ref:`gitweb` 提示对于在FreeBSD上运行简易的git WEB访问有帮助:
+
+.. literalinclude:: freebsd_init/freebsd_gitweb
+   :caption: 如果同时安装了 ``gitweb`` 工具，可以设置一个简单的 :ref:`gitweb` 服务
+
 - (放弃，感觉csh也好)修改 ``admin`` 用户默认使用 :ref:`bash` 作为SHELL:
 
 .. literalinclude:: freebsd_init/chsh

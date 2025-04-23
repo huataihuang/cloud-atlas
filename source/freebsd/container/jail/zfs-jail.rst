@@ -12,3 +12,4 @@ FreeBSD Jail访问ZFS文件系统
 - `(Solved) zfs jail <https://forums.freebsd.org/threads/zfs-jail.89885/>`_
 - `Automatically mounting ZFS dataset in jail? <https://forums.freebsd.org/threads/automatically-mounting-zfs-dataset-in-jail.59072/>`_
 - `Mount ZFS dataset in jail <https://forums.freebsd.org/threads/mount-zfs-dataset-in-jail.90129/>`_
+- `Using ZFS inside a jail <https://github.com/DtxdF/AppJail/wiki/zfs>`_

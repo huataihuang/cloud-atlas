@@ -28,6 +28,14 @@
    :caption: 检查系统中磁盘，安装目标磁盘是 ``nda0``
    :emphasize-lines: 2
 
+- 安装完成后使用 ``df -h`` 检查可以看到初始安装占用空间很小，只需要大约 ``574MB`` :
+
+.. literalinclude:: freebsd_root_on_zfs_using_gpt/df_output
+   :caption: 初始安装占用空间极小，只需 ``574MB``
+   :emphasize-lines: 2
+
+- 接下来可以完成 :ref:`freebsd_init`
+
 参考
 =======
 
