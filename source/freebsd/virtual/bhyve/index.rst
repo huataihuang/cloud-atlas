@@ -7,7 +7,11 @@ bhyve(BSD hypervisor)
 .. toctree::
    :maxdepth: 1
 
+   intro_bhyve.rst
    bhyve_startup.rst
+   bhyve_zfs_snapshot.rst
+   jail_bhyve.rst
+   bhyve_vm_console.rst
    k8s_on_freebsd_bhyve.rst
    bsd_cloud_bhyve/index
 

@@ -33,6 +33,8 @@ ZFS管理的主要手册可以参考:
    zfs_nfs.rst
    zfs_iscsi.rst
    zfs_zcloud_data_near.rst
+   zfs_replication.rst
+   zrepl.rst
 
 .. only::  subproject and html
 
