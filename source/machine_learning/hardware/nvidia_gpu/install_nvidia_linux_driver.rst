@@ -70,6 +70,8 @@ NVIDIA将GPU驱动和开发组件(Toolkits)分别组合成 ``cuda-drivers`` 和 
 
    详情请参考 `NVIDIA Driver Installation Quickstart Guide <https://docs.nvidia.com/datacenter/tesla/tesla-installation-notes/index.html>`_
 
+   注意详细检查兼容版本细节，以官方文档为准，避免踩坑。例如，我现在部署在 :ref:`fedora` 虚拟机中，选择官方文档明确指出的 ``41`` 版本(虽然最新版本42也可能支持)
+
 安装NVIDIA Linux驱动的方法实际上和 :ref:`install_nvidia_cuda` 完全一样，除了最后的安装命令差异:
 
 - :ref:`install_cuda_prepare`
@@ -111,6 +113,10 @@ CentOS 7安装NVIDIA驱动步骤:
    :language: bash
    :caption: RHEL/CentOS 7使用NVIDIA官方软件仓库安装CUDA驱动
 
+Fedora 41 软件仓库方式安装NVIDIA CUDA驱动
+---------------------------------------------
+
+Fedora 41 (通过 :ref:`bhyve` 虚拟机):
 
 
 

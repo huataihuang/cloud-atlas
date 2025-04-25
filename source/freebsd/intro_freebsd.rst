@@ -88,6 +88,8 @@ FreeBSD的硬件支持不如 :ref:`linux` 广泛，但是主流架构的服务�
 
 - `GaryH Tech <https://www.youtube.com/@GaryHTech>`_ YouTube上专注介绍FreeBSD技术的频道，入门可以参考
 
+- `klara <https://klarasystems.com/>`_ 是一家开源企业外包公司，专注于FreeBSD+ZFS存储以及ARM嵌入系统开发，官网 `Klara Articles <https://klarasystems.com/articles/>`_ 提供了很多FreeBSD+ZFS的技术文档
+
 参考
 =======
 
