@@ -13,7 +13,7 @@ Ollama使用AMD GPU运行大模型
 
 - 安装 ROCm ( :ref:`rocm_quickstart` )
 
-.. literalinclude:: ../../hardware/amd_gpu/rocm_quickstart/debian_install
+.. literalinclude:: ../../hardware/amd_gpu/rocm/rocm_quickstart/debian_install
    :caption: 在 Debian 上安装 ROCm
 
 - 比 :ref:`ollama_nvidia_gpu` 多一个步骤，需要附加安装 ``ollama-linux-amd64-rocm.tgz`` :

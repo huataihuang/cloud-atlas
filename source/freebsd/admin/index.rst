@@ -14,6 +14,7 @@ FreeBSD管理
    freebsd_user_group.rst
    add_lib32_after_install_freebsd.rst
    freebsd_kernel_source.rst
+   freebsd_cpu_temperature.rst
 
 .. only::  subproject and html
 
