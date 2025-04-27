@@ -1,16 +1,13 @@
-.. _amd_gpu:
+.. _rocm:
 
 =================================
-AMD GPU
+ROCm
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   amd_gpu_infra.rst
-   amd_firepro_s7150x2.rst
-   amd_radeon_instinct_mi50.rst
-   rocm/index
+   rocm_quickstart.rst 
 
 
 .. only::  subproject and html

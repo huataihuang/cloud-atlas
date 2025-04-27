@@ -82,10 +82,14 @@ bhyve快速起步
 .. literalinclude:: bhyve_startup/zfs_vms
    :caption: 创建vms数据集
 
-注意，如果同时在Host主机和虚拟机内部使用ZFS，需要避免两个系统缓存虚拟机内容时产生竞争内存压力。为了缓解这种情况，可以考虑将Host主机的ZFS设置为仅使用元数据缓存(指定虚拟机的特定 ``zvol`` 数据集)。以下命令案例是将 ``zroot/vms/freebsd`` 的zvol设置为仅缓存元数据(因为我准备在freebsd虚拟机中使用ZFS):
+.. warning::
 
-.. literalinclude:: bhyve_startup/zfs_cache_metadata
-   :caption: 在Host主机上设置指定zvol仅缓存元数据
+   如果同时在Host主机和虚拟机内部使用ZFS，需要避免两个系统缓存虚拟机内容时产生竞争内存压力。为了缓解这种情况，可以考虑将Host主机的ZFS设置为仅使用元数据缓存(指定虚拟机的特定 ``zvol`` 数据集)。以下命令案例是将 ``zroot/vms/freebsd`` 的zvol设置为仅缓存元数据(因为我准备在freebsd虚拟机中使用ZFS):
+
+   .. literalinclude:: bhyve_startup/zfs_cache_metadata
+      :caption: 在Host主机上设置指定zvol仅缓存元数据
+
+
 
 下载安装iso
 ====================

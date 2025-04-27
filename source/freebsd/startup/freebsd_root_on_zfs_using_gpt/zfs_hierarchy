@@ -1,0 +1,28 @@
+# 设置默认的lz4压缩，默认配置通常适合
+zfs set compress=on                                            zroot
+
+# 创建Boot环境的层次结构
+zfs create -o mountpoint=none                                  zroot/ROOT
+zfs create -o mountpoint=none                                  zroot/ROOT/default
+mount -t zfs zroot/ROOT/default /mnt
+
+# 创建剩余文件系统
+zfs create -o mountpoint=/tmp  -o exec=on      -o setuid=off   zroot/tmp
+zfs create -o canmount=off -o mountpoint=/usr                  zroot/usr
+zfs create                                                     zroot/usr/home
+zfs create                     -o exec=off     -o setuid=off   zroot/usr/src
+zfs create                                                     zroot/usr/obj
+zfs create -o mountpoint=/usr/ports            -o setuid=off   zroot/usr/ports
+zfs create                     -o exec=off     -o setuid=off   zroot/usr/ports/distfiles
+zfs create                     -o exec=off     -o setuid=off   zroot/usr/ports/packages
+zfs create -o canmount=off -o mountpoint=/var                  zroot/var
+zfs create                     -o exec=off     -o setuid=off   zroot/var/audit
+zfs create                     -o exec=off     -o setuid=off   zroot/var/crash
+zfs create                     -o exec=off     -o setuid=off   zroot/var/log
+zfs create -o atime=on         -o exec=off     -o setuid=off   zroot/var/mail
+zfs create                     -o exec=on      -o setuid=off   zroot/var/tmp
+
+# 链接和权限设置
+ln -s /usr/home /mnt/home
+chmod 1777 /mnt/var/tmp
+chmod 1777 /mnt/tmp

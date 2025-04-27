@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    think_server_fanless.rst
+   fan_control.rst
 
 .. only::  subproject and html
 

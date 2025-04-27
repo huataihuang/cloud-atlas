@@ -203,6 +203,10 @@ pciconf
        class      = network 
    ...
 
+.. note::
+
+   也可以安装 ``pciutils`` 来获得和Linux平台一样的 ``lspci`` 命令
+
 .. _dmidecode:
 
 dmidecode

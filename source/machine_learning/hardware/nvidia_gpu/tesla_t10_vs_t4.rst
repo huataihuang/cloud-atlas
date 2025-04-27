@@ -27,6 +27,10 @@ TU102图形处理器芯片面积为 754 mm²，包含18600 million(186亿)晶体
 - PCI-Express 3.0 x16
 - 尺寸: 267mm长， 111mm宽，单插槽被动冷却
 
+.. note::
+
+   Tesla T10实际上就是 `NVIDIA GeForce RTX 2080 <https://www.techpowerup.com/gpu-specs/geforce-rtx-2080.c3224>`_ ，所以如果在普通台式机上使用，可以考虑安装第三方RTX 2080散热器。
+
 实际使用
 ----------
 
