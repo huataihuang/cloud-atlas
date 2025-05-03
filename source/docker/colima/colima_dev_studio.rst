@@ -18,6 +18,10 @@ Colima容器化开发环境
 .. literalinclude:: colima_startup/colima_vz_4c8g
    :caption: 使用 ``vz`` 模式虚拟化的 ``4c8g`` 虚拟机运行 ``colima``
 
+.. note::
+
+   如果是早期的Intel架构mac，则不支持 ``--vm-type`` 参数，原因是只有Apple Silicon架构才支持 :ref:`apple_virtualization` (VZ)。所以实际上在Intel架构mac，还需要安装 ``qemu`` 来运行虚拟化 :ref:`lima`
+
 - 修订 ``~/.colima/default/colima.yaml`` 的 :ref:`colima_storage_manage` 管理部分:
 
 .. literalinclude:: colima_storage_manage/colima-docs.yaml

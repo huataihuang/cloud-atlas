@@ -27,7 +27,7 @@ systemd配置静态IP地址
    :language: bash
    :caption: /etc/systemd/network/10-eth0.network配置
 
-- 执行以下命令将默认NetworkManager切换成 ``systemd-networkd`` :
+- 执行以下命令将默认 :ref:`networkmanager` 切换成 ``systemd-networkd`` :
 
 .. literalinclude:: systemd_networkd/switch_systemd-networkd
    :language: bash
