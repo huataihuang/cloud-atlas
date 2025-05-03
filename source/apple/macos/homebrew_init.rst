@@ -47,8 +47,8 @@ Homebrew初始化
 .. literalinclude:: homebrew_init/brew_tar
    :caption: 打包homebrew目录
 
-进一步安装和设置
-====================
+进一步安装和设置(现在跳过)
+===========================
 
 安装语言支持
 -----------------
@@ -99,3 +99,30 @@ nvim插件安装错误排查
    :caption: ruby-lsp 安装报错
 
 这个报错是因为macOS系统自带的ruby版本过低导致的，需要通过 ``ruby install ruby`` 安装社区最新版本，然后配置好环境 ``PATH`` 变量使得默认使用 :ref:`homebrew` 提供的最新版本ruby就能解决
+
+进一步安装和设置
+===========================
+
+我现在更换了一个思路，采用物理主机精简安装，而将整个开发和部署环境迁移到 :ref:`colima` 中，构建一个标准化可移植的类似 :ref:`docker` 运行环境。由于 :ref:`linux` 环境更接近服务器后端，可以构建 :ref:`kubernetes` 等模拟环境，所以也会把日常开发直接运行在相同的环境中。
+
+- 通过 :ref:`homebrew` 安装 ``colima`` :
+
+.. literalinclude:: ../../docker/colima/colima_startup/brew_install_colima
+   :caption: 在 :ref:`macos` 平台安装colima
+
+这里如果是在旧版本macOS上安装，其实会遇到不少问题，例如 :ref:`homebrew_openssl` 需要绕过openssl安装过程中不能通过test的问题。另外， ``brew install qemu`` 也遇到一个 ``cmake`` 版本过低问题:
+
+.. literalinclude:: homebrew_init/cmake_err
+   :caption: 现实cmake版本过低报错
+
+但是，我检查 homebrew 实际上已经安装了 ``/usr/loca/bin/cmake`` 版本是 4.0.1
+
+这个问题似乎有点类似 `VDT Configuration Errors (Mac OS 15.4) <https://root-forum.cern.ch/t/vdt-configuration-errors-mac-os-15-4/63330>`_ ，似乎有多个项目兼容cmake 4.0有问题。果然，在snappy的github项目上，已经有人提出了issue: `Require Update to CMakeLists.txt for source build due to new CMake 4.0(+) requirements #204 <https://github.com/google/snappy/issues/204>`_ ，这个修复是在 snappy 1.2.2 ，但是目前 `homebrew-core/snappy 1.2.2 #216761 <https://github.com/Homebrew/homebrew-core/pull/216761>`_ 还阻塞没有合并，所以当前安装的是 snappy 1.2.1 存在这个报错
+
+可以参考 `Homebrew Formulae: snappy <https://formulae.brew.sh/formula/snappy>`_ 当前确实是 1.2.1 版本( snappy 官方 1.2.2 是3月26日发布，我当前在5月2日安装可以看到homebrew还停留在1.2.1)
+
+.. warning::
+
+   colima安装需要使用 :ref:`go_proxy` 配置来绕过GFW阻塞
+
+- 然后自己构建 :ref:`colima_images` :ref:`colima_debian-dev` 

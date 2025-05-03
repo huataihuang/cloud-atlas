@@ -9,7 +9,8 @@ NetworkManager
    当前主流发行版采用网络管理工具主要有:
 
    - :ref:`netplan`
-   - NetworkManager
+   - NetworkManager (目前看这个方案最主流?)
+   - :ref:`systemd_networkd`
 
    在桌面系统中，例如 Fedora (server/workstation) 以及 Ubuntu Workstation ，通常会使用 NetworkManager 配置，不仅有字符命令配置，也有GUI方便完成设置。
 

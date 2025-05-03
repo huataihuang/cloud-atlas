@@ -88,6 +88,14 @@ squid代理 :ref:`squid_socks_peer`
 
    brew install openconnect
 
+卸载homebrew
+===============
+
+如果需要反向卸载homebrew，官方提供了一个交互方式卸载的脚本:
+
+.. literalinclude:: homebrew/uninstall_brew
+   :caption: 卸载homebrew
+
 使用brew
 =========
 
@@ -265,6 +273,11 @@ brew很好地弥补了 macOS 的开源软件版本滞后的短板，强烈建议
    - :strike:`iterm2提供了最佳终端` ，可以采用 :ref:`vim_tmux_iterm_zsh` (资源消耗太大，放弃)
    - 采用 :ref:`kitty` 作为终端，兼顾快速和便捷
    - Homebrew提供了 :ref:`docker_desktop` 集成安装，可以方便实现Docker官方版本安装部署(现在改为使用 :ref:`colima` )
+
+- 现在我做了一些调整，安装如下( :ref:`homebrew_init` ):
+
+.. literalinclude:: homebrew_init/devops
+   :caption: 安装必要brew工具
    
 安装了homebrew :ref:`vim` 或 :ref:`nvim` 之后，会依赖安装多种开发语言，其中包括 :ref:`python` 3的最新版本，比macOS内置版本更好，所以建议切换到homebrew版本:
 
