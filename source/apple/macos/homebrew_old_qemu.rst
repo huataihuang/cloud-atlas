@@ -58,9 +58,13 @@ Homebrew安装旧版本qemu
 
 .. literalinclude:: homebrew_old_qemu/install
    :caption: 安装指定版本qemu
+
+出现报错:
+
+.. literalinclude:: homebrew_old_qemu/install_output
    :emphasize-lines: 35,36
 
-这里的报错原因是已知的，见 :ref:`homebrew_snappy` ，需要手工修订 :ref:`homebrew_formulea` 来手工安装 ``snappy-1.2.2`` (已完成),并且修订 ``qemu`` 依赖。所以按照前面 ``extract`` 出来的指定 ``qemu@9.2.3.rb`` 配置文件:
+这里的报错原因是已知的，见 :ref:`homebrew_snappy` ，需要手工修订 :ref:`homebrew_formulae` 来手工安装 ``snappy-1.2.2`` (已完成),并且修订 ``qemu`` 依赖。所以按照前面 ``extract`` 出来的指定 ``qemu@9.2.3.rb`` 配置文件:
 
 .. literalinclude:: homebrew_old_qemu/qemu_9.1.2
    :caption: 编辑本地提取出的qemu文件

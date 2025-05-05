@@ -27,7 +27,7 @@ tini运行ssh ``debian-ssh-tini``
 
 这里我遇到一个报错:
 
-.. literalinclude:: ../colima_proxy/build_err
+.. literalinclude:: ../colima_proxy_archive/build_err
    :caption: 无法下载镜像导致构建失败
    :emphasize-lines: 14
 
@@ -65,6 +65,39 @@ tini运行ssh ``debian-ssh-tini``
    :language: dockerfile
    :caption: 包含常用工具和开发环境的debian镜像Dockerfile
    :emphasize-lines: 13
+
+在colima虚拟机内部可以看到用户目录映射:
+
+.. literalinclude:: debian_tini_image/colima_home_dir
+   :caption: Colima启动虚拟机会自动将用户目录 ``bind`` 进虚拟机
+   :emphasize-lines: 11
+
+说明:
+
+  - ``admin`` 用户的 ``uid`` 设置为 ``501`` ，这是因为macOS创建的第一个用户账号(也就是我自己)是 ``501``
+
+    - 在安装 :ref:`macos` 的时候，我特意设置了第一个管理员账号为 ``admin`` (用户名依然是 ``Huatai Huang`` )，这样Host主机中我的用户目录就是 ``/Users/admin``
+    - 在Colima中，Host主机的 ``/Users/admin`` 会被 ``bind`` 进虚拟机
+
+    - 此时只要在 ``docker run`` 时候使用 ``-v /Users/admin:/home/admin`` 就能够完美将Host主机的用户目录映射进容器使用
+
+  - 在Dockerfile中，使用的shell环境是 ``sh`` ，并且每一条命令都会启动一个 ``sh`` SHELL
+
+    - 如果要在命令行读取环境变量，需要使用 ``RUN bash -c "source /home/admin/.bashrc && ..."``
+    - 每个需要读取环境变量的 ``RUN`` 命令都要这样执行 ``source 配置文件``
+    - 不能嵌套shell，例如很多程序有独立的SHELL配置文件，并且将这个配置文件通过在 ``~/.bashrc`` 添加引用来生效，这种嵌套在Dockerfile中不生效
+
+      - 例如 :ref:`rvm` 在 ``~/.bashrc`` 中添加引用 ``. $HOME/.rvm/scripts/rvm`` ，在Dockerfile就不能通过 ``source /home/admin/.bashrc`` 生效
+      - 需要直接引用最终配置文件，也就是 ``RUN bash -c 'source /home/admin/.rvm/scripts/rvm && ...'`` 才能生效
+
+  - 所有使用GitHub仓库 ``git clone`` 都使用 ``https://`` 协议
+
+    - 不需要本地具备GitHub仓库的SSH私钥就可以完成clone，通用性更好
+    - GitHub仓库被GFW干扰: 当git使用operations over HTTP时，实际使用的是curl library，此时注入到Docker容器中的代理配置 ``http_proxy/https_proxy`` 生效就能正常工作
+
+  - :ref:`nvim` 采用了 :ref:`nvim_ide` 配置，当容器内部第一次使用 ``vi`` 时会自动安装已经配置的插件，这个过程时间长度取决于网络(clangd下载特别耗时)
+
+    - 在墙内安装有很大概率受到GFW影响很不稳定，所以建议在Colima虚拟机中启用 :ref:`ssh_tunnel` 共享给容器使用
 
 - 构建 ``debian-dev`` 镜像:
 
