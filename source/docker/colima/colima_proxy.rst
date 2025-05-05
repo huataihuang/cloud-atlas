@@ -1,234 +1,168 @@
 .. _colima_proxy:
 
-=================
-Colima代理
-=================
+===========================
+Colima 代理
+===========================
 
-对于中国的软件开发者、运维者来说，要顺利使用 ``dockerhub`` 来获取镜像， :ref:`proxy` 是必须采用的技术，所以也要为Colima解决绕过GFW阻塞的问题。
+2025年5月，我在旧笔记本 :ref:`mbp15_late_2013` 重新部署 :ref:`colima` 。由于时隔多时，软件堆栈有了很大的更新，我想重新实践和整理手册，修订之前 :ref:`colima_proxy_archive` 中过时的操作步骤，通过简洁有效的方式实现 :ref:`across_the_great_wall` 完成容器的流畅部署。
 
-我最初没有使用代理，发现 :ref:`debian_tini_image` 无法拉取镜像:
+之所以需要设置Colima代理，是因为GFW屏蔽了 ``dockerhub`` 导致无法直接从开源社区获取官方镜像。例如在build镜像:
 
-.. literalinclude:: images/debian_tini_image/ssh/build_debian-ssh-tini_image
-   :caption: 执行镜像构建
+.. literalinclude:: images/debian_tini_image/dev/build_debian-dev_image
+   :caption: 构建镜像
 
-始终报错:
+此时显示访问registry仓库端口超时:
 
-.. literalinclude:: colima_proxy/build_err
-   :caption: 无法下载镜像导致构建失败
+.. literalinclude:: colima_proxy/build_error
+   :caption: 构建镜像网络超时报错
    :emphasize-lines: 14
 
-此外，在 ``colima ssh`` 进入 :ref:`lima` 虚拟机内部，就会发现即使 :ref:`ubuntu_linux` 系统更新( ``apt update`` )也是存在和 :ref:`docker` 更新相关错误:
+未代理之前的初始部署
+=====================
 
-.. literalinclude:: colima_proxy/apt_err
-   :caption: 在 :ref:`lima` 虚拟机内执行 ``apt update`` 报错
-   :emphasize-lines: 12
+:ref:`colima_startup` 中采用基本启动运行方式:
 
-解决实践小结
-=============
+.. literalinclude:: colima_startup/colima_qemu_2c4g
+   :caption: 使用 ``qemu`` 模式虚拟化的 ``2c4g`` 虚拟机运行 ``colima``
 
-如果你没有耐心看完本文，这里给出一个结论:
+- 这里运行指定了 :ref:`containerd` 作为 runtime，所以Colima虚拟机内部只有 ``containerd`` 一个服务，没有安装 :ref:`docker` 。现在需要通过 ``colima ssh`` 登陆到Colima虚拟机内部完成 ``docker`` 服务安装:
 
-- 只需要在物理主机上配置好代理服务器的用户环境变量，例如我使用 :ref:`ssh_tunneling` 访问远端服务器的 :ref:`squid` / :ref:`privoxy`
-- 执行 ``colima start`` 启动colima虚拟机的时候，会自动将物理主机环境变量中有关代理配置设置注入虚拟机，不过只有 :ref:`apt` 解决了 :ref:`across_the_great_wall` (此时可以顺利执行 ``apt update && apt upgrade``
-- 需要同时配置 :ref:`docker_server_proxy` 和 :ref:`containerd_server_proxy` (目前我的验证，尚未验证是否可以只配置其中之一)
-- 在 ``colima`` 虚拟机内部配置 :ref:`docker_client_proxy` 这样执行 ``docker build`` 就能够在docker客户端获取meta信息，再进一步盗用docker/containerd服务器端下载镜像
+.. literalinclude:: colima_proxy/install_docker
+   :caption: 登陆到Colima虚拟内部安装docker服务
+
+Host主机代理准备
+==================
+
+Colima使用的代理通道是在Host主机(macOS)上创建的，在macOS上执行以下命令构建 :ref:`ssh_tunneling` :
+
+代理配置注入虚拟机
+===================
+
+Host主机环境变量方法
+---------------------
+
+如果在执行 ``colima start`` 命令时，Host主机的环境变量中包含代理配置，例如:
+
+.. literalinclude:: colima_proxy/proxy_env
+   :caption: 环境变量中包含代理配置
+
+Colima虚拟机配置文件方法
+------------------------
+
+上述通过Host主机环境变量注入proxy配置的方法要求Host主机shell环境中必须有代理配置，如果这个环境变量在启动colima之前被修改就会不起作用(如果环境变量是临时手工输入的)。所以，更为可靠的方法是修订Colima配置。
+
+- 修改 ``~/.colima/default/colima.yaml`` :
+
+.. literalinclude:: colima_proxy/colima.yaml
+   :language: yaml
+   :caption: ``$HOME/.colima/default/colima.yaml`` 直接添加PROXY配置
+
+代理配置注入虚拟机的分析和要点
+--------------------------------
+
+完成上述两种配置方法之一以后，启动的 ``default`` Colima虚拟机会自动注入代理配置，也就是 ``colima ssh`` 登陆到虚拟机内部检查 ``env | grep -i proxy`` 会看到和Host主机一样的配置:
+
+.. literalinclude:: colima_proxy/colima_env
+   :caption: 在 ``colima`` 虚拟机内部检查 ``env`` 输出可以看到注入的代理配置
+
+上述配置是 ``colima`` 虚拟机启动时自动添加到虚拟机内部的 ``/etc/environment`` 中实现的，即虚拟机内部可以看到动态在 ``/etc/environment`` 中添加了如下配置行:
+
+.. literalinclude:: colima_proxy/environment
+   :caption: 在 ``colima`` 虚拟机内部 ``/etc/environment`` 中自动添加的代理配置
+   :emphasize-lines: 3-8
+
+.. note::
+
+   注入的proxy配置的IP地址，在Host主机上的 ``127.0.0.1:3128`` 会自动转换成Colima虚拟机内部的 ``192.168.5.2:3128``
+
+   这是正确的: 因为这个 ``192.168.5.2`` 代表了Host物理主机。此时只需要在Host物理主机上创建起 :ref:`ssh_tunneling` 连接墙外服务器的 :ref:`squid` 代理端口，就能够 :ref:`across_the_great_wall`
 
 .. warning::
 
-   配置代理需要同时满足 docker 客户端和服务器的代理设置，单方面配置客户端和服务器端都不能实现代理跨越GFW
+   需要 ``注意`` ，在Host主机上的待注入配置或环境变量配置 **必须使用完整格式** ，也就配置项必须带上 ``http://`` ，不可以是简化格式。我实践发现，如果使用以下简化配置(虽然在macOS的Host主机上工作正常):
+   
+   .. literalinclude:: colima_proxy/proxy_env_simple
+      :caption: 在Host主机使用简化配置形式(不建议)
+   
+   会影响 :ref:`apt` 使用，我的实践发现，apt受到这个环境变量影响，但格式会转换导致不支持报错::
+   
+      Unsupported proxy configured: 127.0.0.1://3128
 
-分析和解决思路
-================
+Colima虚拟机内部容器服务的代理配置
+====================================
 
-这个问题需要采用 :ref:`docker_proxy` 方式解决:
+.. note::
 
-- :ref:`ubuntu_linux` 系统需要 :ref:`set_linux_system_proxy` ：至少需要配置 :ref:`apt` 的代理
-- :ref:`docker` / :ref:`containerd` 需要配置 :ref:`docker_server_proxy` ，这样可以让容器运行时能够下载镜像
-- 容器内部需要通过 :ref:`docker_client_proxy` 注入代理配置，这样容器内部的应用就能够顺畅访问internet
+   我最初在 :ref:`colima_proxy_archive` 实践中，因为不确定是 :ref:`docker` 服务还是 :ref:`containerd` 需要代理设置，所以两者都做了配置。但是我现在重新对比验证确认:
 
-代理服务器(之前的尝试，可行但复杂，留作参考)
-==============================================
+   - **只需要诶之docker服务的proxy代理** 环境变量就可以实现镜像通过代理下载
+   - :ref:`containerd` 和 :ref:`nerdctl` 不支持代理，所以之前实践中配置containerd的 ``http_proxy`` 和 ``https_proxy`` 环境变量实际上并没有生效(我对比了)
 
-我个人的经验是使用轻量级的HTTP/HTTPS代理 :ref:`privoxy` 最为简单(服务器无缓存)，如果希望更为稳定和企业级，则选择 :ref:`squid` (服务器有缓存)，不过对实际效果没有太大影响，都是非常好的选择。
+在Colima虚拟机内部运行了 ``docker`` 服务(containerd不需要配置)，需要为这个容器服务配置 :ref:`systemd` 服务的环境变量来传递代理配置
 
-- 首先通过 :ref:`ssh_tunneling` 构建一个本地到远程服务器代理服务端口(服务器上代理服务器仅监听回环地址)的SSH加密连接。我实际采用的是在 ``~/.ssh/config`` 配置如下:
-
-.. literalinclude:: colima_proxy/ssh_config
-   :caption: ``~/.ssh/config`` 配置 :ref:`ssh_tunneling` 构建一个本地到远程服务器Proxy端口加密连接
-
-- 执行构建SSL Tunnel:
-
-.. literalinclude:: colima_proxy/ssh
-   :caption: 通过SSH构建了本地的一个SSH Tunneling到远程服务器的 :ref:`proxy` 服务
-
-apt代理
-----------
-
-- 修改Colima虚拟机内部配置 ``/etc/apt/apt.conf.d/01-vendor-ubuntu`` 添加一行 :ref:`apt` 代理配置:
-
-.. literalinclude:: colima_proxy/apt_proxy
-   :caption: 在 apt 配置中添加代理设置
-
-现在再次执行 ``apt update && apt upgrade`` 就不会有任何GFW的阻塞，顺利完成虚拟机操作系统更新
-
-**Colima虚拟机内部运行的 docker/containerd 需要设置代理以便能够下载镜像运行容器:**
-
-Docker服务器代理
--------------------
-
-我的实践中虚拟机中运行containerd取代默认的Docker:
-
-.. literalinclude:: colima_startup/colima_vz_4c8g
-   :caption: 使用 ``vz`` 模式虚拟化的 ``4c8g`` 虚拟机运行 ``colima``
-
-所以这段Docker服务器代理设置是我之前实践 :ref:`docker_server_proxy` ( 👈 请参考)
-
-Containerd服务器代理
----------------------
-
-Colima虚拟机内部使用的操作系统是 :ref:`ubuntu_linux` ，完整使用了 :ref:`systemd` 系统来管理进程服务，所以可以采用我之前的实践 :ref:`containerd_proxy` 相同方法:
-
-- 修订 ``/etc/environment`` 添加代理配置:
-
-.. literalinclude:: colima_proxy/environment
-   :caption: ``/etc/environment`` 设置代理环境变量
-
-- ``colima ssh`` 重新登陆系统使上述代理环境变量生效，然后执行以下脚本为containerd服务添加代理配置:
-
-.. literalinclude:: ../../kubernetes/container_runtimes/containerd/containerd_proxy/create_http_proxy_conf_for_containerd
-   :language: bash
-   :caption: 生成 /etc/systemd/system/containerd.service.d/http-proxy.conf 为containerd添加代理配置
-   :emphasize-lines: 7-9
-
-代理服务器再次尝试(建议方案)
-==============================
-
-发现colima会将HOST主机proxy环境变量注入虚拟机
-------------------------------------------------
-
-在晚上折腾时偶然发现，如果我的 macOS 操作系统环境变量设置了代理，例如:
-
-.. literalinclude:: colima_proxy/macos_env
-   :caption: 如果macOS的host环境配置了代理变量
-
-则重新启动colima虚拟机之后，这个环境变量会注入到虚拟机内部，但是会做修改(IP地址从 ``127.0.0.1`` 调整为 ``192.168.5.2`` )，而且这个修改是写到虚拟机内部 ``/etc/environment`` 中:
-
-.. literalinclude:: colima_proxy/colima_environment_proxy
-   :caption: Colima启动时会自动将HOST物理主机proxy环境变量注入到虚拟机 ``/etc/environment``
-   :emphasize-lines: 3-5
-
-我忽然想到，既然Colima将我的HOST物理主机的 ``PROXY`` 相关环境变量在启动 :ref:`lima` 虚拟机时候注入到虚拟机内部作为环境变量，那么说明Colima开发者默认就是让虚拟机继承物理服务器的代理配置。同时，观察到Colima在虚拟机的 ``/etc/environment`` 标准配置中添加了代理配置，但是很巧妙地将物理主机 ``127.0.0.1`` 回环地址转变成了 ``192.158.5.2`` ，也就是对应虚拟机( ``192.168.5.1`` )的默认网关( ``192.168.5.2`` )。这说明，Colima会借助物理主机的代理服务器访问外网。
-
-综上所述，看起来完全不用手工配置虚拟机内部服务的代理，而是之际在启动 ``colima`` 虚拟机时，操作命令所在的HOST物理主机shell环境变量PROXY相关设置会自动注入，来解决Colima虚拟机内部的代理。这是Colima的feature。
-
-通过HOST物理主机 ``HTTP_PROXY`` 配置注入虚拟机
-------------------------------------------------
-
-- 首先删除掉刚才测试的虚拟机，准备干净地启动一个全新虚拟机:
-
-.. literalinclude:: colima_startup/colima_delete
-   :caption: 执行 ``colima delete`` 删除不需要的colima虚拟机(所有数据丢失!!!)
-
-- 在启动 ``colima`` 虚拟机之前，先确保发起启动的用户的环境变量如下(配置到 ``~/.zshrc`` 中，或者直接在SHELL中执行):
-
-.. literalinclude:: colima_proxy/macos_env
-   :caption: macOS的host环境 ``colima start`` 用户的环境变量配置代理
-
-- 重新创建colima虚拟机:
-
-.. literalinclude:: colima_startup/colima_vz_4c8g
-   :caption: 使用 ``vz`` 模式虚拟化的 ``4c8g`` 虚拟机运行 ``colima``
-
-- 果然，这次干净启动的 ``colima`` 虚拟机内部注入了原先在HOST物理主机配置的PROXY相关配置， ``colima ssh`` 登陆后检查 ``/etc/environment`` 可以看到配置:
-
-.. literalinclude:: colima_proxy/colima_environment_proxy
-   :caption: Colima启动时会自动将HOST物理主机proxy环境变量注入到虚拟机 ``/etc/environment``
-   :emphasize-lines: 3-8
-
-注意，这里配置环境变量 ``HTTP_PROXY`` / ``http_proxy`` ，有全大写也有全小写，这是因为不同的程序的默认差异，比较搞...
-
-``HTTP_PROXY`` 配置注入虚拟机的 colima.yaml
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-实际上还有一个更为方便的注入方法，就是使用 ``$HOME/.colima/default/colima.yaml`` 直接添加PROXY配置:
-
-.. literalinclude:: colima_proxy/colima_proxy.yaml
-   :language: YAML
-   :caption: ``$HOME/.colima/default/colima.yaml`` 直接添加PROXY配置
-
-新的困扰
-============
-
-其实上述两种方案(虚拟机内部配置 :ref:`containerd_server_proxy` 和 通过注入HOST主机PROXY配置到colima虚拟机)都是完成相同的工作，看起来都很完善。但是，我实际构建 :ref:`colima_images` 还是再次遇到了报错(两个方法都是一样的报错):
-
-当 ``containerd`` 开始同步时是使用代理的(因为我看到如果不启动SSH tunnel，则出现如下访问代理报错::
-
-   error: failed to solve: debian:latest: failed to authorize: failed to fetch anonymous token: Get "https://auth.docker.io/token?scope=repository%3Alibrary%2Fdebian%3Apull&service=registry.docker.io": proxyconnect tcp: dial tcp 127.0.0.1:3128: connect: connection refused
-
-   这里代理IP地址也可能是 ``192.168.5.2`` ，取决于采用上述两个方案之一
-
-但是我发现接下来的https请求居然不再走代理，原因是我发现它报错信息解析的地址 ``production.cloudflare.docker.com => 210.209.84.142`` 是我本地虚拟机解析DNS的结果::
-
-   error: failed to solve: DeadlineExceeded: DeadlineExceeded: DeadlineExceeded: debian:latest: failed to copy: httpReadSeeker: failed open: failed to do request: Get "https://production.cloudflare.docker.com/registry-v2/docker/registry/v2/blobs/sha256/19/19fa7f391c55906b0bbe77bd45a4e7951c67ed70f8054e5987749785450c0442/data?verify=1724172530-5QFH8JiRFjY5RRAQqyHkaNW0Kb4%3D": dial tcp 210.209.84.142:443: i/o timeout
-
-而不是远在墙外squid服务器解析的域名地址(不同地区解析同一个域名返回的地址不同)。看起来 :ref:`containerd` 的代理设置并不是和 :ref:`docker_proxy` 一致，这让我很困扰。
-
-那么怎么解决这个问题呢？
-
-Colima是Docker/Containerd混合体?
----------------------------------------
-
-我原本以为我在 ``colima start`` 运行时传递了参数 ``--runtime containerd`` 就会在 ``colima`` 虚拟机中只单纯运行 :ref:`containerd` 从而避免运行 ``dockerd`` 。然而，事实证明不管怎样，实际上服务器上是通过 ``dockerd`` 去访问 ``containerd`` ( **containerd.sock** )。
-
-从服务器上 ``systemctl status dockerd`` 和 ``systemctl status conainerd`` 可以看到，两个服务同时在运行:
-
-.. literalinclude:: colima_proxy/systemctl_status
-   :emphasize-lines: 12,35
-
-这说明需要同时设置 :ref:`docker` 和 :ref:`containerd` 的代理配置，特别是 :ref:`docker_server_proxy` 
-
-:ref:`systemd` 的 :ref:`docker` 方法见 :ref:`docker_server_proxy` ( ``/etc/default/docker`` 配置是针对 ``SysVinit`` 配置，对systemd不生效) ，其实也是设置 :ref:`systemd` 启动配置的环境变量
+- ``colima ssh`` 登陆到Colima虚拟机内部，执行以下命令创建 ``docker`` 服务的环境配置:
 
 .. literalinclude:: ../network/docker_proxy/create_http_proxy_conf_for_docker
-   :language: bash
+   :language: bash 
    :caption: 生成 /etc/systemd/system/docker.service.d/http-proxy.conf 为docker服务添加代理配置
    :emphasize-lines: 7-9
 
-现在，加上前面配置 :ref:`containerd_server_proxy` ，实际上服务器端运行时(containerd)和管控(docker)都已经启用的PROXY代理。可以通过在colima虚拟机内部检查 ``systemctl show <service_name> --property Environment`` 查看:
+- 现在在Colima虚拟机内部，执行以下命令检查 ``docker`` 服务环境配 :
 
 .. literalinclude:: colima_proxy/systemctl_show_env
    :caption: 通过 ``systemctl show`` 检查 ``Environment`` 属性
 
-输出显示 ``docker`` 和 ``containerd`` 都已经具备了PROXY环境配置
+输出显示 ``docker`` 都已经具备了PROXY环境配置
 
-然而很不幸，我发现 ``nerdctl build`` 输出依然是报错， ``httpReadSeeker`` 复制错误。奇怪，为何没有通过代理来访问 docker 官方仓库？::
+docker客户端配置
+------------------
 
-   error: failed to solve: DeadlineExceeded: DeadlineExceeded: DeadlineExceeded: debian:latest: failed to copy: httpReadSeeker: failed open: failed to do request: Get "https://production.cloudflare.docker.com/registry-v2/docker/registry/v2/blobs/sha256/19/19fa7f391c55906b0bbe77bd45a4e7951c67ed70f8054e5987749785450c0442/data?verify=1724231825-HSnthXcWUnRbhLGA8eMXCizsEq8%3D": dial tcp 199.59.150.43:443: i/o timeout
+.. note::
 
-我理解实际上 ``nerdctl build`` 和 ``docker build`` 并不仅仅是服务器端需要访问internet，有一部分数据是通过客户端这边下载的，也就是META数据是通过客户端下载，来定位需要下载的镜像，再由服务器端去pull镜像。这个逻辑导致客户端和服务器端都要能够跨越GFW。
+   实践验证，当Colima虚拟机已经注入了 ``http_proxy`` 和 ``https_proxy`` 代理配置环境变量，依然要配置docker客户端的 ``config.json``
 
-我突然感觉到是 ``nerdctl`` 客户端的问题，看起来 ``nerdctl build`` 不支持代理？ 我尝试在客户端(macOS HOST主机以及colima虚拟机内部都设置了 ``http_proxy`` 和 ``HTTP_PROXY`` 环境变量，避免大小写差异)，但是始终没有解决通过代理访问问题。
+docker镜像的下载要通过proxy，不仅需要 ``dockerd`` 配置代理， ``docker`` 客户端程序也需要配置代理。这是因为:
 
-从 ``nerdctl build --help`` 输出来看，没有提供 proxy 相关配置 -- **nerdctl这样的docker复刻工具实际上功能做了精简，并不能完全支持docker丰富的功能**
+  - docker的meta元数据是通过 ``docker`` 客户端下载的
+  - docker容器内部需要注入代理配置，否则容器内部的部分安装执行(被墙)会无法完成
 
-``最终的解决之道``
-=====================
+.. note::
 
-最终解决，说来难以置信地简单，就是: 如果要使用代理服务器来下载docker镜像，务必使用 ``docker`` 客户端来管理，支持代理； ``nerdctl`` 客户端不支持代理。
+   docker镜像内部注入代理配置也可以在 ``Dockerfile`` 中配置:
 
-具体解决方法是: 在 ``colima`` 虚拟机内部执行 ``docker build`` 命令，这样结合前面的的服务器配置:
+   .. literalinclude:: colima_proxy/dockerfile_env
+      :caption: 在Dockerfile内添加环境变量
 
-- ``colima start`` 通过HOST物理主机 ``HTTP_PROXY`` 配置注入虚拟机，此时仅解决 :ref:`apt` 翻墙
-- 配置 :ref:`docker_server_proxy` 和 :ref:`containerd_server_proxy` (目前我验证两者都配置，没有验证是否可以只配置其中之一) 确保服务器端能够翻墙拉取镜像
-- 一定要在 ``colima`` 虚拟机内部，配置 docker 客户端使用代理，即配置 ``~/.docker/config.json`` 如下:
+- 在 ``colima`` 虚拟机内部配置 ``~/.docker/config.json`` :
 
 .. literalinclude:: colima_proxy/config.json
    :caption: 配置 ``colima`` 虚拟机内部 ``docker`` 客户端使用代理 ``~/.docker/config.json``
 
-- 最后一定要使用 ``docker build`` 才能支持客户端使用代理， ``nerdctl`` 客户端不支持代理
+构建容器
+=========
 
-参考
-========
+采用 :ref:`debian_tini_image` 的 ``debian-dev`` :
 
-- `Pulling docker images from behind a company VPN #294 <https://github.com/abiosoft/colima/issues/294>`_
- 
+- ``debian-dev`` 包含了安装常用工具和开发环境:
+
+.. literalinclude:: images/debian_tini_image/dev/Dockerfile
+   :language: dockerfile
+   :caption: 包含常用工具和开发环境的debian镜像Dockerfile
+
+- 构建 ``debian-dev`` 镜像:
+
+.. literalinclude:: images/debian_tini_image/dev/build_debian-dev_image
+   :language: bash
+   :caption: 构建包含开发环境的debian镜
+
+- 运行 ``dev`` :
+
+.. literalinclude:: images/debian_tini_image/dev/run_debian-dev_container
+   :language: bash
+   :caption: 运行包含开发环境的debian容器
+
+此时在Colima中运行的容器 ``dev`` 可以在macOS的Host主机上直接访问(端口1122)::
+
+   ssh admin@127.0.0.1 -p 1122
+
+- 在 ``dev`` 容器中检查就可以看到几乎和Host主机完全一致的HOME目录访问，所有文件都具备，非常方便融合Linux+macOS工作

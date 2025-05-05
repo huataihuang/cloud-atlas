@@ -8,13 +8,13 @@ Go程序可以理解环境变量 ``http_proxy`` 和 ``no_proxy`` ，但是当使
 
 - 配置 ``http_proxy`` 和 ``https_proxy`` 环境变量;
 
-.. literalinclude:: ../devops/git/go_proxy/env
+.. literalinclude:: go_proxy/env
    :language: bash
    :caption: 配置代理环境变量
 
 - 配置 :ref:`git_proxy` :
 
-.. literalinclude:: git_proxy/git_config_http.proxy
+.. literalinclude:: ../devops/git/git_proxy/git_config_http.proxy
    :language: bash
    :caption: 全局配置git使用HTTP/HTTPS代理
 

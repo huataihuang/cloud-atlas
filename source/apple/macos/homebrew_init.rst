@@ -110,12 +110,7 @@ nvim插件安装错误排查
 .. literalinclude:: ../../docker/colima/colima_startup/brew_install_colima
    :caption: 在 :ref:`macos` 平台安装colima
 
-这里如果是在旧版本macOS上安装，其实会遇到不少问题，例如 :ref:`homebrew_openssl` 需要绕过openssl安装过程中不能通过test的问题。另外， ``brew install qemu`` 也遇到一个 ``cmake`` 版本过低问题:
-
-.. literalinclude:: homebrew_init/cmake_err
-   :caption: 现实cmake版本过低报错
-
-但是，我检查 homebrew 实际上已经安装了 ``/usr/loca/bin/cmake`` 版本是 4.0.1
+这里如果是在旧版本macOS上安装，其实会遇到不少问题，例如 :ref:`homebrew_openssl` 需要绕过openssl安装过程中不能通过test的问题。另外， ``brew install qemu`` 也遇到一个 ``cmake`` 版本过低问题。 但是，我检查 homebrew 实际上已经安装了 ``/usr/loca/bin/cmake`` 版本是 4.0.1
 
 这个问题似乎有点类似 `VDT Configuration Errors (Mac OS 15.4) <https://root-forum.cern.ch/t/vdt-configuration-errors-mac-os-15-4/63330>`_ ，似乎有多个项目兼容cmake 4.0有问题。果然，在snappy的github项目上，已经有人提出了issue: `Require Update to CMakeLists.txt for source build due to new CMake 4.0(+) requirements #204 <https://github.com/google/snappy/issues/204>`_ ，这个修复是在 snappy 1.2.2 ，但是目前 `homebrew-core/snappy 1.2.2 #216761 <https://github.com/Homebrew/homebrew-core/pull/216761>`_ 还阻塞没有合并，所以当前安装的是 snappy 1.2.1 存在这个报错
 
@@ -125,4 +120,4 @@ nvim插件安装错误排查
 
    colima安装需要使用 :ref:`go_proxy` 配置来绕过GFW阻塞
 
-- 然后自己构建 :ref:`colima_images` :ref:`colima_debian-dev` 
+- 然后自己构建 :ref:`colima_images` ``debian-dev`` 镜像

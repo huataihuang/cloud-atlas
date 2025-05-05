@@ -44,10 +44,6 @@ snappy是Google开发的一个压缩和解压库，不追求最大压缩率，�
 .. literalinclude:: homebrew_formulae/install_snappy
    :caption: 手工安装snappy
 
-.. note::
-
-   不过，由于 ``qemu.rb`` 的formulae配置了 ``depend_on "snappy"`` ，会再次安装 ``snappy-
-
 .. _homebrew_qemu:
 
 Homebrew 安装qemu

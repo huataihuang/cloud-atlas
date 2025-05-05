@@ -30,7 +30,7 @@ Colima容器化开发环境
 
 - 确保发起启动的用户的环境变量如下(配置到 ``~/.zshrc`` 中，或者直接在SHELL中执行):
 
-.. literalinclude:: colima_proxy/macos_env
+.. literalinclude:: colima_proxy_archive/macos_env
    :caption: macOS的host环境 ``colima start`` 用户的环境变量配置代理
 
 - 重启 ``colima`` 服务，此时会挂载HOST主机上指定目录，并且注入HOST主机的代理配置
@@ -46,18 +46,18 @@ Colima容器化开发环境
 
 进入虚拟机( ``colima ssh`` )检查 ``/etc/environment`` 可以看到代理配置:
 
-.. literalinclude:: colima_proxy/colima_environment_proxy
+.. literalinclude:: colima_proxy_archive/colima_environment_proxy
    :caption: Colima启动时会自动将HOST物理主机proxy环境变量注入到虚拟机 ``/etc/environment``
    :emphasize-lines: 3-8
 
 - (物理主机)在HOST主机上 :ref:`ssh_tunneling` 构建一个本地到远程服务器代理服务端口(服务器上代理服务器仅监听回环地址)的SSH加密连接。我实际采用的是在 ``~/.ssh/config`` 配置如下:
 
-.. literalinclude:: colima_proxy/ssh_config
+.. literalinclude:: colima_proxy_archive/ssh_config
    :caption: ``~/.ssh/config`` 配置 :ref:`ssh_tunneling` 构建一个本地到远程服务器Proxy端口加密连接
 
 - (物理主机)执行构建SSL Tunnel:
 
-.. literalinclude:: colima_proxy/ssh
+.. literalinclude:: colima_proxy_archive/ssh
    :caption: 通过SSH构建了本地的一个SSH Tunneling到远程服务器的 :ref:`proxy` 服务
 
 - 登陆到 ``colima`` 虚拟机内部:

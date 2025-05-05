@@ -46,7 +46,7 @@ Linux
 
 这个问题在 `Error related to ncurses-6.2 when installing conda on an Ubuntu server (16.04.7 LTS) #12089 <https://github.com/ContinuumIO/anaconda-issues/issues/12089>`_ 有人已经指出了: 当在Docker中运行时，需要确保底层文件系统是和Linux一致的 ``区分大小写`` 文件系统。
 
-我在 :ref:`docker_desktop` for :ref:`macos` 上部署 :ref:`ubuntu_tini_image` ，恰好就是将共享卷建立在 ``case insensitive``  的 :ref:`apfs` 上导致上述问题。解决方法是 :ref:`macos_apfs_case-sensitive` (通过新增APFS Container可以实现无需重装系统就隔离出一个区分大小写的卷)
+我在 :ref:`docker_desktop` for :ref:`macos` 上部署 :ref:`ubuntu_tini_image` ，恰好就是将共享卷建立在 ``case insensitive``  的 :ref:`apfs` 上导致上述问题。解决方法是 :ref:`apfs_case-sensitive` (通过新增APFS Container可以实现无需重装系统就隔离出一个区分大小写的卷)
 
 GUI包
 ------
