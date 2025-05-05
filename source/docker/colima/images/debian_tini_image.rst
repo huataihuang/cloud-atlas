@@ -97,7 +97,7 @@ tini运行ssh ``debian-ssh-tini``
 
   - :ref:`nvim` 采用了 :ref:`nvim_ide` 配置，当容器内部第一次使用 ``vi`` 时会自动安装已经配置的插件，这个过程时间长度取决于网络(clangd下载特别耗时)
 
-    - 在墙内安装有很大概率受到GFW影响很不稳定，所以建议在Colima虚拟机中启用 :ref:`ssh_tunnel` 共享给容器使用
+    - 在墙内安装有很大概率受到GFW影响很不稳定，所以建议在Colima虚拟机中启用 :ref:`ssh_tunneling` 共享给容器使用
 
 - 构建 ``debian-dev`` 镜像:
 
