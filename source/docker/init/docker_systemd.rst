@@ -18,7 +18,7 @@ Docker systemd进程管理器
 
 systemd提供了处理服务器进程的重启和起停等管理功能，比任何其他进程管理器更为稳定和经过实践验证
 
-不过，systemd也因为其设计架构原因，会沿用其 systemd/journald 来控制容器的输出，而这个容器的输出对于 :ref:`kubernetes` 和 :ref:`openshift` 设计架构是需要直接将日志输出到标准输出stdout和stderr。所以，如果你希望通过Kubernetes和OpenShift这样的调度系统来管理容器，在需要谨慎使用基于systemd的容器。并且，Docker和 :ref:`docker_moby` 社区都不建议在容器中运行systemd。
+不过，systemd也因为其设计架构原因，会沿用其 systemd/journald 来控制容器的输出，而这个容器的输出对于 :ref:`kubernetes` 和 :ref:`openshift` 设计架构是需要直接将日志输出到标准输出stdout和stderr。所以，如果你希望通过Kubernetes和OpenShift这样的调度系统来管理容器，在需要谨慎使用基于systemd的容器。并且，Docker和 :ref:`moby` 社区都不建议在容器中运行systemd。
 
 Docker容器中的systemd
 =======================

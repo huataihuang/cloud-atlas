@@ -1,13 +1,15 @@
-.. _linuxkit:
+.. _bhyve_pci_passthru:
 
 =================================
-linuxkit
+bhyve PCI Passthrough
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   linuxkit_k8s.rst
+   bhyve_pci_passthru_startup.rst
+
+
 
 .. only::  subproject and html
 

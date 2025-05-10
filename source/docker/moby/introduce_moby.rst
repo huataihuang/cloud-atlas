@@ -6,6 +6,12 @@ MoBy开源项目集
 
 `Mobyproject <https://mobyproject.org>`_ 是一个用于装配容器系统的开源框架。
 
+.. figure:: ../../_static/docker/moby/moby_project.jpg
+
+.. note::
+
+   ``Moby`` 这个名字可能和一部著名的美国小说 `Moby Dick (白鲸) <https://www.zhihu.com/question/264718711>`_ 有关: 这是一部受到和捕鲸人抗争48年的雄性抹香鲸Mocha Dick启发的美国经典小说，作者是赫尔曼·麦尔维尔，被誉为美国的“莎士比亚”。
+
 很多人都觉得docker非常好用，一条简单的 ``docker run`` 命令就可以运行容器， ``docker build`` 就可以构建一个镜像。然而，"一生二，二生三，三生万物"，那么最初的原始镜像以及分发构建和编排系统是怎么产生的呢？
 
 Moby就是这样一个 "Under the hood" (隐藏在魔法帽下) 的开源项目。是的，如果说Docker是一个神奇的魔法，那么要揭开本质，你需要了解Moby。

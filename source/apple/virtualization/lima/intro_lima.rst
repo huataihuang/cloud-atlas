@@ -15,7 +15,7 @@ Lima的优点是在启动Linux虚拟机同时会自动实现文件共享(file sh
 
 - :ref:`rancher_desktop`
 - :ref:`colima` : 非常简单配置就能够在macOS上运行Docker和Kubernetes，该项目得到了Thoughtworks技术雷达的 "采纳推荐" (替代 :ref:`docker_desktop`)
-- `GitHub: Finch <https://github.com/runfinch/finch>`_ 对标 :ref:`docker_moby` 的macOS平台容器镜像构建工具
+- `GitHub: Finch <https://github.com/runfinch/finch>`_ 对标 :ref:`moby` 的macOS平台容器镜像构建工具
 - `Podman Desktop <https://podman-desktop.io/>`_ 使用一个插件来运行Lima虚拟机的Podman Desktop GUI
 
 GUI

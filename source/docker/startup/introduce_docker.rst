@@ -35,7 +35,7 @@ Docker生态
 
    cnblog上的rianbowymail有一篇翻译整理自 `An Overall View On Docker Ecosystem — Containers, Moby, Swarm, Linuxkit, containerd, Kubernetes <https://medium.com/devopslinks/an-overall-view-on-docker-ecosystem-containers-moby-swarm-linuxkit-containerd-kubernetes-5e4972a6a1e8>`_ 的文章 `Docker 生态(rianbowymail) <https://www.cnblogs.com/rianbowymail/p/9006322.html>`_ 对Docker生态纷繁复杂的组件以及开源项目关系有一个概括性描述。
 
-- :ref:`docker_moby`
+- :ref:`moby`
 
 Docker带来的DevOps改变
 =======================

@@ -15,6 +15,7 @@ Colima
    colima_storage_manage.rst
    images/index
    colima_dev_studio.rst
+   colima_tunning.rst
 
 .. only::  subproject and html
 
