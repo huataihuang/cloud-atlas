@@ -101,6 +101,10 @@ Colima快速起步
 .. literalinclude:: colima_startup/colima_qemu_2c4g
    :caption: 使用 ``qemu`` 模式虚拟化的 ``2c4g`` 虚拟机运行 ``colima``
 
+.. note::
+
+   根据 :ref:`lima` 官方文档 `Lima VM types <https://lima-vm.io/docs/config/vmtype/>`_ 说明， ``VZ`` 选项( :ref:`apple_virtualization` )需要 ``macOS >= 13.0`` (Lima >= 0.14)
+
 多个docker虚拟机运行案例
 --------------------------
 

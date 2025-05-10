@@ -51,7 +51,14 @@
 风扇转速是通过电压来调整，控制逻辑:
 
 - 通过 :ref:`ipmitool` (如果主板支持ipmi)的 ``sensor`` 来获取芯片温度，在达到一定范围时按照设定逻辑程序发出指令
-- 指令控制BIOS调整风扇连接器输出的电压，来控制PWM的风扇转速
+- :strike:`指令控制BIOS调整风扇连接器输出的电压，来控制PWM的风扇转速` BIOS并不控制风扇转速，而是通过特定芯片完成:
+
+  - 笔记本系统使用 EC (16位芯片，类似服务器的BMC)
+  - 服务器使用 BMC
+  - 台式机使用 EC、ME 等
+
+- CPU内部的DTS（Digital Thermal Sensor）会把CPU内核温度反映到MSR中去，访问MSR可以知道CPU内部的温度(带内)
+- 带外设备可以通过 PECI (platform environment control interface)读取CPU内部信息，这样带外设备就可以探知CPU内部DTS的温度信息
 
 目前CPU，GPU都提供了非常方便的温度检测命令，所以获取主要芯片的温度值比较容易实现；难点是找到控制BIOS的入口，目前我还在找寻。当然正规的服务器，例如 :ref:`hpe_dl360_gen9` 提供了 :ref:`hp_ilo` 这样的BMC控制，可以通过指令(甚至通过ssh通道直接使用命令)。
 
@@ -65,3 +72,4 @@ Windows平台有一个免费的 `Fan Control <https://getfancontrol.com/>`_ 软�
 - `PWM Slope Setting <https://forums.freebsd.org/threads/pwm-slope-setting.88552/>`_
 - `ARCTIC support: How to do your fan PWM settings properly. <https://support.arctic.de/en/pwm-settings>`_ 铭瑄主板的支持文档
 - `How to Change Fan Settings if Bios' Power Options Are Hidden <https://www.wikihow.com/Change-Fan-Settings-if-Bios%27-Power-Options-Are-Hidden>`_ 介绍了通过BIOS，第三方软件(windows版)以及硬件的PC FAN Controller控制风扇转速(淘宝有卖)
+- `谁在控制CPU风扇转速？什么是DPTF? <https://mp.weixin.qq.com/s/MA39fy2PfXD4g2c2p8C7gA>`_

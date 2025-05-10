@@ -10,14 +10,14 @@
 
    Docker是一种全新的运行模式，它并不建议安装运行一个完整的Linux操作系统，而是采用最小化模式，在每个容器中只运行一个目标应用，例如WEB服务器。所有和运行程序无关的程序和库都不会包含，以使得容器精简，缩小容器安全攻击面。
 
-   不过，这种全新的运行模式也带来了运维的难点，或者说需要改变运维工具的视角。如果你想深入理解Docker的镜像制作，请参考 :ref:`docker_moby` 。
+   不过，这种全新的运行模式也带来了运维的难点，或者说需要改变运维工具的视角。如果你想深入理解Docker的镜像制作，请参考 :ref:`moby` 。
 
 虽然你也可以使用docker来运行一个完整Linux操作系统，甚至 :ref:`docker_ssh` 构建一个传统的Linux服务器，但是，用Docker来快速运行一个应用，才是Docker的精粹。
 
 Hello world
 ============
 
-在我们还没有用 :ref:`docker_moby` 打造自己的运行应用之前，我们先来使用一个传奇的Linux命令 ``busybox`` (你甚至可以在 :ref:`android_busybox` 体验)，包含了诸多功能的单一命令行工具::
+在我们还没有用 :ref:`moby` 打造自己的运行应用之前，我们先来使用一个传奇的Linux命令 ``busybox`` (你甚至可以在 :ref:`android_busybox` 体验)，包含了诸多功能的单一命令行工具::
 
    docker run busybox echo "Hello world"
 

@@ -1,10 +1,10 @@
-.. _docker_moby:
+.. _moby:
 
 =================================
-Docker Moby
+Moby
 =================================
 
-Docker Moby项目包含了 :ref:`containerd` ，将在 :ref:`kubernetes` 中详述
+Moby项目包含了 :ref:`containerd` ，将在 :ref:`kubernetes` 中详述
 
 .. toctree::
    :maxdepth: 2

@@ -13,6 +13,7 @@ bhyve(BSD hypervisor)
    jail_bhyve.rst
    bhyve_vm_console.rst
    k8s_on_freebsd_bhyve.rst
+   pci_passthru/index
    bsd_cloud_bhyve/index
 
 .. only::  subproject and html
