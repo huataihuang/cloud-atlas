@@ -1,20 +1,15 @@
-.. _server_chipset:
+.. _freebsd_bridge:
 
 =================================
-服务器主板芯片
+FreeBSD Bridge
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   pcie.rst
-   intel_c610.rst
-   intel_c246.rst
-   nasse_c246.rst
-   intel_i226-v_ethernet.rst
-   dimm_ram.rst
-   ecc_ram.rst
-   
+   intro_freebsd_bridge.rst
+   freebsd_bridge_startup.rst
+
 .. only::  subproject and html
 
    Indices

@@ -48,28 +48,33 @@ bhyve PCI Passthrough快速起步
 .. literalinclude:: bhyve_pci_passthru_startup/pciconf_vl
    :caption: 通过 ``pciconf`` 获取设备信息
 
-我需要传递的设备是 :ref:`amd_radeon_instinct_mi50` :
+我需要传递的设备是 :ref:`amd_radeon_instinct_mi50` (和 :ref:`tesla_p10` ) :
 
 .. literalinclude:: bhyve_pci_passthru_startup/pciconf_vl_output
    :caption: 通过 ``pciconf`` 获取设备信息
-   :emphasize-lines: 10-13
+   :emphasize-lines: 2-6,16-19
 
-这里根据输出 ``vgapci0@pci0:4:0:0`` 可以知道这个 :ref:`amd_radeon_instinct_mi50` 的 ``bus/slot/function`` 值为 ``4/0/0``
+这里根据输出 ``vgapci0@pci0:4:0:0`` 可以知道这个 :ref:`amd_radeon_instinct_mi50` 的 ``bus/slot/function`` 值为 ``4/0/0`` (以及 :ref:`tesla_p10` 为 ``1/0/0`` )
 
 - 在操作系统启动时，需要对Host主机屏蔽掉需要直通的PCI设备，这个设置时通过 ``pptdevs`` 参数完成的，如果有多个设备需要屏蔽，则使用空格来分隔设备列表:
 
 .. literalinclude:: bhyve_pci_passthru_startup/pptdevs
-   :caption: 设置屏蔽的直通的PCI设备( ``/boot/loader.conf`` )
+   :caption: 设置屏蔽的直通的PCI设备( ``/boot/loader.conf`` ) 这里仅屏蔽 :ref:`amd_radeon_instinct_mi50`
+
+如果屏蔽上述2个设备(ref:`amd_radeon_instinct_mi50` 和 :ref:`tesla_p10` )，则写成:
+
+.. literalinclude:: bhyve_pci_passthru_startup/pptdevs_2
+   :caption: 设置屏蔽的直通的PCI设备( ``/boot/loader.conf`` ) 这里同时屏蔽 :ref:`amd_radeon_instinct_mi50` :ref:`tesla_p10`
 
 注意，每行 ``pptdevs`` 只支持最多 ``128`` 个字符，所以如果有更多的直通设备需要配置的画，可以使用 ``pptdevN`` 来设置，例如 ``pptdevs2``
 
-- 重启操作系统，再次检查 ``pciconf -vl`` 就会看到原先设备 ``vgapci0`` 变成了 ``ppt`` (这里看到的是 ``ppt0@pci0:4:0:0`` )类似如下:
+- 重启操作系统，再次检查 ``pciconf -vl`` 就会看到原先设备 ``vgapci0`` 变成了 ``ppt`` (这里看到的是 ``ppt0@pci0:1:0:0`` 和 ``ppt0@pci0:4:0:0`` )类似如下:
 
 .. literalinclude:: bhyve_pci_passthru_startup/pciconf_vl_output_ppt
    :caption: 重启系统后检查 ``pptdevs`` 设备的开头会变成 ``ppt``
-   :emphasize-lines: 1
+   :emphasize-lines: 2,8
 
-- 现在就在虚拟机中使用这个设备了，添加 ``-s 7,passthru,4/0/0`` 类似如下:
+- 现在就在虚拟机中使用这个设备了，添加 ``-s 7,passthru,1/0/0`` (假设这里使用 :ref:`tesla_p10` ) 类似如下:
 
 .. literalinclude:: bhyve_pci_passthru_startup/fedora_vm
    :caption: 设置 fedora 虚拟机使用这个passthru设备
@@ -77,9 +82,9 @@ bhyve PCI Passthrough快速起步
 异常排查
 ===========
 
--s 7,passthru,4/0/0 \
+当我使用了 ``-s 7,passthru,1/0/0`` 出现 ``passthru requires guest memory to be wired`` 报错
 
-- 必须向 ``bhyveload`` 和 ``bhyve`` 传递 ``-S`` 参数来 wire guest memory，否则启动会报错:
+- 必须向 ``bhyveload`` 和 ``bhyve`` 传递 ``-S`` 参数来 ``wire guest memory`` ，否则启动会报错:
 
 .. literalinclude:: bhyve_pci_passthru_startup/wire_memory
    :caption: 如果 ``bhyve`` 没有使用 ``-S`` 参数会报错
