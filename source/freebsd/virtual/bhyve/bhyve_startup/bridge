@@ -1,13 +1,20 @@
 # 创建tap设备
 ifconfig tap0 create
-sysctl net.link.tap.up_on_open=1
+# 创建多个tap设备，分别对应不同虚拟机内部虚拟网卡，规划为每个vm一个虚拟网卡设备，这里案例我一共添加了3个tap设备
+ifconfig tap1 cteate
+ifconfig tap2 cteate
 
 # 创建 bridge0
 ifconfig bridge0 create
 
-# 可以连续使用 addm 添加多个设备到网桥，也可以拆分成一次addm一个设备
-ifconfig bridge0 addm igc0 addm tap0
-# 重命名为 igc0bridge
+# 网桥重命名为 igc0bridge
 ifconfig bridge0 name igc0bridge
 ifconfig igc0bridge up
 
+# 可以连续使用 addm 添加多个设备到网桥，也可以拆分成一次addm一个设备
+# 添加tap虚拟网卡设备连接到bridge
+ifconfig bridge0 addm tap0 addm tap1 addm tap2
+# 一共有4个Intel i226-v 2.5Gbps网卡，都配置到一个bridge上联通网络
+ifconfig bridge0 addm igc0 addm igc1 addm igc2 addm igc3
+
+# 现在虚拟网络和物理网卡接口就已经实现了完全的交换网络(平面型),可以测试网络连通性了
