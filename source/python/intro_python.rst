@@ -37,6 +37,16 @@ Learn Enough系列
 
 `Learn Enough Python to Be Dangerous <https://www.amazon.com/Learn-Enough-Python-Dangerous-Development/>`_
 
+骆昊 的Python教程
+===================
+
+骆昊 在GitHub上提供了两个Python教程:
+
+- `Python - 100天从新手到大师 <https://github.com/jackfrued/Python-100-Days>`_ 非常实用的通过案例完整介绍了Python的方方面面
+- `Python语言基础50课 <https://github.com/jackfrued/Python-Core-50-Courses>`_ 是上述100日课程的第1天到第15天的部分的初学者版本
+
+该教程非常详尽，值得细细学习
+
 我的学习路线
 =============
 

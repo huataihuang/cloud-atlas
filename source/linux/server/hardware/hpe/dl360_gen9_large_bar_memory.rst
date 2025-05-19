@@ -33,7 +33,7 @@ VMware ESX配置建议
 - 物理机和虚拟机都使用EFI引导模式
 - 若GPU 需要 16 GB 或更多的内存映射（BAR1 Memory），需要在物理机bios中启用GPU直通，设置项名称通常为:
 
-  - Above 4G decoding
+  - :ref:`above_4g_decoding`
   - Memory mapped I/O above 4GB
   - PCI 64-bit resource handing above 4G
 

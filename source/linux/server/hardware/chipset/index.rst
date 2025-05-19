@@ -11,6 +11,7 @@
    intel_c610.rst
    intel_c246.rst
    nasse_c246.rst
+   above_4g_decoding.rst
    intel_i226-v_ethernet.rst
    dimm_ram.rst
    ecc_ram.rst
