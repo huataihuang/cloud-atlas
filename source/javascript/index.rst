@@ -8,6 +8,7 @@ JavaScript
    :maxdepth: 1
 
    intro_js.rst
+   html5/index
    startup/index
    functional_programming/index
    react/index
