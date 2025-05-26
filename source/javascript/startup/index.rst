@@ -10,7 +10,6 @@ JavaScript 快速起步
    js_basic.rst
    first_js.rst
    js_var_const.rst
-   css.rst
    json.rst
    debug_webpack.rst
    es.next.rst

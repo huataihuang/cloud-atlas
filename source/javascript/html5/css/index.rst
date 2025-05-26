@@ -1,14 +1,13 @@
-.. _html5:
+.. _css:
 
 =================================
-HTML5
+CSS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   html5_startup.rst
-   css/index
+   css_startup.rst
 
 .. only::  subproject and html
 
