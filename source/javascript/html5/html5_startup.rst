@@ -56,6 +56,29 @@ HTML5是一项 ``实践`` 中的 ``活`` 的技术:
 - ``<embed>`` 向页面中加入插件的通用方法
 - ``<wbr>`` 某个词太长一行放不下，浏览器会在 ``<wbr>`` 标注的地方换行断开
 
+HTML注释
+============
+
+HTML注释采用如下语法( ``XML`` 也采用同样方法):
+
+.. literalinclude:: html5_startup/html_comment.html
+   :caption: html注释方法
+
+HTML浏览器支持特性
+====================
+
+由于 ``HTML5`` 支持的最终实现取决于浏览器，所以最终开发者需要确认不同浏览器是否支持某个标准特性。 `caniuse网站 <https://caniuse.com/>`_ 提供了HTML特性是否得到不同浏览器支持的查询功能。
+
+浏览器装机情况
+==================
+
+`statcounter GlobalStats <https://gs.statcounter.com>`_ 提供了不同浏览器的市场占用率，并且能够通过 ``Edit Chat Data`` 选择展示的数据范围，例如按照浏览器版本，国别等视角。这对于WEB开发者兼容性取舍具有参考价值。
+
+Modernizr检测功能
+===================
+
+`Modernizr <https://modernizr.com/>`_ 提供了检测浏览器对多种HTML5以及相关功能的支持情况，下载该网站提供的 ``Development version`` Modernizr工具，能够知道浏览器具体支持的功能。(我还没有实践，记录待后续实践)
+
 参考
 =======
 

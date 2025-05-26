@@ -1,17 +1,17 @@
-.. _css:
+.. _css_startup:
 
 ===============
-CSS
+CSS快速起步
 ===============
 
 CSS是一组规则，其中每条规则制定了网页中的元素及其样式:
 
-.. literalinclude:: css/css_demo.html
+.. literalinclude:: css_startup/css_demo.html
    :language: html
    :caption: css_demo.html 使用外部css
    :emphasize-lines: 4
 
-.. literalinclude:: css/styles.css
+.. literalinclude:: css_startup/styles.css
    :language: css
    :caption: 指定网页元素及其样式 styles.css
 
@@ -22,7 +22,7 @@ CSS是一组规则，其中每条规则制定了网页中的元素及其样式:
 
 显示效果如下:
 
-.. figure:: ../../_static/javascript/startup/css_demo.png
+.. figure:: ../../../_static/javascript/html5/css/css_demo.png
    :scale: 80
 
    采用 styles.css 后页面显示效果
