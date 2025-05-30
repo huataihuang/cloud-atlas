@@ -7,6 +7,7 @@ Go
 .. toctree::
    :maxdepth: 1
 
+   intro_golang.rst
    install_golang.rst
    go_on_arch_linux.rst
    go_on_fedora.rst

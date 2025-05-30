@@ -34,6 +34,10 @@ RUN apt -y install cmake gettext
 # ruby program install rvm
 # python program (debian already inatalled python3)
 RUN apt -y install python3.11-venv
+# go program
+#RUN apt -y install golang
+RUN wget https://go.dev/dl/go1.24.3.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf go1.24.3.linux-amd64.tar.gz
 
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
@@ -60,7 +64,6 @@ RUN gpg2 --keyserver hkp://keyserver.ubuntu.com --recv-keys 409B6B1796C275462A17
 RUN curl -sSL https://get.rvm.io | bash -s stable
 RUN bash -c 'source /home/admin/.rvm/scripts/rvm && rvm install 3.4.3 && gem install rails'
 
-
 # 我使用Jekyll构建个人blog，如不需要请注释掉下面一行
 # 如果报错 "gem: command not found" (不能通过 "source /home/admin/.bashrc")，改成 "source /home/admin/.rvm/scripts/rvm"
 RUN bash -c 'source /home/admin/.rvm/scripts/rvm && gem install bundler jekyll'
@@ -73,6 +76,9 @@ RUN bash -c 'source /home/admin/venv3/bin/activate && pip install sphinx sphinx_
 # node program: nvm install node (目前采用v22 LTS系列)
 RUN bash -c "cd /home/admin && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash" 
 RUN bash -c "source /home/admin/.nvm/nvm.sh && nvm install 22"
+
+# go program: setup $GOPATH
+RUN bach -c 'echo "export PATH=$PATH:/usr/local/go/bin" >> /home/admin/.bashrc' 
 
 # neovim
 # 当git使用operations over HTTP时，实际使用的是curl library，所以注入容器的 http_proxy https_proxy就能够生效
