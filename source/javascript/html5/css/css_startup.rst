@@ -33,7 +33,6 @@ CSS是一组规则，其中每条规则制定了网页中的元素及其样式:
 每个样式规则为一个或多个HTML元素指定一个或多个格式化信息，语法结构如下:
 
 .. literalinclude:: css_startup/css_structure.json
-   :language: json
    :caption: 样式表语法
 
 - ``selector`` (选择符) : 浏览器会在整个页面中查找选择符匹配的元素

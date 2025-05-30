@@ -7,6 +7,7 @@ Arch Linux
 .. toctree::
    :maxdepth: 1
 
+   intro_archlinux.rst
    best_archlinux.rst
    archlinux_on_mbp.rst
    archlinux_on_thinkpad_x220.rst
