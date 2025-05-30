@@ -76,7 +76,7 @@ foliate
    sudo apt-get update
    sudo apt install foliate
 
-不过，我在Raspberry Pi OS上安装实践未成功(安装并没有找到对应软件包)
+foliate使用了webkitgtk作为页面渲染引擎支持 ``.epub`` ，同时内置了 `PDF.js <https://github.com/mozilla/pdf.js>`_ (由Mozilla支持的开源软件，为浏览器内置PDF功能)支持PDF阅读。该软件设计美观，使用方便，强烈推荐。
 
 calibre
 ==================
