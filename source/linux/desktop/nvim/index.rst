@@ -17,6 +17,7 @@ neovim
    nvim_lua.rst
    coc.nvim.rst
    nvim_ide.rst
+   nvim_ide_fix.rst
    nvim_clangd_arm.rst
    nvim_ansible.rst
    lazy.nvim/index

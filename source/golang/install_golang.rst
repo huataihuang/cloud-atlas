@@ -11,6 +11,11 @@
 
    tar -C /usr/local -xzf go$VERSION.$OS-$ARCH.tar.gz
 
+以下是 :ref:`debian_tini_image` 的 :ref:`debian` 12环境安装实践:
+
+.. literalinclude:: install_golang/local_install_golang
+   :caption: 官方下载最新golang安装包安装
+
 .. note::
 
    推荐采用golang官方提供的最新版本:

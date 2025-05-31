@@ -213,6 +213,15 @@ LSP
 .. literalinclude:: nvim_ide/lsp_complete.lua
    :language: lua
    :caption: ``~/.config/nvim/lua/lsp.lua`` 添加详细配置
+   :emphasize-lines: 27-30
+
+请注意上述配置中 ``vim.diagnostic`` 配置快捷键，这是一个非常有用的功能，当lsp检查出代码错误时会在错误行的开头添加一个 ``E`` ，只要将光标移动到错误行，通过快捷键就就能够查看诊断信息:
+
+  - ``vim.diagnostic.open_float`` 表示浮动框显示错误信息，这里配置 ``<space>e`` 组合键显示错误诊断浮动框
+  - ``vim.diagnostic.goto_prev`` 和 ``vim.diagnostic.goto_next`` 分别显示上一个和下一个错误诊断详情
+  - ``vim.diagnostic.setloclist`` 则是在当前工作窗口切分出一个窗口单独显示错误诊断信息，适合一次性展示多个错误内容的诊断信息j
+
+这里有一个疑惑需要后续解决，就是 ``<space>e`` 和 ``<space>q`` 这个组合键中的 ``<space>`` 在使用中会导致光标移动，需要有一个方法关闭掉交互模式下空格键移动光标的功能(待查)
 
 - 最后，在 ``init.lua`` 中加入激活 ``lsp`` :
 
