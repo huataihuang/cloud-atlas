@@ -5,7 +5,7 @@
 请访问:
 
 - [readthedocs平台上的云图](https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html) 以便获得最佳阅读体验。
-- [「云图 – 云计算图志: 探索 」](https://docs.cloud-atlas.io/discovery) 我的自建网站，也就是云图在现实中的实现
+- [「云图 – 云计算图志: 探索 」](https://docs.cloud-atlas.dev/discovery) 我的自建网站，也就是云图在现实中的实现
 
 ## 这本书的目标
 
@@ -32,10 +32,10 @@
 
 本书项目从 「云图 – 云计算图志」 修订命名为 「云图 – 云计算图志: 探索 」:
 
-- 从0开始构建 [cloud-atlas.io](https://cloud-atlas.io) 网站，「云图 – 云计算图志: 探索 」将作为 [docs.cloud-atlas.io](https://docs.cloud-atlas.io) 的一部分 [「云图 – 云计算图志: 探索 」](https://docs.cloud-atlas.io/discovery)
+- 从0开始构建 [cloud-atlas.dev](https://cloud-atlas.dev) 网站，「云图 – 云计算图志: 探索 」将作为 [docs.cloud-atlas.dev](https://docs.cloud-atlas.dev) 的一部分 [「云图 – 云计算图志: 探索 」](https://docs.cloud-atlas.dev/discovery)
 - 在现实中完成一个Cloud Atlas项目
 
-2024年12月25日
+2025年6月1日
 
 ## Star History
 
