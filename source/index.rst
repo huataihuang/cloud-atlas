@@ -33,17 +33,17 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
 ``Discovery``
 ---------------
 
-2024年底，我将这部 「云图 -- 云计算图志」 修订命名为 「云图 -- 云计算图志: ``探索`` 」:
+:strike:`2024年底` 2025年6月，我将这部 「云图 -- 云计算图志」 修订命名为 「云图 -- 云计算图志: ``探索`` 」:
 
-- 正式启用了 `cloud-atlas.io <https://cloud-atlas.io>`_ 域名，我将重新构建 `docs.cloud-atlas.io <https://docs.cloud-atlas.io>`_ :
+- 正式启用了 :strike:`cloud-atlas.io` `cloud-atlas.dev <https://cloud-atlas.dev>`_ 域名，我将重新构建 `docs.cloud-atlas.dev <https://docs.cloud-atlas.dev>`_ :
 
   - 本项目将作为其中的 ``Discovery`` 分册: 完全面向中文技术文档，继续探索云计算相关技术
   - 从2025年开始撰写一本新的实践指南，作为 「云图 -- 云计算图志」 的下一全新迭代:
 
     - 采用中英文双语言撰写
-    - 从0开始记录自己构建 `cloud-atlas.io <https://cloud-atlas.io>`_ 的真实实践
-    - 完整的对外服务的真实的云计算
-    - **名字还没有想好**
+    - 从0开始记录自己构建 `cloud-atlas.dev <https://cloud-atlas.dev>`_ 的真实实践，一步步构建出完整的 **云计算网站**
+    - 完整的对外服务的真实的云计算: 从底层基础设施到上层应用，以及围绕这一切的所有可构建的软件堆栈
+    - 命名为「云图 -- 云计算图志: ``架构`` 」
 
 阅读
 =========
@@ -51,7 +51,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
 请访问:
 
 - `readthedocs平台上的云图 <https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html>`_ 第三方托管
-- `docs.cloud-atlas.io <https://docs.cloud-atlas.io>`_ 构建 `「云图 -- 云计算图志: 探索」 <https://docs.cloud-atlas.io/discovery>`_ 自建网站，也就是本书的现实世界的实现
+- `docs.cloud-atlas.dev <https://docs.cloud-atlas.dev>`_ 构建 `「云图 -- 云计算图志: 探索」 <https://docs.cloud-atlas.dev/discovery>`_ 自建网站，也就是本书的现实世界的实现
 
 致谢
 =========
