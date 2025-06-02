@@ -22,6 +22,12 @@ Rust是开源基金会Mozilla推动开发，借鉴了现代语言研究成果，
 
    curl https://sh.rustup.rs -sSf | sh -s -- --help
 
+上述安装是一个交互过程，所以如果要直接安装，参考 `Non-interactive install #83 <https://github.com/rust-lang-deprecated/rustup.sh/issues/83>`_  使用如下方法:
+
+.. literalinclude:: rust_startup/install_rust.sh_direct
+   :language: bash
+   :caption: Liinux平台直接安装Rust
+
 更新Rust
 ------------
 
