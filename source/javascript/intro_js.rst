@@ -21,6 +21,26 @@ JavaScript由Ecma(欧洲计算机制造商协会)通过ECMAScript实现语言的
 
 对于客户端而言，JavaScript通常被实现为一门解释语言，但是JavaScript现在也可以被即时编译(JIT)。随着HTML5和CSS3语言标准的推行，JavaScript还可以用于游戏、桌面和移动应用程序开发，以及服务器端网络环境运行(如 :ref:`nodejs` )。
 
+学习线路(我的想法)
+=====================
+
+我是从后端运维工作开始我的IT职业生涯的，前端对我来说是一个模糊的景象: 各种眼花缭乱的工具和开发框架让人无所适从
+
+不过，我的目标是通过前端技术实现全栈(真正的全栈，从底层基础设施到顶层应用)，我需要通过前端来构建web、应用，来实现表达和完成普通人能够使用的产品。那么我该如何学习JavaScript呢？
+
+我的逐渐形成的学习线路想法:
+
+- 学习 :ref:`html5` 和 :ref:`css` 能够构建基本页面
+- 学习 JavaScript 底层技术，并且重点以JS为主，所有的framework最终都是JS构建的组件荟萃，不管技术潮流如恨来去，JS已经是既成的基础
+- 适当学习 :ref:`react` 来完成UI组件的布局和组合，毕竟不可能每个WEB组件元素都自己构建，快速的WEB应用开发都依赖react
+
+  - 可能会对比 :ref:`nextra` 使用 ``Docusaurus`` 来同样构建 :ref:`devops_docs` (如果想用更接近 :ref:`react` 的技术堆栈)
+
+- :ref:`nextjs` 相当于 :ref:`react` 的固定(优化)组合，更为容易构建WEB，但是也限制了天马行空的构建。不过，对于需要快速拿到结果，还是需要 :ref:`nextjs` 这种更高层的预制品来完成作品。所以，我会从两个方向学习，一个是底层JavaScript向上，尽可能打好基础；另一个是从 :ref:`nextjs` 向下，以便能够快速完成WEB构建作品，能够将自己的想法变成现实
+- 构建 :ref:`devops_docs` 则采用 :ref:`nextra` 以便能够充分学习 :ref:`nextjs` 的技术理念
+
+主要学习的目标还是 :ref:`javascript` ，越是底层生命力越旺盛，框架毕竟会由于开源社区的的风向而转变，基本不变的只有底层。
+
 学习资料
 ==========
 
@@ -41,3 +61,4 @@ favicon
 =======
 
 - `维基百科: JavaScript <https://zh.wikipedia.org/zh-hans/JavaScript>`_
+- `Reddit: Which React framework should I learn? <https://www.reddit.com/r/react/comments/10vklh7/which_react_framework_should_i_learn/>`_

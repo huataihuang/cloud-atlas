@@ -38,7 +38,7 @@ Docs-as-Code
 - Markdown: 很多大型组织用来构建文档库
 
   - ``Docusaurus`` Facebook开源的基于 React+Node.js 静态网站生成器，基于MDX框架
-  - ``Nextra`` :ref:`nextjs` 开发的同样基于MDX的静态网站
+  - :ref:`nextra` 是 :ref:`nextjs` 开发的同样基于MDX的静态网站
   - ``Astro`` 支持多种前端框架的文档工具 - `Astro integrations <https://docs.astro.build/en/guides/integrations-guide/#official-integrations>`_
   - :ref:`mkdocs`
   - :ref:`hugo`
@@ -61,7 +61,7 @@ Docs-as-Code
   - :ref:`sphinx_doc`
 
 对比和思考
-=============
+------------
 
 从电子书角度来看， ``Asciidoc`` 和 ``reStructuredText`` 是主要的文档格式，被很多严肃、核心的开源项目，例如FreeBSD和Kernel选为文档基础。我感觉主要原因是这些开源团队更侧重于后台技术，需要严谨的文档格式，同时不希望太过花哨的展示形式冲淡了作为核心技术的稳健风格。
 
@@ -73,9 +73,15 @@ Docs-as-Code
 
 目前我想学习一些前端技术，所以我在选型时会选择 ``Markdown`` 流派，同时我会结合自己近期的学习路线来最终选择一个平台。可能选择基于 :ref:`nextjs` 的 :ref:`nextra` 。
 
+CI/CD
+=========
+
+``Docs-as-Code`` 的重要核心是持续集成，我采用 :ref;`docs_as_code_at_gitlab`
+
 参考
 ======
 
 - `Write The DOCS: Docs as Code <https://www.writethedocs.org/guide/docs-as-code/>`_
 - `Markdown, Asciidoc, or reStructuredText - a tale of docs-as-code <https://www.dewanahmed.com/markdown-asciidoc-restructuredtext/>`_ docs-as-code 有众多选择，实在有些吃惊
 - `Docs-as-code: A Brief Introduction <https://medium.com/@ezinneanne/docs-as-code-a-brief-introduction-4fe15b7f0b4c>`_
+- `Five fast facts about docs as code at GitLab <https://about.gitlab.com/blog/2022/10/12/five-fast-facts-about-docs-as-code-at-gitlab/>`_
