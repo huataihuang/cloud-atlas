@@ -1,14 +1,13 @@
-.. _nextra:
+.. _remix:
 
 =================================
-Nextra
+Remix.js
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   nextra_startup.rst
-   nextra_i18n.rst
+   nextjs_vs_remix.rst
 
 .. only::  subproject and html
 
