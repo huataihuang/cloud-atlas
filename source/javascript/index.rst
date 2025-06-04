@@ -14,6 +14,7 @@ JavaScript
    react/index
    typescript/index
    nextjs/index
+   remix/index
    patternfly/index
 
 .. only::  subproject and html

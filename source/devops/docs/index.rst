@@ -24,6 +24,7 @@ DevOps 文档
    hugo/index
    hexo/index
    nextra/index
+   docusaurus/index
    kindle/index
    kobo/index
    pandoc.rst

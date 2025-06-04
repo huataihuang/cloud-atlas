@@ -1,14 +1,13 @@
-.. _nextra:
+.. _docusaurus:
 
 =================================
-Nextra
+Docusaurus
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   nextra_startup.rst
-   nextra_i18n.rst
+   docusaurus_startup.rst
 
 .. only::  subproject and html
 
