@@ -54,7 +54,7 @@
 
 - :ref:`kubernetes` 集群主要容器镜像都存储在 :ref:`ceph` 云存储，仅对数据库容器存储采用本地存储(数据库有自己的容灾)
 
-我的构思三(最终选择)
+我的构思三
 =====================
 
 正如 :ref:`edge_cloud_infra_2024` 所述，我最终剁手了 ``3台`` :ref:`pi_5` :
@@ -73,3 +73,30 @@
    :file: pi_soft_storage_cluster/parted.csv
    :widths: 5, 15, 20, 30, 30
    :header-rows: 1
+
+我的构思四
+============
+
+- 继续使用 :ref:`pi_3` / :ref:`pi_4` / :ref:`pi_5` 设备 构建集群，但是存储从树莓派抽离，主要集中安装到我组装的 :ref:`nasse_c246` 桌面主机
+- 通过 :ref:`freebsd` 的 :ref:`zfs` 构建 ``RAIDZ0`` 存储数据，虽然没有任何数据冗余，但是4个 :ref:`kioxia_exceria_g2` 构建高性能大容量存储
+- 通过 :ref:`bhyve` 运行 FreeBSD 虚拟机，来构建3个节点的 :ref:`ceph` 分布存储
+- 使用软交换方式( :ref:`nasse_c246` 提供了4个 2.5G 网络)，实现 :ref:`pi_5` 高速访问存储，来构建一个使用 :ref:`ceph` 存储的 :ref:`kubernetes` 集群
+
+业界的产品化集群
+==================
+
+随着树莓派生态完善，涌现了不同的集群构建硬件。其中使用 :ref:`pi_cm4` (BCM2711) 和 :ref:`pi_5` 计算模块 (BCM2712) 构建的微型集群，非常有特色。2025年6月6日，看到油管博主Jeff Geerling介绍的 `Cute, but powerful: meet NanoCluster, a tiny supercomputer <https://www.youtube.com/watch?v=UEtpaiODNs0>`_ ，也就是 ``硅速科技`` 正在预售的 `Sipeed NanoCluster <https://sipeed.com/nanocluster>`_ :
+
+.. figure:: ../../_static/raspberry_pi/pi_cluster/pi_nano_cluster.png
+
+- 以一个可乐罐大小的体积提供 ``7个`` :ref:`pi_cm4` (BCM2711) 或 :ref:`pi_5` 计算模块 (BCM2712)构建的高性能树莓派集群
+- 底部采用一个Open SDK for RISC-V GbE交换机互联
+- 第一个slot的树莓派可以管理所有slot的电源，以及支持4个slot的 :ref:`pi_uart` ，非常类似服务器的 :ref:`hp_ilo` 管理(虽然比较简陋)
+- 支持POE电源简化连线，也支持60W PD
+- 最高支持7个SOMs，如果使用7个 :ref:`pi_5` 计算模块 (BCM2712) 可以获得 56 CPU核心，126TOPS 计算能力(可能还达不到NVIDIA Jetson 256TOPS能力) (此处采用产品宣发资料，未验证)
+
+  - 7个SOM组合包售价 ``250$``
+
+.. note::
+
+   这是一个有意思的产品，非常吸引人。不过我已经购买了大量的 :ref:`pi_3` / :ref:`pi_4` / :ref:`pi_5` 设备，所以不太可能再购买。不过我的树莓派集群虽然达不到这么紧凑，但是功能和软件能力上并不弱，我将用软件定义方式来实现复杂的云计算平台。

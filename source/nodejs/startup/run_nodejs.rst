@@ -6,6 +6,8 @@
 
 对于Linux操作系统，通过发行版包管理器安装Node.js最为方便，包括Debian/Ubuntu, Fedora/CentOS/RHEL 都提供了安装包。
 
+.. _install_nodejs:
+
 Linux安装Node.js
 =================
 
