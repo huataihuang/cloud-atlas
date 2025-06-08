@@ -6,14 +6,17 @@ PCIe bifurcation
 
 :ref:`hpe_dl360_gen9` 支持PCIe直接使用NVMe存储，这样可以在服务器上实现高性能存储集群。(原厂的 U.2 接口NVMe SSD存储升级套件实在成本太高)
 
-最初构想方案(验证存在限制)
+PCIe拆分卡
 ===========================
 
 .. warning::
 
    请注意， :ref:`hpe_dl360_gen9` 只支持第一个PCIe 3.0 x16的bifurcation功能，并且只支持 ``Dual PCIe x8 slot`` ，也就是只能切分成2个 ``x8`` 。所以最多只能在Slot 1上支持2块NVMe SSD。
 
-   请购买 ``双盘NVMe扩展卡`` ，我购买4盘位NVMe扩展卡实际上上浪费了资源，并不是很好的选择。
+   对于 :ref:`hpe_dl360_gen9` 最好使用 ``双盘NVMe扩展卡`` ，我购买4盘位NVMe扩展卡实际上上浪费了资源，并不是很好的选择。
+
+PCIe X16 四盘NVMe扩展卡
+------------------------
 
 在淘宝上可以购买到 PCIe X16 四盘NVMe扩展卡:
 
@@ -24,6 +27,21 @@ PCIe bifurcation
    :scale: 40
 
 .. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_nvme_extendcard-2.png
+   :scale: 40
+
+.. _pcie_bifurcation_x4x4x8_card:
+
+PCIe X16转x8+x4+x4拆分卡
+---------------------------
+
+我在2025年购置组装的主机使用了 :ref:`nasse_c246` ，这种台式机主板(通常)支持将PCIe X16拆分成 ``X8X8`` 或者 ``X4X4X8`` ，也就是最多可以转接3个设备。为了能够充分利用硬件，我购买了一块 ``PCIe X16转x8+x4+x4拆分卡`` :
+
+- ``PCIe X16转x8+x4+x4拆分卡`` 正反两面各提供一个 M.2 :ref:`nvme` ，这样可以安装2块存储
+- 拆分后还有一个 ``X8`` 信号PCIe插槽(X16接口形式)，用来安装我的 :ref:`tesla_p10`
+
+这样我的台式主机不仅可以继续使用 :ref:`tesla_p10` ，又增加了2个存储，加上主板自带的2个存储，总共有4个 M.2 :ref:`nvme` 存储，大大方便我组件 :ref:`zfs` RAIDZ来模拟演练和学习实践
+
+.. figure:: ../../../../_static/linux/server/hardware/hpe/pcie_nvme_extendcard.jpg
    :scale: 40
 
 PCIe bifurcation
