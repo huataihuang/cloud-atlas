@@ -7,7 +7,7 @@ FreeBSD存储
 .. toctree::
    :maxdepth: 1
 
-   freebsd_disk.rst
+   freebsd_disk_startup.rst
    gpart.rst
 
 .. only::  subproject and html

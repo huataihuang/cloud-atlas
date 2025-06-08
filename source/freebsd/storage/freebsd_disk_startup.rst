@@ -1,7 +1,7 @@
-.. _freebsd_disk:
+.. _freebsd_disk_startup:
 
 ===================
-FreeBSD磁盘
+FreeBSD磁盘快速起步
 ===================
 
 在阿里云的FreeBSD虚拟机添加了数据磁盘，但是发现和Linux平台有些不同，所以快速学习和实践一下:
@@ -11,10 +11,10 @@ FreeBSD磁盘
 
 - 首先找出磁盘，因为我发现没有 ``fdisk -l`` 这样的Linux命令，那么替代命令是 ``geom`` (universal control utility for GEOM classes):
 
-.. literalinclude:: freebsd_disk/geom_disk
+.. literalinclude:: freebsd_disk_startup/geom_disk
    :caption: 使用 ``geom`` 列出磁盘
 
-.. literalinclude:: freebsd_disk/geom_disk_output
+.. literalinclude:: freebsd_disk_startup/geom_disk_output
    :caption: 使用 ``geom`` 列出磁盘
    :emphasize-lines: 13,16
 
@@ -22,7 +22,7 @@ FreeBSD磁盘
 
 知道磁盘名字之后，就可以再添加磁盘名字来显示信息:
 
-.. literalinclude:: freebsd_disk/geom_disk_vtbd1
+.. literalinclude:: freebsd_disk_startup/geom_disk_vtbd1
    :caption: 检查 ``vtbd1`` 磁盘
 
 分区
@@ -34,7 +34,7 @@ FreeBSD磁盘
 
 - ``gpart`` 命令可以创建分区，而且可以通过 ``-s`` 参数指定大小(如果没有指定大小则完全占用空闲空间)；然后可以创建文件系统:
 
-.. literalinclude:: freebsd_disk/gpart
+.. literalinclude:: freebsd_disk_startup/gpart
    :caption: 创建分区和文件系统
 
 .. note::
