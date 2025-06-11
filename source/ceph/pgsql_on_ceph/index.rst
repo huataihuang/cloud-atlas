@@ -1,16 +1,13 @@
-.. _freebsd_container:
+.. _pgsql_on_ceph:
 
 =================================
-FreeBSD容器
+Ceph 上运行PostgreSQL
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   jail/index
-   bastille/index
-   runj/index
-   run_linux_containers_on_freebsd.rst
+   pgsql_on_ceph_arch.rst
 
 .. only::  subproject and html
 

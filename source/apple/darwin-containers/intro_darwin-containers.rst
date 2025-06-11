@@ -4,6 +4,10 @@
 Darwin Containers简介
 =========================
 
+.. note::
+
+   2025年WWDC开幕前，Apple开源了 `GigHub: apple/container <https://github.com/apple/container>`_ ，对标Windows WSL，在Apple Silicon上的 :ref:`macos` 中引入了创建和运行Linux容器的轻量级虚拟机。不过，很遗憾，这不是容器化的macOS，所以 ``Darwin Containers`` 依然有研究和发展的价值。
+
 我在实践 :ref:`freebsd_jail` 时，忽然想到我不断跨平台迁移，其中 :ref:`macos` 使用的FreeBSD作为基础的 ``Darwin`` 核心，是不是也具有 Jail 技术，能够轻量级构建容器化运行环境，方便我开发和学习呢？
 
 还真有这样的技术， :ref:`darwin-jail` ，作为 ``Darwin Containers`` 的子项目，提供了在macOS中运行Jail的能力。进一步，这个 ``Darwin Containers`` 项目则原生在Darwin环境提供了部署运行容器的能力。

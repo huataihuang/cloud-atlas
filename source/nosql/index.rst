@@ -9,6 +9,8 @@ NoSQL
 
    intro_nosql.rst
    cassandra/index
+   redis/index
+   clickhouse/index
 
 .. only::  subproject and html
 
