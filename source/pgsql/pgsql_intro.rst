@@ -4,6 +4,20 @@
 PostgreSQL简介
 =====================
 
+RDB(relational database)
+===========================
+
+关系数据库(relation database, RDB)是建立在关系模型基础伤的数据库，借助于集合袋鼠等数学概念和方法来处理数据库中大数据。关系模型是IBM公司的E. F. Codd于1970年在「A Relational Model of Data for Large Shared Data Banks」论文中提出，奠定了现代数据库的基础。
+
+结构化查询语言(Structured Query Language, :ref:`sql` )是大多数RDBMS提供的查询和更新数据库的语言。
+
+RDB是数据存储和检索的基石，虽然不断有各种 :ref:`nosql` (在特定应用场景)尝试替代RDB，但是RDBMS也不断吸收新的技术自我迭代发展，例如PostgreSQL，成为更为全面和强大的数据管理系统。
+
+.. note::
+
+   油管博主"原子能": `为什么关系数据库的挑战者都没有好下场【让编程再次伟大#25】 <https://www.youtube.com/watch?v=IUUpxfa1SSw>`_
+
+
 PostgreSQL历史渊源
 =====================
 
@@ -21,12 +35,12 @@ PostgreSQL支持大部份SQL标准并提供了很多现代特性，并且提供�
    - 很多PostgreSQL的内置函数使用了 ``pg_XXXX`` ，所以 ``pg`` 可以看作是 ``Postgres`` 的缩写，而 ``POSTGRES`` 是 PostgreSQL 的前身和继承
    - 虽然 ``psql`` 是 PostgreSQL 的客户端名字，但是单字母 ``p`` 用作函数缩写部分不容易区分
 
+PostgreSQL vs. MySQL
+=======================
+
 .. note::
 
    PostgreSQL和MySQL对比，可以参考知乎问答 `PostgreSQL 与 MySQL 相比，优势何在？ <https://www.zhihu.com/question/20010554>`_
-
-PostgreSQL vs. MySQL
-=======================
 
 作为开源领域最著名的两大RDBMS，PostgreSQL和MySQL各有千秋：
 

@@ -27,6 +27,19 @@ Ceph存储集群的组成:
 
 Ceph是使用逻辑资源池的对象来存储数据。通过 ``CRUSH`` 算法，Ceph可以计算出在哪里存储对象，以及计算出使用哪个Ceph OSD服务来存储 ``palcement group`` 。这个 ``CRUSH`` 算法确保了Ceph存储集群伸缩性，重平衡以及动态恢复。
 
+Kubernetes
+===============
+
+随着容器编排技术发展， :ref:`kubernetes` 成为主流，也促进了分布式存储的发展。Ceph也与时俱进，成为 :ref:`openstack` 和 :ref:`kubernetes` 的核心存储的选择。 :ref:`rook` 为Kubernetes提供了更好部署和管理Ceph的能力。
+
+数据库
+========
+
+.. warning::
+
+   构想，待实践
+
+
 进一步
 =========
 

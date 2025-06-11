@@ -97,9 +97,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    sqlite/index
    mysql/index
    pgsql/index
-   clickhouse/index
    nosql/index
-   redis/index
    network/index
    infra_service/index
    infra_search/index

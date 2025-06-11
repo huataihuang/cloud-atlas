@@ -1,16 +1,13 @@
-.. _freebsd_container:
+.. _comfyui:
 
 =================================
-FreeBSD容器
+ComfyUI
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   jail/index
-   bastille/index
-   runj/index
-   run_linux_containers_on_freebsd.rst
+   intro_comfyui.rst
 
 .. only::  subproject and html
 

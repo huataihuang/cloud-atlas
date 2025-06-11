@@ -11,6 +11,9 @@ Docusaurus
    using_docusaurus.rst
    docusaurus_multi_docs.rst
    docusaurus_i18n.rst
+   docusaurus_code_blocks.rst
+   docusaurus_url.rst
+   docusaurus_markdown.rst
 
 .. only::  subproject and html
 

@@ -28,8 +28,8 @@ Ceph
    debug/index
    arm/index
    arch/index
+   pgsql_on_ceph/index
    tunning/index
-   ../kubernetes/storage/rook/index
 
 .. only::  subproject and html
 

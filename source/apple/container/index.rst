@@ -1,16 +1,13 @@
-.. _freebsd_container:
+.. _apple_container:
 
 =================================
-FreeBSD容器
+Apple container
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   jail/index
-   bastille/index
-   runj/index
-   run_linux_containers_on_freebsd.rst
+   apple_container_startup.rst
 
 .. only::  subproject and html
 
