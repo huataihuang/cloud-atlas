@@ -24,3 +24,4 @@ FreeBSD代理配置
 =======
 
 - `FreeBSD 101 hacks: Configure proxy <https://nanxiao.gitbooks.io/freebsd-101-hacks/content/posts/configure-proxy.html>`_
+- `Update FreeBSD Using Proxy Server (csup / portsnap proxy update) <https://www.cyberciti.biz/faq/updating-freebsd-source-tree-via-proxyserver/>`_ 提到了使用 ``prtunnel`` 来构建一个 tunnel，这样即使软件不支持代理也可以通过 ``prtunnel`` 实现网络流量走代理。不过这个方法我还没有实践，记录备用。

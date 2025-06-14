@@ -73,6 +73,16 @@ sed
    dir="01GQZ0NMD4790X3ZAEG6PKVXE7"
    cat sync_template | sed "s/DATA/${dir}/g"
 
+FreeBSD平台的sed
+======================
+
+在BSD系统(包括 :ref:`macos` )， ``sed`` 的参数 ``-i`` 需要一个后缀，不能和linux平台一样 ``-i`` 参数是可选的。所以不能直接使用 ``-i`` 参数表示直接修改文件，而是要先给予一个 ``''`` 空白。另外，搜索和替换使用的是 ``@`` 符号，所以以下是一个案例:
+
+.. literalinclude:: sed/bsd_sed
+   :caption: BSD平台的sed案例
+
+这样就能够把 ``line`` 单词替换成 ``new`` 单词
+
 参考
 ========
 
@@ -80,3 +90,4 @@ sed
 - `Linux sed Command: How To Use the Stream Editor <https://phoenixnap.com/kb/linux-sed>`_
 - `sed, a stream editor <https://www.gnu.org/software/sed/manual/sed.html>`_ gnu sed官方手册，最全面的参考
 - `Removing the Last Character of a File <https://www.baeldung.com/linux/remove-last-char-in-file>`_
+- `sed -i on FreeBSD [duplicate] <https://stackoverflow.com/questions/49934684/sed-i-on-freebsd>`_
