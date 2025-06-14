@@ -15,8 +15,10 @@ FreeBSD Jail
    service_jail.rst
    vnet_jail.rst
    linux_jail.rst
+   vnet_thin_jail.rst
    jail_admin.rst
    jail_destroy.rst
+   jail_upgrade.rst
    jail_init.rst
    linux_jail_init.rst
    share_folder_between_jails.rst

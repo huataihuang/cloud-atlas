@@ -76,7 +76,36 @@ FreeBSD提供了一个名为 ``freebsd-update`` 的工具来提供安全补丁�
 .. literalinclude:: freebsd_update_upgrade/freebsd-update_install_output_again
    :caption: 提示信息需要重建第三方程序
 
+RELEASE升级问题排查
+======================
+
+我在尝试 ``14.2-RELEASE`` 升级版本到 ``14.3-RELEASE`` 的时候总是遇到文件 ``fetch`` 错误:
+
+.. literalinclude:: freebsd_update_upgrade/fetch_error
+   :caption: 版本升级时fetch错误
+   :emphasize-lines: 17-29
+
+最初我考虑是受到GFW影响，所以我尝试 :ref:`freebsd_proxy` 设置，但是报错依旧。
+
+我又尝试了 `FreeBSD-update: gunzip: (stdin): unexpected end of file metadata is corrupt error <https://www.nixcraft.com/t/freebsd-update-gunzip-stdin-unexpected-end-of-file-metadata-is-corrupt-error/3784>`_ 介绍的两种方法:
+
+- 先尝试清理掉本地已经下载的缓存文件:
+
+.. literalinclude:: freebsd_update_upgrade/clean_update_cache
+   :caption: 清理本地缓存的升级文件
+
+但是依然报错 ``gunzip: (stdin): unexpected end of file e02141215d8bac9351822518f491b7adb8629d379da8d6778d4c5a2b6f34affb has incorrect hash.``
+
+- 尝试第二个方法是修订 ``/etc/freebsd-update.conf`` ，将 ``ServerName`` 调整为 ``update2.FreeBSD.org`` 服务器:
+
+.. literalinclude:: freebsd_update_upgrade/freebsd-update.conf
+   :caption: 修订升级服务器配置
+   :emphasize-lines: 6
+
+然后重新执行RELEASE升级。实践验证，方法二成功
+
 参考
 ======
 
 - `FreeBSD Handbook: Chapter 26. Updating and Upgrading FreeBSD <https://docs.freebsd.org/en/books/handbook/cutting-edge/>`_
+- `FreeBSD-update: gunzip: (stdin): unexpected end of file metadata is corrupt error <https://www.nixcraft.com/t/freebsd-update-gunzip-stdin-unexpected-end-of-file-metadata-is-corrupt-error/3784>`_

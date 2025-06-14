@@ -59,7 +59,7 @@ cockpit-pcp
 
 这里应该也可以手工安装redis:
 
-.. literalinclude:: ../../../redis/install_redis_startup/apt_install_redis
+.. literalinclude:: ../../../nosql/redis/install_redis_startup/apt_install_redis
    :caption: 在Debian/Ubuntu环境安装redis
 
 不过，我发现如果没有安装redis也能通过 ``systemctl start pmproxy.service`` ，但是配置可能不正确，所以建议先使用平台来激活 ``pmproxy`` 然后检查配置用于后续批量部署
