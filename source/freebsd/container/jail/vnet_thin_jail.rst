@@ -131,6 +131,20 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 .. literalinclude:: vnet_thin_jail/link
    :caption: 创建软连接
 
+.. warning::
+
+   我在实践NullFS的Thin Jails，发现移动到 ``skeleton`` 目录下的 ``/etc`` 目录有一个子目录 ``/etc/ssl/certs`` 。这个证书目录下的文件是软链接到 ``../../../usr/share/certs/trusted/`` 目录下的证书文件。由于 ``/etc`` 目录移动后会导致这些相对链接失效，所以需要有一个修复软链接的步骤。
+
+   如果不执行这个证书软链接修复，则后续host主机上执行 ``pkg -j <jail_name> install <package_name>`` 会报错；而在jail中执行 ``pkg`` 命令会显示证书相关错误:
+
+   .. literalinclude:: vnet_thin_jail/pkg_error
+      :caption: 在jail中执行 ``pkg`` 命令会显示证书相关错误
+
+- **在host上执行** 修复 ``/etc/ssl/certs`` 目录下证书文件软链接
+
+.. literalinclude:: vnet_thin_jail/fix_link.sh
+   :caption: 修复软链接
+
 - 在 ``skeleton`` 就绪之后，需要将数据复制到 jail 目录(如果是UFS文件系统)，对于ZFS则非常方便使用快照:
 
 .. literalinclude:: vnet_thin_jail/snapshot
