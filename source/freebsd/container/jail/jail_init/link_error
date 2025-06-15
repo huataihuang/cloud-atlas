@@ -1,0 +1,64 @@
+root@dev:/etc/ssl/certs # ls -lh
+total 75
+lrwxr-xr-x  1 root wheel   56B Jun  6 16:33 002c0b4f.0 -> ../../../usr/share/certs/trusted/GlobalSign_Root_R46.pem
+lrwxr-xr-x  1 root wheel   57B Jun  6 16:33 0179095f.0 -> ../../../usr/share/certs/trusted/BJCA_Global_Root_CA1.pem
+...
+lrwxr-xr-x  1 root wheel   82B Jun  6 16:33 ff34af3f.0 -> ../../../usr/share/certs/trusted/TUBITAK_Kamu_SM_SSL_Kok_Sertifikasi_-_Surum_1.pem
+lrwxr-xr-x  1 root wheel   62B Jun  6 16:33 ffdd40f9.0 -> ../../../usr/share/certs/trusted/D-TRUST_BR_Root_CA_2_2023.pem
+
+root@dev:/etc/ssl/certs # ls -lh ../../../usr/share/certs/trusted/D-TRUST_BR_Root_CA_2_2023.pem
+ls: ../../../usr/share/certs/trusted/D-TRUST_BR_Root_CA_2_2023.pem: No such file or directory
+
+root@dev:/etc/ssl/certs # ls -lh ../../../
+total 51
+drwxr-xr-x  30 root wheel  106B Jun 15 17:27 etc
+drwxr-xr-x   2 root wheel    2B Jun 15 17:25 home
+drwxr-x---   2 root wheel    8B Jun 15 17:58 root
+drwxrwxrwt   6 root wheel    6B Jun 15 17:28 tmp
+drwxr-xr-x   3 root wheel    3B Jun 15 17:26 usr
+drwxr-xr-x  24 root wheel   24B Jun 15 17:27 var
+
+root@dev:/etc/ssl/certs # ls -lh ../../../usr/share
+ls: ../../../usr/share: No such file or directory
+
+root@dev:/etc/ssl/certs # ls -lh ../../../usr
+total 1
+drwxr-xr-x  2 root wheel    2B Jun  6 15:31 local
+
+root@dev:/etc/ssl/certs # cd ../../../
+root@dev:/ # ls -lh
+total 88
+-rw-r--r--   1 root wheel  1.0K Jun  6 15:40 .cshrc
+-rw-r--r--   1 root wheel  495B Jun  6 15:39 .profile
+-r--r--r--   1 root wheel  6.0K Jun  6 16:17 COPYRIGHT
+drwxr-xr-x   2 root wheel   49B Jun  6 15:40 bin
+drwxr-xr-x  14 root wheel   69B Jun  6 16:17 boot
+dr-xr-xr-x  10 root wheel  512B Jun 15 17:27 dev
+lrwxr-xr-x   1 root wheel   12B Jun 15 17:27 etc -> skeleton/etc
+lrwxr-xr-x   1 root wheel   13B Jun 15 17:27 home -> skeleton/home
+drwxr-xr-x   4 root wheel   78B Jun  6 15:55 lib
+drwxr-xr-x   3 root wheel    5B Jun  6 15:38 libexec
+drwxr-xr-x   2 root wheel    2B Jun  6 15:31 media
+drwxr-xr-x   2 root wheel    2B Jun  6 15:31 mnt
+drwxr-xr-x   2 root wheel    2B Jun  6 15:31 net
+dr-xr-xr-x   2 root wheel    2B Jun  6 15:31 proc
+drwxr-xr-x   2 root wheel  150B Jun  6 15:51 rescue
+lrwxr-xr-x   1 root wheel   13B Jun 15 17:27 root -> skeleton/root
+drwxr-xr-x   2 root wheel  150B Jun  6 16:03 sbin
+drwxr-xr-x   8 root wheel    8B Jun 15 17:26 skeleton
+lrwxr-xr-x   1 root wheel   11B Jun  6 15:31 sys -> usr/src/sys
+lrwxr-xr-x   1 root wheel   12B Jun 15 17:27 tmp -> skeleton/tmp
+drwxr-xr-x  13 root wheel   14B Jun 15 17:27 usr
+lrwxr-xr-x   1 root wheel   12B Jun 15 17:27 var -> skeleton/var
+drwxr-xr-x  24 root wheel   24B Jun  6 15:31 var.bak
+
+明白了，原来是 14.2-RELEASE-base/etc 被移动到 14.2--RELEASE-skeleton/etc
+而这个 skeleton 被挂载到 /skeleton 目录，这导致 /etc 目录变成了 /skeleton/etc
+这样对于 /etc/ssl/certs 目录就变成了 /skeleton/etc/ssl/certs 目录
+此时 /skeleton/etc/ssl/certs 目录原先 ../../../ 表示的根目录变成了 /skeleton 目录，就找不到对应 /usr/share 目录
+需要修订这个相对软连接，改为绝对路径的软连接
+
+root@dev:/ # cd /
+root@dev:/ # cd skeleton/etc/ssl/certs/
+root@dev:/skeleton/etc/ssl/certs # pwd
+/skeleton/etc/ssl/certs
