@@ -92,6 +92,14 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 .. literalinclude:: vnet_thin_jail/update
    :caption: 更新模板补丁
 
+这里有一个疑惑，我的host主机 :ref:`freebsd_update_upgrade` 从 ``14.2-RELEASE`` 升级到 ``14.3-RELEASE`` ，这时我使用 ``$bsd_ver-RELEASE/base.txz`` 下载的 ``14.2-RELEASE/base.txz`` ，解压缩以后使用上面的命令进行更新，输出的提示信息
+
+.. literalinclude:: vnet_thin_jail/update_output
+   :caption: 更新模版补丁时候的输出信息显示是 ``14.3-RELEASE-p0``
+   :emphasize-lines: 3,8
+
+可以看到host主机对模版更新是自动按照 ``14.3-RELEASE`` 的元数据进行，而不是模版的 ``14.2-RELEASE`` 。那么jail模版现在是 ``14.3-RELEASE`` 么？
+
 - 创建一个特定数据集 ``skeleton`` (**骨骼**) ，这个 "骨骼" ``skeleton`` 命名非常形象，用意就是构建特殊的支持大量thin jial的框架底座
 
 .. literalinclude:: vnet_thin_jail/zfs_create
@@ -104,15 +112,19 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 
 .. note::
 
-   执行 ``mv /$jail_zfs/templates/$bsd_ver-RELEASE-base/var /$jail_zfs/templates/$bsd_ver-RELEASE-skeleton/var`` 有如下报错:
+   按照handbook，是执行 ``mv /$jail_zfs/templates/$bsd_ver-RELEASE-base/var /$jail_zfs/templates/$bsd_ver-RELEASE-skeleton/var`` 有如下报错:
 
    .. literalinclude:: vnet_thin_jail/skeleton_link_error
       :caption: 报错
 
-   这是因为  ``var/empty`` 目录没有权限删除: ``mv var/empty: Operation not permitted`` ，我采用以下workround绕过:
+   这是因为  ``var/empty`` 目录没有权限删除: ``mv var/empty: Operation not permitted`` ，所以我采用 ``rsync`` 方法workround绕过(见上文)。
+
+   我之前有一个错误的步骤，我先采用了 ``mv var`` 报错以后，再使用 ``mv var var.bak`` 来修复，也就是执行了如下命令:
 
    .. literalinclude:: vnet_thin_jail/skeleton_link_fix
-      :caption: 修复
+      :caption: **错误的mv方法** 我发现目标var目录损坏了
+
+   所以必须使用类似 ``rsync`` 的命令先复制好var目录，然后再移除原来的var方便后续建立link
 
 - 执行以下命令创建软连接:
 
