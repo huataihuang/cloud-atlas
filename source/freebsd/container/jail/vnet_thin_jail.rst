@@ -145,6 +145,30 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 .. literalinclude:: vnet_thin_jail/fix_link.sh
    :caption: 修复软链接
 
+.. note::
+
+   我最初是在运行的NullFS thin jail上执行 :ref:`jail_init` 发现报错:
+
+   .. literalinclude:: jail_init/install_error
+      :caption: 安装报错
+
+   在jail内部尝试运行 ``pkg install sudo`` ，发现需要更新 ``pkg`` ，但是似乎 ``/usr/src`` 目录导致错误:
+
+   .. literalinclude:: jail_init/install_error_in_jail
+      :caption: 在jail内部安装报错
+
+   原来是 ``NullFS`` 的Thin Jail构建的移动 ``/etc`` 目录到 ``skeleton/etc`` 之后，所有在 ``/etc/ssl/certs`` 目录下原先的软连接到 ``../../../usr/share/certs/trusted/`` 目录下的证书的连接全部失效了。非常奇怪:
+
+   .. literalinclude:: jail_init/link_error
+      :caption: ``/etc/ssl/certs`` 目录下软连接失效
+
+   原因找到了，是因为原先 ``/etc/ssl/certs/`` 目录下的软链接都是相对链接，当 ``/etc`` 目录被移动到 ``skeleton`` 目录下之后，这个相对软链接就失效了。所以就有了上述修复脚本来完成软链接修正。
+
+   修复以后 ``skeleton/etc/ssl/cets/`` 目录下的软链接应该类似如下:
+
+   .. literalinclude:: jail_init/link_ok
+      :caption: 修复以后的软链接
+
 - 在 ``skeleton`` 就绪之后，需要将数据复制到 jail 目录(如果是UFS文件系统)，对于ZFS则非常方便使用快照:
 
 .. literalinclude:: vnet_thin_jail/snapshot
@@ -173,6 +197,24 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 
 .. literalinclude:: vnet_thin_jail/jail.conf
    :caption: 所有jail使用的公共配置部分 ``/etc/jail.conf``
+
+.. note::
+
+   我实践发现，上述 ``jail.conf`` 配置中需要添加:
+
+   .. literalinclude:: vnet_thin_jail/jail.conf_allow.mount
+      :caption: 在jail.conf中添加 ``allow.mount`` 权限
+
+   如果没有添加上述3行配置，那么jail中 ``df -h`` 就只能看到根目录:
+
+   .. literalinclude:: vnet_thin_jail/jail.conf_no_allow.mount_df
+      :caption: **没有** 配置配置允许挂载的时候
+
+   而添加了允许挂载的权限之后才真的看到 ``devfs`` 被挂载上，而且 ``/skeleton`` 也被挂载上
+
+   .. literalinclude:: vnet_thin_jail/jail.conf_allow.mount_df
+      :caption: 配置配置允许挂载的时候
+      :emphasize-lines: 3,4
 
 - ``/etc/jail.conf.d/dev.conf`` 独立配置部分:
 

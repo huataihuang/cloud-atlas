@@ -10,6 +10,7 @@ FreeBSD
    intro_freebsd.rst
    startup/index
    admin/index
+   program/index
    build/index
    desktop/index
    network/index
