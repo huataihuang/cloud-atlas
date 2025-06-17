@@ -4,6 +4,17 @@
 Node.js开发环境
 =====================
 
+发行版安装
+============
+
+- :ref:`freebsd` 提供了 ``pkg`` 和 ``prots`` (源代码)两种安装方式
+
+.. literalinclude:: nodejs_dev_env/freebsd_install_node
+   :caption: 在FreeBS上安装
+
+nvm
+========
+
 `Node Version Manager (nvm) <https://github.com/nvm-sh/nvm>`_ 是 node.js 的版本管理器，可以工作在任何 POSIX兼容的shell环境，运行于unix, macOS 和 Windoes WSL。
 
 这个工具可以管理和切换 Node.js 版本，以便测试和开发。 （例如，我在使用 `hexo <https://hexo.io>`_ 作为自己的blog撰写平台，就遇到过部分插件对nodejs版本的兼容性要求）
