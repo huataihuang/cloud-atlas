@@ -101,6 +101,25 @@ ZFS数据集可以委托给Jail使用:
    .. literalinclude:: zfs-jail/zfs_mount_no_privileges
       :caption: 在jail中挂载zfs卷集没有权限
 
+- 重新启动 ``dev`` jail之后，就可以在该 jail 内部执行ZFS挂载: ``zfs mount zdata/docs``
+
+自动化ZFS挂载
+---------------
+
+上述执行步骤完整展示了如何在jail内部使用一个ZFS数据集，但是整个过程是纯手工命令完成的。如何在jail启动时自动完成ZFS卷集的挂载呢？
+
+- 修改 ``/dev/jail.conf.d/dev.conf`` :
+
+.. literalinclude:: zfs-jail/dev.conf
+   :caption: 配置 ``dev`` jail 启动时自动挂载分配的ZFS dataset
+   :emphasize-lines: 10-14
+
+这样启动 ``dev`` jail后，通过 ``jexec dev`` 进入jail，检查 ``df -h`` 就可以看到这个 ``zdata/docs`` 被自动挂载到指定的 ``/skeleton/home/docs`` 目录:
+
+.. literalinclude:: zfs-jail/df_zfs
+   :caption: 自动挂载ZFS dataset之后的 ``df -h`` 状态
+   :emphasize-lines: 5
+
 参考
 =========
 
