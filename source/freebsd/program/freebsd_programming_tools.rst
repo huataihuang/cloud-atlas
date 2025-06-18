@@ -39,3 +39,4 @@ FreeBSD默认提供 :ref:`clang` ``llvm`` ，所以不需要 ``gcc`` 就可以�
 ======
 
 - `Chapter 2. Programming Tools <https://docs.freebsd.org/en/books/developers-handbook/tools/>`_
+- `How to Install Development Tools (GCC, CMake, etc.) on FreeBSD Operating System <https://www.siberoloji.com/how-to-install-development-tools-gcc-cmake-etc-on-freebsd/>`_
