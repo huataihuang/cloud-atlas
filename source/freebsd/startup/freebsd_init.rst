@@ -28,7 +28,7 @@ FreeBSD初始化
 创建admin账号以及设置sudo
 ============================
 
-.. literalinclude:: ../container/jail/jail_init/user
+.. literalinclude:: freebsd_init/user
    :caption: 创建admin
 
 桌面程序安装

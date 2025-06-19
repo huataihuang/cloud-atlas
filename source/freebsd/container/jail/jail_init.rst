@@ -12,33 +12,38 @@ Jail环境初始化
 
    所有需要安装的软件包名字或版本可以通过 ``pkg search XXX`` 关键字来找到
 
-安装sudo
-===========
+针对jail的安装命令是: ``pkg -j <jail_name> install <package_name_list>`` ，所以为了方便执行，可以先设置 ``alias`` :
 
-为方便进入容器，并且以 ``admin`` 普通用户进入，为后续开发环境构建提供通用平台
+.. literalinclude:: jail_init/alias
+   :caption: 设置alias
 
-- jail中需要安装 ``sudo``
-
-.. literalinclude:: jail_init/sudo
-   :caption: 为 ``dev`` jail 安装sudo
-
-ssh初始化
-=============
-
-- 在 ``dev`` jail中创建用户组和用户 admin:
-
-.. literalinclude:: jail_init/user
-   :caption: 在jail内部创建admin
-
-在 ``dev`` 主机的用户 ``admin`` 添加ssh key，现在就可以像普通虚拟机一样远程ssh登录到容器内部了
+这样本文后续执行的安装命令就可以直接借用 :ref:`freebsd_init` 以及 :ref:`freebsd_programming_tools` 中相对应的命令。
 
 devops初始化
 ===============
 
 安装必要运维工具:
 
-.. literalinclude:: jail_init/devops
+.. literalinclude:: ../../startup/freebsd_init/devops
    :caption: 安装运维工具
+
+ssh初始化
+=============
+
+- 在 ``dev`` jail中创建用户组和用户 admin:
+
+.. literalinclude:: ../../startup/freebsd_init/user
+   :caption: 在jail内部创建admin
+
+在 ``dev`` 主机的用户 ``admin`` 添加ssh key，现在就可以像普通虚拟机一样远程ssh登录到容器内部了
+
+部署开发环境
+===============
+
+- 在 ``dev`` jail中安装所有使用的开发工具:
+
+.. literalinclude:: ../../program/freebsd_programming_tools/install
+   :caption: 安装开发工具
 
 构建 :ref:`nvim_ide`
 =======================
