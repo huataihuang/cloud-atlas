@@ -10,6 +10,7 @@ FreeBSD存储
    freebsd_disk_startup.rst
    gpart.rst
    freebsd_apfs.rst
+   freebsd_hfs.rst
 
 .. only::  subproject and html
 
