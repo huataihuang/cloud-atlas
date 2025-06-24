@@ -21,6 +21,7 @@ Bash
    bash_multi_variable_assigment.rst
    convert_csv_to_json.rst
    remove_last_n_characters_from_a_string_in_bash.rst
+   remove_add_characters.rst
    shell_array.rst
    suspend_process.rst
 

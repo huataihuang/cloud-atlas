@@ -47,14 +47,14 @@ Stripe (RAID-0)
 
 当 ``zpool create`` 时没有指定 ``zpool`` 的类型时，对于多个磁盘会自动采用 ``Stripe`` 条带化模式，也就是将数据分片存放到多个磁盘上，但是不提供任何数据冗余存储，相当于 ``RAID-0``
 
-.. literalinclude:: freebsd_zfs_raidz/zpool_create_zdata
+.. literalinclude:: freebsd_zfs_stripe/zpool_create_zdata
    :caption: 创建条带化(Stripe)类型的Zpool
 
 说明:
 
 - ``-f`` 参数是因为 :ref:`gpart` 划分分区时设置了磁盘分区类型为 ``freebsd-zfs`` ，看起来会自动添加默认已经存在的 ``zroot`` zpool，所以要使用 ``-f`` 参数覆盖强制
 
-.. literalinclude:: freebsd_zfs_raidz/zpool_create_zdata_error
+.. literalinclude:: freebsd_zfs_stripe/zpool_create_zdata_error
    :caption: 创建zpool报错
 
 - ``-o ashift=12`` 的 ``ashift`` 属性设置为 **12** ，以对应 ``4KiB`` (4096字节)块大小。通常对于HDD和SSD，能够获得较好的性能和兼容性。底层是 ``512字节`` 一个扇区，所以 ``2^12=4096`` 就能够对齐和整块读写磁盘。如果没有指定这个 ``ashift`` 参数，ZFS会自动检测 ``ashift`` ，如果检测失败就会默认使用 ``ashift=9`` ，这会导致性能损失。这个 ``ashift`` 参数一旦设置，不能修改
@@ -66,12 +66,12 @@ Stripe (RAID-0)
 
 - 检查 ``zpool`` :
 
-.. literalinclude:: freebsd_zfs_raidz/zpool_list
+.. literalinclude:: freebsd_zfs_stripe/zpool_list
    :caption: 检查zpool磁盘情况
 
 可以看到 ``zdata`` zpool由 ``4个`` 磁盘分区组成
 
-.. literalinclude:: freebsd_zfs_raidz/zpool_list_output
+.. literalinclude:: freebsd_zfs_stripe/zpool_list_output
    :caption: 检查zpool磁盘情况
    :emphasize-lines: 3-6
 

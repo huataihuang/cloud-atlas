@@ -18,12 +18,12 @@ Jail层设置
 ssh初始化
 -----------
 
-jail中需要安装 ``sudo``
+jail中需要安装 ``sudo`` ，这里采用 :ref:`freebsd_init` 中步骤，安装 :ref:`devops` 相关工具
 
-.. literalinclude:: jail_init/sudo
+.. literalinclude:: ../../startup/freebsd_init/devops
    :caption: 为 ``d2l`` jail 安装sudo
 
-.. literalinclude:: jail_init/user
+.. literalinclude:: ../../startup/freebsd_init/user
    :caption: 在jail内部创建admin
 
 Linux层设置
