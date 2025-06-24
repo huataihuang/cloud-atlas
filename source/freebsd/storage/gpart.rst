@@ -126,7 +126,7 @@ gpart
 后续工作
 =========
 
-- :ref:`freebsd_zfs_raidz`
+- :ref:`freebsd_zfs_stripe`
 
 参考
 ======

@@ -34,7 +34,7 @@ FreeBSD管理用户帐号的命令和Linux有些不同，这里做一些总结�
 
 ``pw`` 是FreeBSD环境超级强大的帐号管理工具，可以用来添加组，添加用户等等:
 
-.. literalinclude:: ../container/jail/jail_init/user
+.. literalinclude:: ../startup/freebsd_init/user
    :caption: 在jail内部创建admin
 
 参考
