@@ -32,6 +32,7 @@ ZFS管理的主要手册可以参考:
    zfs_snapshot.rst
    zfs_clone.rst
    zfs_nfs.rst
+   freebsd_zfs_sharenfs.rst
    zfs_iscsi.rst
    zfs_zcloud_data_near.rst
    zfs_replication.rst
