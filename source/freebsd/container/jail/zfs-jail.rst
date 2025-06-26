@@ -20,7 +20,7 @@ ZFS数据集可以委托给Jail使用:
 - 创建 ``zdata/docs`` (可选设置挂载目录)
 
 .. literalinclude:: zfs-jail/create_zfs
-   :caption: 创建挂载到 ``/docs`` 目录的卷集 ``zdata/docs``
+   :caption: 创建卷集 ``zdata/docs``
 
 此时在host主机上执行 ``df -h`` 可以看到一个被挂载到 ``/docs`` 目录上的ZFS卷集:
 

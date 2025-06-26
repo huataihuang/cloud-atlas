@@ -25,6 +25,8 @@
 虚拟化服务器分布
 =================
 
+- xcloud集群的主机分配
+
 .. csv-table:: xcloud服务器部署多层虚拟化虚拟机分配
    :file: priv_cloud_infra_2025_xcloud/hosts.csv
    :widths: 30, 30, 40
