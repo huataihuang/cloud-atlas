@@ -14,6 +14,7 @@ FreeBSD
    build/index
    desktop/index
    network/index
+   network_server/index
    storage/index
    virtual/index
    container/index
