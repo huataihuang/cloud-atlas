@@ -1,14 +1,13 @@
-.. _remix:
+.. _freebsd_network_server:
 
 =================================
-Remix.js
+FreeBSD网络服务
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   nextjs_vs_remix.rst
-   remix_quickstart.rst
+   freebsd_samba.rst
 
 .. only::  subproject and html
 

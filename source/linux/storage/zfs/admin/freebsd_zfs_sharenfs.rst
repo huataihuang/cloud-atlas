@@ -106,6 +106,128 @@ docker容器
 
    需要保证NFS客户端和NFS服务端的用户 ``uid/gid`` 一致，这样才能正常读写共享文件。这里的用户是 ``admin`` ，其NFS客户端和服务器端都采用了相同的 ``uid/gid``
 
+异常排查
+==========
+
+我重启了FreeBSD服务器和树莓派(Raspberry Pi OS, :ref:`debian` 12)，结果发现客户端再次无法挂载NFS:
+
+.. literalinclude:: freebsd_zfs_sharenfs/nfs_protocol_error
+   :caption: 无法挂载NFS服务器，提示协议不支持
+
+我了检查服务器已经启动了 ``nfsd`` ，并且ZFS的 ``sharenfs`` 显示如下 ``zfs get all /zdata/docs | grep -i nfs`` :
+
+.. literalinclude:: freebsd_zfs_sharenfs/zfs_get_sharenfs
+   :caption: 检查ZFS卷集的 ``sharenfs`` 设置
+
+输出显示当前是非常简单的 ``on`` 状态:
+
+.. literalinclude:: freebsd_zfs_sharenfs/zfs_get_sharenfs_output
+   :caption: 显示ZFS卷集的 ``sharenfs`` 设置为 ``on`` 看起来没有问题
+
+尝试详细信息输出:
+
+.. literalinclude:: freebsd_zfs_sharenfs/mount_-v
+   :caption:  执行 ``mount -v`` 检查输出信息
+
+输出信息如下:
+
+.. literalinclude:: freebsd_zfs_sharenfs/mount_-v_output
+   :caption:  执行 ``mount -v`` 检查输出信息显示v4协议不支持，v3协议portmap查询失败
+
+为何客户端尝试v4和v3协议都不成功？
+
+- 在Linux的NFS客户端执行 ``rpcinfo`` 命令检查远程服务的nfs输出协议情况:
+
+.. literalinclude:: freebsd_zfs_sharenfs/rpcinfo
+   :caption: 检查NFS协议
+
+输出信息:
+
+.. literalinclude:: freebsd_zfs_sharenfs/rpcinfo_output
+   :caption: 检查NFS协议
+   :emphasize-lines: 2,3,6,7
+
+可以看到服务器是支持 ``nfsv3`` 和 ``nfsv2`` 的 ``UDP`` 和 ``TCP`` 协议的(为何没有 ``nfsv4`` ?)
+
+- 在Linux的NFS客户端执行 ``showmount`` 检查:
+
+.. literalinclude:: freebsd_zfs_sharenfs/showmount
+   :caption: 在客户端检查 ``showmount``
+
+输出显示
+
+.. literalinclude:: freebsd_zfs_sharenfs/showmount_output
+   :caption: 在客户端检查 ``showmount`` 显示没有注册mountd服务
+
+奇怪了
+
+我检查了FreeBSD服务器的NFS启动配置 ``/etc/rc.conf`` :
+
+.. literalinclude:: freebsd_zfs_sharenfs/rc.conf
+   :caption: 配置 ``/etc/rc.conf`` 启用NFS
+   :emphasize-lines: 2
+
+明明配置是激活 ``mountd`` 的
+
+- 在服务器上检查NFS相关服务，发现 ``mountd`` 服务果然没有启动:
+
+.. literalinclude:: freebsd_zfs_sharenfs/nfs_services
+   :caption: 检查NFS相关服务
+   :emphasize-lines: 4
+
+我检查了之前的执行步骤，发现之前在服务器上执行启动 ``nfsd`` 时候，有一个 ``service mountd reload`` 动作:
+
+.. literalinclude:: freebsd_zfs_sharenfs/start_nfs
+   :caption: 启动NFS服务
+   :emphasize-lines: 2
+
+那么我再次执行 ``service mountd reload`` ，发现这个命令实际上要求 ``mountd`` 已经运行才行，现在我执行这条命令提示报错:
+
+.. literalinclude:: freebsd_zfs_sharenfs/mountd_reload_error
+   :caption: 执行 ``service mountd reload`` 报错
+
+我尝试手工启动 ``mountd`` 服务:
+
+.. literalinclude:: freebsd_zfs_sharenfs/start_mountd
+   :caption: 手工启动 ``mountd``
+
+发现原来 ``mountd`` 必须读取 ``/etc/exports`` 配置文件才能启动，当前没有这个文件，则拒绝启动:
+
+.. literalinclude:: freebsd_zfs_sharenfs/start_mountd_error
+   :caption: 手工启动 ``mountd`` 报错
+
+按照ZFS手册，似乎是不需要配置 ``/etc/exports`` 配置就可以，所以我先尝试 ``touch`` 一个空配置文件，果然可以启动 ``mountd`` 服务了:
+
+.. literalinclude:: freebsd_zfs_sharenfs/exports_mountd
+   :caption: 创建 ``/etc/exports`` 空配置文件以后就能正常启动 ``mountd``
+
+神奇了，现在再次在Linux NFS客户端执行 ``showmount`` :
+
+.. literalinclude:: freebsd_zfs_sharenfs/showmount
+   :caption: 在客户端检查 ``showmount``
+
+就能够看到FreeBSD正常输出了NFS:
+
+.. literalinclude:: freebsd_zfs_sharenfs/showmount_ok
+   :caption: 在客户端检查 ``showmount`` 终于看到正常的NFS服务输出信息
+
+- 现在再次手工 ``mount -v`` :
+
+.. literalinclude:: freebsd_zfs_sharenfs/mount_-v
+   :caption:  执行 ``mount -v`` 检查输出信息
+
+**amazing** 终于成功了，输出信息如下:
+
+.. literalinclude:: freebsd_zfs_sharenfs/mount_-v_ok_output
+   :caption: 终于成功挂载NFS
+   :emphasize-lines: 27
+
+.. note::
+
+   虽然 ZFS ``sharenfs`` 不需要配置 ``/etc/exports`` ，但是由于 ``mountd`` 启动时检查 ``/etc/exports`` 配置。如果该配置文件不存在(可以为空)就会拒绝启动 ``mountd`` 。由于NFS服务输出需要 ``mountd`` ，所以这个  ``mountd`` 不启动，客户端是看不到服务器输出的卷集的。
+
+   有点搞...
+
 参考
 ======
 

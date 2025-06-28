@@ -8,14 +8,25 @@ Linux是完全开源的操作系统，任何人都能够定制自己的发行版
 
 没有最佳，只有最合适...
 
-从 `W3Techs的年度WEB网站Linux统计 <https://w3techs.com/technologies/history_details/os-linux/all/y>`_ Ubuntu使用率最高，这应该和Ubuntu社区活跃安装使用方便有关，其次是CentOS则在大型互联网公司使用较为广泛。总体来说，熟悉这两种主流发行版本对于Linux工作还是非常必要的。知乎上 `互联网公司选择 Debian、Ubuntu 和 CentOS 哪一个发行版运维成本最低? <https://www.zhihu.com/question/29195044/answer/865305122>`_
-同样引用了W3Techs的报告，可以看出:
+市场份额统计
+==============
 
-- Ubuntu使用的网站数量高于CentOS，但是更多的网站使用的是Windows以及Unix系统，不过总体来看在Linux范围内Ubuntu的市场份额是CentOS的2倍
-- 大型互联网公司使用CentOS/Ubuntu/Windows的比例差不多
-- 综上：如果是小型互联网公司趋向于使用Ubuntu，大型互联网公司则两者基本持平
+- ``服务器网站视角`` : 从 `W3Techs的年度WEB网站Linux统计 <https://w3techs.com/technologies/history_details/os-linux/all/y>`_ Ubuntu使用率最高，这应该和Ubuntu社区活跃安装使用方便有关，其次是CentOS则在大型互联网公司使用较为广泛。总体来说，熟悉这两种主流发行版本对于Linux工作还是非常必要的。知乎上 `互联网公司选择 Debian、Ubuntu 和 CentOS 哪一个发行版运维成本最低? <https://www.zhihu.com/question/29195044/answer/865305122>`_ 同样引用了W3Techs的报告，可以看出:
 
-但是，我觉得在企业级Linux市场， :ref:`redhat_linux` 占据了极大优势。这点我在 :ref:`dl360_bios_upgrade` 时特别有感触，因为在HP的服务器支持驱动和firmware更新下载中，只提供Windows安装包和RPM包，压根就没有提供给Ubuntu/Debian系可用的安装包。这也侧面反映了Linux企业市场的格局。
+  - Ubuntu使用的网站数量高于CentOS，但是更多的网站使用的是Windows以及Unix系统，不过总体来看在Linux范围内Ubuntu的市场份额是CentOS的2倍
+  - 大型互联网公司使用CentOS/Ubuntu/Windows的比例差不多
+  - 综上：如果是小型互联网公司趋向于使用Ubuntu，(国内)大型互联网公司则两者基本持平
+
+.. note::
+
+   我觉得在企业级Linux市场， :ref:`redhat_linux` 占据了极大优势。这点我在 :ref:`dl360_bios_upgrade` 时特别有感触，因为在HP的服务器支持驱动和firmware更新下载中，只提供Windows安装包和RPM包，压根就没有提供给Ubuntu/Debian系可用的安装包。这也侧面反映了Linux企业市场的格局。
+
+- ``桌面视角`` : `DistroWatch Page Hit Ranking <https://distrowatch.com/dwres.php?resource=popularity>`_ 是 DistroWatch.com 统计访问发行版页面点击数来反映网站访客使用Linux发行版和其他免费操作系统(如 :ref:`freebsd` )的情况，可以管窥Linux **桌面发行版** 流程程度。观察基于 :ref:`debian` 和 :ref:`arch_linux` 的再发行版比较流行。 
+
+- ``B2B服务视角`` : B2B服务公司 `enlyft <https://enlyft.com/>`_ 是为微软等世界五百强提供技术服务的B2B公司，统计了超过300w公司使用 `B2B服务公司enlyft的客户所使用操作系统的市场份额 <https://enlyft.com/tech/operating-systems>`_ :
+
+  - Ubuntu占据了28%份额，几乎是CentOS+RHEL的两倍
+  - enlyft统计是每日采集，统计了其服务于客户的主机操作系统数量，可以反映出大型计算机软件公司(如微软)以及云计算公司(如Pax8)等公司内使用操作系统等比例
 
 个人最佳
 ===========
