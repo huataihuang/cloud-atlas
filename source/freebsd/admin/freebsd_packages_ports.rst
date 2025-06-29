@@ -53,6 +53,14 @@ FreeBSD提供了一些方法来列出不断增长的软件;
 ``pkg`` 管理二进制软件包
 ==========================
 
+``pkg`` 删除软件包
+---------------------
+
+- ``pkg remove <软件包名>`` 可以删除一个软件包，但是之前依赖安装的软件包还没有清理，所以需要结合 ``pkg autoremove`` :
+
+.. literalinclude:: freebsd_packages_ports/pkg_remove
+   :caption: ``pkg`` 删除软件包
+
 .. _freebsd_ports:
 
 ``ports`` Collection

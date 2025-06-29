@@ -65,6 +65,37 @@ FreeBSD默认提供 :ref:`clang` ``llvm`` ，所以不需要 ``gcc`` 就可以�
 .. literalinclude: freebsd_programming_tools/install_ccls_output
    :caption: 安装ccls输出信息
 
+.. warning::
+
+   我发现一个困扰: Mason ( ``mason.nvim`` )支持的LSP列表和 ``nvim-lspconfig`` 其实有一些gap:
+
+   - 有些LSP在 ``nvim-lspconfig`` 中支持，例如 ``ccls`` ，但是在 ``mason.nvim`` 列表中没有对应项，就无法安装: 也就是在 ``plugins.lua`` 中配置:
+
+   .. literalinclude:: freebsd_programming_tools/plugins.lua
+      :caption: 配置安装LSP
+      :emphasize-lines: 17
+
+   不能设置 ``ccls`` ，只能设置 ``clangd`` ，因为 Mason ( ``mason.nvim`` ) 只支持这个 ``clangd`` 插件安装，才能映射到 ``nvim-lspconfig``
+
+   如果要支持更多插件(如 ``ccls`` )，就只能直接使用 ``nvim-lspconfig`` ，不要依赖 ``mason.nvim``
+
+.. warning::
+
+   在FreeBSD平台使用 Mason ( ``mason.nvim`` ) 还会遇到很多报错: ``The current platform is unsupported`` ，例如安装:
+
+   - ``clangd``
+   - ``lua_ls``
+
+   参考 `Neovim Mason and clangd <https://www.reddit.com/r/freebsd/comments/18qm5yj/neovim_mason_and_clangd/>`_ ，原因是 Mason ( ``mason.nvim`` ) 是一个Linux为主的插件，所以在FreeBSD上有很多问题。虽然能够hack但是得不偿失。所以有人建议改为使用 `helix-editor <https://github.com/helix-editor/helix>`_ 来代替nvim，开箱即用，并且支持直接使用系统现有的LSP而不是每次启动来安装LSP
+
+   知乎上有一篇 `开始使用 HELIX EDITOR 编辑器 <https://zhuanlan.zhihu.com/p/607673321>`_ 可以参考入门
+
+安装依赖
+-------------
+
+- 根据 ``MasonLog`` 日志，如果要安装 ``ruby_lsp`` ，则系统需要先安装 ``gem`` 工具，在 FreeBSD 上是通过 ``pkg install devel/ruby-gems`` 获得
+- 要安装 ``clangd`` ，则需要安装 ``llvm`` ，根据 `FreeBSD 14.3 RELEASE信息 <https://www.freebsd.org/releases/14.3R/announce/>`_ ，当前使用 ``llvm19``
+
 - 修改 ``~/.config/nvim/lua/lsp.lua`` :
 
 .. note::

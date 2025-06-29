@@ -4,6 +4,12 @@
 NeoVim IDE
 ============
 
+.. note::
+
+   `从零开始配置 Neovim(Nvim) <https://martinlwx.github.io/zh-cn/config-neovim-from-scratch/>`_ 和 `Transform Your Neovim into a IDE: A Step-by-Step Guide <https://martinlwx.github.io/en/config-neovim-from-scratch/>`_ 是双语写作的博客，原文作者撰写清晰，推荐阅读。
+
+   我参考该文的最新版本再次 :ref:`nvim_ide_fix`
+
 `Transform Your Neovim into a IDE: A Step-by-Step Guide <https://martinlwx.github.io/en/config-neovim-from-scratch/>`_ 作者提供的指南(借鉴):
 
 - 从0开始构建基于 :ref:`lua` 的 ``nvim`` 配置，努力理解每个配置选项
@@ -249,6 +255,6 @@ LSP
 参考
 ===========
 
-- `Transform Your Neovim into a IDE: A Step-by-Step Guide <https://martinlwx.github.io/en/config-neovim-from-scratch/>`_
+- `Transform Your Neovim into a IDE: A Step-by-Step Guide <https://martinlwx.github.io/en/config-neovim-from-scratch/>`_ 我当时没有注意，原来作者是中文/英文双语撰写博客，中文版 `从零开始配置 Neovim(Nvim) <https://martinlwx.github.io/zh-cn/config-neovim-from-scratch/>`_ 阅读更为方便，并且在2024/25年更新了文档，非常清晰易读，推荐阅读原文
 - `Learn How To Use NeoVim As an IDE <https://programmingpercy.tech/blog/learn-how-to-use-neovim-as-ide/>`_
 - `GitHub: ldelossa/nvim-ide <https://github.com/ldelossa/nvim-ide>`_
