@@ -1,0 +1,14 @@
+sudo sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+
+gw_host=192.168.7.221
+smb_host=192.168.7.200
+
+for smb_port in 137 138 139 445; do
+    for protocol in tcp udp; do
+
+        sudo iptables -t nat -A PREROUTING -p ${protocol} --dport ${smb_port} -j DNAT --to-destination ${smb_host}:${smb_port}
+        sudo iptables -A FORWARD -p ${protocol} -d ${smb_host} --dport ${smb_port} -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+        sudo iptables -t nat -A POSTROUTING -p ${protocol} -d ${smb_host} --dport ${smb_port} -j SNAT --to-source ${gw_host}
+
+    done
+done
