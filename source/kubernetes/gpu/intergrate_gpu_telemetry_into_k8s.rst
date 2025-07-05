@@ -45,7 +45,7 @@ Ubuntu安装NVIDIA驱动
 
 - 安装 NVIDIA CUDA 驱动:
 
-.. literalinclude:: ../../machine_learning/hardware/nvidia_gpu/install_nvidia_linux_driver/cuda_driver_ubuntu_repo_install
+.. literalinclude:: ../../machine_learning/hardware/nvidia_gpu/install_nvidia_linux_driver/cuda_driver_debian_ubuntu_repo_install
    :language: bash
    :caption: Ubuntu使用NVIDIA官方软件仓库安装CUDA驱动
 

@@ -14,6 +14,7 @@ Machine Learning
    :maxdepth: 1
 
    become_a_machine_learning_practitioner.rst
+   basic/index
    startup/index
    concept/index
    deep_learning/index

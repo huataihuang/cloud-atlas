@@ -22,6 +22,12 @@ Docker运行NVIDIA容器
 
    在 `nvidia GEFORCE 驱动下载 <https://www.geforce.com/drivers>`_ 可以获取最新的Linux驱动。
 
+.. warning::
+
+   2023年8月以后， ``nvidia-docker`` 已经停止开发，按照 `Build and run Docker containers leveraging NVIDIA GPUs <https://github.com/NVIDIA/nvidia-docker>`_ 官方文档指引，现在解决方法是采用 ``NVIDIA Container Tookit`` 。(前半部分 ``cuda-driver`` 还是要安装的)
+
+   请参考 :ref:`nvidia_p4_pi_docker` 实践，安装部署 ``NVIDIA Container Tookit`` 来实现容器中使用NVIDIA GPU
+
 安装NVIDIA图形卡的CUDA
 =========================
 

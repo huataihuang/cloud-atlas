@@ -1,14 +1,13 @@
-.. _docker_gpu:
+.. _ml_basic:
 
 =================================
-Docker GPU设备
+机器学习基础
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   nvidia-docker.rst
-   nvidia_p4_pi_docker.rst
+   ai_for_everyone.rst
 
 .. only::  subproject and html
 

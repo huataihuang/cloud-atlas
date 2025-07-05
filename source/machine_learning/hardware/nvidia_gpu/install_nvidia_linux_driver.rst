@@ -90,9 +90,9 @@ Ubuntu软件仓库方式安装NVDIA CUDA驱动
 
 - 安装 NVIDIA CUDA 驱动:
 
-.. literalinclude:: install_nvidia_linux_driver/cuda_driver_ubuntu_repo_install
+.. literalinclude:: install_nvidia_linux_driver/cuda_driver_debian_ubuntu_repo_install
    :language: bash
-   :caption: Ubuntu使用NVIDIA官方软件仓库安装CUDA驱动
+   :caption: Debian/Ubuntu使用NVIDIA官方软件仓库安装CUDA驱动
 
 安装过程会爱用 :ref:`dkms` 编译NVIDIA内核模块，并且会提示添加了 ``/etc/modprobe.d/nvidia-graphics-drivers.conf`` 来 ``blacklist`` 阻止加载冲突的 ``Nouveau`` 开源驱动，并且提示需要重启操作系统来完成驱动验证加载。
 

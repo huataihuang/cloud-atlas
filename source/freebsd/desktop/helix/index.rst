@@ -1,14 +1,14 @@
-.. _docker_gpu:
+.. _helix:
 
 =================================
-Docker GPU设备
+Helix编辑器
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   nvidia-docker.rst
-   nvidia_p4_pi_docker.rst
+   helix_startup.rst
+   helix_lfs.rst
 
 .. only::  subproject and html
 

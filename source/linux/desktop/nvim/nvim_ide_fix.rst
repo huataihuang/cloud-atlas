@@ -177,14 +177,13 @@ LSP
 
 完成上面的配置之后，LSP 已经可用了: 默认安装了 ``pylsp``
 
-安装更多的语言，只需要修订 ``opts`` 配置段，在 ``ensure_installed`` 加入对应LSP名字就可以了
 
 - 编辑 ``~/.config/nvim/lua/lsp.lua`` ，添加一些Mason的特定配置:
 
 .. literalinclude:: nvim_ide_fix/lsp.lua
    :caption: 配置 LSP ``~/.config/nvim/lua/lsp.lua``
 
-更多LSP配置
+typescript LSP
 ---------------
 
 .. warning::
@@ -193,6 +192,12 @@ LSP
 
 要支持更多的LSP，则参考 `nvim-lspconfig/doc/configs.md <https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md>`_
 
+- 现在配置非常简单，只需要只需要修订 ``opts`` 配置段，在 ``ensure_installed`` 加入对应LSP名字就可以了
+
+- 支持 :ref:`javascript` 和 :ref:`typescript` 可以使用 `typescript-tools.nvim <https://github.com/pmizio/typescript-tools.nvim>`_ ，修订 ``lua/plugins.lua`` :
+
+.. literalinclude:: nvim_ide_fix/plugins_typescript_lsp.lua
+   :caption: 安装 ``typescript-tools.nvim``
 
 参考
 ======
