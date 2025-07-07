@@ -20,6 +20,7 @@ FreeBSD桌面
    freebsd_nvim.rst
    freebsd_dev_lsp.rst
    freebsd_vscode_code-server.rst
+   kbdscan_keymap.rst
    helix/index
 
 .. only::  subproject and html

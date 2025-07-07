@@ -8,6 +8,7 @@ FreeBSD起步
    :maxdepth: 1
 
    freebsd_on_intel_mac.rst
+   freebsd_on_thinkpad_x220.rst
    freebsd_root_on_zfs_using_gpt.rst
    freebsd_shutdown.rst
    freebsd_static_ip.rst

@@ -9,6 +9,7 @@ FreeBSD网络
 
    freebsd_wifi.rst
    freebsd_wifi_bcm43602.rst
+   freebsd_wifi_iwn_6205.rst
    freebsd_broadcom_wifi_bcm43602.rst
    freebsd_static_ip.rst
    bridge/index

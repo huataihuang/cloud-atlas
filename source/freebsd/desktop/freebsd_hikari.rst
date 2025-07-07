@@ -16,14 +16,15 @@ hikari compositor 使用了几个以生产力为中心的概念，如 工作表�
 安装hikari
 ============
 
-- 执行以下命令安装::
+- 执行以下命令安装:
 
-   sudo pkg install hikari alacritty
+.. literalinclude:: freebsd_hikari/install
+   :caption: 安装 hikari
 
-- 简单配置::
+- 简单配置:
 
-   mkdir ~/.config/hikari
-   cp /usr/local/etc/hikari/hikari.conf ~/.config/hikari
+.. literalinclude:: freebsd_hikari/config
+   :caption: 配置hikari
 
 - 修改 ``hikari.conf`` ::
 

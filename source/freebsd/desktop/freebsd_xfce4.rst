@@ -6,7 +6,10 @@ FreeBSD XFCE桌面
 
 .. note::
 
-   目前我比较倾向于使用基于 :ref:`wayland` 的 :ref:`freebsd_sway` ，不过最近的实践配置存在问题(已解决)所以目前采用 :ref:`xfce` 以便简化桌面复杂度，专注于后端服务器开发运维。
+   目前我比较倾向于使用基于 :ref:`wayland` 的 :ref:`freebsd_sway` ，不过最近的实践配置存在问题( :strike:`已解决` 每次从头开始安装总会遇到意想不到的问题)所以目前采用 :ref:`xfce` 以便简化桌面复杂度，专注于后端服务器开发运维。
+
+Xorg
+========
 
 - 安装Xorg:
 
@@ -17,6 +20,21 @@ FreeBSD XFCE桌面
 
 .. literalinclude:: freebsd_wayland_sway/group_add_video
    :caption: 将 ``admin`` 用户加入 ``video`` 组(举例)
+
+.. note::
+
+   目前XFCE 4.20 的几乎所有组件都能够运行在 :ref:`wayland` 窗口(实验性)，并且依然保留了支持X11窗口。 ``libxfce4windowing`` 库引入来处理Wyaland和X11支持，现在已经不再需要XWayland。
+
+   不过，由于Xfce尚未正式确定何时在 ``Xfwm4`` 中添加Wayland支持同时依然保持X11功能，所以我目前不会尝试折腾(桌面实在太浪费时光了)
+
+   顺其自然，我暂时保留在X Window环境，专注于探索后端服务和开发。
+
+NVIDIA显卡
+-------------
+
+.. note::
+
+   我的 :ref:`mbp15_late_2013` 使用了Nvidia显卡
 
 - :ref:`freebsd_nvidia-driver` 安装配置
 
@@ -36,6 +54,21 @@ FreeBSD XFCE桌面
 .. literalinclude:: freebsd_nvidia-driver/driver-nvidia.conf
    :caption: 配置一个 ``driver-nvidia.conf`` 引导Xorg正确使用NVIDIA驱动
 
+Intel显卡
+-----------
+
+.. note::
+
+   我的 :ref:`thinkpad_x220` 使用Intel显卡
+
+:ref:`freebsd_sway` 过程安装了Intel显卡驱动，步骤如下;
+
+.. literalinclude:: freebsd_sway/intel_gpu                                                                                              
+   :caption: Intel显卡内核模块加载
+
+XFCE
+=========
+
 - 安装XFCE:
 
 .. literalinclude:: freebsd_xfce4/install
@@ -54,11 +87,6 @@ FreeBSD XFCE桌面
    .. literalinclude:: freebsd_xfce4/switch_snd
       :caption: 修改输出的设备。最后的数字是对应的 pcm 后面的数字
 
-安装信息:
-
-.. literalinclude:: freebsd_xfce4/install_output
-   :caption: 安装Xfce4提示信息
-
 软件包说明:
 
 .. csv-table:: XFCE4软件包说明
@@ -66,7 +94,12 @@ FreeBSD XFCE桌面
    :widths: 30, 70
    :header-rows: 1
 
-安装XFCE会依赖安装 ``dbus-daemon`` ，并且需要在系统中激活 D-BUS :
+- XFCE需要系统挂载 ``/proc`` ，所以在 ``/etc/fstab`` 中添加以下内容以便在系统启动时挂载好:
+
+.. literalinclude:: freebsd_xfce4/fstab
+   :caption: 配置 ``/etc/fstab`` 挂载 ``/proc``
+
+- 安装XFCE会依赖安装 ``dbus-daemon`` ，并且需要在系统中激活 D-BUS :
 
 .. literalinclude:: freebsd_xfce4/dbus_enable
    :caption: 激活系统启动时启动dbus
@@ -76,13 +109,12 @@ FreeBSD XFCE桌面
 .. literalinclude:: freebsd_xfce4/install_lightdm
    :caption: 安装 lightdm
 
-安装lightdm的输出信息
-
-.. literalinclude:: freebsd_xfce4/install_lightdm_output
-   :caption: 安装 lightdm 输出信息
-
 异常排查
 ===========
+
+.. note::
+
+   本段异常排查是 :ref:`mbp15_late_2013` 的NVIDIA显卡异常
 
 报错显示我的笔记本显卡太陈旧，只能使用  NVIDIA 470.xx 驱动，我安装了最新的 550.120 驱动启动时Xorg日志报错;
 
@@ -170,8 +202,25 @@ FreeBSD XFCE桌面
 
    lightdm_enable="YES"
 
+Thunar
+==========
+
+Xfce官方文档显示Thunar有一个插件 ``thunar-shares-plugin`` 可以使用Samba共享一个目录而无需root权限。但是我在FreeBSD中通过 ``pkg search thunar`` 没有找到该插件，似乎发行版没有提供这个插件。
+
+emoji字体
+===========
+
+在WEB网站以及一些 :ref:`nodejs` 程序经常会使用emoji字体，系统如果不安装对应字体就会显示为奇怪的方框乱码。常用的emoji字体有 `Google Noto Color Emoji <https://www.google.com/get/noto/>`_ 和 `EmojiOne Android <https://github.com/joypixels/emojione-assets/releases>`_ ，在FreeBSD平台可以直接安装 ``x11-fonts/noto-emoji`` 字体来实现展示:
+
+.. literalinclude:: freebsd_xfce4/install_emoji
+   :caption: 安装emoji字体
+
+安装以后firefox浏览器就能够显示WEB页面中的emoji字体，不过很奇怪的是 ``xfce4-terminal`` 却不能正常显示。虽然网上信息显示gnome-termianl和alacritty是支持emoji的，但是我尝试了以后依然没有解决。看起来这问题不是终端模拟器问题，而是 ``gtk`` 底层没有支持emoji，因为我发现安装了 ``noto-emoji`` 字体后，在一些XFCE的配置选择字体窗口，gtk显然没有正常渲染emoji，而在 :ref:`freebsd_chinese` 中我选择的 ``rime`` 输入法字体选择框中当出现emoji文字时也无法正常显示。这个共性问题集中显示在和gtk组件有关，从网上信息来看似乎和底层 ``libcairo`` 库有关。我不清楚为何在FreeBSD中存在问题，目前影响不大，暂时忽略。
+
 参考
 ======
 
 - `Install FreeBSD with XFCE and NVIDIA Drivers [2021] <https://nudesystems.com/install-freebsd-with-xfce-and-nvidia-drivers/>`_
 - `FreeBSD Handbook: Chapter 8. Desktop Environments <https://docs.freebsd.org/en/books/handbook/desktop/>`_
+- `How to Install FreeBSD 14 on a 6th Generation Thinkpad <https://akos.ma/blog/how-to-install-freebsd-14-on-a-6th-generation-thinkpad/>`_
+- `Emoji not displayed or overlapping text <https://forums.freebsd.org/threads/emoji-not-displayed-or-overlapping-text.84951/>`_

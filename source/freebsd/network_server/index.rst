@@ -8,6 +8,8 @@ FreeBSD网络服务
    :maxdepth: 1
 
    freebsd_samba.rst
+   freebsd_mount_smbfs.rst
+   smbclient.rst
 
 .. only::  subproject and html
 

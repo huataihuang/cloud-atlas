@@ -313,6 +313,10 @@ then ``exec --no-startup-id fcitx5 -d`` in sway config, and enable wayland in ``
 - 我也是这个现象，参考了这个issue重新调整了 :ref:`gentoo_use_flags` 并重新编译( 详见 :ref:`gentoo_kde_fcitx`
 - 我没有解决 foot/ :ref:`alacritty` 中中文候选窗口显示，不过在 :ref:`gentoo_kde_fcitx` 中使用 foot / alacritty 则中文候选窗口显示正常
 
+.. note::
+
+   `fcitx开发者CS Slayer <https://www.csslayer.info/wordpress/>`_ 个人博客围绕着fcitx提供了很多学习线索，如果要了解wayland环境下中文输入法的原理可以参考其博客
+
 最终解决方法
 ===================
 

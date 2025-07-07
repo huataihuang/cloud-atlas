@@ -9,12 +9,13 @@ FreeBSD Sway桌面
 准备工作
 ==========
 
-在安装 :ref:`sway` 之前，首先需要为FreeBSD安装显卡驱动，这个安装是根据显卡硬件来决定的，例如我的 :ref:`mbp15_late_2013` 使用NVIDIA显卡，所以安装 :ref:`freebsd_nvidia-driver` 。
+在安装 :ref:`sway` 之前，首先需要为FreeBSD安装显卡驱动，这个安装是根据显卡硬件来决定的:
 
-如果是其他显卡芯片，例如Intel显卡，则需要 ``drm-kmod`` ，然后加载Intel i915驱动::
+- 我的 :ref:`mbp15_late_2013` 使用NVIDIA显卡，所以安装 :ref:`freebsd_nvidia-driver` 。
+- 如果是其他显卡芯片，例如我的 :ref:`thinkpad_x220` 使用Intel显卡，则需要 ``drm-kmod`` (这个软件包其实是不同显卡驱动和firmware的集成包，比较庞大) ，然后加载Intel i915驱动:
 
-   pkg install drm-fbsd13-kmod
-   kldload i915ksm
+.. literalinclude:: freebsd_sway/intel_gpu
+   :caption: Intel显卡内核模块加载
 
 Sway安装
 =========
