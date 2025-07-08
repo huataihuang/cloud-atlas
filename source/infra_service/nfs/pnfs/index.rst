@@ -1,13 +1,15 @@
-.. _samba:
+.. _pnfs:
 
 =================================
-Samba服务
+nNFS
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   samba_ad_dc.rst
+   freebsd_pnfs.rst
+   nfs-ganesha.rst
+   nfs-ganesha_over_glusterfs.rst
 
 .. only::  subproject and html
 

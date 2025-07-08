@@ -16,6 +16,8 @@ nfs服务
    run_nfs_behind_firewall.rst
    run_macos_nfs_behind_firewall.rst
    debug_nfs_ssh_tunnel.rst
+   nfs_v4/index
+   pnfs/index
 
 .. only::  subproject and html
 

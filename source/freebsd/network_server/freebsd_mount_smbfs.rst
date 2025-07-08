@@ -97,8 +97,32 @@ FreeBSD mount_smbfs (不推荐)
    - ``sysutils/fusefs-smbnetfs`` 软件包通过fuse提供了 ``smb v2`` 和 ``smb v3`` 支持(待实践验证)
    - FreeBSD不推荐使用smbfs挂载，而是推荐使用 NFS 挂载
 
+.. note::
+
+   一种在FreeBSD上变通使用 ``smb v2/v3`` 的方式是使用 ``gvfs`` (GNOME Virtual File System)，通过 ``gvfsd`` 服务来处理不同文件系统和服务的通讯，并且支持通过FUSE来让不使用GIO(Glib's GIO库)的应用程序使用 ``gvfs`` 。常见的 ``GVFS`` 后端包括:
+
+   - SFTP
+   - SMB
+   - HTTP
+   - DAV
+   - MTP (移动设备文件访问)
+   - Google Drive
+   - Archive mounting (访问.zip或.tar.gz的归档文件)
+
+   ``fuse->gvfs->smb`` 对性能影响很大，如果是大量小文件则非常缓慢。而 ``sshfs`` 虽然也采用FUSE但是性能好很多，缺点可能是文件锁(写模式打开文件则其他只读访问拒绝，而Samba内置了文件锁功能能处理这种情况)。( **我这里记录思路，暂未实践** )
+
+   **我还没有实践** 以后看需求再尝试
+
+.. note::
+
+   `FreeBSD移植fusefs-smbnetfs <https://www.freshports.org/sysutils/fusefs-smbnetfs/>`_ 可以采用FUSE方式挂载SMB
+
+   参考 `FreeBSD smbfs: add deprecation notice <https://reviews.freebsd.org/D32707>`_ 可以看到声明: FreeBSD的smbfs文件系统驱动只支持SMBv1协议，当前smbfs已经不再维护并且可能在FreeBSD 14或之后版本取消。建议使用 ``sysutils/fusefs-smbnetfs`` 代替
+
 参考
 =========
 
 - `FreeBSD: How to mount SMB/CIFS shares under FreeBSD <https://blog.up-link.ro/freebsd-how-to-mount-smb-cifs-shares-under-freebsd/>`_
 - `Correct syntax for mounting smbfs in FreeBSD? <https://unix.stackexchange.com/questions/423145/correct-syntax-for-mounting-smbfs-in-freebsd>`_
+- `Mounting SMB (v2/v3) shares / gvfs? <https://www.reddit.com/r/freebsd/comments/9z5p2b/mounting_smb_v2v3_shares_gvfs/>`_ 
+- `FreeBSD论坛的帖子"Can't connect to samba..." <https://forums.freebsd.org/threads/cant-connect-to-samba.94894/>`_ 提供了关于smbfs的信息以及混合 :ref:`samba` 和 :ref:`nfs` 的架构讨论

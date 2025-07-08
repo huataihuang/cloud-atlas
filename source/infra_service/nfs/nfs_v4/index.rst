@@ -1,13 +1,14 @@
-.. _samba:
+.. _nfs_v4:
 
 =================================
-Samba服务
+NFS v4
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   samba_ad_dc.rst
+   intro_nfs_v4.rst
+   kerberized_nfs.rst
 
 .. only::  subproject and html
 

@@ -14,6 +14,7 @@ Infrastructure
    how_complex_systems_fail.rst
    best_open_source.rst
    wikipedia/index
+   osc_infra.rst
    fedoraproject_base.rst
    opencompute/index
    openinfra/index
