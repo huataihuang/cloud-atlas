@@ -9,6 +9,7 @@ Docker GPU设备
 
    nvidia-docker.rst
    nvidia_p4_pi_docker.rst
+   nvidia-driver_pi_os.rst
 
 .. only::  subproject and html
 

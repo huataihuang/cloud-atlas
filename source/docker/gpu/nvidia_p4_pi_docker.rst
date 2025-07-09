@@ -87,10 +87,12 @@ Host主机安装 ``nvidia-driver``
 .. literalinclude:: nvidia_p4_pi_docker/gcc_output
    :caption: 检查系统安装的gcc版本显示是 ``gcc 12``
 
-- CUDA驱动需要内核头文件以及开发工具包来完成内核相关的驱动安装，因为内核驱动需要根据内核进行编译。这里按照 :ref:`debian` / :ref:`ubuntu_linux` 安装对应内核版本的头文件包:
+- CUDA驱动需要内核头文件以及开发工具包来完成内核相关的驱动安装，因为内核驱动需要根据内核进行编译。 :strike:`这里按照 debian/ubuntu 安装对应内核版本的头文件包`
 
-.. literalinclude:: nvidia_p4_pi_docker/linux-headers
-   :caption: 安装内核版本对应的头文件包
+安装 **树莓派专用linux-headers** :
+
+.. literalinclude:: nvidia_p4_pi_docker/linux-headers-rpi
+   :caption: 安装Raspberry Pi OS特定linux-headers
 
 CUDA软件仓库
 --------------
@@ -107,8 +109,12 @@ CUDA软件仓库
 .. literalinclude:: nvidia_p4_pi_docker/cuda_install
    :caption: 安装仓库
 
-安装 ``cuda-drivers``
------------------------
+仓库安装 ``cuda-drivers``
+----------------------------
+
+.. note::
+
+   使用软件仓库网络安装 ``cuda-drivers`` 需要主机安装好对应的 ``linux-headers``
 
 .. literalinclude:: ../../machine_learning/hardware/nvidia_gpu/install_nvidia_linux_driver/cuda_driver_debian_ubuntu_repo_install
    :language: bash
@@ -116,18 +122,21 @@ CUDA软件仓库
 
 安装过程会爱用 :ref:`dkms` 编译NVIDIA内核模块，并且会提示添加了 ``/etc/modprobe.d/nvidia-graphics-drivers.conf`` 来 ``blacklist`` 阻止加载冲突的 ``Nouveau`` 开源驱动，并且提示需要重启操作系统来完成驱动验证加载。
 
-我这里遇到报错(编译内核错误)
+CUDA软件本地安装
+---------------------
 
-.. literalinclude:: nvidia_p4_pi_docker/cuda-drivers_dpkg_error
-   :caption: 编译内核错误
-   :emphasize-lines: 14
+.. note::
 
-检查错误日志 ``/var/lib/dkms/nvidia/575.57.08/build/make.log`` 可以看到，显示缺少 ``stdarg.h`` :
+   使用本地安装 ``cuda-drivers`` 需要本地安装好内核源代码，这里采用 `Raspberry Pi Documentation: The Linux kernel#Build the kernel <https://www.raspberrypi.com/documentation/computers/linux_kernel.html#building>`_ 下载Raspberry Pi 内核源代码
 
-.. literalinclude:: nvidia_p4_pi_docker/make.log
-   :caption: 编译错误日志
+`JeffGeerling的网站上 Raspberry Pi PCIe Database#GPUs (Graphics Cards) <https://pipci.jeffgeerling.com/#gpus-graphics-cards>`_ 列出的NVIDIA显卡，他采用了下载最新驱动软件安装包方法，本地运行安装
 
-这里提示 ``stdarg.h: No such file or directory`` ，看起来似乎指gcc自带的头文件: ``/usr/lib/gcc/aarch64-linux-gnu/12/include/stdarg.h``
+- 下载最新的 `NVIDIA Linux-aarch64 (ARM64) Display Driver Archive <https://www.nvidia.com/en-us/drivers/unix/linux-aarch64-archive/>`_ 
+
+- 本地安装:
+
+.. literalinclude:: nvidia_p4_pi_docker/run_install
+   :caption: 本地安装
 
 Host主机安装NVIDIA Container Toolkit
 ======================================
@@ -194,3 +203,4 @@ Host主机安装NVIDIA Container Toolkit
 - `Enabling GPUs in the Container Runtime Ecosystem <https://devblogs.nvidia.com/gpu-containers-runtime/>`_
 - **已废弃** `Build and run Docker containers leveraging NVIDIA GPUs <https://github.com/NVIDIA/nvidia-docker>`_
 - `Installing the NVIDIA Container Toolkit <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html>`_ 从2023年8月开始， ``nvidia-docker`` 已经被 ``NVIDIA Container Toolkit`` 替代，所以本文实践部署替代了之前的 :ref:`nvidia-docker`
+- `JeffGeerling的网站上 Raspberry Pi PCIe Database#GPUs (Graphics Cards) <https://pipci.jeffgeerling.com/#gpus-graphics-cards>`_
