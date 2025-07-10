@@ -14,10 +14,14 @@
    - :ref:`install_nvidia_cuda`
    - :ref:`nvidia-docker`
 
+.. note::
+
+   由于 :ref:`nvidia-driver_pi_os` 遇到困难挫折，所以我推翻重新采用 :ref:`ubuntu_linux` for Raspberry Pi作为操作系统，再次尝试安装 ``nvidia-driver``
+
 实践环境
 =============
 
-- :ref:`pi_5` 安装了 Respberry Pi OS ，即 :ref:`debian` 12 (bookworm)，这是一个 :ref:`arm` 架构的低功耗微型计算机，所以后续安装 :ref:`install_nvidia_linux_driver` 需要选择 ``aarch64`` 架构
+- :ref:`pi_5` 安装了 :strike:`Respberry Pi OS` Ubuntu 24.04.02 LTS ，即 :ref:`debian` 12 (bookworm)，这是一个 :ref:`arm` 架构的低功耗微型计算机，所以后续安装 :ref:`install_nvidia_linux_driver` 需要选择 ``aarch64`` 架构
 - :ref:`tesla_p4` 加装了淘宝购买的散热器，并通过 ``OCuLink`` Dock连接到 :ref:`pi_5`
 
 :ref:`tesla_p4` 加电后再启动连接的 :ref:`pi_5` ，进入host主机系统后执行 ``lspci`` 命令可以看到识别出 :ref:`tesla_p4` :
@@ -66,7 +70,7 @@ Host主机安装 ``nvidia-driver``
 
    在 :ref:`install_nvidia_linux_driver` 我曾经采用过两种方式安装 ``cuda-drivers`` :
 
-   - 手工下载安装 `NVIDIA官方提供的 P40 驱动 <https://www.nvidia.com/download/index.aspx#>`_
+   - 手工下载安装 `NVIDIA官方提供的 P40 驱动 <https://www.nvidia.com/download/index.aspx#>`_ (我在 :ref:`nvidia-driver_pi_os` 也尝试了手工安装驱动方法，但是在Raspberry Pi OS上没有成功
    - 通过Linux发行版软件仓库方式安装NVDIA CUDA驱动
 
    本次实践我采用后者 **软件仓库方式**
@@ -82,17 +86,19 @@ Host主机安装 ``nvidia-driver``
 .. literalinclude:: nvidia_p4_pi_docker/gcc
    :caption: 检查系统安装的gcc版本
 
-输出显示目前系统安装了 ``gcc 12`` :
+NVIDIA驱动需要主机已经安装了 Kernel headers 和 开发软件包
 
-.. literalinclude:: nvidia_p4_pi_docker/gcc_output
-   :caption: 检查系统安装的gcc版本显示是 ``gcc 12``
+如果系统尚未安装 ``gcc`` 可以采用 :ref:`debian_init` 纯后台服务器系统安装开发工具的方式(安装 ``build-essential`` 为主):
 
-- CUDA驱动需要内核头文件以及开发工具包来完成内核相关的驱动安装，因为内核驱动需要根据内核进行编译。 :strike:`这里按照 debian/ubuntu 安装对应内核版本的头文件包`
+.. literalinclude:: ../../linux/debian/debian_init/debian_init_vimrc_dev
+   :caption: 安装纯后台开发工具
 
-安装 **树莓派专用linux-headers** :
+- CUDA驱动需要内核头文件以及开发工具包来完成内核相关的驱动安装，因为内核驱动需要根据内核进行编译
 
-.. literalinclude:: nvidia_p4_pi_docker/linux-headers-rpi
-   :caption: 安装Raspberry Pi OS特定linux-headers
+安装 **linux-headers** :
+
+.. literalinclude:: nvidia_p4_pi_docker/linux-headers
+   :caption: 安装inux-headers
 
 CUDA软件仓库
 --------------
@@ -120,23 +126,20 @@ CUDA软件仓库
    :language: bash
    :caption: Debian/Ubuntu使用NVIDIA官方软件仓库安装CUDA驱动
 
-安装过程会爱用 :ref:`dkms` 编译NVIDIA内核模块，并且会提示添加了 ``/etc/modprobe.d/nvidia-graphics-drivers.conf`` 来 ``blacklist`` 阻止加载冲突的 ``Nouveau`` 开源驱动，并且提示需要重启操作系统来完成驱动验证加载。
+安装过程会使用 :ref:`dkms` 编译NVIDIA内核模块，果然在NVIDIA官方支持的Ubuntu平台编译安装非常顺利，没有遇到 :ref:`nvidia-driver_pi_os` 中痛苦的折磨。
 
-CUDA软件本地安装
----------------------
+然而...
 
-.. note::
+GPU初始化异常排查
+===================
 
-   使用本地安装 ``cuda-drivers`` 需要本地安装好内核源代码，这里采用 `Raspberry Pi Documentation: The Linux kernel#Build the kernel <https://www.raspberrypi.com/documentation/computers/linux_kernel.html#building>`_ 下载Raspberry Pi 内核源代码
+虽然驱动安装正常，重启系统后却发现 ``nvidia-smi`` 执行显示驱动没有加载。WHY
 
-`JeffGeerling的网站上 Raspberry Pi PCIe Database#GPUs (Graphics Cards) <https://pipci.jeffgeerling.com/#gpus-graphics-cards>`_ 列出的NVIDIA显卡，他采用了下载最新驱动软件安装包方法，本地运行安装
+- 检查 ``dmesg -T`` 输出，发现原因是总线没有响应初始化命令导致驱动加载失败:
 
-- 下载最新的 `NVIDIA Linux-aarch64 (ARM64) Display Driver Archive <https://www.nvidia.com/en-us/drivers/unix/linux-aarch64-archive/>`_ 
+.. literalinclude:: nvidia_p4_pi_docker/gpu_init_fail
+   :caption: GPU初始化失败
 
-- 本地安装:
-
-.. literalinclude:: nvidia_p4_pi_docker/run_install
-   :caption: 本地安装
 
 Host主机安装NVIDIA Container Toolkit
 ======================================
@@ -203,4 +206,7 @@ Host主机安装NVIDIA Container Toolkit
 - `Enabling GPUs in the Container Runtime Ecosystem <https://devblogs.nvidia.com/gpu-containers-runtime/>`_
 - **已废弃** `Build and run Docker containers leveraging NVIDIA GPUs <https://github.com/NVIDIA/nvidia-docker>`_
 - `Installing the NVIDIA Container Toolkit <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html>`_ 从2023年8月开始， ``nvidia-docker`` 已经被 ``NVIDIA Container Toolkit`` 替代，所以本文实践部署替代了之前的 :ref:`nvidia-docker`
+
+  - 前置步骤是驱动安装，参考 `CUDA Installation Guide for Linux#Driver Installation <https://docs.nvidia.com/cuda/cuda-installation-guide-linux/#driver-installation>`_ : `NVIDIA Driver Installation Guide <https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/index.html>`_
+
 - `JeffGeerling的网站上 Raspberry Pi PCIe Database#GPUs (Graphics Cards) <https://pipci.jeffgeerling.com/#gpus-graphics-cards>`_

@@ -13,14 +13,21 @@
 
 .. note::
 
-   2022年1月，树莓派官方正式发布64位 :ref:``
+   2022年1月，树莓派官方正式发布64位 Raspberry Pi OS，基于 :ref:`debian` 定制。至此树莓派也有了官方发行的64位OS。所以之后我从Ubuntu for Raspberry Pi转回了官方Raspberry Pi OS。
+
+   不过，2025年7月，我在 :ref:`nvidia-driver_pi_os` 实践中遇到挫折，考虑到NVIDIA官方支持的是Ubuntu ARM版本，所以我再次将我的 :ref:`nvidia_p4_pi_docker` 底层操作系统且换成Ubuntu。
 
 下载镜像
 ===========
 
-从Ubuntu官方下载 `Ubuntu 20.04.1 LTS for Raspberry Pi 2,3 or 4 <https://ubuntu.com/download/raspberry-pi>`_ ，下载的文件是 `.xz` 压缩文件，解压缩以后，通过 ``dd`` 命令写入到TF卡::
+从Ubuntu官方 `Install Ubuntu on a Raspberry Pi <https://ubuntu.com/download/raspberry-pi>`_ 页面下载安装镜像，下载的文件是 `.xz` 压缩文件，解压缩以后，通过 ``dd`` 命令写入到TF卡:
 
-   dd if=ubuntu-20.04.1-preinstalled-server-arm64+raspi.img of=/dev/rdisk2 bs=100m
+.. literalinclude:: ubuntu64bit_pi/downaload
+   :caption: 下载Ubuntu for Raspberry Pi镜像并写入TF卡
+
+.. note::
+
+   Ubuntu for Raspberry Pi分为Desktop和Server两个版本，我使用Server版本来构建
 
 .. note::
 
