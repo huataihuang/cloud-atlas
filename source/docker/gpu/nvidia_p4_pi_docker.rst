@@ -140,6 +140,14 @@ GPU初始化异常排查
 .. literalinclude:: nvidia_p4_pi_docker/gpu_init_fail
    :caption: GPU初始化失败
 
+.. note::
+
+   目前初步判断可能存在问题:
+
+   - 使用 OCuLink 连接存在硬件问题或使用问题
+   - 购买的 :ref:`tesla_p4` 可能有硬件隐患
+
+   我准备采用替换方法排查，后续来尝试解决这个问题
 
 Host主机安装NVIDIA Container Toolkit
 ======================================
