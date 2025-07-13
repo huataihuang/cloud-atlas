@@ -45,6 +45,17 @@
 
    树莓派5由于芯片频率提升且多核，必须采用主动散热来确保系统稳定运行
 
+Raspberry Pi CM5
+====================
+
+2025年7月， `Build Your Own ARM Laptop with the New Argon ONE UP! <https://www.youtube.com/watch?v=WLilGkSihXo>`_ 介绍了一款由 Argon 众筹的基于Raspberry Pi CM5计算模块的 `Argon ONE UP笔记本电脑 <https://www.kickstarter.com/projects/argonforty/upton-one-the-true-raspberry-pi-compute-module-5-laptop>`_ 。从介绍视频来看，确实是一款非常实用的ARM架构笔记本电脑。而且，还通过改造过的USB-C接口，输出了GPIO模块接口。
+
+虽然性能有限，作为16GB内存的树莓派5移动设备，一体化体验的开放软硬件系统，感觉非常有意思。如果价格能够压制到 ``2000RMB`` 以内，感觉 :strike:`还是可以选择的` 。
+
+.. note::
+
+   时光白驹过隙，很多年前我曾经想尝试 :ref:`pinebook_pro` 笔记本，然而购买渠道和售价劝退了我。感觉 ``Argon ONE UP笔记本`` 出得太晚了，明年苹果即将推出廉价版MacBook，以苹果设计和制造工艺，使得这些小众的产品凸显了产量太低而成本过高、品控难保，除非是自己经济宽裕到能够买来作为爱好的玩具。唉...
+
 参考
 ========
 
