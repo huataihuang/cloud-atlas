@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    ai_for_everyone.rst
+   generative_ai_for_everyone.rst
 
 .. only::  subproject and html
 
