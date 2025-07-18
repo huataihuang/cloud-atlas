@@ -9,6 +9,7 @@ bhyve(BSD hypervisor)
 
    intro_bhyve.rst
    bhyve_startup.rst
+   bhyve_ubuntu.rst
    bhyve_vm_console.rst
    bhyve_zfs_snapshot.rst
    jail_bhyve.rst

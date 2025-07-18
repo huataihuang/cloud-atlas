@@ -18,7 +18,10 @@ FreeBSD的高性能 :ref:`hypervisor` 名为 ``bhyve`` ，类似于Linux内核�
 
 注意，FreeBSD的 ``bhyve`` 在ARM上只支持纯ARMv8.0虚拟化，目前尚未使用虚拟化主机扩展(Virtualization Host Extensions)。托管具有多个vCPU的Linux guest或FreeBSD guest需要VMX非限制模式支持(UG)。
 
-最简单判断Intel或AMD处理器是否支持 ``bhyve`` 的简单方法是云隙光 ``dmesg`` 或在 ``/var/run/dmesg.boot`` 中查找AMD处理器 ``Features2`` 行上的 ``POPCNT`` 处理器功能标志，或者Intel处理器 :ref:`intel_vt` 行上的EPT和UG
+最简单判断Intel或AMD处理器是否支持 ``bhyve`` 的简单方法是运行 ``dmesg`` 或在 ``/var/run/dmesg.boot`` 中查找AMD处理器 ``Features2`` 行上的 ``POPCNT`` 处理器功能标志，或者Intel处理器 :ref:`intel_vt` 行上的EPT和UG
+
+.. literalinclude:: intro_bhyve/dmesg_popcnt_ept_ug
+   :caption: 检查CPU对POPCNT和EPT和UG支持
 
 例如，我组装了一台 :ref:`xeon_e-2274g` 台式机用来不停机(静音)运行，检查 ``dmesg`` 输出:
 
