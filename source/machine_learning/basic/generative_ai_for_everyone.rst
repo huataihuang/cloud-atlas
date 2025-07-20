@@ -159,8 +159,26 @@ AI对很多任务都有用，就像电力驱动了不同的设备(无所不在)
 
    LLM提示词反向将图片去除噪音
 
-``Using generative AI in software applications``
+Generative AI的生命周期
+============================
 
+构建Generative AI是一个高度实验性的过程，需要不断尝试并修正错误:
+
+- 提示词
+- 检索增强生成(Retrieval augmented generation, RAG)
+
+  - RAG为大语言模型访问外部数据提供了能力
+
+- 微调模型(Fine-tune models)
+
+  - 将大模型修改成适合你的任务
+
+- 预训练模型(Pretrain models)
+
+  - 从头开始训练LLM(Train LLM from scratch)
+
+Generative AI的成本估算
+===========================
 
 参考
 =======

@@ -77,6 +77,10 @@ OpenZFS快照Thin Jail
 NullFS thin Jail
 =========================
 
+.. note::
+
+   目前我主要使用 ``NullFS thin Jail`` ，在 :ref:`vnet_thin_jail` 中就是采用这种方式。此外，我在 :ref:`freebsd_desktop` 环境也采用 ``NullFS thin Jail`` ，但没有结合 :ref:`vnet_jail` (因为桌面没有多个IP地址可以分配)，具体案例见 :ref:`thin_jail_desktop`
+
 通过结合 Thin Jail 和 ``NullFS`` 技术也可以创建节约系统文件存储开销(类似于 ``ZFS snapshot`` clone出来的卷完全不消耗空间)，并且能够将Host主机的我呢见目录共享给 **多个** Jail。
 
 .. note::

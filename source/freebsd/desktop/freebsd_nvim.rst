@@ -4,6 +4,12 @@
 FreeBSD neovim
 ===================
 
+.. note::
+
+   采用在 :ref:`vnet_thin_jail` 基础上构建工作环境
+
+   在FreeBSD上 :ref:`nvim_ide_fix` 存在一定的困难，所以我会重新实践 :ref:`nvim_ide_freebsd` 
+
 安装
 ===========
 

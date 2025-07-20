@@ -62,8 +62,8 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 
 - 安装区别:
 
-  - ZFS snapshot Thin Jail: 将FreeBSD Release base存放在 **只读** 的 ``14.2-RELEASE@base`` 快照上
-  - NullFS Thin Jail: 将FreeBSD Release base存放在 **读写** 的 ``14.2-RELEASE-base`` 数据集上
+  - ZFS snapshot Thin Jail: 将FreeBSD Release base存放在 **只读** 的 ``14.3-RELEASE@base`` 快照上
+  - NullFS Thin Jail: 将FreeBSD Release base存放在 **读写** 的 ``14.3-RELEASE-base`` 数据集上
 
 通过结合Thin Jail 和 ``NullFS`` 技术可以创建节约文件系统存储开销(类似于 ZFS ``snapshot`` clone出来的卷完全不消耗空间)，并且能够将Host主机的目录共享给 **多个** Jail。
 

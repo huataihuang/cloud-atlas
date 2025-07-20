@@ -1,4 +1,4 @@
-cd /skeleton/etc/ssl/certs
+cd /$jail_zfs/templates/$bsd_ver-RELEASE-base/etc/ssl/certs
 
 # 先保存一份原始列表记录
 ls -lh > /tmp/fix_link.txt

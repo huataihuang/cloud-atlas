@@ -16,6 +16,7 @@ FreeBSD Jail
    vnet_jail.rst
    linux_jail.rst
    vnet_thin_jail.rst
+   thin_jail_desktop.rst
    jail_admin.rst
    jail_destroy.rst
    jail_upgrade.rst
