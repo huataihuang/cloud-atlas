@@ -28,6 +28,7 @@ macOS
    introduce_macos_studio.rst
    macos_studio_startup.rst
    macos_studio.rst
+   macos_studio_as_chromebook.rst
    macos_share_file.rst
    homebrew.rst
    homebrew_init.rst

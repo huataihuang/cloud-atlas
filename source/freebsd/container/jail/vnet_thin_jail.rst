@@ -108,7 +108,7 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 - 创建一个特定数据集 ``skeleton`` (**骨骼**) ，这个 "骨骼" ``skeleton`` 命名非常形象，用意就是构建特殊的支持大量thin jial的框架底座
 
 .. literalinclude:: vnet_thin_jail/zfs_create
-   :caption: 创建skeleton
+   :caption: 创建特定数据集 ``skeleton`` (骨骼)
 
 - 执行以下命令，将特定目录移入 ``skeleton`` 数据集，并构建 ``base`` 和 ``skeleton`` 必要目录的软连接关系
 

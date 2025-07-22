@@ -117,7 +117,7 @@ BIOS模式启动bhyve虚拟机
 
 - 执行以下命令开始启动虚拟机安装:
 
-.. literalinclude:: bhyve_startup/vm
+.. literalinclude:: bhyve_ubuntu/vm
    :caption: 安装虚拟机
 
 命令参数:
@@ -133,11 +133,6 @@ BIOS模式启动bhyve虚拟机
 - ``-P`` 当检测到PAUSE指令时强制guest虚拟机vcpu退出
 - ``-s 29,fbuf,tcp=0.0.0.0:5900,w=800,h=600,wait`` 提供了 ``Graphical UEFI Framebuffer`` ，这对于图形安装界面非常有用，例如安装Windows就需要这个参数
 
-异常
------
-
-BdsDxe: failed to load Boot0002 "UEFI Misc Device"
-
 VNC客户端连接
 ===============
 
@@ -145,49 +140,24 @@ VNC客户端连接
 
 .. figure:: ../../../_static/freebsd/virtual/bhyve/bhyve_debian.png
 
-安装要点
-=========
-
-安装结束前，最后一步需要返回并选择 ``Execute a shell`` 加载一个终端，然后需要将debian的efi文件复制出来给FreeBSD加载:
-
-.. figure:: ../../../_static/freebsd/virtual/bhyve/debian_installation_goback.png
-
-.. figure:: ../../../_static/freebsd/virtual/bhyve/debian_installation_shell.png
-
-.. figure:: ../../../_static/freebsd/virtual/bhyve/debian_installation_shell_1.png
-
-.. literalinclude:: bhyve_startup/efi
-   :caption: 在shell窗口执行 ``复制debian的efi``
+启动
+=======
 
 .. note::
 
-   复制后的 efi 文件名是 ``bootx64.efi``
-
-启动
-=======
+   我在 :ref:`bhyve_startup` 实践中提到了按照handbook，在上述安装过程结束时候需要复制 ``grubx64.efi`` 为 ``bootx64.efi`` 。但是我现在实践没有执行这步efi文件复制，看起来也能够启动虚拟机。
 
 最后重启虚拟机，需要强制退出，然后再启动
 
 - 强制虚拟机关机:
 
-.. literalinclude:: bhyve_startup/stop_vm
+.. literalinclude:: bhyve_ubuntu/stop_vm
    :caption: 停止虚拟机
 
 - 启动虚拟机:
 
-.. literalinclude:: bhyve_startup/start_vm
+.. literalinclude:: bhyve_ubuntu/start_vm
    :caption: 启动虚拟机
-
-- 简单的启动脚本:
-
-.. literalinclude:: bhyve_startup/start_vm.sh
-   :caption: 启动虚拟机的简单脚本
-
-注意，在终端执行虚拟机启动脚本，关闭终端会导致虚拟机退出，所以需要使用 :ref:`tmux` 这样的终端管理器执行
-
-可以设置在系统重启后执行的crontab::
-
-   @reboot /path/to/startdebianvm
 
 参考
 ======
