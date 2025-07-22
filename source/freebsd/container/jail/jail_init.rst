@@ -30,7 +30,7 @@ devops初始化
 ssh初始化
 =============
 
-- 在 ``dev`` jail中创建用户组和用户 admin:
+- 在 ``mdev`` jail中创建用户组和用户 admin:
 
 .. literalinclude:: ../../startup/freebsd_init/user
    :caption: 在jail内部创建admin

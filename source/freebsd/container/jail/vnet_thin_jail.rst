@@ -34,6 +34,11 @@ Jail目录树
 
    注意，我使用了 ``jail_zfs`` 环境变量来指定ZFS位置，对应目录就是 ``/$jail_zfs``
 
+- 设置环境变量:
+
+.. literalinclude:: vnet_thin_jail/env
+   :caption: 设置 jail目录和release版本环境变量
+
 - 创建jail目录结构
 
 .. literalinclude:: vnet_thin_jail/dir
@@ -67,17 +72,17 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 
 通过结合Thin Jail 和 ``NullFS`` 技术可以创建节约文件系统存储开销(类似于 ZFS ``snapshot`` clone出来的卷完全不消耗空间)，并且能够将Host主机的目录共享给 **多个** Jail。
 
-- 创建 **读写模式** 的 ``14.2-RELEASE-base`` (注意，大家约定俗成 ``@base`` 表示只读快照， ``-base`` 表示可读写数据集)
+- 创建 **读写模式** 的 ``14.3-RELEASE-base`` (注意，大家约定俗成 ``@base`` 表示只读快照， ``-base`` 表示可读写数据集)
 
 .. literalinclude:: vnet_thin_jail/templates_base
-   :caption: 创建 **读写模式** 的 ``14.2-RELEASE-base``
+   :caption: 创建 **读写模式** 的 ``14.3-RELEASE-base``
 
 - 下载用户空间:
 
 .. literalinclude:: vnet_thin_jail/fetch
    :caption: 下载用户空间
 
-- 将下载内容解压缩到模版目录: **内容解压缩到模板目录( 14.2-RELEASE-base 后续不需要创建快照，直接使用)**
+- 将下载内容解压缩到模版目录: **内容解压缩到模板目录( 14.3-RELEASE-base 后续不需要创建快照，直接使用)**
 
 .. literalinclude:: vnet_thin_jail/tar
    :caption: 解压缩
@@ -92,13 +97,13 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 .. literalinclude:: vnet_thin_jail/update
    :caption: 更新模板补丁
 
-这里有一个疑惑，我的host主机 :ref:`freebsd_update_upgrade` 从 ``14.2-RELEASE`` 升级到 ``14.3-RELEASE`` ，这时我使用 ``$bsd_ver-RELEASE/base.txz`` 下载的 ``14.2-RELEASE/base.txz`` ，解压缩以后使用上面的命令进行更新，输出的提示信息
+这里有一个疑惑，我的host主机 :ref:`freebsd_update_upgrade` 从 ``14.3-RELEASE`` 升级到 ``14.3-RELEASE`` ，这时我使用 ``$bsd_ver-RELEASE/base.txz`` 下载的 ``14.3-RELEASE/base.txz`` ，解压缩以后使用上面的命令进行更新，输出的提示信息
 
 .. literalinclude:: vnet_thin_jail/update_output
    :caption: 更新模版补丁时候的输出信息显示是 ``14.3-RELEASE-p0``
    :emphasize-lines: 3,8
 
-可以看到host主机对模版更新是自动按照 ``14.3-RELEASE`` 的元数据进行，而不是模版的 ``14.2-RELEASE`` 。那么jail模版现在是 ``14.3-RELEASE`` 么？
+可以看到host主机对模版更新是自动按照 ``14.3-RELEASE`` 的元数据进行，而不是模版的 ``14.3-RELEASE`` 。那么jail模版现在是 ``14.3-RELEASE`` 么？
 
 - 创建一个特定数据集 ``skeleton`` (**骨骼**) ，这个 "骨骼" ``skeleton`` 命名非常形象，用意就是构建特殊的支持大量thin jial的框架底座
 

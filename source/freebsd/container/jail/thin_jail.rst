@@ -6,6 +6,14 @@ FreeBSD Thin(薄) Jail
 
 FreeBSD Thin Jail是基于 :ref:`zfs` (OpenZFS) 快照 或模板 和 NullFS 来创建的 **瘦** Jail
 
+设置环境变量
+================
+
+为方便调整，我设置了环境变量来方便后续操作
+
+.. literalinclude:: vnet_thin_jail/env
+   :caption: 设置 jail目录和release版本环境变量
+
 .. _thin_jail_using_zfs_snapshot:
 
 OpenZFS快照Thin Jail
@@ -18,7 +26,7 @@ OpenZFS快照Thin Jail
 
 - 和 :ref:`thick_jail` 一样下载用户空间:
 
-.. literalinclude:: thick_jail/fetch
+.. literalinclude:: vnet_thin_jail/fetch
    :caption: 下载用户空间
 
 - 将下载内容解压缩到模板目录:
@@ -63,7 +71,7 @@ OpenZFS快照Thin Jail
    虽然 ``snapshot => clone`` 极大地节约了磁盘空间，但是如果需要更新OpenZFS snapshot Thin Jails，需要:
 
    - destroy 所有的 clone，也就是销毁Thin Jails
-   - 更新ZFS卷，也就是上文案例中的 ``zroot/jails/templates/14.2-RELEASE`` ，当然可以是再建立一个卷，例如 ``zroot/jails/templates/14.3-RELEASE``
+   - 更新ZFS卷，也就是上文案例中的 ``zroot/jails/templates/14.3-RELEASE`` ，当然可以是再建立一个卷，例如 ``zroot/jails/templates/14.3-RELEASE``
    - 重新走一遍 ZFS snapshot => ZFS clone ，来构建Thin Jails
 
    也就是说，这是一个重建的过程，和 :ref:`docker` 的镜像发布非常相似: 不存在更新snapshot从而达到所有clone自动更新的效果
@@ -92,66 +100,74 @@ NullFS thin Jail
 
    所以，两者区别仅在于创建Thin Jail的开始步骤: 
 
-   - 将FreeBSD Release base存放在 **只读** 的 ``14.2-RELEASE@base`` **快照** - OpenZFS snapshot Thin Jail
-   - 将FreeBSD Relaase base存放在 **读写** 的 ``14.2-RELEASE-base`` **数据集** - NullFS Thin Jail
+   - 将FreeBSD Release base存放在 **只读** 的 ``14.3-RELEASE@base`` **快照** - OpenZFS snapshot Thin Jail
+   - 将FreeBSD Relaase base存放在 **读写** 的 ``14.3-RELEASE-base`` **数据集** - NullFS Thin Jail
 
-- 创建 **读写模式** 的 ``14.2-RELEASE-base`` (注意，大家约定俗成 ``@base`` 表示只读快照， ``-base`` 表示可读写数据集)
+- 创建 **读写模式** 的 ``14.3-RELEASE-base`` (注意，大家约定俗成 ``@base`` 表示只读快照， ``-base`` 表示可读写数据集)
 
-.. literalinclude:: thin_jail/zfs_nullfs
-   :caption: 创建 **读写模式** 的 ``14.2-RELEASE-base`` 数据集
+.. literalinclude:: vnet_thin_jail/templates_base
+   :caption: 创建 **读写模式** 的 ``14.3-RELEASE-base`` 数据集
 
 - 和 :ref:`thick_jail` 一样下载用户空间:
 
-.. literalinclude:: thick_jail/fetch
+.. literalinclude:: vnet_thin_jail/fetch
    :caption: 下载用户空间
 
 - 将下载内容解压缩到模板目录:
 
-.. literalinclude:: thin_jail/template_nullfs
-   :caption: 内容解压缩到模板目录( ``14.2-RELEASE-base`` 后续不需要创建快照，直接使用)
+.. literalinclude:: vnet_thin_jail/tar
+   :caption: 内容解压缩到模板目录( ``14.3-RELEASE-base`` 后续不需要创建快照，直接使用)
 
 - 将时区和DNS配置复制到模板目录:
 
-.. literalinclude:: thin_jail/template_conf_nullfs
+.. literalinclude:: vnet_thin_jail/cp
    :caption: 时区和DNS配置复制到模板目录
 
 - 更新模板补丁:
 
-.. literalinclude:: thin_jail/template_update_nullfs
+.. literalinclude:: vnet_thin_jail/update
    :caption: 更新补丁
 
 ``关键部分来了，以下是NullFS特别部分``
 
 - 创建一个特定数据集 ``skeleton`` (骨骼) ，这个 "骨骼" ``skeleton`` 命名非常形象，用意就是构建特殊的支持大量thin jial的框架底座
 
-.. literalinclude:: thin_jail/create_skeleton_zfs
+.. literalinclude:: vnet_thin_jail/zfs_create
    :caption: 创建特定数据集 ``skeleton`` (骨骼)
 
-- 执行以下命令，将特定目录移入 ``skeleton`` 数据集，并构建 ``base`` 和 ``skeleton`` 必要目录的软连接关系
+- 执行以下命令，将特定目录移入 ``skeleton`` 数据集，并构建 ``base`` 和 ``skeleton`` 必要目录的软连接关系(注意：刚开始步骤有报错，我修改了方法)
 
 .. literalinclude:: thin_jail/create_directories_nullfs
-   :caption: 创建目录
+   :caption: 创建目录(以前的方法，实际有报错，修正见后文)
 
-这里有一个报错，在 ``mv var`` 到 ``skeleton`` ZFS数据集下时会报错，显示其中 ``var/empty`` 目录没有权限删除: ``mv var/empty: Operation not permitted`` ，我后来是通过将上一级目录重命名来解决的 ``mv var var.bak``
+这里有一个报错，在 ``mv var`` 到 ``skeleton`` ZFS数据集下时会报错，显示其中 ``var/empty`` 目录没有权限删除: ``mv var/empty: Operation not permitted`` ，我后来是通过将上一级目录重命名来解决的 ``mv var var.bak`` ，具体方法按照 :ref:`vnet_thin_jail` :
+
+.. literalinclude:: vnet_thin_jail/skeleton_link
+   :caption: 特定目录移入 ``skeleton`` 数据集
 
 - 执行以下命令创建软连接
 
-.. literalinclude:: thin_jail/skeleton_link
+.. literalinclude:: vnet_thin_jail/link
    :caption: 创建 ``skeleton`` 软连接     
+
+- **补充步骤** (实践发现需要修正certs软连接，见 :ref:`vnet_thin_jail` ) 修复 ``/etc/ssl/certs`` 目录下证书文件软链接
+
+.. literalinclude:: vnet_thin_jail/fix_link.sh
+   :caption: 修复软链接
 
 - 在 ``skeleton`` 就绪之后，需要将数据复制到 jail 目录(如果是UFS文件系统)，对于ZFS则非常方便使用快照:
 
-.. literalinclude:: thin_jail/zfs_snapshot_nullfs
+.. literalinclude:: vnet_thin_jail/snapshot
    :caption: 将刚才建立的 ``skeleton`` 创建快照，也就是用于jail
 
 完成后可以看到相关的ZFS数据集如下:
 
-.. literalinclude:: thin_jail/zfs_nullfs_df
+.. literalinclude:: vnet_thin_jail/df_jail
    :caption: 完成后可以看到ZFS挂载(df)
 
 - 创建一个 base template的目录，这个目录是 ``skeleton`` 挂载所使用的根目录:
 
-.. literalinclude:: thin_jail/nullfs-base_dir
+.. literalinclude:: vnet_thin_jail/nullfs-base
    :caption: 创建一个jail所使用的模板目录
 
 - 之前构建 ``d2l`` ZFS snapshot Thin Jail时，共用 ``/etc/jail.conf`` :
@@ -184,13 +200,13 @@ NullFS thin Jail
 NullFS简析
 --------------
 
-在 ``NullFS`` Jail中，只有特定的从数据集 ``14.2-RELEASE-base`` 移出到 ``14.2-RELEASE-skeleton`` 并被快照clone成 ``skeleton`` 的数据才是可读写的。这部分通过软连接和 **只读** 挂载的 ``14.2-RELEASE-base`` 关联。
+在 ``NullFS`` Jail中，只有特定的从数据集 ``14.3-RELEASE-base`` 移出到 ``14.3-RELEASE-skeleton`` 并被快照clone成 ``skeleton`` 的数据才是可读写的。这部分通过软连接和 **只读** 挂载的 ``14.3-RELEASE-base`` 关联。
 
-``通过数据集 14.2-RELEASE-base 只读挂载确保Jail不会修改基础软件，同时由于是数据集，所以可以在Host进行滚动更新``
+``通过数据集 14.3-RELEASE-base 只读挂载确保Jail不会修改基础软件，同时由于是数据集，所以可以在Host进行滚动更新``
 
 这里有一个非常巧妙的构思:  ``13.2-RELEASE-skeleton@base`` 将部分需要根据每个jail变化的部分单独摘除出来( ``/etc`` / ``/usr/local`` / ``root`` / ``/tmp`` / ``/var`` )，这样后续clone出来的这部分每个jail都可以各自读写没有障碍。
 
-如果需要为所有Jail部署相同的软件和配置，例如 ``sudo`` 和 ``ssh`` ，则可以在 ``chroot`` ``14.2-RELEASE-base`` 目录下进行安装更新，完成后只要对 ``13.2-RELEASE-skeleton`` 做依次快照 ``@base`` ，那么这部分增加的软件配置会被所有NullFS Jail使用。唯一的缺点是，这部分非 ``base`` 的软件包安装是使用ZFS snapshot，是不能自动为每个Jail更新的，这部分定制需要在每个Jail中对 ``clone`` 内容进行更新( ``snapshot`` 是死的，更新需要重建所有Jail，这也是没有办法的办法，相当于底座替换)
+如果需要为所有Jail部署相同的软件和配置，例如 ``sudo`` 和 ``ssh`` ，则可以在 ``chroot`` ``14.3-RELEASE-base`` 目录下进行安装更新，完成后只要对 ``13.2-RELEASE-skeleton`` 做依次快照 ``@base`` ，那么这部分增加的软件配置会被所有NullFS Jail使用。唯一的缺点是，这部分非 ``base`` 的软件包安装是使用ZFS snapshot，是不能自动为每个Jail更新的，这部分定制需要在每个Jail中对 ``clone`` 内容进行更新( ``snapshot`` 是死的，更新需要重建所有Jail，这也是没有办法的办法，相当于底座替换)
 
 参考
 ======

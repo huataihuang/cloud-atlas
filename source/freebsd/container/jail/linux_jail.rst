@@ -23,6 +23,11 @@ FreeBSD 可以使用 :ref:`linuxulator` 和 ``debootstrap`` 在jail中运行Linu
 准备 :ref:`thin_jail`
 ==================================
 
+为方便调整，我设置了环境变量来方便后续操作
+
+.. literalinclude:: vnet_thin_jail/env
+   :caption: 设置 jail目录和release版本环境变量
+
 :ref:`thin_jail` 初始化
 ----------------------------------
 
@@ -37,7 +42,7 @@ FreeBSD 可以使用 :ref:`linuxulator` 和 ``debootstrap`` 在jail中运行Linu
 
 (已完成,跳过)和 :ref:`thick_jail` 一样下载用户空间:
 
-.. literalinclude:: thick_jail/fetch
+.. literalinclude:: vnet_thin_jail/fetch
    :caption: 下载用户空间
 
 (已完成,跳过)将下载内容解压缩到模板目录:

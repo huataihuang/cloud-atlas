@@ -4,11 +4,16 @@
 FreeBSD Thick(厚) Jail
 =======================
 
+为方便调整，我设置了环境变量来方便后续操作
+
+.. literalinclude:: vnet_thin_jail/env
+   :caption: 设置 jail目录和release版本环境变量
+
 原则上，一个 jail 只需要一个主机名、一个根目录、一个 IP 地址和一个用户空间。
 
 - 下载用户空间:
 
-.. literalinclude:: thick_jail/fetch
+.. literalinclude:: vnet_thin_jail/fetch
    :caption: 下载用户空间
 
 - 解压缩到jail目录:
