@@ -154,10 +154,30 @@ VNC客户端连接
 .. literalinclude:: bhyve_ubuntu/stop_vm
    :caption: 停止虚拟机
 
-- 启动虚拟机:
+- 启动虚拟机(去除了cdrom配置):
 
 .. literalinclude:: bhyve_ubuntu/start_vm
-   :caption: 启动虚拟机
+   :caption: 启动虚拟机 ``start_ubuntu``
+
+生成虚拟机配置
+================
+
+上述启动虚拟机需要很长的命令行，为了方便启动，可以先把虚拟机配置dump出来，也就是修改上述 ``start_ubuntu`` ，添加一行 ``-o config.dump=1`` 参数，就可以输出配置(需要重定向到文件):
+
+.. literalinclude:: bhyve_ubuntu/start_vm_config
+   :caption: 启动虚拟机 ``start_ubuntu`` 重定向输出vm配置
+   :emphasize-lines: 10,11
+
+此时生成的配置文件 ``ubuntu.config`` 如下:
+
+.. literalinclude:: bhyve_ubuntu/ubuntu.config
+   :caption: 启动虚拟机 ``start_ubuntu`` 重定向输出vm配置文件 ``ubuntu.config``
+   :emphasize-lines: 25
+
+- 删除掉上述配置文件中 ``config.dump=1`` 行，就可以使用 ``-k`` 参数来启动虚拟机:
+
+.. literalinclude:: bhyve_ubuntu/bhyve_config
+   :caption: 使用 ``-k`` 指定配置文件启动虚拟机
 
 参考
 ======
@@ -165,3 +185,4 @@ VNC客户端连接
 - `FreeBSD handbook: Chapter 24. Virtualization <https://docs.freebsd.org/en/books/handbook/virtualization/>`_
 - `How to install Linux VM on FreeBSD using bhyve and ZFS <https://www.cyberciti.biz/faq/how-to-install-linux-vm-on-freebsd-using-bhyve-and-zfs/#google_vignette>`_
 - `From 0 to Bhyve on FreeBSD 13.1 <https://klarasystems.com/articles/from-0-to-bhyve-on-freebsd-13-1/>`_
+- `bhyve wiki <https://wiki.freebsd.org/bhyve>`_
