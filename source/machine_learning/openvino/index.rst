@@ -1,16 +1,14 @@
-.. _intel_gpu:
+.. _openvino:
 
 =================================
-Intel GPU
+Intel OpenVINO
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intel_gpu_infra.rst
-   intel_uhd_graphics_630.rst
-   check_gpu_vram_size.rst
-
+   intro_openvino.rst
+   openvino_genai.rst
 
 .. only::  subproject and html
 

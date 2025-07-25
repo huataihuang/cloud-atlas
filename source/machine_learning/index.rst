@@ -25,6 +25,7 @@ Machine Learning
    hardware/index
    jetson/index
    cuda/index
+   openvino/index
    pytorch/index
    tensorflow/index
    stable_diffusion/index

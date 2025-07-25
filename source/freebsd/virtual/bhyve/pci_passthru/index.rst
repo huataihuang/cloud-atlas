@@ -8,6 +8,8 @@ bhyve PCI Passthrough
    :maxdepth: 1
 
    bhyve_pci_passthru_startup.rst
+   bhyve_nvidia_gpu_passthru.rst
+   bhyve_intel_gpu_passthru.rst
 
 
 

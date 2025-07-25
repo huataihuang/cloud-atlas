@@ -14,7 +14,7 @@ Intel UHD Graphics 630 是Intel于2017年9月1日推出的集成显卡解决方�
    :widths: 20, 40, 40
    :header-rows: 1
 
-从技术参数来看，Intel UHD Graphics 630似乎只有 :ref:`tesla_p10` 的 ``1/30`` 性能
+从技术参数来看，Intel UHD Graphics 630似乎只有 :ref:`tesla_p10` 的 ``1/30`` 性能，具体待实测
 
 机器学习
 =========
@@ -27,6 +27,13 @@ Intel UHD Graphics 630 是Intel于2017年9月1日推出的集成显卡解决方�
 - ...
 
 很不幸，我的 :ref:`xeon_e-2274g` 集成的 ``Intel UHD Graphics 630`` 不在支持之列，也就是说无缘 :ref:`llama` 支持了，哭... (安慰自己一下，毕竟十一代之后的CPU价格较贵，我现在使用的九代CPU也算物尽其用 ^_^ )
+
+不过，也不是完全绝望:
+
+- `Supported APIs for Intel® Graphics <https://www.intel.com/content/www/us/en/support/articles/000005524/graphics.html>`_ 显示Intel UHD 630支持 vulkan 1.3
+- `llama build: Vulkan <https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md#vulkan>`_ 显示llama可以通过Vulkan API来使用GPU，也就变相支持了旧版本 ``Intel UHD Graphics``
+
+我准备以vulkan的思路来尝试驱动 ``Intel UHD Graphics 630`` 用于llama: 配置20GB的共享显存，这样可以加载 :ref:`ollama_run_deepseek` 32b模型进行推理，正好能够对应 :ref:`tesla_p10` 的24GB显存同样使用32b模型。很期待两者的性能对比...
 
 参考
 ======
