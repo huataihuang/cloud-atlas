@@ -70,6 +70,18 @@ FreeBSD检查方法
 
 你都可以通过指定 ``sysctl -a hw.physmem`` 这样的命令一一对应提取
 
+综合上述方法，可以使用 ``egrep`` 一次性提取所需的信息，例如:
+
+.. literalinclude:: freebsd_check/sysctl_cpu_mem
+   :caption: 通过 ``sysctl`` 获取硬件信息
+
+可以看到我的组装机 :ref:`nasse_c246` 安装的 :ref:`xeon_e-2274g` 以及 64G 内存:
+
+.. literalinclude:: freebsd_check/sysctl_cpu_mem_output
+   :caption: 通过 ``sysctl`` 获取硬件信息
+
+
+
 内存查看工具
 ========================
 
@@ -249,3 +261,4 @@ FreeBSD也提供了和Linux相同的 ``dmidecode`` ::
 ======
 
 - `FreeBSD Display Information About The System Hardware <https://www.cyberciti.biz/tips/freebsd-display-information-about-the-system.html>`_
+- `FreeBSD CPU Information Command <https://www.cyberciti.biz/faq/howto-find-out-freebsd-cpuinfo/>`_

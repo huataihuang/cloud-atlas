@@ -1,0 +1,224 @@
+diff --git a/sys/amd64/vmm/x86.c b/sys/amd64/vmm/x86.c
+index 7d11346ac..2505b1a2a 100644
+--- a/sys/amd64/vmm/x86.c
++++ b/sys/amd64/vmm/x86.c
+@@ -51,7 +51,7 @@ static SYSCTL_NODE(_hw_vmm, OID_AUTO, topology, CTLFLAG_RD | CTLFLAG_MPSAFE, 0,
+ 
+ #define	CPUID_VM_HIGH		0x40000000
+ 
+-static const char bhyve_id[12] = "bhyve bhyve ";
++static const char bhyve_id[12] = "KVMKVMKVM\0\0\0";
+ 
+ static uint64_t bhyve_xcpuids;
+ SYSCTL_ULONG(_hw_vmm, OID_AUTO, bhyve_xcpuids, CTLFLAG_RW, &bhyve_xcpuids, 0,
+diff --git a/sys/dev/pci/pcireg.h b/sys/dev/pci/pcireg.h
+index 623deb8b4..11b8ddf1e 100644
+--- a/sys/dev/pci/pcireg.h
++++ b/sys/dev/pci/pcireg.h
+@@ -1125,6 +1125,11 @@
+ #define	PCIM_ACS_UNCLAIMED_REQ_REDIRECT_CTL	0x1000
+ #define	PCIR_ACS_EGRESS_CONTROL_VECTOR	0x8
+ 
++/*
++ * PCI Vendors
++ */
++#define PCI_VENDOR_NVIDIA 0x10DE
++
+ /*
+  * AMD IOMMU Base Capability
+  * From AMD I/O Virtualization Technology (IOMMU) Specification
+diff --git a/usr.sbin/bhyve/pci_passthru.c b/usr.sbin/bhyve/pci_passthru.c
+index fa23358c0..f74adfa2f 100644
+--- a/usr.sbin/bhyve/pci_passthru.c
++++ b/usr.sbin/bhyve/pci_passthru.c
+@@ -76,6 +76,7 @@
+ #define PASSTHRU_MMIO_MAX 2
+ 
+ static int pcifd = -1;
++static uint8_t *nvidia_bar0;
+ 
+ SET_DECLARE(passthru_dev_set, struct passthru_dev);
+ 
+@@ -571,6 +572,30 @@ cfginitbar(struct passthru_softc *sc)
+ 		sc->psc_bar[i].addr = base;
+ 		sc->psc_bar[i].lobits = 0;
+ 
++		if (i == 0 &&
++		    read_config(&sc->psc_sel, PCIR_VENDOR, 2) ==
++			PCI_VENDOR_NVIDIA &&
++		    read_config(&sc->psc_sel, PCIR_CLASS, 2) == PCIC_DISPLAY) {
++
++			struct pci_bar_mmap pbm;
++			memset(&pbm, 0, sizeof(pbm));
++			pbm.pbm_sel = sc->psc_sel;
++			pbm.pbm_flags = PCIIO_BAR_MMAP_RW;
++			pbm.pbm_reg = PCIR_BAR(i);
++			pbm.pbm_memattr = VM_MEMATTR_DEVICE;
++			if (ioctl(pcifd, PCIOCBARMMAP, &pbm) != 0) {
++				warn("Failed to map Nvidia BAR 0");
++				return (-1);
++			}
++			assert(pbm.pbm_bar_off == 0);
++
++			nvidia_bar0 = (uint8_t *)(uintptr_t)pbm.pbm_map_base;
++			if (pbm.pbm_map_length < 0x88000) {
++				warnx("Invalid BAR 0 size for Nvidia device");
++				return (-1);
++			}
++		}
++
+ 		/* Allocate the BAR in the guest I/O or MMIO space */
+ 		error = pci_emul_alloc_bar(pi, i, bartype, size);
+ 		if (error)
+@@ -918,6 +943,11 @@ passthru_init(struct pci_devinst *pi, nvlist_t *nvl)
+ 	if ((error = set_pcir_handler(sc, PCIR_COMMAND, 0x04, NULL, NULL)) != 0)
+ 		goto done;
+ 
++	/* copy PCI header to virtual PCI space */
++	for (uint32_t i = 0; i < 0x3E; ++i) {
++		pci_set_cfgdata8(pi, i, read_config(&sc->psc_sel, i, 1));
++	}
++
+ 	SET_FOREACH(devpp, passthru_dev_set) {
+ 		devp = *devpp;
+ 		assert(devp->probe != NULL);
+@@ -1014,6 +1044,13 @@ passthru_cfgread(struct pci_devinst *pi, int coff, int bytes, uint32_t *rv)
+ 
+ 	sc = pi->pi_arg;
+ 
++	if (coff >= PCI_REGMAX) {
++		warnx("%s (%d/%d/%d): Invalid offset %x", __func__, pi->pi_bus,
++		    pi->pi_slot, pi->pi_func, coff);
++		*rv = 0xFFFFFFFF;
++		return (-1);
++	}
++
+ 	if (sc->psc_pcir_rhandler[coff] != NULL)
+ 		return (sc->psc_pcir_rhandler[coff](sc, pi, coff, bytes, rv));
+ 
+@@ -1108,6 +1145,12 @@ passthru_cfgwrite(struct pci_devinst *pi, int coff, int bytes, uint32_t val)
+ 
+ 	sc = pi->pi_arg;
+ 
++	if (coff >= PCI_REGMAX) {
++		warnx("%s (%d/%d/%d): Invalid offset %x", __func__, pi->pi_bus,
++		    pi->pi_slot, pi->pi_func, coff);
++		return (-1);
++	}
++
+ 	if (sc->psc_pcir_whandler[coff] != NULL)
+ 		return (sc->psc_pcir_whandler[coff](sc, pi, coff, bytes, val));
+ 
+@@ -1125,6 +1168,10 @@ passthru_write(struct pci_devinst *pi, int baridx, uint64_t offset, int size,
+ 
+ 	if (baridx == pci_msix_table_bar(pi)) {
+ 		msix_table_write(sc, offset, size, value);
++	} else if (baridx == 0 &&
++	    pci_get_cfgdata16(pi, PCIR_VENDOR) == PCI_VENDOR_NVIDIA &&
++	    pci_get_cfgdata8(pi, PCIR_CLASS) == PCIC_DISPLAY) {
++		passthru_cfgwrite(pi, offset - 0x88000, size, value);
+ 	} else {
+ 		assert(pi->pi_bar[baridx].type == PCIBAR_IO);
+ 		assert(size == 1 || size == 2 || size == 4);
+@@ -1153,6 +1200,13 @@ passthru_read(struct pci_devinst *pi, int baridx, uint64_t offset, int size)
+ 
+ 	if (baridx == pci_msix_table_bar(pi)) {
+ 		val = msix_table_read(sc, offset, size);
++	} else if (baridx == 0 &&
++	    pci_get_cfgdata16(pi, PCIR_VENDOR) == PCI_VENDOR_NVIDIA &&
++	    pci_get_cfgdata8(pi, PCIR_CLASS) == PCIC_DISPLAY) {
++		/* dummy read to MMIO because hw might depend on it */
++		memcpy(&val, nvidia_bar0 + offset, size);
++
++		passthru_cfgread(pi, offset - 0x88000, size, (uint32_t *)&val);
+ 	} else {
+ 		assert(pi->pi_bar[baridx].type == PCIBAR_IO);
+ 		assert(size == 1 || size == 2 || size == 4);
+@@ -1232,6 +1286,62 @@ passthru_mmio_addr(struct pci_devinst *pi, int baridx, int enabled,
+ 	struct passthru_softc *sc;
+ 
+ 	sc = pi->pi_arg;
++
++	if (pci_get_cfgdata16(pi, PCIR_VENDOR) == PCI_VENDOR_NVIDIA &&
++	    pci_get_cfgdata8(pi, PCIR_CLASS) == PCIC_DISPLAY && baridx == 0) {
++		uint64_t gpa = address;
++		uint64_t len = 0x880000;
++		uint64_t hpa = sc->psc_bar[baridx].addr;
++
++		printf(
++		    "%d/%d/%d modify_mmio 0x%016lx -> 0x%016lx (size %16lx) %s\n\r",
++		    sc->psc_sel.pc_bus, sc->psc_sel.pc_dev, sc->psc_sel.pc_func,
++		    hpa, gpa, len,
++		    enabled ? "map" : "unmap");
++		if (!enabled) {
++			if (vm_unmap_pptdev_mmio(pi->pi_vmctx, sc->psc_sel.pc_bus,
++				sc->psc_sel.pc_dev, sc->psc_sel.pc_func, gpa,
++				len) != 0) {
++				warnx(
++				    "pci_passthru: vm_unmap_pptdev_mmio nvidia low failed");
++			}
++		} else {
++			if (vm_map_pptdev_mmio(pi->pi_vmctx, sc->psc_sel.pc_bus,
++				sc->psc_sel.pc_dev, sc->psc_sel.pc_func, gpa,
++				len, hpa) != 0) {
++				warnx(
++				    "pci_passthru: vm_map_pptdev_mmio nvidia low failed");
++			}
++		}
++
++		gpa += 0x880000 + 0x1000;
++		hpa += 0x880000 + 0x1000;
++		len = sc->psc_bar[baridx].size - (0x880000 + 0x1000);
++
++		printf(
++		    "%d/%d/%d modify_mmio 0x%016lx -> 0x%016lx (size %16lx) %s\n\r",
++		    sc->psc_sel.pc_bus, sc->psc_sel.pc_dev, sc->psc_sel.pc_func,
++		    hpa, gpa, len,
++		    enabled ? "map" : "unmap");
++		if (!enabled) {
++			if (vm_unmap_pptdev_mmio(pi->pi_vmctx, sc->psc_sel.pc_bus,
++				sc->psc_sel.pc_dev, sc->psc_sel.pc_func, gpa,
++				len) != 0) {
++				warnx(
++				    "pci_passthru: vm_unmap_pptdev_mmio nvidia low failed");
++			}
++		} else {
++			if (vm_map_pptdev_mmio(pi->pi_vmctx, sc->psc_sel.pc_bus,
++				sc->psc_sel.pc_dev, sc->psc_sel.pc_func, gpa,
++				len, hpa) != 0) {
++				warnx(
++				    "pci_passthru: vm_map_pptdev_mmio nvidia low failed");
++			}
++		}
++
++		return;
++	}
++
+ 	if (!enabled) {
+ 		if (vm_unmap_pptdev_mmio(pi->pi_vmctx, sc->psc_sel.pc_bus,
+ 					 sc->psc_sel.pc_dev,
+diff --git a/../pci_passthru.c b/./usr.sbin/bhyve/pci_passthru.c
+index afa14a0c2..4bd2dc891 100644
+--- a/usr.sbin/bhyve/pci_passthru.c
++++ b/usr.sbin/bhyve/pci_passthru.c
+@@ -577,9 +577,9 @@ cfginitbar(struct passthru_softc *sc)
+ 		sc->psc_bar[i].lobits = 0;
+ 
+ 		if (i == 0 &&
++		    pci_host_read_config(&sc->psc_sel, PCIR_VENDOR, 2) ==
+-		    read_config(&sc->psc_sel, PCIR_VENDOR, 2) ==
+ 			PCI_VENDOR_NVIDIA &&
++		    pci_host_read_config(&sc->psc_sel, PCIR_CLASS, 2) == PCIC_DISPLAY) {
+-		    read_config(&sc->psc_sel, PCIR_CLASS, 2) == PCIC_DISPLAY) {
+ 
+ 			struct pci_bar_mmap pbm;
+ 			memset(&pbm, 0, sizeof(pbm));
+@@ -951,7 +951,7 @@ passthru_init(struct pci_devinst *pi, nvlist_t *nvl)
+ 
+ 	/* copy PCI header to virtual PCI space */
+ 	for (uint32_t i = 0; i < 0x3E; ++i) {
++		pci_set_cfgdata8(pi, i, pci_host_read_config(&sc->psc_sel, i, 1));
+-		pci_set_cfgdata8(pi, i, read_config(&sc->psc_sel, i, 1));
+ 	}
+ 
+ 	SET_FOREACH(devpp, passthru_dev_set) {
