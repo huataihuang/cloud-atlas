@@ -1,0 +1,100 @@
+#!/bin/sh
+
+usage() {
+	cat >&2 << EOF
+Usage: ${0} [--no-bhf] [--reboot] [--verbose] [--without-kernel]
+	Builds bhyve
+EOF
+	exit 1
+}
+
+build_module() {
+	local _path
+	_path="${1}"
+
+	# change to module path
+	cd "${_path}"
+
+	# clean module
+	if test "${clean}" = "true"; then
+		make clean > "${cmd_redirect}" 2>&1
+	fi
+
+	# build module
+	make > "${cmd_redirect}" 2>&1
+
+	# install module
+	make install > "${cmd_redirect}"
+}
+
+build() {
+	build_module "${src_dir}/include"
+	build_module "${src_dir}/lib/libvmmapi"
+	build_module "${src_dir}/sys/modules/vmm"
+
+	# build kernel
+	if test "${with_kernel}" = "true"; then
+		cd "${src_dir}"
+		local kern_opts
+		kern_opts="-j$(sysctl -n hw.ncpu)"
+		if test "${with_bhf}" = "true"; then
+			kern_opts="${kern_opts} KERNCONF=BHF"
+		fi
+		if ! test "${clean}" = "true"; then
+			kern_opts="${kern_opts} NO_CLEAN=YES"
+		fi
+		make kernel ${kern_opts} > "${cmd_redirect}" 2>&1
+	fi
+
+	build_module "${src_dir}/usr.sbin/bhyve"
+	build_module "${src_dir}/usr.sbin/bhyvectl"
+	build_module "${src_dir}/usr.sbin/bhyveload"
+
+	if test "${with_reboot}" = "true"; then
+		reboot
+	fi
+}
+
+set -e
+set -u
+
+while test $# -gt 0; do
+	case "${1-}" in
+		--clean)
+			clean="true"
+			shift
+			;;
+		--reboot)
+			with_reboot="true"
+			shift
+			;;
+		--src-dir=*)
+			src_dir="${1#*=}"
+			shift
+			;;
+		--verbose)
+			cmd_redirect="/dev/stdout"
+			shift
+			;;
+		--without-bhf)
+			with_bhf="false"
+			shift
+			;;
+		--without-kernel)
+			with_kernel="false"
+			shift
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+
+readonly clean="${clean-"false"}"
+readonly cmd_redirect="${cmd_redirect-"/dev/null"}"
+readonly src_dir="${src_dir-"/usr/src"}"
+readonly with_bhf="${with_bhf-"true"}"
+readonly with_kernel="${with_kernel-"true"}"
+readonly with_reboot="${with_reboot-"false"}"
+
+build

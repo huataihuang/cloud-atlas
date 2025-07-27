@@ -35,6 +35,23 @@ Intel UHD Graphics 630 是Intel于2017年9月1日推出的集成显卡解决方�
 
 我准备以vulkan的思路来尝试驱动 ``Intel UHD Graphics 630`` 用于llama: 配置20GB的共享显存，这样可以加载 :ref:`ollama_run_deepseek` 32b模型进行推理，正好能够对应 :ref:`tesla_p10` 的24GB显存同样使用32b模型。很期待两者的性能对比...
 
+Intel显卡的DVMT技术
+======================
+
+Intel内置显卡的内存是动态分配的，也就是操作系统系统内存分配给显卡使用，在BIOS中设置称为 ``DVMT`` (Dynamic Video Memory Technoloy)。不过，实际上这个值在BIOS中只能设置 ``128MB`` , ``256MB`` 和 ``maximum`` ，而其他设置值取决于主板制造商和安装在主机的内存量。
+
+``DVMT`` 的资料似乎比较匮乏，Intel网站 `How to Adjust Dedicated Video Memory for Intel Graphics <https://www.intel.com/content/www/us/en/support/articles/000041253/graphics.html>`_ 没有明确说明，只提供了一个Windows 10/11的配置指引，看起来是操作系统动态配置的: `Frequently Asked Questions for Intel® Graphics Memory on Windows® 10 and Windows 11 <https://www.intel.com/content/www/us/en/support/articles/000020962/graphics.html>`_ :
+
+The amount of graphics memory in use is dynamically allocated to balance the needs of the operating system and all running applications.
+
+在Windows系统上 ``Intel UHD Graphics`` 630 最多可以分配一半的系统内存作为显卡显存。
+
+目前我还没有找到有关Linux的配置方法，有些资料可能可以参考:
+
+- `Intel UHD Graphics 630 "Coffee Lake" On Linux <https://www.phoronix.com/review/coffee-uhd-graphics>`_
+- `Don't Change DVMT Pre-allocated Video Memory in BIOS. Lessens Performance. <https://www.reddit.com/r/gpdwin/comments/5hxgpe/dont_change_dvmt_preallocated_video_memory_in/>`_
+- `Windows: Calculating Graphics Memory <https://learn.microsoft.com/en-us/windows-hardware/drivers/display/calculating-graphics-memory>`_
+
 参考
 ======
 

@@ -4,9 +4,19 @@
 在bhyve中实现NVIDIA GPU passthrough
 ===============================================
 
+.. warning::
+
+   本文记录的通过补丁方式来解决NVIDIA GPU passthrough可能不是我遇到问题的解决方法:
+
+   我使用了发行版原生的 ``bhyve`` ，也尝试了本文记录的补丁方式，但是都 **没有解决** :ref:`tesla_p10` passthrough 给 bhyve 虚拟机时无法启动虚拟机的问题
+   
+   但是我硬件改成 :ref:`tesla_p4` ，结果就成功启动了虚拟机(目前使用了补丁版本，但我怀疑原生版本也行)
+
 我在尝试 :ref:`bhyve_pci_passthru_startup` 将 :ref:`tesla_p10` passthrough 给 bhyve 虚拟机，但是遇到无法启动虚拟机的问题，不论是直接使用 ``bhyve`` 命令还是通过 :ref:`vm-bhyve` 管理工具。这个问题困挠了我很久...
 
 `GPU passthrough for bhyve on FreeBSD 14 <https://dflund.se/~getz/Notes/2024/freebsd-gpu/>`_ 解释了为何网上说 "bhyve支持PCI设备passthrough，但是不支持GPU passthru" 是一个误解: 真实原因是NVIDIA驱动仅支持KVM信号的hypervisor，对于bhyve则需要补丁才行。
+
+很不幸，我最终实践没有成功passthru :ref:`tesla_p10` ，但是同样GPU核心但是内存和频率降级的 :ref:`tesla_p4` 就非常成功使用。我感觉这两款NVIDIA GPU在处理hypvervisor时候有一些区别，目前我还没有找到如何驱动 :ref:`tesla_p10` passthru的方法。暂时先使用 :ref:`tesla_p4` 来做一些小模型的测试，后续有机会再尝试解决 :ref:`tesla_p10` passthru。
 
 .. note::
 
@@ -59,8 +69,8 @@ PCI passthru
 
 - 重启系统
 
-获取源代码
-============
+nvidia补丁(尝试一)
+=====================
 
 .. warning::
 
@@ -91,6 +101,21 @@ PCI passthru
    :caption: 编译安装include, vmm, bhyve, bhyvectl, bhyveloa
 
 重启系统
+
+nvidia补丁(尝试二)
+=======================
+
+`ZioMario提供了一个编译安装脚本 <https://forums.freebsd.org/threads/current-state-of-bhyve-nvidia-passthrough.88244/page-4>`_ 我准备重新尝试一下
+
+- 准备目录
+
+.. literalinclude:: bhyve_nvidia_gpu_passthru/src
+   :caption: 下载源代码
+
+- 将下载的 :download:`setup.txt` :download:`build_branch.txt` :download:`build.txt` 存放到一个目录下，并将后缀名修订为 ``.sh`` ，然后执行:
+
+.. literalinclude:: bhyve_nvidia_gpu_passthru/build
+   :caption: 执行 build_branch.sh 脚本
 
 配置
 =======
