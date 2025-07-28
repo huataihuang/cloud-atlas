@@ -10,7 +10,7 @@
 
    我使用了发行版原生的 ``bhyve`` ，也尝试了本文记录的补丁方式，但是都 **没有解决** :ref:`tesla_p10` passthrough 给 bhyve 虚拟机时无法启动虚拟机的问题
    
-   但是我硬件改成 :ref:`tesla_p4` ，结果就成功启动了虚拟机(目前使用了补丁版本，但我怀疑原生版本也行)
+   但是我硬件改成 :ref:`tesla_p4` ，结果就成功启动了虚拟机。目前使用了补丁版本，但我怀疑原生版本也行(我准备回滚到发行版本再重新尝试)
 
 我在尝试 :ref:`bhyve_pci_passthru_startup` 将 :ref:`tesla_p10` passthrough 给 bhyve 虚拟机，但是遇到无法启动虚拟机的问题，不论是直接使用 ``bhyve`` 命令还是通过 :ref:`vm-bhyve` 管理工具。这个问题困挠了我很久...
 
@@ -116,6 +116,14 @@ nvidia补丁(尝试二)
 
 .. literalinclude:: bhyve_nvidia_gpu_passthru/build
    :caption: 执行 build_branch.sh 脚本
+
+.. note::
+
+   到这里，我发现我的 :ref:`tesla_p4` 能够启动，但是 :ref:`tesla_p10` 不能启动虚拟机。不过 :ref:`bhyve_ubuntu_tesla_p4_docker` 还是遇到passthru的GPU无法初始化的问题。
+
+   我可能还需要继续找寻方法:
+
+   `GPU passthrough with bhyve - Corvin Köhne - EuroBSDcon 2023 <https://www.youtube.com/watch?v=eurBCPj65oI>`_ 演讲者就是开发bhyve passthru的Corvin Köhne，上述补丁应该是他提供的。我准备仔细看看视频
 
 配置
 =======

@@ -223,7 +223,15 @@ VNC图形界面
 .. literalinclude:: vm-bhyve/vm-bhyve.log_passthru
    :caption: 最简化 ``passthru0="1/0/0"``
 
-但是还是VNC没有任何输出黑屏
+但是还是VNC没有任何输出黑屏。这个问题我一直没有解决，我尝试 :ref:`bhyve_nvidia_gpu_passthru` 来解决 :ref:`tesla_p10` passthru没有成功，但是发现同样的配置 :ref:`tesla_p4` 是正常工作的。此问题待排查
+
+虚拟机重命名
+=============
+
+``vm-bhyve`` 提供了 ``rename`` 指令可以重命名虚拟机，并且对于 :ref:`zfs` 存储，可以非常丝滑地转换zfs存储集地名字以及对应地配置，所以不需要人工干预处理，非常实用:
+
+.. literalinclude:: vm-bhyve/vm-bhyve_rename
+   :caption: 重命名虚拟机
 
 参考
 =======
