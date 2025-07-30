@@ -26,6 +26,8 @@ Intel UHD Graphics 630 是Intel于2017年9月1日推出的集成显卡解决方�
 - Intel Arc graphics
 - ...
 
+对于 :ref:`ollama` 支持Intel GPU是通过 :ref:`ipex-llm` 来实现的，同样 ``ipx-llm`` 文档 `在带有 Intel GPU 的 Windows 系统上安装 IPEX-LLM <https://github.com/intel/ipex-llm/blob/main/docs/mddocs/Quickstart/install_windows_gpu.zh-CN.md>`_ 可以看到需要 " Intel Core Ultra 和 Core 11-14 代集成的 GPUs (iGPUs)，以及 Intel Arc 系列 GPU"
+
 很不幸，我的 :ref:`xeon_e-2274g` 集成的 ``Intel UHD Graphics 630`` 不在支持之列，也就是说无缘 :ref:`llama` 支持了，哭... (安慰自己一下，毕竟十一代之后的CPU价格较贵，我现在使用的九代CPU也算物尽其用 ^_^ )
 
 不过，也不是完全绝望:

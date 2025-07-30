@@ -1,20 +1,13 @@
-.. _llm:
+.. _ipex-llm:
 
 =================================
-LLM 大型语言模型
+ipex-llm
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   llm_learn_tips.rst
-   llm_startup.rst
-   llama/index
-   vllm/index
-   ipex-llm/index
-   ollama/index
-   unsloth/index
-   langchain/index
+   intro_ipex-llm.rst
 
 .. only::  subproject and html
 

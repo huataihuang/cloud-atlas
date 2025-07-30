@@ -4,13 +4,19 @@
 在bhyve中实现NVIDIA GPU passthrough
 ===============================================
 
+.. note::
+
+   NVIDIA官方提供了 `FreeBSD x64 Graphics Driver Archive <https://www.nvidia.com/en-us/drivers/unix/freebsd-x64-archive/>`_ ，即最新的FreeBSD显卡驱动。但是很不幸，CUDA并不支持FreeBSD，所以无法直接将FreeBSD作为 :ref:`machine_learning` 平台。
+
 .. warning::
 
    本文记录的通过补丁方式来解决NVIDIA GPU passthrough可能不是我遇到问题的解决方法:
 
    我使用了发行版原生的 ``bhyve`` ，也尝试了本文记录的补丁方式，但是都 **没有解决** :ref:`tesla_p10` passthrough 给 bhyve 虚拟机时无法启动虚拟机的问题
    
-   但是我硬件改成 :ref:`tesla_p4` ，结果就成功启动了虚拟机。目前使用了补丁版本，但我怀疑原生版本也行(我准备回滚到发行版本再重新尝试)
+   但是我硬件改成 :ref:`tesla_p4` ，结果就成功启动了虚拟机，然而很不幸，不能正常初始化驱动，所以最终还是没有能够正常使用。目前使用了补丁版本( :strike:`我准备回滚到发行版本再重新尝试` )，但是我目前暂时放弃。准备等年底 RELEASE 15 再重新尝试。
+
+   **目前我没有能够完成 bhyve NVIDIA GPU passthru**
 
 我在尝试 :ref:`bhyve_pci_passthru_startup` 将 :ref:`tesla_p10` passthrough 给 bhyve 虚拟机，但是遇到无法启动虚拟机的问题，不论是直接使用 ``bhyve`` 命令还是通过 :ref:`vm-bhyve` 管理工具。这个问题困挠了我很久...
 
@@ -123,8 +129,27 @@ nvidia补丁(尝试二)
 
    我可能还需要继续找寻方法:
 
-   `GPU passthrough with bhyve - Corvin Köhne - EuroBSDcon 2023 <https://www.youtube.com/watch?v=eurBCPj65oI>`_ 演讲者就是开发bhyve passthru的Corvin Köhne，上述补丁应该是他提供的。我准备仔细看看视频
+   - `GPU passthrough with bhyve - Corvin Köhne - EuroBSDcon 2023 <https://www.youtube.com/watch?v=eurBCPj65oI>`_ 演讲者就是开发bhyve passthru的Corvin Köhne，上述补丁应该是他提供的。我准备仔细看看视频
+   - 更换PCIe转接板，关闭 :ref:`pcie_bifurcation` 采用直接安装 :ref:`tesla_p10` (不太可能？)
+   - 等待年底 RELEASE 15 重新尝试 ``bhyve passthru``
 
+BIOS尝试
+------------
+
+google AI提到bhyve不支持Linux中使用的 ``pci=realloc`` 内核配置，建议设置 ``pci=realloc=off`` 。我尝试了在Ubuntu虚拟机中配置 ``pci=realloc`` 或 ``pci=realloc=off`` 都没有解决无法初始化 :ref:`tesla_p4` 驱动的问题，同样也没有启动 :ref:`tesla_p10` 的虚拟机。
+
+我也尝试关闭 :ref:`above_4g_decoding` :
+
+- 之前为了能够实现和 :ref:`dl360_gen9_large_bar_memory` 效果，我特意配置 :ref:`nasse_c246` BIOS 激活了:
+
+  - ``Above 4G Decoding`` (在 Advanced 菜单中)
+  - ``above 4GB mmio BIOS Assignment`` (在 chipset 菜单中)
+
+- 上述两个 :ref:`above_4g_decoding` 不能disable，否则安装的 :ref:`tesla_p10` 启动时BIOS会告警提示PCIE配置不满足设备要求，所以这两个配置看起来是正确的
+
+- 我尝试了 ``Re-Size BAR Support`` (该配置是为了加速NVIDIA性能，默认开启)关闭和开启都没有解决
+
+总之，BIOS符合NVIDIA GPU的要求，看起来还是需要从 ``bhyve`` 这里寻找解决方法
 配置
 =======
 
