@@ -26,7 +26,7 @@ NVIDIA多实例GPU(Multi-Instance GPU, MIG)技术扩展了 NVIDIA H100, :ref:`nv
 
 - 硬件要求:
 
-  - NVIDIA从 ``Ampere`` 架构开始支持 ``Multi-Instance GPU (MIG) `` 功能
+  - NVIDIA从 ``Ampere`` 架构开始支持 ``Multi-Instance GPU (MIG)`` 功能
 
     - 2020年5月14日发布 ``Ampere`` 架构: A100 80GB SXM4 GPU 是首个支持最高7个实例的MIG虚拟化和GPU分区
     - 2022年发布 ``Hopper`` 架构: H100 SXM5 GPU
