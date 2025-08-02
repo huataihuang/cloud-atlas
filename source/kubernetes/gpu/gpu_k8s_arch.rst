@@ -26,7 +26,7 @@ NVIDIA容器运行时(Container Runtime)是一种GPU aware容器运行时，与 
 
 NVIDIA容器堆栈(Container Stack)架构目标是支持容器生态系统中的任何容器运行时，堆栈组件包括:
 
-- ``nvidia-docker`` 包装器(wrapper)
+- ``nvidia-docker`` 包装器(wrapper) (注意，现在 ``nvidia-docker`` 已经被替换为 :ref:`nvidia_container_toolkit`
 - NVIDIA容器运行时( ``nvidia-container-runtime`` )
 - NVIDIA容器运行时Hook( ``nvidia-container-toolkit`` / ``nvidia-container-runtime-hook`` )
 - NVIDIA容器库和CLI( ``libnvidia-container1`` , ``nvidia-container-cli`` )

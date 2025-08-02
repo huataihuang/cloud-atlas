@@ -21,6 +21,7 @@ NVIDIA GPU
    tesla_p100.rst
    tesla_t10_vs_t4.rst
    nvidia_a100.rst
+   nvidia_h100.rst
    nvidia_sxm_socket.rst
    nvidia_gpu_mem_clock.rst
    install_nvidia_linux_driver.rst
