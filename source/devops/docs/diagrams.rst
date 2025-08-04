@@ -4,7 +4,7 @@
 diagrams
 =================
 
-`Diagrams - Diagram as Code <https://diagrams.mingrammer.com/>`_ 是一个在 :ref:`python` 代码中绘制云计算架构的示意图( :ref:`diagram` )软件。也就是说，不需要手工绘制，而是通过代码驱动，实现完整的 ``Diagram as Code`` :
+`Diagrams - Diagram as Code <https://diagrams.mingrammer.com/>`_ 是一个在 :ref:`python` 代码中绘制云计算架构的示意图软件。也就是说，不需要手工绘制，而是通过代码驱动，实现完整的 ``Diagram as Code`` :
 
 - 编写代码
 - 版本控制

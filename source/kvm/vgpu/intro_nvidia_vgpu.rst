@@ -18,7 +18,20 @@ mediated pass-through需要特定的硬件支持:
 
 - Nvidia vGPU 需要 GRID/Tesla (服务器级) 或 Quadro (专业级)
 - AMD MxGPU 需要 FirePro Server/Radeon Instinct (服务器级) 或 Randeon Pro (专业级)
-- Intel GVT-g 没有特定要求
+- :ref:`intel_gvt` 没有特定要求(注意，Intel GVT-g技术已经被 :ref:`sr-iov` 取代，从Intel第10代处理器Ice Lake之后就不再支持)
+
+NVIDIA ``vGPU`` 软件的 ``GPU Instance`` 支持
+===============================================
+
+NVIDIA新一代GPU，从Ampere架构(2020年)开始，提供了 :ref:`sr-iov` 和 :ref:`nvidia_mig` ( ``GPU Instance`` )功能:
+
+- :ref:`nvidia_mig` 提供了硬件级别的分区: 物理GPU被硬件级分区分为多个隔离 ``GPU Instance`` ，CUDA应用能够使用完全隔离的内存带宽、缓存和计算核心
+- :ref:`sr-iov` 提供了增强型vGPU能力: Ampere 及后续更新的架构， :ref:`sr-iov` 是激活vGPU功能的前提条件，允许将单个GPU划分为独立的Virtual Functions(VFs)，然后分配给不同的VM(为虚拟机提供完整的 :ref:`iommu` 保护)，提供了更为有效和安全的共享GPU资源的能力
+- Ampere及更新的架构中，vGPU是构建在 :ref:`sr-iov` 之上，提供了更好的安全和管理性: :ref:`sr-iov` 创建 VFs，NVIDIA ``vGPU`` 软件则提供必要的驱动、虚拟机安全以及在虚拟化环境中有效利用虚拟GPU的管理功能
+
+.. figure:: ../../_static/machine_learning/hardware/nvidia_gpu/nvidia_mig/mig_sr-iov.png
+
+   MIG结合sr-iov实现虚拟机的vGPU隔离
 
 vGPU license
 =================

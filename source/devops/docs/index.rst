@@ -25,6 +25,11 @@ DevOps 文档
    hexo/index
    nextra/index
    docusaurus/index
+   fossflow.rst
+   excalidraw.rst
+   tldraw.rst
+   diagrams.rst
+   mermaid.rst
    kindle/index
    kobo/index
    pandoc.rst

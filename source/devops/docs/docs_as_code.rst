@@ -73,6 +73,17 @@ Docs-as-Code
 
 目前我想学习一些前端技术，所以我在选型时会选择 ``Markdown`` 流派，同时我会结合自己近期的学习路线来最终选择一个平台。可能选择基于 :ref:`nextjs` 的 :ref:`nextra` 。
 
+设计图表
+==========
+
+除了文字撰写，在技术文档中，往往需要一些系统图表( ``diagram`` )来表示页面设计、系统架构等。我准备采用以下开源工具来完成架构图和网站设计:
+
+- :ref:`fossflow`
+- :ref:`excalidraw`
+- :ref:`tldraw`
+- :ref:`diagrams`
+- :ref:`mermaid`
+
 CI/CD
 =========
 
@@ -85,3 +96,4 @@ CI/CD
 - `Markdown, Asciidoc, or reStructuredText - a tale of docs-as-code <https://www.dewanahmed.com/markdown-asciidoc-restructuredtext/>`_ docs-as-code 有众多选择，实在有些吃惊
 - `Docs-as-code: A Brief Introduction <https://medium.com/@ezinneanne/docs-as-code-a-brief-introduction-4fe15b7f0b4c>`_
 - `Five fast facts about docs as code at GitLab <https://about.gitlab.com/blog/2022/10/12/five-fast-facts-about-docs-as-code-at-gitlab/>`_
+- `4 个推荐的开源系统设计图表工具 <https://www.explainthis.io/zh-hans/pinthis/blog/system-design-tools>`_
