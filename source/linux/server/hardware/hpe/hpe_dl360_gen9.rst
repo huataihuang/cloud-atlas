@@ -40,9 +40,9 @@ HPE ProLiant DL360 Gen9服务器是通用型1U机架式服务器，提供了不�
 
 .. note::
 
-   实际上我最终没有采购CMR HDD机械磁盘，因为我发现目前由于磁记录技术停滞发展，已经没有超过2T规格的CMR HDD了。小规格HDD售价和SSD相差无几，性能又大为落后，所以如果要实现高性能分布式集群，还是采用 NVMe SSD实现更佳。
+   实际上我最终没有采购CMR HDD机械磁盘，因为我发现目前由于磁记录技术停滞发展，已经没有超过2T规格的 ``2.5"`` CMR HDD了。小规格HDD售价和SSD相差无几，性能又大为落后，所以如果要实现高性能分布式集群，还是采用 NVMe SSD实现更佳。
 
-   目前我先临时采用旧有的500GB HDD磁盘来模拟实验，并且采购 PCIe 3.0 slot 转接 :strike:`4个` 3个NVMe SSD磁盘(原因是 DL360 Gen9 :ref:`pcie_bifurcation` 只能在slot1上设置，并且只支持分成2个 x8，导致加上 slot 2，我只能安装3个NVMe - :ref:`samsung_pm9a1` )，来实现高性能 :ref:`ceph` 集群:
+   目前我先临时采用旧有的500GB 笔记本HDD磁盘来模拟实验，并且采购 PCIe 3.0 slot 转接 :strike:`4个` 3个NVMe SSD磁盘(原因是 DL360 Gen9 :ref:`pcie_bifurcation` 只能在slot1上设置，并且只支持分成2个 x8，导致加上 slot 2，我只能安装3个NVMe - :ref:`samsung_pm9a1` )，来实现高性能 :ref:`ceph` 集群:
 
    - PCIe 3.0 x16 (slot1) 转接 :strike:`4个` 2个 NVMe SSD磁盘(需要主板支持 :ref:`pcie_bifurcation` )
    - 需要升级 :ref:`hpe_dl360_gen9` BIOS 才能支持 ``PCIe Bifurcation Options``
