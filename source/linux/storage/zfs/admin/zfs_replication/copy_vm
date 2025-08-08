@@ -1,0 +1,17 @@
+# 在不停止vm情况下发起第一次虚拟机快照
+zfs snapshot rpool/vm-X-disk-Y@initial_snapshot
+
+# 第一次初始化复制虚拟机: 
+# 发送方使用 -p 参数表示在数据流中包含dataset的属性(在使用 -R 递归参数时，这个 -p 参数是隐含默认的)
+# 接收方使用 -F 参数表示在执行接收操作之前，强制将文件系统回滚到最新快照。结合发送端的 -R -I 命令，会销毁发送端不存在的快照和文件系统
+zfs send -Rpv rpool/vm-X-disk-Y@initial_snapshot | ssh -o BatchMode=yes root@new_server_ip zfs recv -Fv rpool/vm-X-disk-Y
+
+# 在完成第一次初始化vm复制之后，停止虚拟机，然后创建增量快照 @final_snapshot
+vm-bhyve stop vm-X
+# 这样由于增量快照极小，可以降低虚拟机停机时间
+zfs snapshot rpool/vm-X-disk-Y@final_snapshot
+
+# 后续增量虚拟机快照传输，注意 zfs send 增加了 -I 参数
+zfs send -Rpv -I rpool/vm-X-disk-Y@initial_snapshot rpool/vm-X-disk-Y@final_snapshot | ssh -o BatchMode=yes root@new_server_ip zfs recv -Fv rpool/vm-X-disk-Y
+
+# 最后就可以在备份服务器上启动复制好的虚拟机

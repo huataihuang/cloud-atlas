@@ -106,6 +106,27 @@ zfs提供了一个 ``-r`` 参数表示 ``recursive`` (递归)，可以包含所�
    :language: shell
    :caption: 一个简单replication复制脚本可参考
 
+根据 `Oracle Solaris ZFS Administration Guide > Sending and Receiving ZFS Data <https://docs.oracle.com/cd/E18752_01/html/819-5461/gbchx.html>`_ 说明，当使用 ``-i`` 参数时候，可以发送两个快照之间的增量部分，不过要求已经完成过上一次快照复制(即已经存在 ``newtank/dana`` ):
+
+.. literalinclude:: zfs_replication/replication_incremental
+   :caption: 复制两个快照之间的增量部分
+
+其他复制案例参考
+------------------
+
+`fastest way to copy zfs volume from server to another <https://forum.proxmox.com/threads/fastest-way-to-copy-zfs-volume-from-server-to-another.139464/>`_ 备份虚拟机的案例:
+
+.. literalinclude:: zfs_replication/copy_vm
+   :caption: 备份虚拟机案例参考
+
+上述复制采用了最小化停机操作(即初次复制虚拟机时不停虚拟机，初次复制完成后，停虚拟机，再增量快照并传输增量部分)
+
+如果对虚拟机停机时间没有要求，那么可以简化为一次性停机复制:
+
+.. literalinclude:: zfs_replication/copy_vm_simple
+   :caption: 简单的一次性停机复制vm
+
+
 参考
 =====
 
@@ -115,3 +136,4 @@ zfs提供了一个 ``-r`` 参数表示 ``recursive`` (递归)，可以包含所�
 - `Querying ZFS File System Information <https://docs.oracle.com/cd/E18752_01/html/819-5461/gazsu.html>`_
 - `Basics of ZFS Snapshot Management <https://klarasystems.com/articles/basics-of-zfs-snapshot-management/>`_
 - `how to one-way mirror an entire zfs pool to another zfs pool <https://unix.stackexchange.com/questions/263677/how-to-one-way-mirror-an-entire-zfs-pool-to-another-zfs-pool>`_ 这篇问答极好，回答中提供了详细的参数解答
+- `fastest way to copy zfs volume from server to another <https://forum.proxmox.com/threads/fastest-way-to-copy-zfs-volume-from-server-to-another.139464/>`_ 提供了备份虚拟机案例 
