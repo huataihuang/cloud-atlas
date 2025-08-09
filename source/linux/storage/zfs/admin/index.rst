@@ -38,6 +38,7 @@ ZFS管理的主要手册可以参考:
    zfs_mobile_hard_drive.rst
    zfs_replication.rst
    zrepl.rst
+   zfs_pool_restore.rst
 
 .. only::  subproject and html
 
