@@ -10,6 +10,7 @@ bhyve PCI Passthrough
    bhyve_pci_passthru_startup.rst
    bhyve_nvidia_gpu_passthru.rst
    bhyve_intel_gpu_passthru.rst
+   bhyve_amd_gpu_passthru.rst
 
 
 

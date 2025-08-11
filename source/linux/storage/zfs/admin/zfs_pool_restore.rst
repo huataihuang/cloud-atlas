@@ -4,6 +4,14 @@
 ZFS pool 恢复
 ====================
 
+.. warning::
+
+   因为是测试环境，我自己的homelab，所以我不太重视数据安全性，采用了 ``zpool destory`` 来一次性销毁存储。
+
+   但是，我强烈建议你不要直接使用 ``zpool destroy`` ，这个命令和 ``rm -rf /`` 没有什么差别，几乎是瀑布式递归删除所有的被删除存储池下所有数据集数据。大杀器，慎用!!!
+
+   如果要清理数据，建议采用反向，从最低层的 ``dataset`` 开始，一点点删除和不断核对数据安全性完整性。避免出现盛昌环境故障!!!
+
 我在移动硬盘上完成了 :ref:`zfs_replication` ，意味着已经完成了ZFS数据的备份。我当时有点大意了，想着备份完成，可以缩容(删除zfs pool):
 
 .. literalinclude:: zfs_pool_restore/zpool_destroy
@@ -21,10 +29,14 @@ ZFS pool 恢复
 ZFS pool删除前的系统变化
 ===========================
 
+.. warning::
+
+   虽然 ``zpool destory`` 过程打断依然可以恢复 ``zpool`` ，但是我发现有些 ``dataset`` 已经删除了。所以有可能恢复会比较麻烦，并不一定像我这里写得这么简单。例如，我发现我之前创建的 ``zdata/vms`` 卷集已经消失了(我已经备份，所以也没有再折腾)
+
 检查发现，原来
 
 - ZFS pool在 ``destroy`` 步骤中会调用停止使用ZFS dataset的NFS服务，我的docker容器之所以突然无法读写NFS，只是因为NFS服务被停止了
-- ZFS pool的 ``destroy`` 时，如果数据集还有进程在使用(例如我这里因为 :ref:`freebsd_jail` 正处于运行状态)，就会阻断pool删除(实际数据没有变化)
+- ZFS pool的 ``destroy`` 时，如果数据集还有进程在使用(例如我这里因为 :ref:`freebsd_jail` 正处于运行状态)，就会阻断pool删除( **此时有可能部分卷集还没有删除** )
 
 很幸运， ``zdata`` 没有销毁，可以通过 ``zpool list`` 看到:
 

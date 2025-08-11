@@ -24,4 +24,4 @@
 
 启用 ``zstd`` 压缩，参考 :ref:`zfs_compression` 对两种压缩方式的对比
 
-数据备份同步参考 :ref:``
+数据备份同步: :ref:`zfs_replication`

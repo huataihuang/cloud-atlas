@@ -20,6 +20,7 @@ LFS(Linux from scratch)
    lfs_vm.rst
    lfs_partition.rst
    lfs_partition_optane.rst
+   lfs_partition_freebsd.rst
    lfs_mba.rst
    lfs_prepare.rst
    lfs_cross_toolchain/index
