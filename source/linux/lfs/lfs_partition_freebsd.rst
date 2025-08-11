@@ -110,7 +110,7 @@ LFS分区(和FreeBSD一起Dualboot)
 
   - ``zdata/docs`` 日常操作数据(启用 ``zstd`` 压缩)
   - ``zdata/vms`` :ref:`bhyve` 虚拟机
-  - ``zdata/jails`` :ref:`freebsdjail` 容器
+  - ``zdata/jails`` :ref:`freebsd_jail` 容器
 
 我已经在 :ref:`zfs_replication` 中完成了备份，所以现在将上述 ``zdata/vms`` 和 ``zdata/jails`` 恢复回来:
 
