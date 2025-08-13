@@ -10,6 +10,7 @@ LLM 大型语言模型
    llm_learn_tips.rst
    llm_startup.rst
    llama/index
+   llama.cpp/index
    vllm/index
    ipex-llm/index
    ollama/index

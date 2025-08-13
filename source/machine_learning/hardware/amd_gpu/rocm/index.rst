@@ -7,6 +7,7 @@ ROCm
 .. toctree::
    :maxdepth: 1
 
+   intro_rocm.rst
    rocm_quickstart.rst 
 
 

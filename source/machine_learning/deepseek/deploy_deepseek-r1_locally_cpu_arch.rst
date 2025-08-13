@@ -11,17 +11,17 @@
 
 - :ref:`ubuntu_linux` / :ref:`debian` 编译环境:
 
-.. literalinclude:: ../llm/llama/install/install_llama_cpu/debian_dev
+.. literalinclude:: ../llm/llama.cpp/install/install_llama_cpu/debian_dev
    :caption: 编译环境准备
 
 - 下载 ``llama.cpp`` 源代码:
 
-.. literalinclude:: ../llm/llama/install/install_llama_cpu/download_llama
+.. literalinclude:: ../llm/llama.cpp/install/install_llama_cpu/download_llama
    :caption: 下载 ``llama.cpp`` 源代码
 
 - 针对CPU架构编译:
 
-.. literalinclude:: ../llm/llama/install/install_llama_cpu/cmake_cpu
+.. literalinclude:: ../llm/llama.cpp/install/install_llama_cpu/cmake_cpu
    :caption: 针对CPU架构编译
 
 下载模型

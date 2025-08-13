@@ -11,7 +11,7 @@
 
 我在 :ref:`install_llama_cpu` 按照以下方式完成编译安装:
 
-.. literalinclude:: ../llm/llama/install/install_llama_cpu_lfs/cmake_cpu_again
+.. literalinclude:: ../llm/llama.cpp/install/install_llama_cpu_lfs/cmake_cpu_again
    :caption: 删除 ``build`` 目录重新配置编译
 
 运行
