@@ -72,6 +72,36 @@ AMDGPU驱动安装
 .. literalinclude:: rocm_quickstart/lsmod
    :caption: 检查内核模块
 
+可以通过 :ref:`dkms` 检查状态来获知驱动是否安装完成:
+
+.. literalinclude:: rocm_quickstart/dkms
+   :caption: 检查 ``dkms`` 状态
+
+输出显示:
+
+.. literalinclude:: rocm_quickstart/dkms_amdgpu_output
+   :caption: 检查 ``dkms`` 状态可以看到amdgpu驱动模块
+
+- 检查 ``rocminfo`` 输出中包含如下信息:
+
+.. literalinclude:: rocm_quickstart/rocminfo_gfx906_output
+   :caption: ``rocminfo`` 信息中包含显卡GPU信息
+
+可以看到我的 :ref:`amd_radeon_instinct_mi50` 显示为 ``gfx906``
+
+- 检查GPU是否检测到(这里遇到了异常)
+
+.. literalinclude:: rocm_quickstart/clinfo
+   :caption: 执行 ``clinfo`` 检查GPU是否列出
+
+输出正常显示了 ``Platform Name`` 和 ``Board Name`` ，但是很不幸卡住了输出，最后出现了 ``GPU Hang`` 报错:
+
+.. literalinclude:: rocm_quickstart/clinfo_output
+   :caption: 执行 ``clinfo`` 检查出现GPU Hang报错
+   :emphasize-lines: 8,9
+
+异常问题在后续排查
+
 .. note::
 
    到这里为止，就可以尝试 :ref:`ollama_amd_gpu` 
@@ -84,18 +114,45 @@ AMDGPU驱动安装
 .. literalinclude:: rocm_quickstart/rocm-smi_no_gpu
    :caption: ``rocm-smi`` 显示没有可用AMD GPU
 
-- 检查 ``dmesg | grep amdgpu`` 发现初始化异常:
+- 检查 ``dmesg | grep amdgpu`` 发现初始化异常，通过完整的 ``dmesg`` 显示，似乎 ``atom_bios`` （看起来是bhyve模拟的bios存在问题不能支持 ``amdgpu`` )
 
 .. literalinclude:: rocm_quickstart/dmesg_amdgpu_error
    :caption: 检查系统日志发现AMD GPU初始化失败
+   :emphasize-lines: 35,36
 
+看起来驱动初始化异常，可能原因(可能性从高到低):
+
+  - :ref:`bhyve_amd_gpu_passthru` 对这款 :ref:`amd_radeon_instinct_mi50` 驱动对虚拟化支持存在问题
+  
+    - 可能需要裸物理主机安装一个Ubuntu来对比验证
+    - 可能需要再部署一个 :ref:`lfs` 来对比Linux环境 :ref:`iommu` :ref:`ovmf_gpu_nvme`
+
+  - AMDGPU driver可能需要降级到低版本来支持旧GPU
+  - :ref:`amd_radeon_instinct_mi50` 硬件问题
+
+我看到Reddit上的一个帖子 `Mi50 32gb (Working config, weirdness and performance) <https://www.reddit.com/r/LocalLLaMA/comments/1mi5s6w/mi50_32gb_working_config_weirdness_and_performance/>`_ 可以正常使用ROCm和AMDGPU驱动(非虚拟机)
+
+- **这个方法已经验证没有解决我的问题** PROXMOX论坛帖子 `AMD GPU firmware/bios missing? amdgpu fatal error <https://forum.proxmox.com/threads/amd-gpu-firmware-bios-missing-amdgpu-fatal-error.134739/>`_ 提出了通过安装 ``firmware-amd-graphics`` 来解决。不过这个firmware是私有软件，我直接在Ubuntu中执行 ``apt install firmware-amd-graphics`` 显示不存在(PROXMOX提供的虚拟机可能已经内置提供了软件仓库)
+
+上述帖子提供了手工下载Firmware的方法: 在 `debian firmware-nonfree <http://ftp.debian.org/debian/pool/non-free-firmware/f/firmware-nonfree/>`_ 提供下载:
+
+.. literalinclude:: rocm_quickstart/firmware-amd-graphics
+   :caption: 手工安装 firmware-amd-graphics
+
+.. warning::
+
+   我发现上述手工安装的 firmware 实际上在之前安装 amdgpu driver 已经安装在 ``/lib/firmware/amdgpu`` 目录下了
+
+   但是比较奇怪，在 ``/lib/firmware/amdgpu`` 目录下似乎是 ``.zst`` 后缀的压缩文件，例如 ``yellow_carp_vcn.bin.zst`` ; 而 ``firmware-amd-graphics/usr/lib/firmware/amdgpu/`` 目录下是解压缩的文件，例如 ``yellow_carp_vcn.bin``
+
+   我尝试了上述方法，没有解决问题，报错依旧
 
 安装完成后步骤(归档)
 ======================
 
 .. note::
 
-   我再次实践安装，看起来这部分已经不再需要，例如 ``/etc/ld.so.conf.d/`` 目录下现在安装软件包会自动添加 ``10-rocm-opencl.conf`` 和 ``20-amdgpu.conf``
+   以前的实践笔记，有些步骤可能不再需要，例如 ``/etc/ld.so.conf.d/`` 目录下现在安装软件包会自动添加 ``10-rocm-opencl.conf`` 和 ``20-amdgpu.conf``
 
 - 配置系统链接器为ROCm应用指明查找共享目标文件 ``.so`` 位置:
 
