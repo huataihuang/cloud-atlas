@@ -4,6 +4,13 @@
 macOS上运行ZFS
 ===============
 
+``pkg`` 包安装 ``OpenZFSonOsX``
+==================================
+
+``OpenZFS on OS X`` 直接提供了安装包，支持从 :ref:`macos` 10.9 (Mavericks) - 15.0 (Sequoia) 不同版本(Intel/ARM)。我在 macOS 11.7 上安装使用非常方便，可以不用 :ref:`homebrew` 也能够方便部署。
+
+安装过程需要配置允许运行，如下文。由于过程简单，这里不再复述。
+
 :ref:`homebrew` 安装openzfs
 ============================
 
@@ -26,7 +33,7 @@ macOS上运行ZFS
    这个开发者 `Joergen Lundman <https://github.com/lundman>`_ 是OpenZFS开发者，需要允许加载，并重启操作系统生效
 
 使用
-======
+-------
 
 - 尝试检查:
 

@@ -19,6 +19,7 @@ ZFS安装
    gentoo_zfs_xcloud.rst
    boot_on_zfs_for_raspberry_pi.rst
    macos_zfs.rst
+   windows_zfs.rst
 
 .. only::  subproject and html
 

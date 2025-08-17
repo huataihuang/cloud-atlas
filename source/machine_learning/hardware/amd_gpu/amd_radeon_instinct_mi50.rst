@@ -64,12 +64,20 @@ MI50规格
 - 从技术参数来看，Intel Arc A750和MI50相当，但是据说Intel驱动现在优化还有差距，并且消费级Intel Arc A750只有8GB规格，难以满足机器学习的需求(Intel Arc A750是新品，但价格要达到1300元)
 - 当然最重要的原因是Radeon Instinct MI50 32GB太便宜了，感觉非常有性价比，虽然肯定会比 :ref:`nvidia_gpu` 要折腾得多，甚至有可能软件支持上存在大坑。但是，这么低廉的价格以及当前官方软件还能够支持运行实现主流机器学习框架运行，也许真值得冒险一试
 
-.. note::
+一些参考信息
+===============
 
-   当前冲动之下入手了一块，等到货后实践评测，再补充实践经验，待续
+- `Reddit: Instinct MI50 on consumer hardware <https://www.reddit.com/r/ROCm/comments/1kwirmw/instinct_mi50_on_consumer_hardware/>`_
+
+  - ROCm目前新版 ``6.4.0`` 支持MI60，由于MI60和MI50的芯片相同，所以虽然官方文档没有说支持MI50，但实际上只要支持MI60就会支持MI50
+  - 当使用容器(LXC)时，物理主机只需要使用 ``--no-dkms`` 参数安装amdgpu模块，然后在容器中安装RPCm就可以在容器中使用GPU
+  - 大概相当于NVIDIA RTX 3060的性能，比NVIDIA 3090慢2-4倍
+  - 当使用qwen3 32B gptq int4是，使用2块32GB MI50，大概 35token/s; llama3 70B gptq int4 大约 15token/s
+  - `GitHub: nlzy/vllm-gfx906 <https://github.com/nlzy/vllm-gfx906>`_ 提供了一个针对 AMD gfx906 GPU (即Radeon Vii/MI50/MI60)的 :ref:`vllm`
 
 参考
 ======
 
 - `TechPowerUP GPU Database > Radeon Instinct MI50 Specs <https://www.techpowerup.com/gpu-specs/radeon-instinct-mi50.c3335>`_
 - `WikiPedia : ROCm <https://en.wikipedia.org/wiki/ROCm>`_
+- `Reddit: Instinct MI50 on consumer hardware <https://www.reddit.com/r/ROCm/comments/1kwirmw/instinct_mi50_on_consumer_hardware/>`_

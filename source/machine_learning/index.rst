@@ -32,6 +32,7 @@ Machine Learning
    fauxpilot/index
    codellama/index
    deepseek/index
+   qwen/index
    comfyui/index
    freebsd/index
 

@@ -11,6 +11,10 @@ OpenShift简介
    文档会同时参考 `Red Hat官方OpenShift文档 <https://access.redhat.com/documentation/en-us/openshift_container_platform/4.10>`_  以及 `OKD开源社区文档 <https://docs.okd.io/latest/welcome/index.html>`_ ，进行两者对比梳理，并结合自己的部署实践。
 
    Red Hat官方文档提供了中文版(社区只有英文)，所以相对更为方便，可以快速阅读。
+   
+   早期的OpenShift集成了太多RedHat特有的功能，会比较困扰。不过 4.x 之后有很大改善，基本上就是对标准cncf工具或开源工具(argocd/prometheus/tekton/operatormanager...)的自定义设置。所以一定程度上可以视为标准 :ref:`kubernetes` 集成了大量开源工具来更便于使用，也为自己今后迁移回标准Kubernetes(避免厂商锁定)提供了可能。此外，OpenShift 4.x提供了很多operator来方便管理，使用上会比较轻松。( 参考 `Why should one use Openshift vs the managed Kubernetes services in public cloud? <https://www.reddit.com/r/kubernetes/comments/ze9qru/why_should_one_use_openshift_vs_the_managed/>`_ )
+
+   我将OpenShift作为一个开源解决整体方案来参考，通过解析软件堆栈构成，可以对开源生态以及合理的组合加深理解。
 
 OpenShift
 ===========

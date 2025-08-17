@@ -16,6 +16,7 @@ OpenStack是开源的AWS系统的clone，目前在小规模云计算场景下应
    :maxdepth: 1
 
    openstack_architecture.rst
+   ubicloud.rst
    devstack.rst
    installation/index
    deployment/index

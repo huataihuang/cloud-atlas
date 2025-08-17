@@ -29,6 +29,11 @@ Cisco交换设备Console连接
 
 如果是Windows系统，则可以参考 `Access the CLI via PuTTY using a Console Connection on 300 and 500 Series Managed Switches <https://www.cisco.com/c/en/us/support/docs/smb/switches/cisco-small-business-300-series-managed-switches/smb4984-access-the-cli-via-putty-using-a-console-connection-on-300-a.html>`_ 使用开源免费的PuTTY工具来访问控制台。
 
+``MGMT`` 接口
+=================
+
+在 :ref:`ws-c4948-s` 上 ``Console`` 接口下方还有一个 ``MGMT`` 接口，这是一个网络接口而不是串口。 ``MGMT`` 是一个通过网络提供管理功能的接口，类似于HP服务器的 :ref:`hp_ilo` 接口，提供远程 telnet / :ref:`ssh` 访问管理接口的能力。 
+
 参考
 =======
 
