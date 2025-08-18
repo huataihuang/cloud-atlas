@@ -75,6 +75,16 @@ MI50规格
   - 当使用qwen3 32B gptq int4是，使用2块32GB MI50，大概 35token/s; llama3 70B gptq int4 大约 15token/s
   - `GitHub: nlzy/vllm-gfx906 <https://github.com/nlzy/vllm-gfx906>`_ 提供了一个针对 AMD gfx906 GPU (即Radeon Vii/MI50/MI60)的 :ref:`vllm`
 
+实测性能
+===========
+
+- 通过 :ref:`ollama` 运行 :ref:`qwen2.5-coder` ``qwen2.5-coder:32b-instruct-q6_K`` ，实测性能:
+
+  - 大约 ``13+`` tokens/s
+  - 但是连续测试会降低到 ``10`` tokens/s (原因待查)
+
+我一共购买了2块 ``MI50`` ，我准备后续同时使用测试更大规模模型，看看性能以及准确度
+
 参考
 ======
 

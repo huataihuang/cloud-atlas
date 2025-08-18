@@ -4,7 +4,7 @@
 Ollama异常:大量kworker ``D``
 ===============================
 
-我在使用 :ref:`ollama_amd_gpu` ，向 :ref:`qwen2.5-coder` 询问了一个中文问题 "法国的首都是哪里?" ，结果发现ollama客户端长时间没有响应并突然推出(进程显示为 ``defunc`` )。
+我在使用 :ref:`ollama_amd_gpu` ，向 :ref:`qwen2.5-coder` 发现ollama客户端长时间没有响应并突然推出(进程显示为 ``defunc`` )。
 
 此时检查发现系统负载极高，Load超过 250+，但同时CPU是完全空闲的。
 
@@ -47,3 +47,16 @@ Ollama异常:大量kworker ``D``
    TLB失效/刷新: 当内存映射发生变化(例如，某个页面宝贝释放，重新映射或其权限发生更改)时，TLB中相应条目可能会陈旧或无效。为避免使用这些陈旧条目，系统必须将它们从TLB中失效或刷新，确保CPU始终使用正确的最新的内存映射。这里 ``fence`` 栅栏表示同步，确保某些操作(例如内存写入或TLB刷新)在其他操作开始前完成。
 
    ``amdgpu_tlb_fence_work`` 应该是GPU内存映射被修改时维护内存一致性和正确性，进行TLB更新以反映最新内存状态。
+
+排查结果
+=============
+
+经过几次尝试，我找到原因:
+
+- 我同时启动了2个 :ref:`qwen2.5-coder` : 当在服务器上手工运行了 ``ollama run qwen2.5-coder:32b-instruct-q6_K`` ，同时又使用了 :ref:`vscode_continue_ollama` (也调用了 :ref:`qwen2.5-coder` )
+- 两个model运行时，后启动当model会将前一个model驱逐掉前一个model，此时系统日志中就会出现几行: ``amdgpu: Freeing queue vital buffer 0x75acbea00000, queue evicted``
+- 之后就会出现大量当 ``D`` 住状态 ``kworker`` 系统进程，每次切换model都会出现上百个这样D住的系统进程，导致系统负载越来越大，响应缓慢
+
+这个问题可能是AMD驱动问题，也可能是 Ollama 使用了自带 ``ROCm`` 和我安装在系统范围的 ``amdgpu driver`` 存在配套兼容问题。我准备尝试使用 :ref:`vllm` 来运行模型，看看是否解决。
+
+

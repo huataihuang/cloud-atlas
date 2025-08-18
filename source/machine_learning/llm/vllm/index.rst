@@ -8,6 +8,7 @@ vLLM
    :maxdepth: 1
 
    intro_vllm.rst
+   install/index
 
 .. only::  subproject and html
 

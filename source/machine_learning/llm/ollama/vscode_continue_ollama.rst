@@ -26,7 +26,13 @@ VS Code插件Continue连接Ollama实现AI辅助编程
    上述配置其实有点迷糊，可能需要摸索摸索。我自己也是按照导引做的，但是看起来continue的界面迭代变化块，和文档并不相同，所以我也就在这里不再记录了。
 
 使用
-==========
+========
+
+``Continue`` 提供了一个chat模式，就好像直接和Ollama对话
+
+.. figure:: ../../../_static/machine_learning/llm/ollama/vscode_continue_ollama.png
+
+   对话模式通过提示获取代码片段
 
 - 其实使用chat模式就很方便，通过简单对话就能获取代码片段进行参考，也方便学习编程
 - 代码注释比较有用，特别是看到一时无法理解的代码，让 continue 调用 Ollama 帮我解析，可以快速完成代码阅读
