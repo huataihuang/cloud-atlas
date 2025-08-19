@@ -1,10 +1,10 @@
-.. _install_llama_android:
+.. _install_llama.cpp_android:
 
 =============================
-Android环境安装LLaMA
+Android环境安装LLaMA.cpp
 =============================
 
-LLaMA可以在Android上编译和运行，有两种方式:
+llama.cpp可以在Android上编译和运行，有两种方式:
 
 - 使用 :ref:`termux` 提供的 :ref:`linux` 运行环境
 - 使用 Android NDK的交叉编译

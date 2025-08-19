@@ -22,7 +22,7 @@ Vulkan的优点:
 :ref:`intel_uhd_graphics_630`
 ==============================
 
-:ref:`intel_uhd_graphics_630` 虽然性能有限，并且也不支持 :ref:`llama` 的 `llama.cpp for SYCL <https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/SYCL.md>`_ (需要Intel 11代CPU内置GPU)，但是还是支持 Vulkan 1.3。理论上来说， :ref:`install_llama_vulkan` 可以采用非常廉价的 :ref:`xeon_e-2274g` 内置 :ref:`intel_uhd_graphics_630` 来完成llm模型推理。是的，性能可能不好，但是借助相对巨大的内存，或许可以加载较大规模的LLM模型。
+:ref:`intel_uhd_graphics_630` 虽然性能有限，并且也不支持 :ref:`llama` 的 `llama.cpp for SYCL <https://github.com/ggml-org/llama.cpp/blob/master/docs/backend/SYCL.md>`_ (需要Intel 11代CPU内置GPU)，但是还是支持 Vulkan 1.3。理论上来说， :ref:`install_llama.cpp_vulkan` 可以采用非常廉价的 :ref:`xeon_e-2274g` 内置 :ref:`intel_uhd_graphics_630` 来完成llm模型推理。是的，性能可能不好，但是借助相对巨大的内存，或许可以加载较大规模的LLM模型。
 
 参考
 ======

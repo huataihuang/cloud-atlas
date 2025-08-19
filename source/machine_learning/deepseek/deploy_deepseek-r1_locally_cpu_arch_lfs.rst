@@ -4,14 +4,14 @@
 本地化部署DeepSeek-R1 CPU架构(LFS环境)
 =======================================
 
-在 :ref:`debian` 环境中初步验证了 :ref:`deploy_deepseek-r1_locally_cpu_arch` ，我将 :ref:`hpe_dl380_gen9` 物理主机上的Host操作系统切换到自己编译定制的 :ref:`lfs` 系统，从源代码重新编译 :ref:`install_llama_cpu_lfs` ，然后执行本地部署 DeepSeek-R1 CPU架构(LFS环境)。
+在 :ref:`debian` 环境中初步验证了 :ref:`deploy_deepseek-r1_locally_cpu_arch` ，我将 :ref:`hpe_dl380_gen9` 物理主机上的Host操作系统切换到自己编译定制的 :ref:`lfs` 系统，从源代码重新编译 :ref:`install_llama.cpp_cpu_lfs` ，然后执行本地部署 DeepSeek-R1 CPU架构(LFS环境)。
 
 安装llama.cpp
 =================
 
-我在 :ref:`install_llama_cpu` 按照以下方式完成编译安装:
+我在 :ref:`install_llama.cpp_cpu` 按照以下方式完成编译安装:
 
-.. literalinclude:: ../llm/llama.cpp/install/install_llama_cpu_lfs/cmake_cpu_again
+.. literalinclude:: ../llm/llama.cpp/install/install_llama.cpp_cpu_lfs/cmake_cpu_again
    :caption: 删除 ``build`` 目录重新配置编译
 
 运行

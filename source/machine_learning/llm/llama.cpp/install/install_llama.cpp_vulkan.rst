@@ -1,7 +1,7 @@
-.. _install_llama_vulkan:
+.. _install_llama.cpp_vulkan:
 
 ========================
-Vulkan架构安装LLaMA
+Vulkan架构安装LLaMA.cpp
 ========================
 
 Vulkan支持
@@ -20,7 +20,7 @@ Vulkan支持
 
 理论上 :ref:`llama` 是支持 :ref:`vulkan` 加速的，我考虑尝试一下在 :ref:`pi_5` 构建一个微型推理系统
 
-.. literalinclude:: install_llama_vulkan/install_vulkan
+.. literalinclude:: install_llama.cpp_vulkan/install_vulkan
    :caption: 在树莓派上安装 ``vulkan``
 
 然后运行 ``vkcube`` 命令查看是否工作

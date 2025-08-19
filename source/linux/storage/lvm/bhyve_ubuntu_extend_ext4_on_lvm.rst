@@ -13,8 +13,8 @@ bhyve上Ubuntu虚拟机扩展LVM上的EXT4文件系统
 
 可以看到 ``60GiB`` 空间，LVM根卷只使用了 ``28.47GiB`` :
 
-.. literalinclude:: bhyve_ubuntu_extend_ext4_on_lvm/fdisk
-   :caption: 虚拟机内部 fdisk 检查磁盘空间
+.. literalinclude:: bhyve_ubuntu_extend_ext4_on_lvm/fdisk_output
+   :caption: 虚拟机内部 fdisk 检查磁盘空间 输出信息 
    :emphasize-lines: 1,14
 
 - ``df`` 可以看到LVM卷 ``ubuntu--vg-ubuntu--lv`` 挂载为 ``/`` ，只分配了 ``28G`` :

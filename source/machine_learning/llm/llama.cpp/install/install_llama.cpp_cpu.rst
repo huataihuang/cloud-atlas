@@ -1,7 +1,7 @@
-.. _install_llama_cpu:
+.. _install_llama.cpp_cpu:
 
 =====================
-CPU架构LLaMA安装
+CPU架构LLaMA.cpp安装
 =====================
 
 二进制安装
@@ -25,22 +25,22 @@ CPU架构LLaMA安装
 
 - :ref:`ubuntu_linux` / :ref:`debian` 编译环境:
 
-.. literalinclude:: install_llama_cpu/debian_dev
+.. literalinclude:: install_llama.cpp_cpu/debian_dev
    :caption: 编译环境准备
 
 - 下载 ``llama.cpp`` 源代码:
 
-.. literalinclude:: install_llama_cpu/download_llama
+.. literalinclude:: install_llama.cpp_cpu/download_llama
    :caption: 下载 ``llama.cpp`` 源代码
 
 - 针对CPU架构编译:
 
-.. literalinclude:: install_llama_cpu/cmake_cpu
+.. literalinclude:: install_llama.cpp_cpu/cmake_cpu
    :caption: 针对CPU架构编译
 
 这里完成编译生成的3个执行程序:
 
-.. literalinclude:: install_llama_cpu/llama
+.. literalinclude:: install_llama.cpp_cpu/llama
    :caption: 编译生成的llama执行程序
 
 都被复制到 ``llama.cpp`` 目录下待用，并且执行程序是静态编译程序，可以复制到其他相同操作系统环境使用。

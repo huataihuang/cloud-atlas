@@ -1,7 +1,7 @@
-.. _install_llama_architecture:
+.. _install_llama.cpp_architecture:
 
 ==============================
-不同架构安装 LLaMA
+不同架构安装 LLaMA.cpp
 ==============================
 
 llama.cpp编译支持不同环境，需要使用不同的编译方式:
@@ -24,7 +24,7 @@ llama.cpp编译支持不同环境，需要使用不同的编译方式:
   - Vulkan - 支持不同GPU,CPU和操作系统的底层跨平台3D图形和计算 API，在Linux下(如果不使用 :ref:`docker` )需要安装 ``Vulkan SDK``
 
 - CANN - 使用华为昇腾NPU(Ascend NPU)的CANN(Compute Architecture for Neural Networks)神经网络计算架构的加速
-- Android - 居然可以在Android中使用 :ref:`termux` 完成编译，Amazing，待实践 :ref:`install_llama_android`
+- Android - 居然可以在Android中使用 :ref:`termux` 完成编译，Amazing，待实践 :ref:`install_llama.cpp_android`
 
 GPU加速后端
 =============
@@ -41,11 +41,11 @@ GPU加速后端
 我的实践
 ==========
 
-- :ref:`install_llama_cpu`
-- :ref:`install_llama_cuda`
-- :ref:`install_llama_hip`
-- :ref:`install_llama_vulkan`
-- :ref:`install_llama_android`
+- :ref:`install_llama.cpp_cpu`
+- :ref:`install_llama.cpp_cuda`
+- :ref:`install_llama.cpp_hip`
+- :ref:`install_llama.cpp_vulkan`
+- :ref:`install_llama.cpp_android`
 
 参考
 ==========

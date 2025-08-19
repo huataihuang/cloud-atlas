@@ -1,8 +1,8 @@
-.. _install_llama_cpu_lfs:
+.. _install_llama.cpp_cpu_lfs:
 
-==========================
-在LFS中CPU架构LLaMA安装
-==========================
+==============================
+在LFS中CPU架构LLaMA.cpp安装
+==============================
 
 我的物理主机使用了 :ref:`lfs` / :ref:`blfs` 构建，力图对系统进行精简和性能优化。由于 :ref:`hpe_dl380_gen9` 满配了 ``768GB`` 物理能够，能够满血 :ref:`deploy_deepseek-r1_locally_cpu_arch` ，所以本文尝试在 :ref:`lfs` / :ref:`blfs` 编译安装 LLaMA
 
@@ -18,7 +18,7 @@
 
 - 下载 ``llama.cpp`` 源代码:
 
-.. literalinclude:: install_llama_cpu/download_llama
+.. literalinclude:: install_llama.cpp_cpu/download_llama
    :caption: 下载 ``llama.cpp`` 源代码
 
 准备阶段
@@ -26,18 +26,18 @@
 
 - 针对CPU架构编译准备:
 
-.. literalinclude:: install_llama_cpu_lfs/cmake_cpu_prepare
+.. literalinclude:: install_llama.cpp_cpu_lfs/cmake_cpu_prepare
    :caption: 针对CPU架构编译
 
 报错 ``gmake`` :
 
-.. literalinclude:: install_llama_cpu_lfs/gmake_error
+.. literalinclude:: install_llama.cpp_cpu_lfs/gmake_error
    :caption: 缺少 ``gmake`` 命令
    :emphasize-lines: 16,17
 
 这是因为没有构建 ``gmake`` 软链接，参考 :ref:`debian` 环境:
 
-.. literalinclude:: install_llama_cpu_lfs/gmake
+.. literalinclude:: install_llama.cpp_cpu_lfs/gmake
    :caption: 创建 ``gmake`` 软链接
 
 编译阶段
@@ -45,12 +45,12 @@
 
 - 针对CPU架构编译:
 
-.. literalinclude:: install_llama_cpu_lfs/cmake_cpu
+.. literalinclude:: install_llama.cpp_cpu_lfs/cmake_cpu
    :caption: 针对CPU架构编译
 
 编译报错:
 
-.. literalinclude:: install_llama_cpu_lfs/cmake_cpu_error_1
+.. literalinclude:: install_llama.cpp_cpu_lfs/cmake_cpu_error_1
    :caption: 针对CPU架构编译错误1
    :emphasize-lines: 3
 
@@ -76,7 +76,7 @@
 
 所以，我删除源代码目录下的 ``build`` 子目录重新编译:
 
-.. literalinclude:: install_llama_cpu_lfs/cmake_cpu_again
+.. literalinclude:: install_llama.cpp_cpu_lfs/cmake_cpu_again
    :caption: 删除 ``build`` 目录重新配置编译， ``成功``
 
 终于成功了
