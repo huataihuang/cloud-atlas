@@ -6,6 +6,10 @@ vim结合ctags
 
 在编程过程中，函数转跳(从函数会话快速跳到函数定义或相反)是常用功能，vim可以结合 ``ctags`` 工具实现
 
+.. note::
+
+   另一个常用的程序转跳工具是 ``cscope`` ，更适合大型项目使用，能够为C，lex 和 yacc 源代码文件构建一个符号交叉引用表(symbol cross-reference table)。请参考 :ref:`nvim_escope`
+
 安装
 ======
 
@@ -13,6 +17,11 @@ vim结合ctags
 
 .. literalinclude:: vim_ctags/install
    :caption: 在macOS上使用 :ref:`homebrew` 安装 ``ctags``
+
+- 在 :ref:`ubuntu_linux` 上可以安装 ``universal-ctags`` (相对较新，建议安装) 或 ``exuberant-ctags``
+
+.. literalinclude:: vim_ctags/install_universal-ctags
+   :caption: 安装 ``universal-ctags``
 
 使用
 =======

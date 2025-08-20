@@ -15,4 +15,41 @@ MIT6.824: Distributed System课程
 
 `肖宏辉 <https://www.zhihu.com/people/xiao-hong-hui-15>`_ 翻译了 `MIT 6.824 Distributed Systems (Spring 2020) <https://www.youtube.com/watch?v=cQP8WApzIQQ&list=PLrw6a1wE39_tb2fErI4-WkMbsvGQk9_UB>`_ 课程视频 `MIT6.824中文文字版 <https://mit-public-courses-cn-translatio.gitbook.io/mit6-824/>`_ ，可以方便对照学习。
 
+学习思路
+==========
 
+- 先阅读 `MIT6.824中文文字版 <https://mit-public-courses-cn-translatio.gitbook.io/mit6-824/>`_ ，对课程内容有一个初步 "中文化" 理解
+- 然后观看油管上的 `MIT 6.824: Distributed Systems <https://www.youtube.com/@6.824>`_ 原版课程，通过英文学习(视频CC英文字幕)，以便能够加深理解(视频以及英文能够帮助我更好理解技术)
+- 结合 :ref:`golang` 学习，对课程作业进行编程，一方面加深分布式原理理解，一方面加深go语言编程能力
+
+分布式系统的驱动力和挑战
+==========================
+
+我们使用分布式的原因(驱动力):
+
+- 需要更高的计算性能(并行计算相当于有更多的cpu、内存和存储)
+- 分布式系统能够提供容错(tolerate faults)
+- 有些计算天然具备空间物理分布
+- 分布式系统能够提供安全隔离(限制出错域)
+
+分布式系统的问题(挑战):
+
+- 并发执行带来并发编程和复杂交互的问题，以及时间依赖问题(同步、异步)
+- 分布式系统带来故障的分散以及复杂的组成，故障难以排查;并且规模带来了罕见问题的放大(硬件故障概率)
+
+  - 系统容错性(availability)
+
+    - 使用非易失存储(non-volatile storage)来避免电力故障的数据丢失: 使用checkpoint或log，以便电力恢复能够从系统最新状态继续推进计算
+    - 使用数据复制(replication)
+
+  - 系统自我可恢复性(recoverability)
+
+- 分布式系统实际上很难达到性能的优化(需要极其小心设计和构建，否则性能很难达到理想的状态)
+- 分布式系统的可扩展性(Scalability): 当web服务器扩展达到一定规模后，系统的瓶颈可能转转移到数据库或者存储，通过数据库分片和分布式存储来提升性能
+- 分布式系统带来数据一致性(Consistency)的问题
+
+  - 强一致性的代价很高: 通讯代价(特别是需要构建跨地区的分布式系统，确保强一致性会带来系统性能的急剧下降)
+  - 弱一致性特别适合现实中超长距离的分布式系统
+
+MapReduce
+=============
