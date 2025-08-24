@@ -41,6 +41,16 @@ eBPF的新设计针对现代硬件做了优化，因此eBPF生成的志林集比
 - 但是与内核模块不同的是，eBPF 程序不需要重新编译
 - 正因为eBPF不是内核模块，所以eBPF程序不会导致系统崩溃
 
+基于ebpf的监控系统
+=====================
+
+随着 :ref:`kubernetes` 迅速发展，类似 :ref:`cilium` 和 :ref:`calico` 的网络底层都引入了ebpf作为管控和监控的基础，也涌现了不少基于ebpf的 :ref:`opentelemetry` 实现:
+
+- :ref:`cilium` + :ref:`cilium_hubble` 实现了完整的网络基础架构以及流量观察
+- `netdata <https://github.com/netdata/netdata>`_ 安装在节点的agent提供了分布式监控引擎(GPL v3+开源协议)，不过企业级的云计算和Dashboards UI非开源
+- `openflow <https://github.com/deepflowio/deepflow>`_ 国内的开源监控项目(Apache 2.0开源协议)，其架构采用了经典的agent采集，server存储到clickhouse，以及结合了现有开源 :ref:`grafana` :ref:`prometheus` :ref:`opentelemetry` ``skywalking`` , :ref:`kafka` 实现展示
+- `pixie <https://github.com/pixie-io/pixie>`_
+
 参考
 ========
 

@@ -1,15 +1,11 @@
-.. _packet_analysis:
+.. _ndpi:
 
 =================================
-网络协议分析
+ndpi
 =================================
 
 .. toctree::
    :maxdepth: 1
-
-   tcpdump/index
-   wireshark/index
-   ntop/index
 
 .. only::  subproject and html
 

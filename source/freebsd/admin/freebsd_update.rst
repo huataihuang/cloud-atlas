@@ -26,6 +26,24 @@ FreeBSD提供了两种更新系统方式:
 
    freebsd-update fetch install
 
+``freebsd-update`` 结合反向代理
+----------------------------------
+
+对于局域网中有多个FreeBSD服务器需要更新，则建议在内部部署 :ref:`nginx_reverse_proxy` (见 `FreeBSD Update (freebsd-update) <https://wiki.freebsd.org/FreeBSD_Update>`_ 案例配置):
+
+- 配置内部域名 ``freebsd-update.cloud-atlas.dev`` 反向代理访问 ``http://update.freebsd.org``
+- 修订 ``/etc/freebsd-update.conf`` 使用内部服务器 ``freebsd-update.cloud-atlas.dev`` 来更新
+
+这样只要有一次服务器更新，后续其他FreeBSD更新都能够通过反向代理的缓存进行更新，大大加快速度节约公网带宽
+
+.. note::
+
+   其实最大的困扰是在墙内访问 ``http://update.freebsd.org`` 速度太慢了，经常出现网络断开问题。我测试了一下，发现在阿里云上租用的虚拟机访问速度还可以，所以采用如下策略:
+
+   - 在阿里云FreeBSD虚拟机内部构建一个 :ref:`thin_jail` (底层文件系统是UFS)
+   - jail中部署一个 :ref:`nginx_reverse_proxy` 实现对 ``http://update.freebsd.org`` 反向代理
+   - 通过 :ref:`ssh_tunneling` 允许本地FreeBSD服务器能够访问映射到本地的远程阿里云FreeBSD容器中的nginx 80端口，实现动过缓存服务器更新系统，加速更新
+
 使用pkg更新FreeBSD软件
 =========================
 
@@ -73,3 +91,4 @@ FreeBSD提供了两种更新系统方式:
 
 - `FreeBSD update packages and apply security upgrades using pkg/freebsd-update <https://www.cyberciti.biz/faq/freebsd-applying-security-updates-using-pkg-freebsd-update/>`_
 - `FreeBSD How to Update All Packages <https://linuxhint.com/update_freebsd_packages/>`_
+- `FreeBSD Update (freebsd-update) <https://wiki.freebsd.org/FreeBSD_Update>`_

@@ -103,6 +103,10 @@ NullFS thin Jail
    - 将FreeBSD Release base存放在 **只读** 的 ``14.3-RELEASE@base`` **快照** - OpenZFS snapshot Thin Jail
    - 将FreeBSD Relaase base存放在 **读写** 的 ``14.3-RELEASE-base`` **数据集** - NullFS Thin Jail
 
+.. note::
+
+   这里创建的 ``Thin Jail Using NullFS`` 是基于 :ref:`zfs` 完成的实践。实际上，基于NullFS的Thin Jail也可以使用传统的UFS构成。由于我在阿里云租用的VM默认文件系统是UFS，所以我独立再记录到 :ref:`thin_jail_ufs` 中。
+
 - 创建 **读写模式** 的 ``14.3-RELEASE-base`` (注意，大家约定俗成 ``@base`` 表示只读快照， ``-base`` 表示可读写数据集)
 
 .. literalinclude:: vnet_thin_jail/templates_base

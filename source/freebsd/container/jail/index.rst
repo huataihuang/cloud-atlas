@@ -12,6 +12,7 @@ FreeBSD Jail
    jail_host.rst
    thick_jail.rst
    thin_jail.rst
+   thin_jail_ufs.rst
    service_jail.rst
    vnet_jail.rst
    linux_jail.rst
