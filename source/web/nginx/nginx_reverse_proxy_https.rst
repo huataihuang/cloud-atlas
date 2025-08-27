@@ -69,6 +69,9 @@ Let's Encrypt证书
 .. literalinclude:: nginx_reverse_proxy_https/install_certbot_rocky
    :caption: :ref:`centos` / :ref:`rockylinux` 安装 ``Certbot``
 
+.. literalinclude:: nginx_reverse_proxy_https/install_certbot_freebsd
+   :caption: :ref:`freebsd` 安装 ``Certbot``
+
 - 运行 ``Certboot`` :
 
 .. literalinclude:: nginx_reverse_proxy_https/run_certbot

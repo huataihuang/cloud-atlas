@@ -26,6 +26,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    nginx_reverse_proxy_nodejs.rst
    nginx_reverse_proxy_https.rst
    nginx_cors.rst
+   lets_encrypt_challenge.rst
    lets_encrypt_wildcard_certificates.rst
    nginx_config_include.rst
    nginx_redirect_url.rst

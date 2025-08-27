@@ -24,10 +24,10 @@ Nginx配置文件的include
 .. literalinclude:: nginx_config_include/config_files
    :caption: ``tree`` 输出配置文件列表
 
-- ``/etc/nginx/conf.d/cloud-atlas.io.conf`` :
+- ``/etc/nginx/conf.d/cloud-atlas.dev.conf`` :
 
-.. literalinclude:: nginx_config_include/cloud-atlas.io.conf
-   :caption: ``/etc/nginx/conf.d/cloud-atlas.io.conf``
+.. literalinclude:: nginx_config_include/cloud-atlas.dev.conf
+   :caption: ``/etc/nginx/conf.d/cloud-atlas.dev.conf``
 
 - ``/etc/nginx/includes/server_name.conf`` :
 
@@ -46,7 +46,7 @@ Nginx配置文件的include
 
 .. note::
 
-   将上述配置从 ``cloud-atlas.io.conf`` 作为起点(类似于程序的 ``main()`` )，将不同的配置片段 ``include`` 进来，就可以看出整个配置的原貌。
+   将上述配置从 ``cloud-atlas.dev.conf`` 作为起点(类似于程序的 ``main()`` )，将不同的配置片段 ``include`` 进来，就可以看出整个配置的原貌。
 
 后端Nginx配置
 ---------------
@@ -56,10 +56,10 @@ Nginx配置文件的include
 .. literalinclude:: nginx_config_include/config_files_backend
    :caption: ``tree`` 输出后端Nginx配置文件列表
 
-- 后端Nginx配置 ``/etc/nginx/conf.d/cloud-atlas.io.conf`` :
+- 后端Nginx配置 ``/etc/nginx/conf.d/cloud-atlas.dev.conf`` :
 
-.. literalinclude:: nginx_config_include/cloud-atlas.io.conf_backend
-   :caption: 后端Nginx配置 ``/etc/nginx/conf.d/cloud-atlas.io.conf``
+.. literalinclude:: nginx_config_include/cloud-atlas.dev.conf_backend
+   :caption: 后端Nginx配置 ``/etc/nginx/conf.d/cloud-atlas.dev.conf``
 
 - 后端Nginx配置 ``/etc/nginx/includes/server.conf`` :
 

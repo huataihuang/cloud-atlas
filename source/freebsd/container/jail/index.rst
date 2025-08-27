@@ -29,6 +29,7 @@ FreeBSD Jail
    zfs-jail_zpool.rst
    freebsd_chroot.rst
    pgsql_in_jail.rst
+   nginx_in_jail.rst
    bsd_cloud_jail/index
 
 .. only::  subproject and html
