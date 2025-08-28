@@ -128,38 +128,20 @@ Let's Encrypt证书
 .. literalinclude:: nginx_reverse_proxy_https/cloud-atlas.io.conf_backend
    :caption: 后端服务器 nginx 配置
 
-异常排查
-============
+.. note::
 
-我发现奇怪的问题，在 macOS 上使用 Safari 访问域名 https://docs.cloud-atlas.io/discovery ，有一定几率无法打开页面:
+   我在实践完成后发现一个非常困扰的问题，safari经常正常访问网站。我最初以为是自己的配置问题，反复排查，但是最后发现问题在于阿里云对没有"网站备案"的HTTP/HTTPS会TCP reset。这个问题困扰的是只有Safari会出现异常(chrome和firefox正常)。
 
-.. literalinclude:: nginx_reverse_proxy_https/safari_error
-   :caption: Safari访问网站随机断开连接
+   这个问题的根源在于阿里云对HTTPS的握手 :ref:`sni` 进行检查，因为Safari目前(2025年中)不支持 :ref:`esni` 和 :ref:`ech` ，导致明文的SNI泄露了客户端访问的域名。任何没有备案的域名访问都会被TCP RESET!
 
-然而，服务器是非常空闲的。有时候刷新safari浏览器又能够看到页面
+   而Chrome和Firefox已经默认启用了 :ref:`ech` 支持，所以访问网站时不会泄露SNI，所以始终正常。
 
-这个问题困扰我很久，最初我以为是阿里云外网访问的随机问题(但我觉得阿里云这样的头部云厂商不太可能存在这样的bug)，所以我尝试更换操作系统(Linux更换到FreeBSD)，问题依旧。
+   目前(Safari不支持加密SNI)，没有很好的解决方案:
 
-今天我更新了Sequioa 15.3版本macOS之后，我突然发现现在safari完全不能打开我的网站 https://docs.cloud-atlas.io/discovery/ ，晕倒...
+   - 我的域名是 `cloud-atlas.dev <https://cloud-atlas.dev>`_ ，这个 ``.dev`` 顶级域名工信部不提供备案，也就是无法在大陆租用的云主机上使用
+   - 海外的VM价格太贵而且反向访问速度太慢，不太可能作为homelab的网关
 
-**但是，chrome浏览器访问是正常的** 另外，验证了 Firefox 也可以正常访问网站。奇怪的是Safari不行...
-
-这带来一个问题，iOS设备无法访问我的网站，毕竟这是非常主要的手机客户端
-
-我注意到Safari浏览器访问网站时候，Nginxi日志 ``error.log`` 显示:
-
-.. literalinclude:: nginx_reverse_proxy_https/nginx_error.log
-   :caption: safari浏览器访问时nginx错误日志
-
-参考 `nginx faq: What does the following error mean in the log file: “accept() failed (53: Software caused connection abort) while accepting new connection on 0.0.0.0:80”? <https://nginx.org/en/docs/faq/accept_failed.html>`_ 说明:
-
-这类错误是因为客户端在nginx能够处理之前关闭的连接。例如，当用户没有等待一个包含大量图像的页面完全加载，而是点击了另一个链接是，就会发生这种情况。在这种情况下，用户浏览器将关闭所有不需要的先前连接。 **这是一个非关键错误**
-
-但是，为何safari客户端会快速关闭页面访问连接，而chrome却能够正常浏览？
-
-.. warning::
-
-   还需要排查...
+   我最终决定将方案改为使用 :ref:`cloudflare_tunnel` 输出 `cloud-atlas.dev <https://cloud-atlas.dev>`_ ，构建自己的互联网集群。
 
 参考
 ======
