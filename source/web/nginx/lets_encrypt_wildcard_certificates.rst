@@ -87,7 +87,9 @@ NGINX配置
 
 - `Does Let's Encrypt issue wildcard certificates? <https://certbot.eff.org/faq#does-let-s-encrypt-issue-wildcard-certificates>`_
 - `Generate A Let’s Encrypt certificate using Certbot and DNS Validation <https://medium.com/@pi_45757/generate-a-lets-encrypt-certificate-using-certbot-and-dns-validation-47b41ab012d7>`_ 手工执行 ``certbot`` 命令生成 ``DNS TEXT record`` 添加到Cloudflare DNS记录中，然后手工执行 ``certbot`` :ref:`dns-01_challenge` 完成部署，可以帮助我们理解整个过程
-- `How to issue Let’s Encrypt wildcard certificate with acme.sh and Cloudflare DNS <https://www.cyberciti.biz/faq/issue-lets-encrypt-wildcard-certificate-with-acme-sh-and-cloudflare-dns/>`_ 通过辅助脚本 ``acme.sh`` 实现Cloudflare DNS API操作来自动完成证书生成和更新，实际使用较为方便
-- `How to issue a Let’s Encrypt Wildcard SSL certificate with Acme.sh <https://kb.virtubox.net/knowledgebase/how-to-issue-wildcard-ssl-certificate-with-acme-sh-nginx/>`_
 - `Generating options-ssl-nginx.conf and ssl-dhparams in certonly mode <https://community.letsencrypt.org/t/generating-options-ssl-nginx-conf-and-ssl-dhparams-in-certonly-mode/136272>`_ 手工配置时 ``certbot`` 只生成了证书，还需要补充生成 ``options-ssl-nginx.conf`` 和 ``ssl-dhparams.pem``
+- `How to issue Let’s Encrypt wildcard certificate with acme.sh and Cloudflare DNS <https://www.cyberciti.biz/faq/issue-lets-encrypt-wildcard-certificate-with-acme-sh-and-cloudflare-dns/>`_ 通过辅助脚本 ``acme.sh`` 实现Cloudflare DNS API操作来自动完成证书生成和更新，实际使用较为方便
 - `How To Acquire a Let's Encrypt Certificate Using DNS Validation with acme-dns-certbot on Ubuntu 18.04 <https://www.digitalocean.com/community/tutorials/how-to-acquire-a-let-s-encrypt-certificate-using-dns-validation-with-acme-dns-certbot-on-ubuntu-18-04>`_
+- `How to issue a Let’s Encrypt Wildcard SSL certificate with Acme.sh <https://kb.virtubox.net/knowledgebase/how-to-issue-wildcard-ssl-certificate-with-acme-sh-nginx/>`_
+- `Automating Let’s Encrypt Lifecycle with Posh-Acme and Cloudflare <https://koolaid.info/automating-lets-encrypt-lifecycle-with-posh-acme-and-cloudflare/>`_
+- `How to use acme.sh with Clouflare and NameCheap <https://community.letsencrypt.org/t/how-to-use-acme-sh-with-clouflare-and-namecheap/230568>`_

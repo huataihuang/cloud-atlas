@@ -24,14 +24,51 @@ yt-dlp
 
    配置方法和 :ref:`youtube-dl` 基本相同，例如配置文件是 ``~/.config/yt-dlp/config``
 
-举例
+提取cookies
+=============
+
+要下载油管文件，需要为 ``yt-dlp`` 提供cookies。有以下一些方法
+
+使用 ``yt-dlp`` 提取chrome的cookies
+-------------------------------------
+
+``yt-dlp`` 无需使用第三方就可以提取chrome浏览器的cookie:
+
+.. literalinclude:: yt-dlp/cookies-from-browser
+   :caption: 提取chrome的cookies
+
+上述命令将浏览器的cookies保存为cookies.txt文件。这个cookies.txt文件后续就可以 ``--cookies`` 参数用于下载油管文件。不过，需要注意这个cookies.txt报案了所有网站的cookies，所以一定要保障安全。
+
+使用 ``chrome`` 保存cookies
+------------------------------
+
+``chrome`` 的私有浏览窗口可以导出cookies:
+
+- 在浏览器中使用一个新的 private browsing/incognito 窗口，并登陆到YouTube
+- 在同一个窗口和相同的tab中，访问 ``https://www.youtube.com/robots.txt``
+- 使用第三方export cookies来输出当前incognito窗口的cookies:
+
+  - chrome推荐使用 `Get cookies.txt LOCALLY chrome插件 <https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc>`_ (注意: **需要在插件管理页面勾选 "Allow in Incognito" 才能在隐私页面中使用** )
+  - firefox推荐使用 `cookies.txt firefox插件 <https://addons.mozilla.org/en-US/firefox/addon/cookies-txt/>`_
+
+.. figure:: ../../_static/python/network/get_cookies.txt_locally.png
+
+   在chrome中激活 "Allow in Incognito" 选项以后可以使用 ``Get cookies.txt LOCALLY chrome插件`` 保存当前页面的cookies
+
+.. note::
+
+   chrome处于incongnito状态时，代理配置使用的是系统设置proxy(默认情况下常规的proxy插件不生效，除非配置 "Allow in Incognito")。我是通过设置系统代理方式来实现incognito 窗口访问YouTube
+
+使用
 =====
 
 我非常喜欢的 `《杀死那个石家庄人》--万能青年旅店 影视混剪MV <https://www.youtube.com/watch?v=npHbCnf-Lpk>`_
 
 - 首先获取视频列表::
 
-   yt-dlp -F "https://www.youtube.com/watch?v=npHbCnf-Lpk"
+   yt-dlp -F "https://www.youtube.com/watch?v=npHbCnf-Lpk" --cookies www.youtube.com_cookies.txt
+
+这里参数 ``--cookies www.youtube.com_cookies.txt`` 是指定刚才从chrome的Incognito页面export出来的cookie文件
 
 显示输出:
 
@@ -41,7 +78,7 @@ yt-dlp
 
 我来下载最小的一个视频mp4，编号 ``18`` ::
 
-   yt-dlp -f 18 "https://www.youtube.com/watch?v=npHbCnf-Lpk"
+   yt-dlp -f 18 "https://www.youtube.com/watch?v=npHbCnf-Lpk" --cookies www.youtube.com_cookies.txt
 
 .. note::
 
