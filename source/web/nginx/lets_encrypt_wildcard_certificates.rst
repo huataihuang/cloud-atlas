@@ -82,6 +82,26 @@ NGINX配置
 自动配置
 ===========
 
+.. note::
+
+   由于无法解决阿里云强制"网站备案"对HTTPS TLS握手的 :ref:`sni` 嗅探和TCP reset，我目前放弃了自建 :ref:`nginx_reverse_proxy_https` ，改为采用 :ref:`cloudflare_tunnel` 来实现内部服务器对外输出服务。所以，暂时不再搞Let's encrypt证书，这段 ``acme.sh`` 脚本自动申请和更新证书的实践我没有做。
+
+   看以后需要再搞，这里仅记录备查。
+
+`GitHub: acmesh-official/acme.sh <https://github.com/acmesh-official/acme.sh>`_ 提供了一个完全采用shell编写的ACME客户端协议实现，非常方便用于申请证书和保持证书更新:
+
+- 完全采用shell编写的ACME协议客户端
+- 完整支持了ACME协议实现
+- 支持ECDSA certs
+- 支持SAN和wildcard certs
+- 只使用一个脚本来自动完成 issue, renew 和 install 证书
+- 不需要root/sudoers权限
+- 支持Docker运行
+- 支持IPv6
+- 通过cron实现更新或错误通知
+
+待实践...
+
 参考
 =======
 
