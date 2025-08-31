@@ -107,7 +107,13 @@ yt-dlp
 快速下载喜爱的音频文件
 ========================
 
-经常听的的歌曲，建一个 ``playlist`` 列表，然后一次性从Youtube下载音频:
+经常听的的歌曲，建一个 ``playlist`` 列表，可以使用 ``yt-dlp`` 获取这个列表中的所有视频的IDs:
+
+.. literalinclude:: yt-dlp/get-id
+   :caption: 获取 ``playlist`` 列表所有视频的IDs
+
+
+然后一次性从Youtube下载音频:
 
 .. literalinclude:: yt-dlp/yt-dlp_songs.sh
    :language: bash

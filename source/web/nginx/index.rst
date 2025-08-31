@@ -31,6 +31,7 @@ nginx官方网站提供O'REILLY发布的 Derek DeJonghe 撰写的 `Complete NGIN
    lets_encrypt_wildcard_certificates.rst
    nginx_config_include.rst
    nginx_redirect_url.rst
+   nginx_port_in_redirect.rst
    nginx_webdav.rst
    nginx_config_tips.rst
    auth/index
