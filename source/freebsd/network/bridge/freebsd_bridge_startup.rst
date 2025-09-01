@@ -16,13 +16,13 @@ FreeBSD bridge快速起步
 内核模块加载
 ==============
 
-- 交换网络(bridge/switch)的内核模块是 ``if_bridge.ko`` ，可以通过命令行加载内核模块(需要持久化则需要配置 ``/etc/loader.conf`` ):
+- 交换网络(bridge/switch)的内核模块是 ``if_bridge.ko`` ，可以通过命令行加载内核模块(需要持久化则需要配置 ``/boot/loader.conf`` ):
 
 .. literalinclude:: ../../virtual/bhyve/bhyve_startup/kldload
    :caption: 加载内核模块 ``if_bridge`` (其他3个内核模块用于支持虚拟化)
    :emphasize-lines: 4
 
-- 需要配置 ``/etc/loader.conf`` 确保加载这个 ``if_bridge`` 模块(这里其他模块是为了虚拟机，虚拟机也是连接到这个bridge，如果只是物理网络交换，则不需要虚拟化相关模块):
+- 需要配置 ``/boot/loader.conf`` 确保加载这个 ``if_bridge`` 模块(这里其他模块是为了虚拟机，虚拟机也是连接到这个bridge，如果只是物理网络交换，则不需要虚拟化相关模块):
 
 .. literalinclude:: ../../virtual/bhyve/bhyve_startup/loader.conf
    :caption: 配置启动时自动加载 ``if_bridge`` 内核模块支持交换机功能(其他3个内核模块用于支持虚拟化)

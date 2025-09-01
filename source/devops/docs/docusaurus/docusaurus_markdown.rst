@@ -10,6 +10,14 @@ Docusaurus Markdown
 
    完整请参考官方文档
 
+链接
+=========
+
+有两种方式链接到其他页面:
+
+- URL path: ``[URL path to another document](./installation)``
+- file path: ``[file path to another document](./installation.mdx)``
+
 代码块
 ========
 

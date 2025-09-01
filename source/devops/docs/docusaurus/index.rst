@@ -15,6 +15,7 @@ Docusaurus
    docusaurus_code_snippets.rst
    docusaurus_url.rst
    docusaurus_markdown.rst
+   docusaurus_customize.rst
 
 .. only::  subproject and html
 
