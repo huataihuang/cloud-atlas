@@ -15,13 +15,14 @@ FreeBSD代理配置
    setenv HTTP_PROXY http://192.168.7.9:3128
    setenv HTTPS_PROXY https://192.168.7.9:3128
 
-- 对于 ``sh`` ，配置 ``/etc/profile`` ::
+- 对于 ``sh`` ，配置 ``/etc/profile`` / ``~/.shrc`` ::
 
-   export HTTP_PROXY http://192.168.7.9:3128
-   export HTTPS_PROXY https://192.168.7.9:3128
+   export HTTP_PROXY=http://192.168.7.9:3128
+   export HTTPS_PROXY=https://192.168.7.9:3128
 
 参考
 =======
 
 - `FreeBSD 101 hacks: Configure proxy <https://nanxiao.gitbooks.io/freebsd-101-hacks/content/posts/configure-proxy.html>`_
+- `How to Configure Proxy Settings for `pkg` Downloads on FreeBSD Operating System <https://www.siberoloji.com/how-to-configure-proxy-settings-for-pkg-downloads-on-freebsd-operating-system/>`_
 - `Update FreeBSD Using Proxy Server (csup / portsnap proxy update) <https://www.cyberciti.biz/faq/updating-freebsd-source-tree-via-proxyserver/>`_ 提到了使用 ``prtunnel`` 来构建一个 tunnel，这样即使软件不支持代理也可以通过 ``prtunnel`` 实现网络流量走代理。不过这个方法我还没有实践，记录备用。
