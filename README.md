@@ -37,6 +37,14 @@
 
 2025年6月1日
 
+## [cloud-atlas.dev](https://cloud-atlas.dev) 上线
+
+我在不久前看到一个观点: 不要等所有条件都具备再出发，你永远不能计划所有的变化和要求
+
+想法一直在变，但是我无法再等，所以我决定即使没有准备好，我也出发了: 包括我自己构建的这个网站 [cloud-atlas.dev](https://cloud-atlas.dev)
+
+2025年9月1日
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=huataihuang/cloud-atlas&type=Date)](https://star-history.com/#huataihuang/cloud-atlas&Date)

@@ -16,6 +16,11 @@
 .. literalinclude:: vm-bhyve/install_vm-bhyve
    :caption: 安装 ``vm-bhyve``
 
+可以看到会依赖安装3个软件包:
+
+.. literalinclude:: vm-bhyve/install_vm-bhyve_output
+   :caption: 安装 ``vm-bhyve`` 会安装3个软件包
+
 - 创建存储: 
 
   - 创建 ``zdata/vms`` :ref:`zfs` 存储数据集，并且将默认 ``recordsize`` 属性 ``128K`` 调整为 ``64K``
