@@ -24,6 +24,12 @@ ZFS 复制(replication)
 - ``zfs send | zfs recv`` 是基于块级别的复制，并且内置了checksum，所以能够保障数据完整型
 - 建议在启动 ``Replication`` 之前先检查目标服务器是否有足够空间容纳发送方数据
 
+.. note::
+
+   ZFS不支持 ``shrink`` (收缩)，无法缩小zpool: zpool会跨越多个设备，对于shrink需要重新分配和组织所有现有数据块，但是ZFS并没有这样的设计。
+
+   作为一个变通方法，ZFS可以通过备份恢复的方式来收缩，也就是是使用 ``zfs send | zfs recv`` 来支持从较大的zpool备份出去，然后再恢复到较小的磁盘上。
+
 数据复制
 ============
 

@@ -4,11 +4,15 @@
 gpart
 ==========
 
-我在2025年初组装了一台 :ref:`nasse_c246` ，内置了2个 :ref:`nvme` M.2接口。由于主板支持 :ref:`pcie_bifurcation` ，可以将主板伤的PCIe 3.0 X16拆分成 ``X8X8`` 或 ``X4X4X8`` ，所以我最终购买了一个 :ref:`pcie_bifurcation_x4x4x8_card` 为主机构建了 ``4块`` :ref:`kioxia_exceria_g2` :ref:`nvme` 存储:
+我在2025年初组装了一台 :ref:`nasse_c246` ，内置了2个 :ref:`nvme` M.2接口。由于主板支持 :ref:`pcie_bifurcation` ，可以将主板上的PCIe 3.0 X16拆分成 ``X8X8`` 或 ``X4X4X8`` ，所以我最终购买了一个 :ref:`pcie_bifurcation_x4x4x8_card` 为主机构建了 ``4块`` :ref:`kioxia_exceria_g2` :ref:`nvme` 存储:
 
 - 第一块nvme存储已经安装了最小化 :ref:`freebsd` ，我特意仅划分了较小的分区用于 ``zroot`` ZFS pool，这样磁盘后半部分空白分区可以后后续其他nvme磁盘的分区共同组件 ``RAIDZ`` ( ``zdata`` pool)
 - 第 ``2-4`` 块nvme磁盘，每个磁盘划分为2个分区，第一个分区较小，和第一块nvme的系统分区大小相当，用于后续构建物理磁盘上的 :ref:`gluster` 冗余安全存储数据；后一个分区则为剩余磁盘空间，用于构建 ``RAIDZ`` ( ``zdata`` pool)
 - 一共有 ``4`` 个较大的分区分布在 ``4`` 块nvme上，为了能够最大化使用空间，采用了 ``RAIDZ0`` 模式，这样能够获得最大空间和最高性能(生产环境不可采用这种无安全保障的RAIDZ，生产环境请使用 ``RAIDZ5`` )
+
+.. note::
+
+   由于我后续在 :ref:`nasse_c246` 组装机上将所有拆分PCIe 3.0 X16的3个PCIe接口都用于GPU设备，所以最终我修改方案，采用单块 :ref:`kioxia_exceria_g2` :ref:`nvme` 存储来构建FreeBSD存储: :ref:`gpart_zdata`
 
 磁盘
 ======
@@ -82,7 +86,7 @@ gpart
    :caption: 已经安装了FreeBSD的磁盘分区情况
    :emphasize-lines: 5
 
-**可以看到 gpart 分区的 -s 参数实际上是指分区最后边界的位置** 是 ``256G`` ，所以可以看到我手工划分的分区1和之前通过FreeBSD安装时划分的分区边界(大小)是一样的。
+gpart 分区的 ``-s`` 参数表示容量大小，这里是 ``256G`` ，所以可以看到我手工划分的分区1和之前通过FreeBSD安装时划分的分区边界(大小)是一样的。
 
 - 接下来再给 ``nda0`` 添加分区2，这里因为是完全分配剩余空间，所以不指定 ``-s`` 参数:
 
@@ -134,4 +138,4 @@ gpart
 - `Adding a Volume and Creating Partitions in FreeBSD <https://serverspace.us/support/help/adding-a-volume-and-creating-partitions-in-freebsd/>`_
 - `GPART(8)  System Manager's Manual <https://man.freebsd.org/cgi/man.cgi?gpart(8)>`_
 - `FreeBSD handbook: Chapter 20.Storage <https://docs.freebsd.org/en/books/handbook/disks/>`_
-- `How to Use `gpart` to Manage Partitions on FreeBSD Operating System <https://www.siberoloji.com/how-to-use-gpart-to-manage-partitions-on-freebsd/#google_vignette>`_
+- `How to Use 'gpart' to Manage Partitions on FreeBSD Operating System <https://www.siberoloji.com/how-to-use-gpart-to-manage-partitions-on-freebsd/#google_vignette>`_

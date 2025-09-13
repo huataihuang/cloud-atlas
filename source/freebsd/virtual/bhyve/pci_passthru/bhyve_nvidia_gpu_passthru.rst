@@ -22,11 +22,21 @@
 
 `GPU passthrough for bhyve on FreeBSD 14 <https://dflund.se/~getz/Notes/2024/freebsd-gpu/>`_ 解释了为何网上说 "bhyve支持PCI设备passthrough，但是不支持GPU passthru" 是一个误解: 真实原因是NVIDIA驱动仅支持KVM信号的hypervisor，对于bhyve则需要补丁才行。
 
-很不幸，我最终实践没有成功passthru :ref:`tesla_p10` ，但是同样GPU核心但是内存和频率降级的 :ref:`tesla_p4` 就非常成功使用。我感觉这两款NVIDIA GPU在处理hypvervisor时候有一些区别，目前我还没有找到如何驱动 :ref:`tesla_p10` passthru的方法。暂时先使用 :ref:`tesla_p4` 来做一些小模型的测试，后续有机会再尝试解决 :ref:`tesla_p10` passthru。
+`bhyve Current state of bhyve Nvidia passthrough? <https://forums.freebsd.org/threads/current-state-of-bhyve-nvidia-passthrough.88244/>`_ 也提示采用 `GPU passthrough for bhyve on FreeBSD 14 <https://dflund.se/~getz/Notes/2024/freebsd-gpu/>`_ 介绍的补丁方法，有人验证在 14.3 上也能工作。这个讨论线索中 `原帖讨论中 c-c-c-c 提供的patch文件 <https://forums.freebsd.org/threads/current-state-of-bhyve-nvidia-passthrough.88244/page-2>`_ ，可以直接应用到14.3
+
+但是，但是... 上述补丁是针对bhyve上运行的不同虚拟机传递 ``KVMKVMKVM`` 或者其他字符串，这个解决方法需要根据不同的NVIDIA硬件结合Guest系统进行调整，看起来并不是通用的方法。我在本文中尝试在 :ref:`tesla_p10` 上实施就没有成功，让人非常迷惘。
+
+.. warning::
+
+   我在 :ref:`tesla_p10` 实践本文的补丁方法没有成功，但是不代表此方法不能适用于你的NVIDIA设备，所以本文笔记或许也有参考价值。请自行验证...
+
+   另外，我 ``remake`` 新补丁方法，采用 :ref:`bhyve_nvidia_gpu_passthru_intpin_patch`
+
+很不幸，我最终实践没有成功passthru :ref:`tesla_p10` ，但是同样GPU核心但是内存和频率降级的 :ref:`tesla_p4` :strike:`就非常成功使用` 表现能启动虚拟机但无法初始化。我感觉这两款NVIDIA GPU在处理hypvervisor时候有一些区别
 
 .. note::
 
-   :ref:`bhyve_intel_gpu_passthru` 实现非常简单，标准方法操作就可以，不需要补丁
+   :ref:`bhyve_intel_gpu_passthru` 实现非常简单，标准方法操作就可以，不需要补丁(不过我还没有验证是否实际工作，所以还不能确定)
 
 ``vm-bhyve``
 ===============
@@ -82,12 +92,21 @@ nvidia补丁(尝试一)
 
    我实践还存在问题，补丁和编译似乎没有问题，但是没有解决 passthru NVIDIA GPU 之后无法启动虚拟机的问题，VNC显示还是黑屏
 
-   太奔溃了，我休息一下再想办法解决
+.. warning::
 
-- 参考 ` 26.6.3. Updating the Source <https://docs.freebsd.org/en/books/handbook/cutting-edge/#updating-src-obtaining-src>`_ 根据 ``uname -r`` 获取当前安装的RELEASE，例如 ``14.3-RELEASE`` ，则下载对应的源代码分支:
+   我最初使用的源代码可能搞错了，我当时实践使用了 :ref:`freebsd_build_from_source` FreeBSD官方源码 ``releng/14.3``，但是后来仔细看了 `bhyve Current state of bhyve Nvidia passthrough? <https://forums.freebsd.org/threads/current-state-of-bhyve-nvidia-passthrough.88244/>`_ 发现目前网上提供针对NVIDIA passthru的补丁是采用 `Backhoff自动化公司 freebsd-src <https://github.com/Beckhoff/freebsd-src/>`_ ( `德国倍福自动化有限公司 <https://baike.baidu.com/item/%E5%BE%B7%E5%9B%BD%E5%80%8D%E7%A6%8F%E8%87%AA%E5%8A%A8%E5%8C%96%E6%9C%89%E9%99%90%E5%85%AC%E5%8F%B8/6896839>`_ )分支 ``phab/corvink/<RELEASE>/nvida-wip`` 来进行补丁的。
 
-.. literalinclude:: ../../../build/freebsd_build_from_source/freebsd_src
-   :caption: 获取 freebsd 源代码
+   所以后续我可能还会重新再进行一次这里的实践，目前这段笔记中 `Backhoff自动化公司 freebsd-src <https://github.com/Beckhoff/freebsd-src/>`_ 源代码下载是我后来补的笔记
+
+- 从 `Backhoff自动化公司 freebsd-src <https://github.com/Beckhoff/freebsd-src/>`_ 拉取源码:
+
+.. literalinclude:: bhyve_nvidia_gpu_passthru/src
+   :caption: 下载 Backhoff 的 freebsd-src 源代码
+
+- ``checkout`` 出 ``phab/corvink/14.2/nvidia-wip`` 分支:
+
+.. literalinclude:: bhyve_nvidia_gpu_passthru/checkout
+   :caption: ``phab/corvink/14.2/nvidia-wip`` 分支
 
 - 下载补丁 :download:`nvidia.patch.txt <nvidia.patch.txt>` (或者下载 `原帖讨论中 c-c-c-c 提供的patch文件 <https://forums.freebsd.org/threads/current-state-of-bhyve-nvidia-passthrough.88244/page-2>`_ ) 存放到 ``/usr/src`` 目录中
 
@@ -150,6 +169,7 @@ google AI提到bhyve不支持Linux中使用的 ``pci=realloc`` 内核配置，�
 - 我尝试了 ``Re-Size BAR Support`` (该配置是为了加速NVIDIA性能，默认开启)关闭和开启都没有解决
 
 总之，BIOS符合NVIDIA GPU的要求，看起来还是需要从 ``bhyve`` 这里寻找解决方法
+
 配置
 =======
 

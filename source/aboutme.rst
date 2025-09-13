@@ -10,4 +10,4 @@
 - Email:    huataihuangATgmail.com
 - LinkedIn: `huatai-huang-a41a131a <https://www.linkedin.com/in/huatai-huang-a41a131a>`_
 
-目前 ``待业`` 中， **寻求一份"Work Life Balance"的工作**
+目前 ``失业`` 中， **寻求一份"Work Life Balance"的工作**

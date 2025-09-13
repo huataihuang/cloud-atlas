@@ -9,6 +9,8 @@ bhyve PCI Passthrough
 
    bhyve_pci_passthru_startup.rst
    bhyve_nvidia_gpu_passthru.rst
+   bhyve_nvidia_gpu_passthru_intpin_patch.rst
+   bhyve_nvidia_gpu_passthru_freebsd_15.rst
    bhyve_intel_gpu_passthru.rst
    bhyve_amd_gpu_passthru.rst
 
