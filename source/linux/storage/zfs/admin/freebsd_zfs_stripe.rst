@@ -75,6 +75,28 @@ Stripe (RAID-0)
    :caption: 检查zpool磁盘情况
    :emphasize-lines: 3-6
 
+.. _freebsd_zfs_stripe_single_disk:
+
+FreeBSD ZFS单块磁盘stripe
+============================
+
+在 :ref:`gpart_linux_zfs_partition` 构建FreeBSD和Linux共存的分区，使用了单块磁盘，其中分区5用于构建单块磁盘(分区)的 ``zdata`` zpool，以下是 ``gpart show nda0`` 输出:
+
+.. literalinclude:: ../../../../freebsd/storage/gpart_linux_zfs_partition/gpart_show_output_all
+   :caption: 使用 ``gpart`` 检查，其中第5个分区用于构建 ``zdata`` zpool
+   :emphasize-lines: 7
+
+- 创建 ``zdata`` zpool (单块磁盘构建的ZFS zpool实际上就是 ``stripe`` 模式，和上文相同):
+
+.. literalinclude:: freebsd_zfs_stripe/zpool_zdata
+   :caption: 创建 ``zdata`` zpool
+
+- 检查 ``zpool list -v`` 输出:
+
+.. literalinclude:: freebsd_zfs_stripe/zpool_list_zdata_output
+   :caption: ``zpool list -v`` 输出显示 ``zdata`` zpool 详情
+   :emphasize-lines: 2,3
+
 参考
 ======
 
