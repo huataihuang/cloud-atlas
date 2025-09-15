@@ -10,6 +10,26 @@ FreeBSD在发行不同relase期间会持续开发: 有些人会倾向于使用�
 
    在大陆访问FreeBSD的更新网站非常缓慢，甚至无法完成更新。所以可能需要设置 :ref:`freebsd_proxy`
 
+FreeBSD版本
+============
+
+已知 FreeBSD 有如下版本(或阶段): ``current --> alpha（进入 stable 分支）--> beta --> rc --> release``
+
+- alpha: alpha 是 current 进入 release 的第一步
+- rc
+- beta
+- release
+- current: current相对稳定后会推送到 stable，但是不保证二者没有大的 bug
+- stable: stable 的真实意思是该分支的 ABI（Application Binary Interface，应用程序二进制接口）是稳定的(但和Linux发行版的"稳定版"概念不同，反而是一种 **不稳定** 的 "开发版" )
+
+.. note::
+
+   只有 alpha、rc、beta 和 release（且是一级架构）才能使用命令 ``freebsd-update`` 更新系统，其余版本系统均需要通过源代码编译的方式（或使用二进制的 pkgbase）更新系统。
+
+   FreeBSD 开发计划准备删除命令 ``freebsd-update`` ，一律改用 ``pkgbase``
+
+   参见 `FreeBSD Manual Pages freebsd-update <https://man.freebsd.org/cgi/man.cgi?freebsd-update>`_
+
 FreeBSD update
 =================
 

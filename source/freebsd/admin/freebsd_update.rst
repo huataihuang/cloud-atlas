@@ -14,9 +14,10 @@ FreeBSD提供了两种更新系统方式:
 
 更新FreeBSD Core OS有两个步骤:
 
-- 获取完整的Core OS软件系统索引::
+- 获取完整的Core OS软件系统索引:
 
-   freebsd-update fetch
+.. literalinclude:: freebsd_update/fetch
+   :caption: 获取完整的Core OS软件系统索引
 
 - 更新系统已经安装的软件::
 
