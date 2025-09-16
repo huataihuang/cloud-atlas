@@ -15,6 +15,7 @@ HPE服务器
    dl360_bios_upgrade.rst
    dl360_config_mem.rst
    pcie_bifurcation.rst
+   uefitool_pcie_bifurcation.rst
    plx_8747_pcie_bifurcation.rst
    dl360_nvme_storage.rst
    dl360_tesla_p10.rst

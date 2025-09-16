@@ -8,6 +8,7 @@ bhyve PCI Passthrough
    :maxdepth: 1
 
    bhyve_pci_passthru_startup.rst
+   bhyve_pci_passthru_pptdevs.rst
    bhyve_nvidia_gpu_passthru.rst
    bhyve_nvidia_gpu_passthru_intpin_patch.rst
    bhyve_nvidia_gpu_passthru_freebsd_15.rst
