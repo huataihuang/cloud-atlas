@@ -12,7 +12,7 @@ gpart
 
 .. note::
 
-   由于我后续在 :ref:`nasse_c246` 组装机上将所有拆分PCIe 3.0 X16的3个PCIe接口都用于GPU设备，所以最终我修改方案，采用单块 :ref:`kioxia_exceria_g2` :ref:`nvme` 存储来构建FreeBSD存储: :ref:`gpart_zdata`
+   由于我后续在 :ref:`nasse_c246` 组装机上将所有拆分PCIe 3.0 X16的3个PCIe接口都用于GPU设备，所以最终我修改方案，采用单块 :ref:`kioxia_exceria_g2` :ref:`nvme` 存储来构建FreeBSD存储: :ref:`gpart_linux_zfs_partition`
 
 磁盘
 ======

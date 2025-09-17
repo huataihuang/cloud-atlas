@@ -58,3 +58,5 @@ bhyve PCI Passthrough ``pptdevs`` 经验教训
 .. warning::
 
    当Host主机上的PCIe设备更改时，原先系统识别的PCIe IDs会动态变化，这会导致 ``/boot/loader.conf`` 原先配置的 ``pptdevs`` 误屏蔽掉错误的设备!!!
+
+   **我甚至可能误屏蔽了一块nvme存储(捂脸)** 导致 :ref:`freebsd_zfs_stripe` 无法使用，当时没有想到这个可能还折腾好久重建了ZFS，悲剧啊悲剧

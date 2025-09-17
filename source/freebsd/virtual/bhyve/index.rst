@@ -11,6 +11,7 @@ bhyve(BSD hypervisor)
    bhyve_startup.rst
    vm-bhyve.rst
    bhyve_ubuntu.rst
+   bhyve_storage.rst
    bhyve_change_vm_memory.rst
    bhyve_vm_console.rst
    bhyve_zfs_snapshot.rst

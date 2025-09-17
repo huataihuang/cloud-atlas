@@ -105,21 +105,12 @@ Read the Docs Sphinx theme 有一个bug会导致表格单元中的文字不能�
    :language: css
    :linenos:
 
-- 修改文档源代码目录下 ``conf.py`` 配置文件添加如下配置选项::
+- 修改文档源代码目录下 ``conf.py`` 配置文件添加如下配置选项:
 
-   html_static_path = ['_static']
-   
-   html_context = {
-       'css_files': [
-           '_static/theme_overrides.css',  # override wide tables in RTD theme
-           ],
-        }
+.. literalinclude:: sphinx_table/conf.py
+   :caption: 在 ``conf.py`` 配置文件设置CSS override
 
 - 然后重新build文档，这样看到的文档表格文字就能自动换行。
-
-.. note::
-
-   最新更新的Sphinx 4.2.0已经无法使用上述方法，待后续再探索
 
 参考
 ======
