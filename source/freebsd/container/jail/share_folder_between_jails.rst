@@ -8,7 +8,7 @@
 
 实际上在FreeBSD中，对于Jail中使用Host上目录，采用了一种名为 ``nullfs`` 的回环文件系统。在部署 :ref:`linux_jail` 时已经使用，也就是将host主机的 ``/tmp`` 和 ``/home`` 目录挂载到 Linux Jail中: 这样就可以在Jail中使用X11
 
-.. literalinclude:: linux_jail/d2l.conf
+.. literalinclude:: linux_jail_archive/d2l.conf
    :caption: Linux Jail ``/etc/jail.conf.d/d2l.conf`` 配置了host目录通过nullfs挂载到Jail
    :emphasize-lines: 11,12
 

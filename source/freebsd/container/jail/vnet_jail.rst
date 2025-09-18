@@ -61,7 +61,7 @@ VNET Jail 只是在网络堆栈有特殊配置，其他部分和 :ref:`thick_jai
 
 - 现在启动 ``d2l`` Jail:
 
-.. literalinclude:: linux_jail/start_d2l
+.. literalinclude:: linux_jail_archive/start_d2l
    :caption: 启动 ``d2l`` Linux Jail
 
 启动以后在物理主机上 ``ifconfig`` 就能够看出和之前 :ref:`thin_jail` / :ref:`linux_jail` 的网络差异部分了:
@@ -88,7 +88,7 @@ VNET Jail 只是在网络堆栈有特殊配置，其他部分和 :ref:`thick_jai
 
 - 此时 ``chroot`` 进入 Linux Jail 部分:
 
-.. literalinclude:: linux_jail/jexec_chroot
+.. literalinclude:: linux_jail_archive/jexec_chroot
    :caption: ``jexec`` 结合 ``chroot`` 将访问 :ref:`debian` 系统Linux二进制兼容
 
 神奇的部分来了，此时在Linux环境执行 ``ifconfig`` 也能够看到完整的网卡:

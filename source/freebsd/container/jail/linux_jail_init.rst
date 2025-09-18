@@ -31,17 +31,17 @@ Linux层设置
 
 - 进入 ``d2l`` Linux jail，并 ``chroot`` :
 
-.. literalinclude:: linux_jail/jexec_chroot
+.. literalinclude:: linux_jail_archive/jexec_chroot
    :caption: ``jexec`` 结合 ``chroot`` 将访问 :ref:`debian` 系统Linux二进制兼容
 
 需要确保检查当前确实是Linux环境:
 
-.. literalinclude:: linux_jail/uname
+.. literalinclude:: linux_jail_archive/uname
    :caption: 使用 ``uname`` 检查Linux环境
 
 输出类似:
 
-.. literalinclude:: linux_jail/uname_output
+.. literalinclude:: linux_jail_archive/uname_output
    :caption: 使用 ``uname`` 检查Linux环境输出
 
 安装必要软件包
