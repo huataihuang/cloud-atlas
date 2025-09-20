@@ -55,8 +55,10 @@ Jail目录树
    - ``templates`` 在使用 Thin Jails 时，该目录存储模板(共享核心系统)
    - ``containers`` 将存储jail (也就是容器)
 
-``快照(snapshot)`` 型 vs. ``模板和NullFS`` 型
-================================================
+.. _snapshot_vs_templates_nullfs_thin_jails:
+
+``快照(snapshot)`` 型 vs. ``模板和NullFS`` 型 Thin Jail
+==========================================================
 
 FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来创建的 瘦 Jail:
 

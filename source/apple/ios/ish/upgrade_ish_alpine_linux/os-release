@@ -1,0 +1,1 @@
+cat /etc/os-release

@@ -32,6 +32,7 @@ Alpine Linux
    alpine_kvm.rst
    alpine_docker.rst
    alpine_nfs.rst
+   alpine_init.rst
    alpine_dev.rst
 
 .. only::  subproject and html

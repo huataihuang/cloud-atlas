@@ -8,6 +8,7 @@ iSH: Linux shell for iOS
    :maxdepth: 1
 
    intro_ish.rst
+   upgrade_ish_alpine_linux.rst
    ish_ssh_server.rst
 
 .. only::  subproject and html
