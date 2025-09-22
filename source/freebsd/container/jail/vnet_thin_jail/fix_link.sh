@@ -1,4 +1,3 @@
-#cd /$jail_dir/templates/$bsd_ver-RELEASE-base/etc/ssl/certs
 cd /$jail_dir/templates/$bsd_ver-RELEASE-skeleton/etc/ssl/certs
 
 # 先保存一份原始列表记录

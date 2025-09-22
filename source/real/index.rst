@@ -11,6 +11,10 @@ Real
 .. figure:: ../_static/real/west_world.jpg
    :scale: 50
 
+.. note::
+
+   2025年9月1日开始，我启动了 `docs.cloud-atlas.dev <https://docs.cloud-atlas.dev>`_ ，将本章节 ``Real`` 迁移延续到新平台，作为完整的、总结性的真实实践记录。
+
 .. toctree::
    :maxdepth: 1
 

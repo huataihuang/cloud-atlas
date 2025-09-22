@@ -1,8 +1,8 @@
 .. _vnet_thin_jail:
 
-=========================
-VNET + Thin Jail
-=========================
+=====================================
+VNET + Thin Jail(Template+NullFS)
+=====================================
 
 在实践了不同的FreeBSD Jail技术之后，我在 `cloud-atlas.dev <https://cloud-atlas.dev>`_ 实践中，采用了FreeBSD VNET + Thin Jail 来构建基础环境:
 
@@ -14,6 +14,8 @@ VNET + Thin Jail
    本文记录完整部署步骤，也就是从主机激活Jail功能开始到通过辅助脚本快速启动jail
 
    本文步骤也是 `云图「架构」: VNET + Thin Jail <http://docs.cloud-atlas.dev/zh-CN/architecture/container/jails/vnet-thin-jail#配置jail>`_
+
+   对于采用 ``快照(snapshot) Thin Jail`` 请参考 :ref:`vnet_thin_jail_snapshot`
 
 主机激活 jail
 ===============
@@ -178,6 +180,9 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 
 - 在 ``skeleton`` 就绪之后，需要将数据复制到 jail 目录(如果是UFS文件系统)，对于ZFS则非常方便使用快照:
 
+.. literalinclude:: vnet_thin_jail/jail_name
+   :caption: 为了能够灵活创建jail，这里定义一个 ``jail_name`` 环境变量，方便后续调整jail命名
+
 .. literalinclude:: vnet_thin_jail/snapshot
    :caption: 创建skeleton快照,然后再创建快照的clone(jail)
 
@@ -198,7 +203,16 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 .. note::
 
    - Jail的配置分为公共部分和特定部分，公共部分涵盖了所有jails共有的配置
-   - 尽可能提炼出Jails的公共部分，这样就可以简化针对每个jail的特定部分，方便编写较稳维护
+   - 尽可能提炼出Jails的公共部分，这样就可以简化针对每个jail的特定部分，方便编写校验维护
+
+如果全部采用Template+NullFS
+-------------------------------------
+
+.. note::
+
+   本段落配置是我之前采用的，也就是所有Jail都采用统一的 VNET + Thin Jail(Template+NullFS)，这样公共的 ``/etc/jail.conf`` 配置部分内容更多，而独立配置部分，如 ``/etc/jail.conf.d/jdev.conf`` 则只有IP配置
+
+   不过，当采用 VNET + Thin Jail(Template+NullFS) 混合部分 :ref:`vnet_thin_jail_snapshot` ，则因为两者有一些差异，所以我把更多的差异部分移动到独立的 ``/etc/jail.conf.d/jdev.conf`` ，以确保公共的 ``/etc/jail.conf`` 能够同时满足两个不同的Thin Jail的配置。见下文 ``如果部分采用Template+NullFS``
 
 - 创建所有jail使用的公共配置部分 ``/etc/jail.conf`` (使用了 VNET 模式配置):
 
@@ -223,24 +237,44 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
       :caption: 配置配置允许挂载的时候
       :emphasize-lines: 3,4
 
-- ``/etc/jail.conf.d/dev.conf`` 独立配置部分:
+- ``/etc/jail.conf.d/jdev.conf`` 独立配置部分:
 
-.. literalinclude:: vnet_thin_jail/dev.conf
-   :caption: ``/etc/jail.conf.d/dev.conf``
+.. literalinclude:: vnet_thin_jail/jdev.conf
+   :caption: ``/etc/jail.conf.d/jdev.conf``
 
-- 注意，这里配置引用了一个针对nullfs的fstab配置，所以还需要创建一个 ``/zdata/jails/dev-nullfs-base.fstab`` :
+如果部分采用Template+NullFS
+----------------------------------
+
+.. note::
+
+   现在配置改进为混合多种jail形式，所以调整公共部分以及独立的 ``jdev.conf``
+
+- 适合不同Jail的公共配置 ``/etc/jail.conf`` :
+
+.. literalinclude:: vnet_thin_jail/jail.conf_common
+   :caption: 混合多种jail的公共 ``/etc/jail.conf``
+
+- 用于Template+NullFS类型的 ``jdev`` 独立配置 ``/etc/jail.conf.d/jdev.conf`` :
+
+.. literalinclude:: vnet_thin_jail/jdev.conf_nullfs
+   :caption: 用于Template+NullFS类型 ``/etc/jail.conf.d/jdev.conf``
+
+fstab配置和启动jail
+-----------------------
+
+- 注意，这里配置引用了一个针对nullfs的fstab配置，所以还需要创建一个 ``/zdata/jails/jdev-nullfs-base.fstab`` :
 
 .. literalinclude:: vnet_thin_jail/fstab
-   :caption: ``/zdata/jails/dev-nullfs-base.fstab``
+   :caption: ``/zdata/jails/jdev-nullfs-base.fstab``
 
-- 最后启动 ``dev`` :
+- 最后启动 ``jdev`` :
 
 .. literalinclude:: vnet_thin_jail/start
-   :caption: 启动 ``dev``   
+   :caption: 启动 ``jdev``   
 
-通过 ``rexec dev`` 进入jail
+通过 ``rexec jdev`` 进入jail
 
-- 设置Jail ``dev`` 在操作系统启动时启动，修改 ``/etc/rc.conf`` :
+- 设置Jail ``jdev`` 在操作系统启动时启动，修改 ``/etc/rc.conf`` :
 
 .. literalinclude:: vnet_thin_jail/rc.conf
    :caption: ``/etc/rc.conf``
