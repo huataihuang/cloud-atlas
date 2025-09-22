@@ -6,7 +6,7 @@ VNET + Thin Jail(Snapshot)
 
 .. note::
 
-   本文是 :ref;`thin_jail_using_zfs_snapshot` 的完整(补充)实践，以及结合 :ref:`vnet_jail` 完成的方案。
+   本文是 :ref:`thin_jail_using_zfs_snapshot` 的完整(补充)实践，以及结合 :ref:`vnet_jail` 完成的方案。
 
    同时，也是我实践 :ref:`linux_jail` 的基础(前置部分)
 
