@@ -6,7 +6,19 @@ Linux Jail初始化
 
 和 :ref:`jail_init` 初始化类似，我想要一个能够方便环线的开发、测试环境，来模拟大规模集群的部署和开发。
 
-和 :ref:`jail_init` 不同的是， :ref:`linux_jail` 多了一步 ``chroot`` ，并且进入 :ref:`debian` 系统之后所有的操作相当于在一个Linux系统中完成
+和 :ref:`jail_init` 不同的是， :ref:`linux_jail` 多了一步 ``chroot`` ，并且进入 :ref:`debian` / :ref:`ubuntu_linux` 系统之后所有的操作相当于在一个Linux系统中完成:
+
+.. literalinclude:: linux_jail/jexec_chroot
+   :caption: 进入Linux Jail的Ubuntu环境
+
+注意，在 :ref:`linux_jail` 中的Linux系统是没有 :ref:`systemd` 
+
+补全apt
+=========
+
+通过 ``debootstrap`` 部署在 ``/compat/ubuntu`` 目录的 :ref:`ubuntu_linux` 系统是一个非常精简的Ubuntu系统，只有 ``129M`` ，仅包含Linux核心系统
+
+比较奇怪，虽然 ``debootstrap`` 显示安装了 ``apt 2.4.5`` ，但是我 ``chroot /comapt/ubuntu /bin/bash`` 之后却显示找不到 ``apt`` 命令
 
 Jail层设置
 ============
@@ -101,3 +113,8 @@ ssh登录
 .. literalinclude:: ../../../machine_learning/startup/install_conda/install_miniconda_interact
    :caption: 交互方式安装
    :emphasize-lines: 11,26
+
+参考
+===========
+
+- `Setting up a (Debian) Linux jail on FreeBSD <https://forums.freebsd.org/threads/setting-up-a-debian-linux-jail-on-freebsd.68434/>`_

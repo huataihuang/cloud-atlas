@@ -126,7 +126,7 @@ Jail目录树
 .. literalinclude:: vnet_thin_jail_snapshot/start
    :caption: 启动 ``ldev``
 
-通过 ``rexec jdev`` 进入jail
+通过 ``rexec ldev`` 进入jail
 
 - 设置Jail ``ldev`` 在操作系统启动时启动，修改 ``/etc/rc.conf`` :
 

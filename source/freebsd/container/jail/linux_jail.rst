@@ -8,7 +8,9 @@ FreeBSD Linux Jail
 
    我之前曾经实践过 :ref:`linux_jail_archive` ，但是当时经验不足折腾了很久记录也比较杂乱。最近我准备构建一个在FreeBSD系统编译 :ref:`lfs` ，也就是通过Linux Jail模拟出一个Linux环境，来访问和FreeBSD共存的Linux分区，通过这个模拟linux jail来编译LFS。
 
-   本文是重新实践的笔记，我将采用ZFS存储上构建 :ref:`vnet_thin_jail` 基础上部署linux jail
+   本文是重新实践的笔记，我将采用ZFS存储上构建 :ref:`vnet_thin_jail_snapshot` 基础上部署linux jail:
+
+   我最初想采用 :ref:`vnet_thin_jail` ，但是在挂载Linux根目录时遇到了和NullFS根目录挂载的冲突(为避免资源死锁，拒绝挂载)，仔细看了官方手册发现官方案例是Snapshot类型的Thin Jail，所以改为采用 :ref:`vnet_thin_jail_snapshot`
 
 FreeBSD Linux Jail是在FreeBSD Jail中激活支持Linux二进制程序的一种实现，通过一个允许Linux系统调用和库的兼容层来实现转换和执行在FreeBSD内核上。这种特殊的Jail可以无需独立的linux虚拟机就可以运行Linux软件。
 
@@ -41,38 +43,38 @@ Jail目录树
 .. literalinclude:: vnet_thin_jail/df
    :caption: jail目录的zfs形式
 
-模版和NullFS型Thin Jails
+快照(snapshot)型Thin Jails
 ----------------------------------
 
 .. note::
 
    :ref:`snapshot_vs_templates_nullfs_thin_jails`
 
-通过结合Thin Jail 和 ``NullFS`` 技术可以创建节约文件系统存储开销(类似于 ZFS ``snapshot`` clone出来的卷完全不消耗空间)，并且能够将Host主机的目录共享给 多个 Jail。
+   实践发现需要采用 ``Snapshot Thin Jail``
 
-- 创建 **读写模式** 的 ``14.3-RELEASE-base`` (注意，大家约定俗成 ``@base`` 表示只读快照， ``-base`` 表示可读写数据集)
+- 为OpenZFS Snapshot Thin Jail 准备模版dataset:
 
-.. literalinclude:: vnet_thin_jail/templates_base
-   :caption: 创建 **读写模式** 的 ``14.3-RELEASE-base``
+.. literalinclude:: vnet_thin_jail_snapshot/templates
+   :caption: 创建 ``14.3-RELEASE`` 模版
 
 - 下载用户空间:
 
 .. literalinclude:: vnet_thin_jail/fetch
    :caption: 下载用户空间
 
-- 将下载内容解压缩到模版目录: **内容解压缩到模板目录( 14.3-RELEASE-base 后续不需要创建快照，直接使用)**
+- 将下载内容解压缩到模版目录: **内容解压缩到模板目录(后续要在14.3-RELEASE上创建快照，这就是和NullFS的区别)**
 
-.. literalinclude:: vnet_thin_jail/tar
+.. literalinclude:: vnet_thin_jail_snapshot/tar
    :caption: 解压缩
 
 - 将时区和DNS配置复制到模板目录:
 
-.. literalinclude:: vnet_thin_jail/cp
+.. literalinclude:: vnet_thin_jail_snapshot/cp
    :caption: 将时区和DNS配置复制到模板目录
 
 - 更新模板补丁:
 
-.. literalinclude:: vnet_thin_jail/update
+.. literalinclude:: vnet_thin_jail_snapshot/update
    :caption: 更新模板补丁
 
 .. note::
@@ -83,82 +85,57 @@ Jail目录树
       :caption: 在FreeBSD 15 Alpha 2 上执行 ``freebsd-update`` 报错
       :emphasize-lines: 9,13
 
-- 创建一个特定数据集 ``skeleton`` (**骨骼**) ，这个 "骨骼" ``skeleton`` 命名非常形象，用意就是构建特殊的支持大量thin jail的框架底座
+- 为模版创建快照(完整快照):
 
-.. literalinclude:: vnet_thin_jail/zfs_create
-   :caption: 创建特定数据集 ``skeleton`` (骨骼)
+.. literalinclude:: vnet_thin_jail_snapshot/base_snapshot
+   :caption: 为RELEASE模版创建base快照
 
-- 执行以下命令，将特定目录移入 ``skeleton`` 数据集，并构建 ``base`` 和 ``skeleton`` 必要目录的软连接关系
+- 基于快照(snapshot)的Thin Jail 比 NullFS 类型简单很多，只要在模块快照基础上创建clone就可以生成一个新的Thin Jail:
 
-.. literalinclude:: vnet_thin_jail/skeleton_link
-   :caption: 特定目录移入 ``skeleton`` 数据集
-
-.. note::
-
-   部分移动命令和手册不同，原因见 :ref:`vnet_thin_jail`
-
-- 执行以下命令创建软连接:
-
-.. literalinclude:: vnet_thin_jail/link
-   :caption: 创建软连接
-
-- **在host上执行** 修复 ``/etc/ssl/certs`` 目录下证书文件软链接
-
-.. literalinclude:: vnet_thin_jail/fix_link.sh
-   :caption: 修复软链接
-
-.. note::
-
-   需要修复 ``/etc/ssl/certs`` 目录下证书文件软链接，原因见 :ref:`vnet_thin_jail`
-
-- 在 ``skeleton`` 就绪之后，需要将数据复制到 jail 目录(如果是UFS文件系统请参考 :ref:`thin_jail_ufs` )，对于ZFS则非常方便使用快照:
-
-.. literalinclude:: linux_jail/jail_name
+.. literalinclude:: vnet_thin_jail_snapshot/jail_name
    :caption: 为了能够灵活创建jail，这里定义一个 ``jail_name`` 环境变量，方便后续调整jail命名
 
-.. literalinclude:: vnet_thin_jail/snapshot
-   :caption: 创建skeleton快照,然后再创建快照的clone(jail)
+.. literalinclude:: vnet_thin_jail_snapshot/clone_ldev
+   :caption: clone出一个名为 ``ldev`` 的Thin Jail(后续将进一步改造为 :ref:`linux_jail` )
 
 - 现在可以看到相关ZFS数据集如下:
 
-.. literalinclude:: linux_jail/df_jail
+.. literalinclude:: vnet_thin_jail_snapshot/df_jail
    :caption: ZFS数据集显示jail存储
-   :emphasize-lines: 10
+   :emphasize-lines: 9
 
-- 创建一个 ``base`` template的目录，这个目录是 ``skeleton`` 挂载所使用的根目录
-
- .. literalinclude:: vnet_thin_jail/nullfs-base
-    :caption: 创建 ``skeleton`` 挂载所使用的根目录
-
-配置VNET+Thin Jails
+配置Snapshot Thin Jails
 ----------------------------
 
 .. note::
 
-   首先配置 :ref:`vnet_thin_jail` ，运行起来以后再调整为Linux Jail
+   先Thin Jail ，运行起来以后再调整为Linux Jail
 
    - Jail的配置分为公共部分和特定部分，公共部分涵盖了所有jails共有的配置
    - 尽可能提炼出Jails的公共部分，这样就可以简化针对每个jail的特定部分，方便编写校验维护
 
-- 创建所有jail使用的公共配置部分 ``/etc/jail.conf`` (使用了 VNET 模式配置):
+- 适合不同Jail的公共配置 ``/etc/jail.conf`` :
 
-.. literalinclude:: vnet_thin_jail/jail.conf
-   :caption: 所有jail使用的公共配置部分 ``/etc/jail.conf``
+.. literalinclude:: vnet_thin_jail/jail.conf_common
+   :caption: 混合多种jail的公共 ``/etc/jail.conf``
 
-- ``/etc/jail.conf.d/$jail_name.conf`` 独立配置部分:
+- 用于Snapshot类型的 ``ldev`` 独立配置 ``/etc/jail.conf.d/ldev.conf`` :
 
-.. literalinclude:: linux_jail/ldev.conf
-   :caption: ``/etc/jail.conf.d/ldev.conf`` (jail名为 ``ldev`` )
+.. literalinclude:: vnet_thin_jail_snapshot/ldev.conf
+   :caption: 用于Snapshot类型 ``/etc/jail.conf.d/ldev.conf``
+   :emphasize-lines: 6
 
-- 注意，这里配置引用了一个针对nullfs的fstab配置( ``ldev-nullfs-base.ftab`` )，所以还需要创建一个 ``/zdata/jails/$jail_name-nullfs-base.fstab`` :
+.. note::
 
-.. literalinclude:: linux_jail/fstab
-   :caption: ``/zdata/jails/$jail_name-nullfs-base.fstab``
+   挂载路径和NullFS类型的Thin Jail不同
 
-- 最后启动 ``$jail_name`` ( ``ldev`` ) :
+启动jail
+-----------------------
 
-.. literalinclude:: vnet_thin_jail/start
-   :caption: 启动 ``$jail_name`` ( ``ldev`` )
+- 最后启动 ``ldev`` :
+
+.. literalinclude:: vnet_thin_jail_snapshot/start
+   :caption: 启动 ``ldev``
 
 Linux Jail
 ==============
@@ -175,6 +152,11 @@ Linux Jail是在常规Jail上启用 Linux ABI实现
 .. literalinclude:: linux_jail/start
    :caption: 启动Linux ABI支持
 
+启动Linux支持后，在 FreeBSD Host 上执行 ``df`` 可以看到系统挂载了Linux兼容的设备文件系统:
+
+.. literalinclude:: linux_jail/df
+   :caption: FreeBSD Host 上Linux兼容的设备文件系统
+
 - 现在进入 ``ldev`` 容器:
 
 .. literalinclude:: linux_jail/jexec
@@ -185,6 +167,12 @@ Linux Jail是在常规Jail上启用 Linux ABI实现
 .. literalinclude:: linux_jail/debootstrap
    :caption: 安装 ``debootstrap`` 部署Ubuntu
 
+完成后观察Linux Jail中文件系统挂载，可以看到增加了一个 ``devfs`` 挂载到 ``/compat/ubuntu/dev`` :
+
+.. literalinclude:: linux_jail/df_in_linux_jail
+   :caption: 在Linux Jail内部查看文件系统挂载
+   :emphasize-lines: 5
+
 .. note::
 
    所有 ``debootstrap`` 使用的脚本都存储在 ``/usr/local/share/debootstrap/scripts/`` 目录，目前只支持 Ubuntu 22.04 (jammy)。如果要安装更高版本，请参考 :ref:`linux_jail_ubuntu-base`
@@ -194,25 +182,130 @@ Linux Jail是在常规Jail上启用 Linux ABI实现
 .. literalinclude:: linux_jail/stop
    :caption: 停止 jail
 
-- 修订 ``/zdata/jails/$jail_name-nullfs-base.fstab`` ，将原先挂载FreeBSD base系统的目录修改为挂载Linux目录
-
-
-
 - 修订 ``/etc/jail.conf.d/ldev.conf`` 添加挂载配置:
 
 .. literalinclude:: linux_jail/ldev_mount.conf
    :caption: 为 ``/etc/jail.conf.d/ldev.conf`` 添加挂载配置
-   :emphasize-lines: 6-13
+   :emphasize-lines: 13-19
 
 - 然后启动 ``ldev`` :
 
 .. literalinclude:: linux_jail/start
    :caption: 启动Linux ABI支持
 
+- 进入Linux Jail的Ubuntu环境(需要结合 ``chroot`` ):
+
+.. literalinclude:: linux_jail/jexec_chroot
+   :caption: 进入Linux Jail的Ubuntu环境
+
+- 在Linux Jail Ubuntu中执行以下 ``uname`` 命令检查环境:
+
+.. literalinclude:: linux_jail/uname
+   :caption: ``uname`` 命令检查Linux环境
+
+输出显示如下:
+
+.. literalinclude:: linux_jail/uname_output
+   :caption: ``uname`` 命令检查Linux环境的输出
+
 异常排查
 ==========
 
-- 启动 ``ldev`` 时候提示 为避免资源死锁，拒绝挂载 
+- 执行 ``jexec ubuntu chroot /compat/ubuntu /bin/bash`` 进入了Linux Jail Ubuntu环境，但是提示一个错误信息，显示没有组ID，确实发现在Linux Jail中的 ``/etc/`` 目录下没有 ``passwd`` 和 ``group`` 文件
+
+.. literalinclude:: linux_jail/not_found_gid
+   :caption: 进入Linux Jail Ubuntu环境提示没有找到组ID
+   :emphasize-lines: 2,3,6,11
+
+解决的方法是在FreeBSD Host主机上，将Host主机的 ``/etc/group`` 和 ``/etc/passwd`` 文件复制到Linux Jail中:
+
+.. literalinclude:: linux_jail/cp_group
+   :caption: 在FreeBSD Host主机上复制 ``/etc/group``
+
+- 另外，在 ``ls`` 命令执行时总是提示 ``Invalid argument`` :
+
+.. literalinclude::  linux_jail/invalid_argument
+   :caption: 任何 ``ls`` 都提示 ``Invalid argument``
+   :emphasize-lines: 2
+
+比较奇怪，虽然 ``debootstrap`` 显示安装了 ``apt 2.4.5`` ，但是我 ``chroot /comapt/ubuntu /bin/bash`` 之后却显示找不到 ``apt`` 命令
+
+我检查发现，在 Linux Jail Ubuntu的 chroot 目录后， ``/var/cache/apt/archives`` 目录下实际上已经下载了需要安装的软件包，但是却没有安装。我手工尝试安装:
+
+.. literalinclude:: linux_jail/dpkg_apt
+   :caption: 通过 ``dpkg`` 手工安装 ``apt`` 包
+
+看出了异常，连目录不能读取出现报错:
+
+.. literalinclude:: linux_jail/dpkg_apt_output
+   :caption: 通过 ``dpkg`` 手工安装 ``apt`` 包报错信息
+
+实际上目录是存在的，但是无法读取:
+
+.. literalinclude:: linux_jail/read_directory_invalid_argument
+   :caption: 读取目录报错
+   :emphasize-lines: 3,5
+
+正是这个目录无法读取的报错，导致了一系列apt软件包(包括自己)都没有安装成功
+
+我回顾了以下自己的操作步骤，发现有一步是我自作主张和手册不同的，就是我首次启动 ``ldev`` Snapshot Thin Jail使用了自己之前在 :ref:`vnet_thin_jail_snapshot` 的配置文件，而不是手册中的命令行方式，我怀疑是这个步骤差异导致了Linux兼容层安装失败(实践验证并不是)
+
+对比手册初次启动Thin Jail命令:
+
+.. literalinclude:: linux_jail/jail_run
+   :caption: 手册启动Thin Jail命令(按照我的环境做了一些修改)
+   :emphasize-lines: 13-17
+
+对比了配置文件，主要差别就是上述高亮的权限没有允许，我尝试修订配置文件添加上述权限允许。然而很不幸，再次启动 ``ldev`` 并没有解决问题。而且我发现实际上添加前后，进入 ``ldev`` (尚未chroot)，在FreeBSD Thin Jail中看到挂载虚拟文件系统是一样的，说明这些权限添加不添加都没有关系。再看手册中配置案例也没有添加，所以我还是去除这些配置:
+
+.. literalinclude:: linux_jail/ldev_jail_df
+   :caption: 在 ``ldev`` 中检查 ``df -h`` 可以看到已经挂载了Linux需要的文件系统
+   :emphasize-lines: 5-12
+
+google gemini提示是 Linux执行程序和FreeBSD内核提供的Linux兼容层存在功能不匹配，通常是文件系统metadata相关的翻译问题，或者是 **目录包含的属性Linux二进制程序不能识别** 。
+
+我忽然想到我在底层的ZFS上启用了压缩属性，会不会导致上述问题?
+
+在 FreeBSD Host 主机上检查:
+
+.. literalinclude:: linux_jail/host_zfs_ldev
+   :caption: 检查 ``ldev`` 所在ZFS卷属性
+
+输出显示这个ZFS dataset继承了上一级ZFS的压缩属性:
+
+.. literalinclude:: linux_jail/host_zfs_ldev_output
+   :caption: 检查 ``ldev`` 所在ZFS卷属性可以看到继承了上级ZFS的压缩属性
+
+回滚步骤，重新开始创建 ``ldev`` linux jail所使用的ZFS卷，也就是clone步骤:
+
+.. literalinclude:: vnet_thin_jail_snapshot/clone_ldev
+   :caption: clone出一个名为 ``ldev`` 的Thin Jail(后续将进一步改造为 :ref:`linux_jail` )
+
+这步完成后立即执行关闭压缩:
+
+.. literalinclude:: vnet_thin_jail_snapshot/zfs_disable_compression
+   :caption: 关闭clone出来的ZFS卷的compression属性
+
+然后检查关闭情况:
+
+.. literalinclude:: vnet_thin_jail_snapshot/check_zfs_compression
+   :caption: 检查ZFS的压缩关闭
+
+可以看到已经off
+
+.. literalinclude:: vnet_thin_jail_snapshot/check_zfs_compression_output
+   :caption: 检查ZFS的压缩关闭确保已经off
+
+然后重新创建 ``ldev``
+
+**悲伤，居然没有解决这个问题，报错依旧**
+
+准备回退到 14.3-RELEASE 再测试一下
+
+.. note::
+
+   :ref:`linux_jail_init`
+
 
 参考
 ======

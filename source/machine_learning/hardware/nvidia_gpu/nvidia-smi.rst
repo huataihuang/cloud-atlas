@@ -20,3 +20,4 @@ NVML
 - `NVIDIA System Management Interface SMI <https://developer.nvidia.com/nvidia-system-management-interface>`_
 - `NVIDIA GPU Debug Guidelines <https://docs.nvidia.com/deploy/gpu-debug-guidelines/index.html>`_ 提供了debug指南，可以使用工具进行诊断
 - `DCGM initialization error #222 <https://github.com/NVIDIA/gpu-operator/issues/222>`_ 提供了一些诊断案例
+- `Explained Output of Nvidia-smi Utility <https://medium.com/analytics-vidhya/explained-output-of-nvidia-smi-utility-fc4fbee3b124>`_ 解释输出内容
