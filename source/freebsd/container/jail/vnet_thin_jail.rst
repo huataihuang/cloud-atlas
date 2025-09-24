@@ -1,7 +1,7 @@
 .. _vnet_thin_jail:
 
 =====================================
-VNET + Thin Jail(Template+NullFS)
+VNET + Thin Jail(NullFS)
 =====================================
 
 在实践了不同的FreeBSD Jail技术之后，我在 `cloud-atlas.dev <https://cloud-atlas.dev>`_ 实践中，采用了FreeBSD VNET + Thin Jail 来构建基础环境:
