@@ -16,9 +16,20 @@ Linux Jail初始化
 补全apt
 =========
 
+.. note::
+
+   这段可能是 ``debootstrap`` 的问题导致的， `Setting up a (Debian) Linux jail on FreeBSD <https://forums.freebsd.org/threads/setting-up-a-debian-linux-jail-on-freebsd.68434/>`_ 提示在初次进入Linux Jail中，需要执行安装包补全:
+
+   .. literalinclude:: linux_jail_init/dpkg_install
+      :caption: 补全系统安装
+
 通过 ``debootstrap`` 部署在 ``/compat/ubuntu`` 目录的 :ref:`ubuntu_linux` 系统是一个非常精简的Ubuntu系统，只有 ``129M`` ，仅包含Linux核心系统
 
-比较奇怪，虽然 ``debootstrap`` 显示安装了 ``apt 2.4.5`` ，但是我 ``chroot /comapt/ubuntu /bin/bash`` 之后却显示找不到 ``apt`` 命令
+比较奇怪，虽然 ``debootstrap`` 显示安装了 ``apt 2.4.5`` ，但是我 ``chroot /comapt/ubuntu /bin/bash`` 之后却显示找不到 ``apt`` 命令。
+
+.. warning::
+
+   我最终采用 :ref:`linux_jail_ubuntu-base` ，使用Ubuntu官方提供的core系统，绕开了这个问题。
 
 Jail层设置
 ============
@@ -67,13 +78,13 @@ Linux层设置
 admin帐号
 ------------
 
-- 在 ``d2l`` Linux jail中创建用户组和用户admin:
+- 在 Linux jail中创建用户组和用户admin:
 
 .. literalinclude:: linux_jail_init/admin
    :caption: Linux jail中创建用户组和用户admin
 
-ssh登录
-=========
+ssh登录(可选)
+================
 
 完成上述 jail 层 和 linux 层设置之后，现在可以在host上通过 ssh 先登录到 jail 中，然后再 ``chroot`` 进入Linux:
 

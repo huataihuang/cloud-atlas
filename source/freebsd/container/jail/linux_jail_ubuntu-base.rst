@@ -44,7 +44,9 @@
 
 .. note::
 
-   非常成功，解决了 :ref:`linux_jail` 在 FreeBSD 15 Alpha 2上古怪的bug(不能使用ZFS作为底层存储，不能使用 ``debootstrap`` 来构建Ubuntu环境)，终于能够正常使用Linux on FreeBSD了
+   :strike:`非常成功，解决了` 后续实践发现目前似乎绕开的 :ref:`linux_jail` 在 FreeBSD 15 Alpha 2上古怪的bug可嫩并不是bug( :strike:`不能使用ZFS作为底层存储` ， **不能使用** ``debootstrap`` 来构建Ubuntu环境)，终于能够正常使用Linux on FreeBSD了
+
+   还需要继续探索
 
 参考
 ========

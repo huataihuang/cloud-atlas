@@ -312,6 +312,17 @@ google gemini提示是 Linux执行程序和FreeBSD内核提供的Linux兼容层�
 UFS文件系统上Linux Jail
 ===========================
 
+.. warning::
+
+   后续实践发现问题，看来有可能和Ubuntu系统有关:
+
+   - 我最初使用 :ref:`linux_jail_ubuntu-base` 完成最小化系统安装并成功运行Linux Jail，此时在系统中执行 ``ls`` 命令是没有 ``Invalid argument`` 报错的
+   - 但是后续我执行了 ``apt update && apt upgrade`` 之后，在Linux系统中使用 ``ls`` 命令又重新出现了 ``Invalid argument`` 报错
+
+   总之，看起来并不是底层文件系统问题，我切换到UFS中可能恰好因为初次解压缩官方core系统没有问题，但是后续升级就出现问题了。之前 ``debootstrap`` 构建的系统因为是直接从互联网下载软件包解压缩，所以用的软件包最新，可能就是有问题的
+
+   待继续排查
+
 那如果ZFS始终存在上述问题，是否改成UFS能够绕开呢？好吧，那就再搞一次 :ref:`vnet_thick_jail` ( :ref:`thin_jail` 需要 :ref:`zfs` 支持，所以改为UFS的话需要采用 Classic Jail ，也就是 :ref:`thick_jail` )
 
 - 执行 :ref:`vnet_thick_jail` 部署
@@ -339,7 +350,7 @@ UFS文件系统上Linux Jail
 
 .. note::
 
-   将底层文件系统切换到UFS之后，确实解决了 ``Invalid argument`` 的报错问题，此时 ``chroot`` 进入Ubuntu系统后， ``ls`` 命令不再报错
+   :strike:`将底层文件系统切换到UFS之后，确实解决了 Invalid argument 的报错问题，此时 chroot 进入Ubuntu系统后， ls 命令不再报错`
 
 比较奇怪的是，在这个 Ubuntu Jail环境中，默认没有安装apt工具包，但是在 ``/var/cache/apt/archives`` 目录下却有很多下载的 ``deb`` 软件包，也包括 ``apt-utils_2.4.5_amd64.deb  apt_2.4.5_amd64.deb``
 
