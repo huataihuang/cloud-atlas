@@ -12,6 +12,15 @@ FreeBSD Linux Jail
 
    我最初想采用 :ref:`vnet_thin_jail` ，但是在挂载Linux根目录时遇到了和NullFS根目录挂载的冲突(为避免资源死锁，拒绝挂载)，仔细看了官方手册发现官方案例是Snapshot类型的Thin Jail，所以改为采用 :ref:`vnet_thin_jail_snapshot`
 
+.. warning::
+
+   由于本次实践是在FreeBSD 15 Alpha 2上进行，遇到了好几个坑:
+
+   - 不支持在ZFS存储上存放 ``/compat/ubuntu`` 系统(应该是现阶段的bug，之前RELEASE版本是正常的)
+   - ``bootstrap`` 不能正确创建Ubuntu工作环境( 最后通过 :ref:`linux_jail_ubuntu-base` 绕过问题)
+
+   不过，本文的方法步骤是正确的，相信再过几个月(2025年12月会发布FreeBSD 15 RELEASE)正式版本发布以后就可以了。
+
 FreeBSD Linux Jail是在FreeBSD Jail中激活支持Linux二进制程序的一种实现，通过一个允许Linux系统调用和库的兼容层来实现转换和执行在FreeBSD内核上。这种特殊的Jail可以无需独立的linux虚拟机就可以运行Linux软件。
 
 VNET + Thin Jail
