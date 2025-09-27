@@ -25,13 +25,13 @@ HOST物理服务器构建代理映射( :ref:`ssh_tunneling` )
 
 - 通过 :ref:`ssh_tunneling` 构建一个本地到远程服务器代理服务端口(服务器上代理服务器仅监听回环地址)的SSH加密连接，方法是配置 ``~/.ssh/config`` ( ``<SERVER_IP>`` 以实际地址配置) **端口转发要设置允许Docker NAT网关地址** :
 
-.. literalinclude:: ../colima/colima_proxy_archive/ssh_config
+.. literalinclude:: ../../container/colima/colima_proxy_archive/ssh_config
    :caption: ``~/.ssh/config`` 配置 :ref:`ssh_tunneling` 构建一个本地到远程服务器Proxy端口加密连接
    :emphasize-lines: 13
 
 - 执行以下命令构建SSL Tunnel:
 
-.. literalinclude:: ../colima/colima_proxy_archive/ssh
+.. literalinclude:: ../../container/colima/colima_proxy_archive/ssh
    :caption: 通过SSH构建了本地的一个SSH Tunneling到远程服务器的 :ref:`proxy` 服务
 
 HOST物理服务器apt代理
@@ -39,7 +39,7 @@ HOST物理服务器apt代理
 
 - :ref:`ubuntu_linux` 设置 ``/etc/apt/apt.conf.d/01-vendor-ubuntu`` ; :ref:`debian` 设置 ``/etc/apt/apt.conf.d/70debconf`` / :ref:`raspberry_pi_os` 设置 ``/etc/apt/apt.conf.d/50raspi`` (其实配置目录下任何文件应该都可以) 添加 :ref:`apt` 代理配置:
 
-.. literalinclude:: ../colima/colima_proxy_archive/apt_proxy
+.. literalinclude:: ../../container/colima/colima_proxy_archive/apt_proxy
    :caption: 在 apt 配置中添加代理设置
 
 HOST物理服务器全局配置代理
@@ -47,7 +47,7 @@ HOST物理服务器全局配置代理
 
 - 修订 ``/etc/environment`` 添加代理配置(该配置对HOST物理服务器上 :ref:`curl_proxy` 以及大多数符合Linux代理规范的应用起作用):
 
-.. literalinclude:: ../colima/colima_proxy/environment
+.. literalinclude:: ../../container/colima/colima_proxy/environment
    :caption: ``/etc/environment`` 设置代理环境变量
 
 - 登陆系统使上述代理环境变量生效

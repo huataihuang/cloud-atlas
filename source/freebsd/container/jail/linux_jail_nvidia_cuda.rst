@@ -17,7 +17,7 @@ linuxulator思路
 `PyTorch and Stable Diffusion on FreeBSD <https://github.com/verm/freebsd-stable-diffusion>`_ 思路相同，通过结合FreeBSD ``nvidia-driver`` 和 :ref:`linuxulator` 运行Linux版本CUDA来实现一个机器学习环境:
 
 - FreeBSD Host主机安装 ``nvidia-driver`` (NVIDIA公司为FreeBSD提供了原生的驱动，但是没有提供CUDA)
-- 安装 `libc6-shim <https://github.com/shkhln/libc6-shim>`_ (会同时依赖安装 ``nvidia-driver`` 和 ``linux-nvidia-libs`` )来获取 ``nvidia-sglrun`` (能够提供CUDA)
+- 安装 `libc6-shim <https://github.com/shkhln/libc6-shim>`_ ( :strike:`会同时` 依赖安装 ``nvidia-driver`` 和 ``linux-nvidia-libs`` )来获取 ``nvidia-sglrun`` (能够提供CUDA)
 - 接下来就可以安装 ``miniconda`` 以及运行 :ref:`pytorch` 和 :ref:`stable_diffusion`
 
 linux jail思路
@@ -78,6 +78,10 @@ NVIDIA为FreeBSD提供了原生的 ``nvidia-driver`` 驱动，所以方案类似
 .. literalinclude:: linux_jail_nvidia_cuda/loader.conf
    :caption: 设置 ``/boot/loader.conf``
 
+.. warning::
+
+   我遇到一个非常奇怪的问题，在 ``/boot/loader.conf`` 添加了 ``nvidia_load="YES"`` ，但是重启没有自动加载 ``nvidia`` 驱动，而是启动后每次都需要手工执行 ``kldload nvidia`` 加载。这让我很困惑，参考 `Loading kernel modules automatically <https://forums.freebsd.org/threads/loading-kernel-modules-automatically.26990/>`_ 似乎是配置文件有隐含特殊字符导致的，但是我没有找到解决方法。
+
 输出显示:
 
 .. literalinclude:: linux_jail_nvidia_cuda/kldstat_nvidia_output
@@ -130,13 +134,34 @@ BIOS设置 :ref:`above_4g_decoding`
 
 至此，FreeBSD ``nvidia-driver`` 以及通过 :ref:`linuxulator` 运行 CUDA 已部署完毕，接下来就可以进行 :ref:`machine_learning` 工作。当然，为了进一步方便工作，还可以继续部署 :ref:`linux_jail` 来实现隔离且完整的机器学习环境
 
+- 如果要直接在FreeBSD :ref:`linuxulator` 环境运行Linux版本Conda，可以安装 ``miniconda`` Linux版本:
+
+.. literalinclude:: linux_jail_nvidia_cuda/linux-miniconda_install
+   :caption: 安装Linux版本miniconda
+
+此时会安装一个Linux版本的 miniconda，可以用于今后机器学习安装对应的软件包
+
 Linux Jail实现CUDA实践
 =========================
 
-待续...
+- 已经完成了 :ref:`linux_jail_ubuntu-base`
+
+.. note::
+
+   由于上文已经在FreeBSD Host中安装了 ``nvidia-driver`` ，所以参考 :ref:`nvidia-docker` 架构，在Jail中，应该只需要安装Linux版本的 CUDA Toolkit，而不需要安装完整版本的CUDA(包含 ``cuda-toolkit`` 和 ``nvidia-driver`` )
+
+- 从NVIDIA官方提供 `NVIDIA CUDA Toolkit repo 下载 <https://developer.nvidia.com/cuda-downloads>`_ 选择 ``linux`` => ``x86_64`` => ``Ubuntu`` => ``24.04`` => ``deb(network)``
+
+.. literalinclude:: ../../../docker/gpu/bhyve_ubuntu_tesla_p4_docker/cuda_driver_debian_ubuntu_repo_install
+   :caption: Debian/Ubuntu使用NVIDIA官方软件仓库安装CUDA驱动
+
+- 安装 ``cuda-toolkit`` :
+
+.. literalinclude:: linux_jail_nvidia_cuda/install_cuda-toolkit
+   :caption: 安装 ``cuda-toolkit``
 
 参考
 =======
 
-- `Davinci Resolve installed in Freebsd Jail <https://www.youtube.com/watch?v=zM0gqoseO7k>`_ 油管上NapoleonWils0n围绕FreeBSD有不少视频编码解码的解析，其中关于FreeBSD Jail运行Ubuntu来实现NVIDIA CUDA
+- `Davinci Resolve installed in Freebsd Jail <https://www.youtube.com/watch?v=zM0gqoseO7k>`_ 油管上NapoleonWils0n围绕FreeBSD有不少视频编码解码的解析，其中关于FreeBSD Jail运行Ubuntu来实现NVIDIA CUDA 文档见 `DaVinci Resolve Freebsd <https://github.com/NapoleonWils0n/davinci-resolve-freebsd-jail>`_
 - `PyTorch and Stable Diffusion on FreeBSD <https://github.com/verm/freebsd-stable-diffusion>`_ 思路相同，通过结合FreeBSD ``nvidia-driver`` 和 :ref:`linuxulator` 运行Linux版本CUDA来实现一个机器学习环境

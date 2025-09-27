@@ -102,7 +102,7 @@ Colima虚拟机内部容器服务的代理配置
 
 - ``colima ssh`` 登陆到Colima虚拟机内部，执行以下命令创建 ``docker`` 服务的环境配置:
 
-.. literalinclude:: ../network/docker_proxy/create_http_proxy_conf_for_docker
+.. literalinclude:: ../../docker/network/docker_proxy/create_http_proxy_conf_for_docker
    :language: bash 
    :caption: 生成 /etc/systemd/system/docker.service.d/http-proxy.conf 为docker服务添加代理配置
    :emphasize-lines: 7-9

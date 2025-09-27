@@ -137,6 +137,6 @@ ZFS存储构建
 
 - 恢复容器运行:
 
-.. literalinclude:: ../../../../docker/colima/images/debian_tini_image/dev/run_acloud-dev_container
+.. literalinclude:: ../../../../container/colima/images/debian_tini_image/dev/run_acloud-dev_container
    :language: bash
    :caption: 运行包含开发环境的ARM环境debian镜像

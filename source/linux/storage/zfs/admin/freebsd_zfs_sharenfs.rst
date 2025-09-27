@@ -92,7 +92,7 @@ docker容器
 
 在客户端Host实现了简单的NFS挂载之后，启动 :ref:`debian_tini_image` 的 ``acloud-dev`` :
 
-.. literalinclude:: ../../../../docker/colima/images/debian_tini_image/dev/run_acloud-dev_container
+.. literalinclude:: ../../../../container/colima/images/debian_tini_image/dev/run_acloud-dev_container
    :language: bash
    :caption: 运行包含开发环境的ARM环境debian镜像
 

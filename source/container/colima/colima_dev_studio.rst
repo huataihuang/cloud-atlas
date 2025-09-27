@@ -67,7 +67,7 @@ Colima容器化开发环境
 
 - 执行以下命令，将 ``colima`` 虚拟机内部的 ``docker`` 和 ``containerd`` 都配置为通过代理访问internet，这样才能正确下载镜像:
 
-.. literalinclude:: ../network/docker_proxy/create_http_proxy_conf_for_docker
+.. literalinclude:: ../../docker/network/docker_proxy/create_http_proxy_conf_for_docker
    :language: bash
    :caption: 生成 /etc/systemd/system/docker.service.d/http-proxy.conf 为containerd添加代理配置
    :emphasize-lines: 7-9

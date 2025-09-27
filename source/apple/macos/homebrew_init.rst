@@ -107,7 +107,7 @@ nvim插件安装错误排查
 
 - 通过 :ref:`homebrew` 安装 ``colima`` :
 
-.. literalinclude:: ../../docker/colima/colima_startup/brew_install_colima
+.. literalinclude:: ../../container/colima/colima_startup/brew_install_colima
    :caption: 在 :ref:`macos` 平台安装colima
 
 这里如果是在旧版本macOS上安装，其实会遇到不少问题，例如 :ref:`homebrew_openssl` 需要绕过openssl安装过程中不能通过test的问题。另外， ``brew install qemu`` 也遇到一个 ``cmake`` 版本过低问题。 但是，我检查 homebrew 实际上已经安装了 ``/usr/loca/bin/cmake`` 版本是 4.0.1

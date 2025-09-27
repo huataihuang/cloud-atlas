@@ -4,7 +4,7 @@
 Colima简介
 ==================
 
-.. figure:: ../../_static/docker/colima/colima.png
+.. figure:: ../../_static/container/colima/colima.png
 
    Colima - container runtimes on macOS (and Linux) with minimal setup.
 
@@ -17,7 +17,7 @@ Colima是一个相对比较成熟的开源项目，在 `ThoughtWorks第29期技�
 Colima功能
 =============
 
-.. figure:: ../../_static/docker/colima/colima.gif
+.. figure:: ../../_static/container/colima/colima.gif
 
 - 支持Intel和 Apple Silicion 架构Mac
 - 简单的CLI接口

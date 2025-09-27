@@ -1,18 +1,13 @@
-.. _freebsd_container:
+.. _freebsd_appjail:
 
 =================================
-FreeBSD容器
+FreeBSD AppJail
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   jail/index
-   bastille/index
-   runj/index
-   run_containers_on_freebsd.rst
-   podman/index
-   appjail/index
+   intro_freebsd_appjail.rst
 
 .. only::  subproject and html
 

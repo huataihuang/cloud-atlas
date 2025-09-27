@@ -195,7 +195,7 @@ Colima是Docker/Containerd混合体?
 
 :ref:`systemd` 的 :ref:`docker` 方法见 :ref:`docker_server_proxy` ( ``/etc/default/docker`` 配置是针对 ``SysVinit`` 配置，对systemd不生效) ，其实也是设置 :ref:`systemd` 启动配置的环境变量
 
-.. literalinclude:: ../network/docker_proxy/create_http_proxy_conf_for_docker
+.. literalinclude:: ../../docker/network/docker_proxy/create_http_proxy_conf_for_docker
    :language: bash
    :caption: 生成 /etc/systemd/system/docker.service.d/http-proxy.conf 为docker服务添加代理配置
    :emphasize-lines: 7-9

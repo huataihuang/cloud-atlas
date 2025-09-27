@@ -25,7 +25,7 @@
 
 - 然后就可以直接使用这个镜像用于后续工作了，例如运行容器:
 
-.. literalinclude:: ../colima/images/debian_tini_image/dev/run_acloud-dev_container
+.. literalinclude:: ../../container/colima/images/debian_tini_image/dev/run_acloud-dev_container
    :language: bash
    :caption: 运行 ``acloud-dev`` 容器
 

@@ -9,13 +9,10 @@ Docker
 
    startup/index
    desktop/index
-   colima/index
    images/index
    rootless/index
    moby/index
-   podman/index
    config/index
-   linuxserver/index
    init/index
    admin/index
    applications/index
