@@ -1,16 +1,13 @@
-.. _freebsd_virtual:
+.. _devuan:
 
 =================================
-FreeBSD虚拟化
+Devuan
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_freeebsd_virtualization.rst
-   bhyve/index
-   wine/index
-   linuxulator/index
+   intro_devuan.rst
 
 .. only::  subproject and html
 

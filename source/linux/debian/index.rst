@@ -12,6 +12,7 @@ Debian
    debian_programming.rst
    debian_alternatives.rst
    debian_downgrade_kernel.rst
+   devuan/index
 
 .. only::  subproject and html
 

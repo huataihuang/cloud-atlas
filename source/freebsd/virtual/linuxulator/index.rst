@@ -1,16 +1,14 @@
-.. _freebsd_virtual:
+.. _linuxulator:
 
 =================================
-FreeBSD虚拟化
+Linuxulator
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_freeebsd_virtualization.rst
-   bhyve/index
-   wine/index
-   linuxulator/index
+   linuxulator_startup.rst
+   linuxulator_nvidia_cuda.rst
 
 .. only::  subproject and html
 

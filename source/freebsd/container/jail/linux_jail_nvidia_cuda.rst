@@ -8,20 +8,8 @@
 
 我最初想到的是 :ref:`bhyve_pci_passthru` ，毕竟这是非常直觉的想法，通过PCIe Passthrough实现GPU直通给Linux虚拟机，这样就避免了 :ref:`nvidia_gpu` 无法很好在FreeBSD支持的问题(我相像中厂商对FreeBSD硬件驱动支持都比较弱)。不过，现实总是比较残酷，在反复折腾 :ref:`bhyve_nvidia_gpu_passthru` 遇到各种问题，让人非常沮丧: 花费了大量的时间精力，这些时间本应该投入到现今火热一日千里的 :ref:`llm` 实践中。
 
-思路
-=====
-
-linuxulator思路
--------------------
-
-`PyTorch and Stable Diffusion on FreeBSD <https://github.com/verm/freebsd-stable-diffusion>`_ 思路相同，通过结合FreeBSD ``nvidia-driver`` 和 :ref:`linuxulator` 运行Linux版本CUDA来实现一个机器学习环境:
-
-- FreeBSD Host主机安装 ``nvidia-driver`` (NVIDIA公司为FreeBSD提供了原生的驱动，但是没有提供CUDA)
-- 安装 `libc6-shim <https://github.com/shkhln/libc6-shim>`_ ( :strike:`会同时` 依赖安装 ``nvidia-driver`` 和 ``linux-nvidia-libs`` )来获取 ``nvidia-sglrun`` (能够提供CUDA)
-- 接下来就可以安装 ``miniconda`` 以及运行 :ref:`pytorch` 和 :ref:`stable_diffusion`
-
 linux jail思路
----------------
+===============
 
 `Davinci Resolve installed in Freebsd Jail <https://www.youtube.com/watch?v=zM0gqoseO7k>`_ 提供了一个新的思路:
 
@@ -32,17 +20,16 @@ linux jail思路
 
 .. note::
 
-   其实方案的核心都是使用 :ref:`linuxulator` 来实现Linux CUDA运行在FreeBSD ``nvidia-driver`` 上，性能和稳定性会受到一定影响，但是终究还是能够实 :ref:`freebsd_machine_learning` 环境。使用 :ref:`linux_jail` 比直接使用 :ref:`linuxulator` 的环境更干净隔离一些，其他差别不大。
+   另一种解决思路是 :ref:`linuxulator_nvidia_cuda` ，更为简便
 
-   两种方案各有优势:
+.. warning::
 
-   - 采用 :ref:`linuxulator` 对于使用者来说还是直面FreeBSD，使用感受较好，也可以少安装一些环境依赖降低系统复杂度
-   - 采用 :ref:`linux_jail` 则提供了隔离且模拟的Linux运行环境，相当于使用了Linux容器(比喻不当)，而且可以在Linux Jail中构建 :ref:`docker` (推测待实践)来部署 :ref:`nvidia_container_toolkit` ，实现一个 :ref:`kubernetes` 计算节点
+   目前我的实践还遇到一些困难没有解决，待后续再尝试:
 
-   我准备两者都实践一下，挑战一下
+   - :ref:`linux_jail` 中缺乏 :ref:`systemd` 导致 ``nvidia-cuda-toolkit`` 无法安装
 
-linuxulator实现CUDA实践
-========================
+Host安装 :ref:`linuxulator` 软件栈
+====================================
 
 NVIDIA为FreeBSD提供了原生的 ``nvidia-driver`` 驱动，所以方案类似 :ref:`nvidia-docker` ，首先在FreeBSD Host中安装 ``nvidia-driver`` 以及支持 :ref:`linuxulator` 运行模拟Linux驱动的 ``linux-nvidia-libs`` 库文件(我理解是将Linux层调用Linux版本 ``nvidia-driver`` 的API转换成调用FreeBSD版本 ``nvidia-driver`` )。此外，附加安装 ``libc6-shim`` 能够获得一个 ``nv-sglrun`` 工具来包装使用CUDA:
 
@@ -144,6 +131,8 @@ BIOS设置 :ref:`above_4g_decoding`
 Linux Jail实现CUDA实践
 =========================
 
+- 已经完成了上述Host主机上安装 ``nvidia-driver`` 等软件堆栈
+
 - 已经完成了 :ref:`linux_jail_ubuntu-base`
 
 .. note::
@@ -155,10 +144,47 @@ Linux Jail实现CUDA实践
 .. literalinclude:: ../../../docker/gpu/bhyve_ubuntu_tesla_p4_docker/cuda_driver_debian_ubuntu_repo_install
    :caption: Debian/Ubuntu使用NVIDIA官方软件仓库安装CUDA驱动
 
-- 安装 ``cuda-toolkit`` :
+- 安装 ``nvidia-cuda-toolkit`` :
 
-.. literalinclude:: linux_jail_nvidia_cuda/install_cuda-toolkit
-   :caption: 安装 ``cuda-toolkit``
+.. literalinclude:: linux_jail_nvidia_cuda/install_nvidia-cuda-toolkit
+   :caption: 安装 ``nvidia-cuda-toolkit``
+
+.. note::
+
+   我发现NVIDIA提供了不同的CUDA Toolkit: 仓库中有
+
+   - ``nvidia-cuda-toolkit``
+   - ``cuda-toolkit``
+
+   两者在 :ref:`ubuntu_linux` core系统中安装:
+
+     - ``nvidia-cuda-toolkit`` 需要 ``6037 MB`` 空间
+     - ``cuda-toolkit`` 需要 ``7474 MB`` 空间
+     - 两者安装的软件包和依赖有所不同
+
+   以下这段内容来自Google AI:
+
+   - ``nvidia-cuda-toolkit`` 是完整版本的CUDA Toolkit，也称为 ``full development suite`` 。包含了完整CUDA开发工具和库，适合需要完整toolchain来编译、调试和prifile CUDA程序的开发者。当安装完整版本 ``nvidia-cuda-toolkit`` 通常会处理依赖以及安装NVIDIA驱动
+   - ( **这段似乎不正确** Google AI似乎搞混了Conda环境中的 ``cudatoolkit`` 包)``cuda-toolkit`` 通常用于Conda包或者较为核心的toolkit，软件包较少仅包含运行软件(如 :ref:`tensorflow` )所需的库，没有包含完整的开发toolchain。这个软件包组合通常是最终用户使用的，仅用于预编译应用程序或Python软件包，如 :ref:`pytorch` 或 :ref:`tensorflow` 。安装 ``cuda-toolkit`` 通常假设系统已经安装了NVIDIA GPU驱动，所以安装软件更少。
+   - 如果需要完整开发环境来编写C++ CUDA程序，则安装完整版本 ``nvidia-cuda-toolkit`` ; 如果只是最终用户运行预编译程序，例如安装运行 :ref:`deep_learning` 框架如 :ref:`pytorch` 或 :ref:`tensorflow` ，则通常安装轻量级 ``cuda-toolkit`` (通过 ``conda`` 或 ``pip`` 安装 ``cudatoolkit`` 软件包)
+
+这里有一些报错，看来是安装 ``nvidia-cuda-toolkit`` 时自动安装和配置 :ref:`systemd` 导致的:
+
+.. literalinclude:: linux_jail_nvidia_cuda/install_nvidia-cuda-toolkit_error
+   :caption: 安装 ``nvidia-cuda-toolkit`` 报错
+
+.. note::
+
+   我曾经想是不是应该改为安装 :ref:`nvidia_container_toolkit` ？面向容器定制的toolkit或许可以避免 ``systemd`` 问题...
+
+   我参考 `NVIDIA Container Toolkit <https://github.com/NVIDIA/nvidia-container-toolkit>`_ 发现也不行，这个 ``NVIDIA Container Toolkit`` 是一个复杂的安装在Host上的软件包，用于配置 :ref:`docker` 或其他 :ref:`container` 运行时来实现容器化运行 ``CUDA Toolkit`` 。
+
+   也就是说，确实应该在容器(或者Jail)内部安装 ``CUDA Toolkit`` ，但是没法使用NVIDIA官方的 ``NVIDIA Container Toolkit`` ，这个软件包和Linux平台深度绑定，只是为了能够方便构建和运行容器，但无法在FreeBSD上使用。
+
+这个问题似乎不好解决，但也可能可以解决(google ai给了启发):
+
+- :ref:`devuan` 是一个 :ref:`debian` fork版本，采用了 ``sysvinit`` 系统替代 :ref:`systemd` ，理论上当安装 ``nvidia-cuda-toolkit`` 的依赖时或许可以避免 ``systemd`` 问题(不过也取决于NVIDIA开发的软件包是否强制依赖了 ``systemd`` )
+- 使用CUDA runfile installer安装，有可能通过 ``--override`` 参数bypass掉依赖检查，不过CUDA系统可能会依赖才能工作
 
 参考
 =======

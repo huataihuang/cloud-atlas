@@ -66,7 +66,7 @@ FreeBSD Wifibox
 
 为了能够启动操作系统时持久化启动 :ref:`linuxulator` 支持，应该配置 修改 ``/etc/rc.conf`` 添加:
 
-.. literalinclude:: ../virtual/linuxulator/rc.conf
+.. literalinclude:: ../virtual/linuxulator/linuxulator_startup/rc.conf
    :caption: 配置 ``/etc/rc.conf`` 持久化激活 ``Linuxulator``
 
 - 创建 ``/compat/linux`` 目录:

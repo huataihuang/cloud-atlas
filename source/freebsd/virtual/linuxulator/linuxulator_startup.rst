@@ -1,7 +1,7 @@
-.. _linuxulator:
+.. _linuxulator_startup:
 
 ================================
-Linuxulator: Linux执行程序兼容
+Linuxulator 快速起步
 ================================
 
 FreeBSD提供了Linux二进制程序兼容，也就是 ``Linuxulator`` ，可以在FreeBSD上直接运行无需修改的Linux二进制程序。
@@ -13,12 +13,22 @@ FreeBSD提供了Linux二进制程序兼容，也就是 ``Linuxulator`` ，可以
 
 要使配置持久化，则修改 ``/etc/rc.conf`` 添加:
 
-.. literalinclude:: linuxulator/rc.conf
+.. literalinclude:: linuxulator_startup/rc.conf
    :caption: 配置 ``/etc/rc.conf`` 持久化激活 ``Linuxulator``
 
-执行以下命令在系统中安装CentOS 7软件包源的Linux子系统::
+- 安装Rocky Linux 9 userland:
 
-   pkg install linux_base-c7
+.. literalinclude:: linuxulator_startup/install_rl9
+   :caption: 安装Rocky Linux 9 userland
+
+.. note::
+
+   根据handbook说明， ``Linux userlands`` 当前推荐采用 **Rocky Linux 9 userland** 
+
+   以前的 CentOS 7 不建议采用 (废弃) :strike:`执行以下命令在系统中安装CentOS 7软件包源的Linux子系统` :
+
+   .. literalinclude:: linuxulator_startup/install_c7
+      :caption: 安装CentOS 7软件包源的Linux子系统
 
 根据安装提示，还需要在 ``/etc/fstab`` 中添加以下挂载配置::
 
@@ -34,11 +44,8 @@ FreeBSD提供了Linux二进制程序兼容，也就是 ``Linuxulator`` ，可以
 
 当然，也可以重启系统生效
 
-.. note::
-
-   目前我还没有实践，我可能会在兼容开发一些Linux软件时来实践本文
-
 参考
 ======
 
 - `Install FreeBSD with XFCE and NVIDIA Drivers [2021] <https://nudesystems.com/install-freebsd-with-xfce-and-nvidia-drivers/>`_
+- `Chapter 12. Linux Binary Compatibility <https://docs.freebsd.org/en/books/handbook/linuxemu/>`_
