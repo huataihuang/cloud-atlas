@@ -90,6 +90,8 @@ FreeBSD的硬件支持不如 :ref:`linux` 广泛，但是主流架构的服务�
 
 - `klara <https://klarasystems.com/>`_ 是一家开源企业外包公司，专注于FreeBSD+ZFS存储以及ARM嵌入系统开发，官网 `Klara Articles <https://klarasystems.com/articles/>`_ 提供了很多FreeBSD+ZFS的技术文档
 
+- `zenarmor <https://www.zenarmor.com/>`_ 是一家专注于安全的开源公司，结合了安全访问、防火墙( :ref:`opnsense` )。 `zenarmor FreeBSD Tutorials <https://www.zenarmor.com/docs/category/freebsd-tutorials>`_ 提供了比较全面的教程
+
 - `IT Notes <https://it-notes.dragas.net/>`_ 一位意大利BSD社区者Stefano Marinelli创建的一人公司，记录分享了围绕FreeBSD(和illumos)的很多技术文章
 
 参考

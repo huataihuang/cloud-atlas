@@ -114,18 +114,88 @@ shim
 .. literalinclude:: linuxulator_nvidia_cuda/install_rl9-devtools
    :caption: 安装Rocky Linux 9 开发工具
 
-这样在Host主机的 ``/compat/linux/bin/cc`` 就是 ``Rocky Linux 9`` 编译工具
+这样在Host主机的 ``/compat/linux/bin/cc`` 就是 ``Rocky Linux 9`` 提供的 ``gcc11``
 
 - 获取 ``uvm_ioctl_override.c`` :
 
-``待续...``
+.. literalinclude:: linuxulator_nvidia_cuda/fetch
+   :caption: 获取 ``uvm_ioctl_override.c``
 
-- 如果要直接在FreeBSD :ref:`linuxulator` 环境运行Linux版本Conda，可以安装 ``miniconda`` Linux版本:
+- 编译:
 
-.. literalinclude:: ../../container/jail/linux_jail_nvidia_cuda/linux-miniconda_install
-   :caption: 安装Linux版本miniconda
+.. literalinclude:: linuxulator_nvidia_cuda/build
+   :caption: 编译 ``uvm_ioctl_override.c``
 
-此时会安装一个Linux版本的 miniconda，可以用于今后机器学习安装对应的软件包
+初始化设置
+============
+
+初始化设置需要2个步骤:
+
+- 安装缺失的软件包 ``linux-rl9-libglvnd`` (针对 ``Rocky Linux 9`` ，早期针对CentOS 7则安装 ``linux-c7-libglvnd`` )，目的是获取 ``libGL.so.1`` :
+
+.. literalinclude:: linuxulator_nvidia_cuda/install_libglvnd
+   :caption: 安装缺失的软件包 ``linux-rl9-libglvnd`` 获取 ``libGL.so.1``
+
+- 建立 ``/sbin/md5`` 软链接: FreeBSD 13.1开始提供 ``/sbin/md5sum`` ，installer需要该执行程序，所以比较可靠的方式是在 ``~/bin`` 目录建立软链接:
+
+.. literalinclude:: linuxulator_nvidia_cuda/link
+   :caption: 建立 ``/sbin/md5sum`` 软链接
+
+安装路径
+===========
+
+设置一个安装路径用于所有的Linux程序安装，我使用 ``${linux_dir}`` 作为存放所有Linux程序的基础目录(原文采用 ``${BASE_PATH}`` 环境变量):
+
+.. literalinclude:: linuxulator_nvidia_cuda/linux_dir
+   :caption: 使用 ``${linux_dir}`` 作为存放所有Linux程序的基础目录
+
+Conda
+=========
+
+.. note::
+
+   `Install minianaconda on FreeBSD <https://www.reddit.com/r/freebsd/comments/1g45wxq/install_minianaconda_on_freebsd/>`_ 提到直接下载官方 ``Miniconda3-latest-Linux-x86_64.sh`` 进行安装:
+
+   .. literalinclude:: linuxulator_nvidia_cuda/miniconda3-installer
+      :caption: 下载 ``Miniconda installer for Linux`` 最新版本进行安装
+
+   但我实践发现也同样报错 ``[PYI-15462:ERROR] Module object for struct is NULL!`` (见下文，可能是同时安装了 Python 3.12 和 3.11 导致的)
+
+需要在FreeBSD系统中安装原生python，运行 ``Miniconda3-latest-Linux-x86_64.sh`` 会依赖本地安装的python来执行脚本内容:
+
+.. literalinclude:: linuxulator_nvidia_cuda/pkg_install_python3
+   :caption: 安装python3
+
+.. note::
+
+   这里选择安装 python 3.11
+
+   原因 **可能** 是安装 python312 会同时安装 python311 ，似乎会导致 miniconda3 安装成勋报错:
+
+   .. literalinclude:: linuxulator_nvidia_cuda/miniconda-installer_error
+      :caption: 安装 ``miniconda`` 报错
+      :emphasize-lines: 12,16
+
+   ``miniconda`` ``[PYI-15660:ERROR] Module object for struct is NULL!`` 错误是由于Python环境损坏或者混乱导致 ``PyInstaller`` 无法正确捆绑内置的 ``struct`` 模块。这个错误通常在 ``Conda`` 环境中使用 ``PyInstaller`` 时发生。
+
+   根据 `linux-miniconda-installer Port details <https://www.freshports.org/sysutils/linux-miniconda-installer/>`_ 说明，软件包依赖 ``lang/python311``
+
+`PyTorch and Stable Diffusion on FreeBSD <https://github.com/verm/freebsd-stable-diffusion>`_ 使用 ``pkg`` 安装Linux Conda( ``miniconda`` ):
+
+.. literalinclude:: linuxulator_nvidia_cuda/miniconda-installer
+   :caption: 安装 ``miniconda``
+
+目前还存在的问题是 
+
+.. literalinclude:: linuxulator_nvidia_cuda/miniconda-installer_error_again
+   :caption: 安装 ``miniconda`` 依然报错
+   :emphasize-lines: 14
+
+google ai提示可能需要配置好Linux二进制兼容层: If the error persists, there may be a mismatch between the Conda-shipped libraries and the versions in your Linux base installation. Manually finding and replacing shared libraries is not recommended and is often a fragile fix. 
+
+想到既然我已经构建过 :ref:`linux_jail_ubuntu-base` ，那么先尝试在 :ref:`linux_jail` 中安装 ``miniconda`` (反正也是集中在一个目录)，然后将 ``conda`` 目录取出在Host的 :ref:`linuxulator` 环境运行，看看问题到底在哪里。
+
+
 
 参考
 =======

@@ -1,15 +1,13 @@
-.. _linuxulator:
+.. _opnsense:
 
 =================================
-Linuxulator
+OPNsense防火墙
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   linuxulator_startup.rst
-   linuxulator_rocky-base.rst
-   linuxulator_nvidia_cuda.rst
+   intro_opnsense.rst
 
 .. only::  subproject and html
 

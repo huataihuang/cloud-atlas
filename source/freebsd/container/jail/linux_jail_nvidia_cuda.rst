@@ -165,7 +165,7 @@ Linux Jail实现CUDA实践
    以下这段内容来自Google AI:
 
    - ``nvidia-cuda-toolkit`` 是完整版本的CUDA Toolkit，也称为 ``full development suite`` 。包含了完整CUDA开发工具和库，适合需要完整toolchain来编译、调试和prifile CUDA程序的开发者。当安装完整版本 ``nvidia-cuda-toolkit`` 通常会处理依赖以及安装NVIDIA驱动
-   - ( **这段似乎不正确** Google AI似乎搞混了Conda环境中的 ``cudatoolkit`` 包)``cuda-toolkit`` 通常用于Conda包或者较为核心的toolkit，软件包较少仅包含运行软件(如 :ref:`tensorflow` )所需的库，没有包含完整的开发toolchain。这个软件包组合通常是最终用户使用的，仅用于预编译应用程序或Python软件包，如 :ref:`pytorch` 或 :ref:`tensorflow` 。安装 ``cuda-toolkit`` 通常假设系统已经安装了NVIDIA GPU驱动，所以安装软件更少。
+   - ( **这段似乎不正确** Google AI似乎搞混了Conda环境中的 ``cudatoolkit`` 包) ``cuda-toolkit`` 通常用于Conda包或者较为核心的toolkit，软件包较少仅包含运行软件(如 :ref:`tensorflow` )所需的库，没有包含完整的开发toolchain。这个软件包组合通常是最终用户使用的，仅用于预编译应用程序或Python软件包，如 :ref:`pytorch` 或 :ref:`tensorflow` 。安装 ``cuda-toolkit`` 通常假设系统已经安装了NVIDIA GPU驱动，所以安装软件更少。
    - 如果需要完整开发环境来编写C++ CUDA程序，则安装完整版本 ``nvidia-cuda-toolkit`` ; 如果只是最终用户运行预编译程序，例如安装运行 :ref:`deep_learning` 框架如 :ref:`pytorch` 或 :ref:`tensorflow` ，则通常安装轻量级 ``cuda-toolkit`` (通过 ``conda`` 或 ``pip`` 安装 ``cudatoolkit`` 软件包)
 
 这里有一些报错，看来是安装 ``nvidia-cuda-toolkit`` 时自动安装和配置 :ref:`systemd` 导致的:
