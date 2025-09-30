@@ -1,12 +1,14 @@
-.. _linuxulator_rocky-base:
+.. _linux_jail_rocky-base:
 
-==============================================================
-使用 ``Rocky-Container-base`` tgz 包部署Linuxulator userland
-==============================================================
+===========================================================
+使用 ``Rocky-Container-base`` tgz 包部署Linux Jail Rocky
+===========================================================
 
 我在 :ref:`linuxulator_nvidia_cuda` 实践中遇到执行 ``miniconda-installer`` 运行报错，推测和Python3运行环境相关。想对比尝试 :ref:`linuxulator_startup` 中更新 ``linuxulator`` 中 Rocky Linux 9 的Python(系统提供的 ``linux-rl9`` 中python配置有问题)。但是发现发行版的 ``linuxulator`` linux userland实际上是非常非常精简的系统，甚至没有提供 :ref:`dnf` 包管理器。
 
 考虑到 ``linuxulator`` 和 :ref:`linux_jail` 实际底层原理一致，既然 :ref:`linux_jail_ubuntu-base` 能够通过Ubuntu core来构建，那么Rocky Linux应该也可以以相同方式构建 ``linuxulator`` userland 环境。
+
+同理，也可以使用 ``Rocky-9-Container-base`` 来构建 :ref:`linux_jail` ，就像 :ref:`linux_jail_ubuntu-base` 一样。这样思路打开了，完全可以构建不同Linux发行版的 Linux Jail 或 ``linuxulator``
 
 `Rocky Linux download > 9 > images > x86_64 <https://download.rockylinux.org/pub/rocky/9/images/x86_64/>`_ 提供了 `Rocky-9-Container-base.latest.x86_64.tar.xz <https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-Container-base.latest.x86_64.tar.xz>`_ ，虽然是针对 :ref:`container` 的镜像压缩包，但是jail非常类似container，实际上都剥离了 :ref:`systemd` ，应该可以共用。
 
@@ -16,7 +18,7 @@
 
 - 解压缩下载 ``Rocky-9-Container-Base.latest.x86_64.tar.xz`` :
 
-.. literalinclude:: linuxulator_rocky-base/tar
+.. literalinclude:: linux_jail_rocky-base/tar
    :caption: 解压缩
 
 .. note::
@@ -27,17 +29,18 @@
 
 - 在FreeBSD Host主机上将 ``/etc/resolv.conf`` 复制给Jail使用:
 
-.. literalinclude:: ../../container/jail/linux_jail_rocky-base/cp_resolv
+.. literalinclude:: linux_jail_rocky-base/cp_resolv
    :caption: 将Host主机的 ``/etc/resolv.conf`` 复制给Jail
 
 - 更新:
 
-.. literalinclude:: ../../container/jail/linux_jail_rocky-base/update
+.. literalinclude:: linux_jail_rocky-base/update
    :caption: 更新系统
 
-.. note::
+- 安装 ``config-manager`` 插件(用于管理后续仓库配置):
 
-   ``linuxulator`` 不需要复杂完整的环境，所以更新系统后就可以顺利使用了。对于 :ref:`linux_jail` 则参考 :ref:`linux_jail_rocky-base` 继续设置包管理以及安装必要的工具软件。
+.. literalinclude:: linux_jail_rocky-base/config-manager
+   :caption: 安装 ``config-manager`` 插件
 
 参考
 =======

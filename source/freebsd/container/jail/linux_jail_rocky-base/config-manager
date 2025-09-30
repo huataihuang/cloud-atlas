@@ -1,0 +1,1 @@
+dnf install 'dnf-command(config-manager)'

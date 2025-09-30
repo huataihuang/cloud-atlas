@@ -17,6 +17,7 @@ FreeBSD Jail
    vnet_jail.rst
    linux_jail.rst
    linux_jail_ubuntu-base.rst
+   linux_jail_rocky-base.rst
    linux_jail_nvidia_cuda.rst
    linux_jail_archive.rst
    linux_jail_tunning.rst
