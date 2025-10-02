@@ -47,4 +47,7 @@ Jail思考
   - VNET和ZFS类似，是FreeBSD的技术优势，可以在物理主机上构建的大量Jail
   - 即使个人使用的主机也应该采用，以便能够更好模拟
 
-- :ref:`linux_jail` 可能尽量避免使用，究竟有那些应用必须在Linux上运行？
+- :ref:`linux_jail` :
+
+  - 构建基于FreeBSD的 :ref:`freebsd_machine_learning`
+  - 运行Linux专有软件

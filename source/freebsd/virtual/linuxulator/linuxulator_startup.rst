@@ -6,12 +6,12 @@ Linuxulator 快速起步
 
 FreeBSD提供了Linux二进制程序兼容，也就是 ``Linuxulator`` ，可以在FreeBSD上直接运行无需修改的Linux二进制程序。
 
-要激活 ``Linuxulator`` ，执行以下命令::
+要激活 ``Linuxulator`` ，执行以下命令:
 
-   kldload linux
-   kldload linux64
+.. literalinclude:: linuxulator_startup/kldload
+   :caption: 加载linux模块激活 ``Linuxulator``
 
-要使配置持久化，则修改 ``/etc/rc.conf`` 添加:
+- 要使配置持久化，则修改 ``/etc/rc.conf`` 添加:
 
 .. literalinclude:: linuxulator_startup/rc.conf
    :caption: 配置 ``/etc/rc.conf`` 持久化激活 ``Linuxulator``

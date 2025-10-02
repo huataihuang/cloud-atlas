@@ -10,6 +10,22 @@
 
 `Rocky Linux download > 9 > images > x86_64 <https://download.rockylinux.org/pub/rocky/9/images/x86_64/>`_ 提供了 `Rocky-9-Container-base.latest.x86_64.tar.xz <https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-Container-base.latest.x86_64.tar.xz>`_ ，虽然是针对 :ref:`container` 的镜像压缩包，但是jail非常类似container，实际上都剥离了 :ref:`systemd` ，应该可以共用。
 
+激活Linuxulator
+===================
+
+- 执行以下命令激活 ``Linuxulator`` :
+
+.. literalinclude:: linuxulator_startup/kldload
+   :caption: 加载linux模块激活 ``Linuxulator``
+
+- 配置持久化，修改 ``/etc/rc.conf`` 添加:
+
+.. literalinclude:: linuxulator_startup/rc.conf
+   :caption: 配置 ``/etc/rc.conf`` 持久化激活 ``Linuxulator``
+
+部署Linuxulator userland
+===========================
+
 .. note::
 
    不要使用 ``Rocky-9-Container-Minimal.latest.x86_64.tar.xz`` ，这个 ``minimal`` 版本不包含 :ref:`dnf` 包管理器，也就是说，实际上FreeBSD ``linuxulator`` 提供的userland其实就是 ``minimal`` 版本。
@@ -18,6 +34,8 @@
 
 .. literalinclude:: linuxulator_rocky-base/tar
    :caption: 解压缩
+
+重启一次系统，重启后系统会自动挂载Linux兼容文件系统(或者如 :ref:`linuxulator_startup` 配置 ``/etc/fstab`` 并挂载)  ``<= 因为我之前部署安装linuxulator，系统自动为挂载了 /compat/linux 目录下的 proc sys shem 文件系统，所以这步我实际没有执行，但事后复盘我觉得如果我手工解压缩Rocky-9-Container-Minimal包，并且也enable linux，那么系统也会自动挂载这些linux文件系统`` 
 
 .. note::
 

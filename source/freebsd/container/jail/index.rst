@@ -30,6 +30,7 @@ FreeBSD Jail
    jail_upgrade.rst
    jail_init.rst
    linux_jail_init.rst
+   linux_jail_init_rocky.rst
    share_folder_between_jails.rst
    share_zfs_dataset_between_jails.rst
    zfs-jail.rst
