@@ -45,7 +45,7 @@ NeoVim IDE
 
 .. literalinclude:: nvim_ide/init.lua
    :language: lua
-   :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``options.lua``
+   :caption: 在 ``~/.config/nvim/init.lua`` 中激活 ``options.lua``
    :emphasize-lines: 1
 
 现在显示的效果:
@@ -71,7 +71,7 @@ NeoVim IDE
 
 .. literalinclude:: nvim_ide/init.lua
    :language: lua
-   :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``keymaps.lua``
+   :caption: 在 ``~/.config/nvim/init.lua`` 中激活 ``keymaps.lua``
    :emphasize-lines: 2
 
 安装包管理器
@@ -79,7 +79,7 @@ NeoVim IDE
 
 ``nvim`` 通过第三方插件提供了强大的能力。有多种插件管理器，其中 :ref:`lazy.nvim` 非常受欢迎，提供了很多神奇功能:
 
-  - 修正以来顺序
+  - 修正依赖顺序
   - 锁文件 ``lazy-lock.json`` 跟踪安装的插件
   - ...
 
@@ -93,7 +93,7 @@ NeoVim IDE
 
 .. literalinclude:: nvim_ide/init.lua
    :language: lua
-   :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``plugins.lua``
+   :caption: 在 ``~/.config/nvim/init.lua`` 中激活 ``plugins.lua``
    :emphasize-lines: 3
 
 这里我遇到一个报错:

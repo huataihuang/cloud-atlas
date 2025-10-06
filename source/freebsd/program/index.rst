@@ -8,6 +8,7 @@ FreeBSD开发
    :maxdepth: 1
 
    freebsd_programming_tools.rst
+   freebsd_nvim_ide.rst
 
 .. only::  subproject and html
 

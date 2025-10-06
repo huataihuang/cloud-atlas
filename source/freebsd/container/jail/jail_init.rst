@@ -8,7 +8,7 @@ Jail环境初始化
 
 .. note::
 
-   这里安装命令假设Jail名字是 ``dev``
+   这里安装命令假设Jail名字是 ``jdev``
 
    所有需要安装的软件包名字或版本可以通过 ``pkg search XXX`` 关键字来找到
 
@@ -30,7 +30,7 @@ devops初始化
 ssh初始化
 =============
 
-- 在 ``mdev`` jail中创建用户组和用户 admin:
+- 在 ``jdev`` jail中创建用户组和用户 admin:
 
 .. literalinclude:: ../../startup/freebsd_init/user
    :caption: 在jail内部创建admin

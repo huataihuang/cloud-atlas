@@ -8,7 +8,7 @@ FreeBSD neovim
 
    采用在 :ref:`vnet_thin_jail` 基础上构建工作环境
 
-   在FreeBSD上 :ref:`nvim_ide_fix` 存在一定的困难，所以我会重新实践 :ref:`nvim_ide_freebsd` 
+   在FreeBSD上 :ref:`nvim_ide_fix` 存在一定的困难，所以我会重新实践，本文为分解步骤逐步完成配置，后续 :ref:`freebsd_nvim_ide` 再结合自己的git配置同步进行快速配置。 
 
 安装
 ===========

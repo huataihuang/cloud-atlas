@@ -4,15 +4,27 @@
 重新配置NeoVim IDE
 =======================
 
-我之前 :ref:`nvim_ide` 参考 `从零开始配置 Neovim(Nvim) <https://martinlwx.github.io/zh-cn/config-neovim-from-scratch/>`_ ，原作者更新了博客，配置更为精简。正好我遇到了在 :ref:`nvim_ide_freebsd` ，所以再次参考这篇博客进行配置。
+我之前 :ref:`nvim_ide` 参考 `从零开始配置 Neovim(Nvim) <https://martinlwx.github.io/zh-cn/config-neovim-from-scratch/>`_ ，原作者更新了博客，配置更为精简。正好我需要构建 :ref:`freebsd_nvim_ide` ，所以再次一步步重新完成部署，尝试构建一个通用且简洁的IDE。
+
+.. warning::
+
+   本文参考 `从零开始配置 Neovim(Nvim) <https://martinlwx.github.io/zh-cn/config-neovim-from-scratch/>`_ 实践发现，前半部分(到 ``colorscheme`` 配置为止)是Linux/FreeBSD通用的；但是后半部分原文采用 `blink.cmp <https://github.com/saghen/blink.cmp>`_ 虽然更为简单方便，但是仅适用于Linux，所以 :ref:`freebsd_nvim_ide` 的LSP配置我将单独探索，另行撰写。
 
 配置文件路径
 ==============
+
+- 先构建配置文件初始化
+
+.. literalinclude:: nvim_ide/config_init
+   :caption: 初始化 ``nvim`` 的配置路径
+   :emphasize-lines: 3
 
 ``nvim`` 配置目录 ``~/.config/nvim`` ，默认读取 ``~/.config/nvim/init.lua`` ，为方便维护，从 ``init.lua`` 划分出不同目标的配置:
 
 .. literalinclude:: nvim_ide_fix/tree
    :caption: ``nvim`` 配置目录 ``~/.config/nvim`` 结构
+
+上述创建了一个空的 ``~/.config/nvim/init.lua`` ，这样进入 ``nvim`` 之后执行 ``checkhealth`` 至少能够看到 ``Configuration`` 是OK状态；每次修改 ``init.lua`` 都需要重启 ``nvim`` 才能看到修改的变化
 
 选项配置
 =========
@@ -31,8 +43,12 @@
 
 .. literalinclude:: nvim_ide/init.lua
    :language: lua
-   :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``options.lua``
+   :caption: 在 ``~/.config/nvim/init.lua`` 中激活 ``options.lua``
    :emphasize-lines: 1
+
+.. note::
+
+   这里为了方便表示 ``~/.config/nvim/lua/init.lua`` 高亮的行是表示当前步骤添加的行，这里显示的是最终完成版本，高亮行表示当前添加的配置
 
 键盘映射配置
 ==============
@@ -51,7 +67,7 @@
 
 .. literalinclude:: nvim_ide/init.lua
    :language: lua
-   :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``keymaps.lua``
+   :caption: 在 ``~/.config/nvim/init.lua`` 中激活 ``keymaps.lua``
    :emphasize-lines: 2
 
 安装插件管理器
@@ -59,7 +75,7 @@
 
 ``nvim`` 通过第三方插件提供了强大的能力。有多种插件管理器，其中 :ref:`lazy.nvim` 非常受欢迎，提供了很多神奇功能:
 
-  - 修正以来顺序
+  - 修正依赖顺序
   - 锁文件 ``lazy-lock.json`` 跟踪安装的插件
   - ...
 
@@ -73,7 +89,7 @@
 
 .. literalinclude:: nvim_ide/init.lua
    :language: lua
-   :caption: 在 ``~/.config/nvim/lua/init.lua`` 中激活 ``plugins.lua``
+   :caption: 在 ``~/.config/nvim/init.lua`` 中激活 ``plugins.lua``
    :emphasize-lines: 3
 
 主题配置
@@ -113,6 +129,10 @@
 
 自动代码补全(Auto-completion)
 ================================
+
+.. warning::
+
+   从这里开始，配置 ``blink.cmp`` 方法我只在Linux平台上完成，在FreeBSD平台配置遇到很多障碍，所以这段有关FreeBSD的 LSP 配置，我改到 :ref:`freebsd_nvim_ide` 继续探索
 
 .. note::
 
