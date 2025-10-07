@@ -56,6 +56,7 @@ macOS
    xbar.rst
    kitty.rst
    macos_shared_library.rst
+   macos_spoken_content.rst
 
 .. only::  subproject and html
 
