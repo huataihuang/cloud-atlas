@@ -13,6 +13,14 @@ Termux中文输入
 
 按住 ``termux`` 的快捷键条(也就是终端屏幕下方的一些 ``ESC`` ``CTRL`` 等软按键组成的条带)，然后向左滑动，当这个快捷键条变成空白条的时候，就可以正常输入中文了。
 
+.. note::
+
+   `muyinliu <https://github.com/muyinliu>`_ ( `Hello，Termux <https://tonybai.com/2017/11/09/hello-termux/>`_ 作者)推荐在中英文混合显示环境中使用字体 ``CodeNewRomanNerdFontMono-Regular.otf`` ，是 Nerd Fonts 中的一种字体（所以也支持很多图标相关的字符）。
+
+   该字体可以从 `Nerd Fonts Downloads <https://www.nerdfonts.com/font-downloads>`_ 下载: 关键词 ``CodeNewRoman``
+
+   感谢 **muyinliu** 提供的建议
+
 参考
 ===========
 

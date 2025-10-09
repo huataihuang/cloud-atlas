@@ -28,6 +28,7 @@ Termux特点
 
 - `Hax4Us <https://hax4us.github.io>`_ 提供了很多使用Termux定制Android的文章，可以参考配置。
 - `Termux 高级终端安装使用配置教程 <https://www.sqlsec.com/2018/05/termux.html>`_ 是国内网友写的非常详尽的Termux指南，非常完备，值得学习参考
+- `Hello，Termux <https://tonybai.com/2017/11/09/hello-termux/>`_ Tony Bai老师的一篇非常详尽的Termux使用指南，为移动开发提供了极大帮助，比我撰写的文档更为生动详尽，推荐阅读
 
 参考
 ========
