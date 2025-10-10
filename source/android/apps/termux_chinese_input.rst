@@ -15,7 +15,11 @@ Termux中文输入
 
 .. note::
 
-   `muyinliu <https://github.com/muyinliu>`_ ( `Hello，Termux <https://tonybai.com/2017/11/09/hello-termux/>`_ 作者)推荐在中英文混合显示环境中使用字体 ``CodeNewRomanNerdFontMono-Regular.otf`` ，是 Nerd Fonts 中的一种字体（所以也支持很多图标相关的字符）。
+   在 `Hello，Termux <https://tonybai.com/2017/11/09/hello-termux/>`_ (Tony Bai老师的一篇非常详尽的Termux使用指南)的评论中， `muyinliu <https://github.com/muyinliu>`_ 提到 ``SwiftKey`` 输入法支持在Termux中使用外界键盘输入中文(我没有验证，记录以备参考)
+
+.. note::
+
+   `muyinliu <https://github.com/muyinliu>`_ 推荐在中英文混合显示环境中使用字体 ``CodeNewRomanNerdFontMono-Regular.otf`` ，是 Nerd Fonts 中的一种字体（所以也支持很多图标相关的字符）。
 
    该字体可以从 `Nerd Fonts Downloads <https://www.nerdfonts.com/font-downloads>`_ 下载: 关键词 ``CodeNewRoman``
 

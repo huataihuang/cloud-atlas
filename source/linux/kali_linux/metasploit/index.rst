@@ -1,19 +1,14 @@
-.. _kali_linux:
+.. _metasploit:
 
 =================================
-Kali Linux
+Metasploit
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_kali_linux.rst
-   kali_fulltime.rst
-   startup/index
-   wifi/index
-   admin/index
-   arm/index
-   metasploit/index
+   intro_metasploit.rst
+   metasploit_macos.rst
 
 .. only::  subproject and html
 
