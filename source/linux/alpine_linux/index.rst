@@ -13,6 +13,7 @@ Alpine Linux
    alpine_install.rst
    alpine_install_pi.rst
    alpine_install_pi_1.rst
+   alpine_init.rst
    alpine_pi_clock_skew.rst
    alpine_chrony.rst
    alpine_dnsmasq.rst
@@ -27,12 +28,12 @@ Alpine Linux
    alpine_extended.rst
    alpine_apk.rst
    alpine_ssh_docker.rst
+   busybox.rst
    openrc/index
    uefi/index
    alpine_kvm.rst
    alpine_docker.rst
    alpine_nfs.rst
-   alpine_init.rst
    alpine_dev.rst
 
 .. only::  subproject and html

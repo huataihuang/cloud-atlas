@@ -13,8 +13,14 @@ Android移动工作解决方案
 
 - 使用第三方Android镜像(内核开启 ``Alternate Mode over USB-C`` )
 - 使用 usb-c to HDMI 联线
+- 使用高端Pixel(如 Pixel 8 或更新)结合最新的Android 16 beta，支持类似Samsung ``DeX`` 桌面模式，未来这是一个非常值得期待的官方解决方案(演示请参考油管视频 `Samsung DEX Is Coming To Your Google Pixel? Android 16 Desktop Mode First Impressions <https://www.youtube.com/watch?v=k6ai9hv_uwM>`_ )
+- 购买使用Samsung支持DeX模式的手机，当前就可以体验Android桌面
 
-待实践
+.. note::
+
+   根据网上传言 `Your iPhone May Get a 'Desktop' Mode With iOS 19 <https://lifehacker.com/tech/iphone-desktop-mode-ios-19-rumors>`_ 苹果公司似乎也在开发将 :ref:`macos` 带到 iPad上，提供类似桌面体验。这其实是一个技术策略选择，其实对于macOS多年前就支持的扩展屏幕功能，对于 macOS 和 iPadOS 这样逐渐融合的操作系统，应该不难实现。
+
+   也就看苹果是否会被谷歌逼到提供这样的方便功能了，毕竟苹果将产品线划分开来，卖得如此好，没有竞争对手的压力，未必会愿意提供模糊产品区分的功能。
 
 无线投屏
 ===========

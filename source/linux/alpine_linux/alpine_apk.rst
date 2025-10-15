@@ -32,29 +32,30 @@ apk软件仓库
 更新系统
 ==============
 
-- 配置了软件仓库之后，就可以更新软件包列表::
+- 配置了软件仓库之后，就可以更新软件包列表:
 
-   apk update
+.. literalinclude:: alpine_apk/update
+   :caption: 更新alpine linux的软件包列表
 
-此时会提示信息::
+此时会提示信息:
 
-   fetch http://mirror.math.princeton.edu/pub/alpinelinux/v3.14/main/x86_64/APKINDEX.tar.gz
-   3.14.2 [/media/sdb1/apks]
-   v3.14.2-5-gd4163d4c6c [http://mirror.math.princeton.edu/pub/alpinelinux/v3.14/main]
-   OK: 4791 distinct packages available
+.. literalinclude:: alpine_apk/update_output
+   :caption: 更新alpine linux的软件包列表
 
-- 然后可以更新系统::
+- 然后可以更新系统:
 
-   apk upgrade
+.. literalinclude:: alpine_apk/upgrade
+   :caption: 更新alpine linux系统
 
-也可以结合上述两个命令成一个命令::
+也可以结合上述两个命令成一个命令:
 
-   apk -U upgrade
+.. literalinclude:: alpine_apk/update_upgrade
+   :caption: 一条命令完整更新alpine linux系统
 
-- 如果只更新指定软件(例如busybox)，则使用::
+- 如果只更新指定软件(例如busybox)，则使用:
 
-   apk update
-   apk add --upgrade busybox
+.. literalinclude:: alpine_apk/upgrade_busybox
+   :caption: 指定更新软件(例如busybox)
 
 diskless模式更新内核
 -----------------------
