@@ -13,7 +13,7 @@ MacBook Pro 15" Late 2013
 
 - Apple型号: A1398 (Model ID: MacBookPro11,3)
 
-- 预装操作系统: MacOS X 10.9 ，目前支持最新操作系统版本(2021年为 macOS Big Sur 11.2.3)
+- 预装操作系统: MacOS X 10.9 ，最高支持操作系统版本Big Sur 11.7.10
 
 - 整机重量: 2.02 kg
 

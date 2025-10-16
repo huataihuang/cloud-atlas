@@ -8,6 +8,21 @@ Lima简介
 
 Lima的优点是在启动Linux虚拟机同时会自动实现文件共享(file sharing)和端口转发(port forwarding)，这对使用者非常友好，类似于Windows的WSL2。我的使用体验是，几乎无感知地将 :ref:`macos` 的数据目录作为Lima的本地磁盘，能够如同Linux上运行Docker一样以标准化的 :ref:`docker_volume` 挂载到容器内部。
 
+功能支持
+===========
+
+- 自动文件共享: :ref:`colima_storage_manage`
+- 自动宽口转发
+- 内置支持 :ref:`containerd` 以及其他 :ref:`container` 如 :ref:`podman` , :ref:`docker` 等
+- Intel on Intel
+- :ref:`arm-on-intel_lima`
+- Arm on Arm
+- :ref:`intel-on-arm_lima`
+- 支持不同的guest Linux发行版: 默认使用 :ref:`ubuntu_linux` 但支持各种主流发行版
+
+  - :ref:`lima_run_alpine`
+  - :ref:`lima_run_freebsd`
+
 容器环境
 ===========
 

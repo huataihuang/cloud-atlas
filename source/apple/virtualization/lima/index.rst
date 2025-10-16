@@ -10,6 +10,9 @@ Lima: Linux Machines
    intro_lima.rst
    lima_startup.rst
    lima_run_freebsd.rst
+   lima_run_alpine.rst
+   arm-on-intel_lima.rst
+   intel-on-arm_lima.rst
 
 
 .. only::  subproject and html

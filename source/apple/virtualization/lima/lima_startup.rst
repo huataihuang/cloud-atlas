@@ -14,6 +14,11 @@ Lima依赖 :ref:`qemu` 7.0或更高版本，不过只在使用QEMU驱动时需�
 .. literalinclude:: lima_startup/brew_install_lima
    :caption: :ref:`homebrew` 安装 lima
 
+不过，对于我使用的古老的 :ref:`mbp15_late_2013` 操作系统 Big Sur 11.7.10 ， :ref:`homebrew` 已经不再支持，所以我现在采用官方提供的二进制发行版解压缩到 ``/usr/local`` 目录使用:
+
+.. literalinclude:: lima_startup/binary_install_lima
+   :caption: 二进制发行版安装 lima
+
 使用
 ========
 

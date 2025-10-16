@@ -35,6 +35,8 @@ macOS
    homebrew_python.rst
    homebrew_formulae.rst
    homebrew_old_qemu.rst
+   macports.rst
+   macports_old_qemu.rst
    install_disabled_homebrew_package.rst
    multi_jdk_on_macos.rst
    macos_keyboard_customize.rst
