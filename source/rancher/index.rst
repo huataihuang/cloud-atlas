@@ -11,7 +11,7 @@ Rancher是由 `Rancher公司 <https://rancher.com/>`_ (SUSE子公司)开发的 :
 
    rancher_arch.rst
    install_kubeflow_on_rancher.rst
-   rancher_desktop.rst
+   rancher_desktop/index
 
 .. only::  subproject and html
 

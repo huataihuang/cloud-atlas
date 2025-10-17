@@ -1,7 +1,7 @@
-.. _rancher_desktop:
+.. _rancher_desktop_startup:
 
 ========================
-Rancher Desktop
+Rancher Desktop 快速起步
 ========================
 
 Rancher Desktop 是 SUSE推出的 ``Rancher`` 桌面软件，跨平台为 :ref:`macos` (基于 :ref:`lima` )， :ref:`windows` 和 :ref:`linux` 桌面提供了容器和 :ref:`kubernetes` 管理，是开发者的基础工具 
@@ -36,7 +36,7 @@ Rancher Desktop 简介
 Rancher Desktop 工作原理
 =========================
 
-.. figure:: ../_static/rancher/how-it-works-rancher-desktop.svg
+.. figure:: ../../_static/rancher/rancher_desktop/how-it-works-rancher-desktop.svg
 
 Rancher Desktop实际上是一个Electron程序，包装了一系列开源工具来提供易用的用户体院。在 :ref:`macos` 和 :ref:`linux` 平台，Rancher Desktop使用与你寄来运行 :ref:`containerd` 或 :ref:`docker` 以及 :ref:`kubernetes` 。而在 :ref:`windows` 平台则调用Windows Subsystem for Linux v2。
 
@@ -45,14 +45,20 @@ Rancher Desktop实际上是一个Electron程序，包装了一系列开源工具
 
 首次启动 Rancher Desktop 会提供一些默认常用配置(激活 :ref:`kubernetes` ，使用 :ref:`docker` 引擎):
 
-.. figure:: ../_static/rancher/rancher_desktop_first.png
+.. figure:: ../../_static/rancher/rancher_desktop/rancher_desktop_first.png
 
-版本运行要求
+启动报错排查
 --------------
+
+.. note::
+
+   我所遇到的启动报错问题是因为我因为硬件限制使用了非常古老的 macOS Big Sur 11 操作系统，现在很多软件，包括 Rancher Desktop 和 :ref:`qemu` 默认都需要 macOS 13 运行环境。所以，比较折腾做了版本回退，使用低版本来满足运行环境。
+
+   如果你的运行环境是 macOS 13 或更新，应该不会遇到我所遭遇的问题。本段仅供参考
 
 这里我遇到一个启动报错，原因是:
 
-.. literalinclude:: rancher_desktop/download_error
+.. literalinclude:: rancher_desktop_startup/download_error
    :caption: 下载镜像报错
 
 下载镜像报错，可以看到 ``qemu-img`` 是针对 :ref:`macos` 13编译的，看起来我的操作系统 Big Sur 11 不满足要求
@@ -64,11 +70,11 @@ Rancher Desktop实际上是一个Electron程序，包装了一系列开源工具
 所以我卸载1.20，重新安装 ``1.17``
 
 ``1.17`` 启动报错一
-----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 由于之前安装了 ``1.20`` 配置了启动 kubernetes 1.3x 启动，但是回退到 ``1.17`` 之后配置残留，所以启动时会报错:
 
-.. literalinclude:: rancher_desktop/start_k8s_error
+.. literalinclude:: rancher_desktop_startup/start_k8s_error
    :caption: 启动 kubernetes 报错
    :emphasize-lines: 9
 
@@ -80,11 +86,11 @@ Rancher Desktop实际上是一个Electron程序，包装了一系列开源工具
 这个步骤会清理掉Kubernetes集群以及已经下载的镜像，整个Rancher Desktop会退出。再次启动Rancher Desktop之后，会重新引导进行一次配置
 
 ``1.17`` 启动报错二
-----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 没有想到实际上 ``1.17`` 携带的 :ref:`qemu` 依然是针对 macOS 13 编译的，我回退到 ``Rancher Desktop 1.17`` 之后启动依然报错，检查发现在 ``/Applications/Rancher\ Desktop.app/Contents/Resources/resources/darwin/lima/bin/`` 目录下的 ``qemu-img`` 和 ``qemu-system-x86_64`` 都是相同提示:
 
-.. literalinclude:: rancher_desktop/version_error
+.. literalinclude:: rancher_desktop_startup/version_error
    :caption: ``qemu`` 相关程序都是针对macOS 13编译的二进制
    :emphasize-lines: 2,8
 
@@ -95,6 +101,8 @@ Rancher Desktop实际上是一个Electron程序，包装了一系列开源工具
 好吧，我自己重新搞一次 :ref:`macports_old_qemu` ，然后再复制过来 ``qemu-img`` 和 ``qemu-system-x86_64``  
 
 果然解决了启动问题，能够正常启动 ``qemu-system-x86_64``
+
+
 
 参考
 ======
