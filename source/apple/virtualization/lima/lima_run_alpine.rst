@@ -4,6 +4,14 @@
 Lima运行Alpine Linux虚拟机
 =============================
 
+.. warning::
+
+   我暂时没有解决如何在lima中运行 :ref:`alpine_linux` ，也许我的操作系统确实太陈旧了，运行lima存在什么问题
+
+   待后续再排查
+
+   目前暂时改为采用 :ref:`rancher_desktop` (同样基于 Lima 的企业级工具，类似 :ref:`docker_desktop` )
+
 实践是在古老的 :ref:`mbp15_late_2013` 完成，由于是早期的 ``x86_64`` 系统，不支持最新的 :ref:`vz` ，所以需要通过 :ref:`macports` 安装 :ref:`qemu` ( :ref:`macports_old_qemu` )。
 
 .. note::
@@ -61,13 +69,7 @@ Lima运行Alpine Linux虚拟机
 
 但是当前没有任何输出信息
 
-.. warning::
-
-   我暂时没有解决如何在lima中运行 :ref:`alpine_linux` ，也许我的操作系统确实太陈旧了，运行lima存在什么问题
-
-   待后续再排查
-
 使用
 =======
 
-
+待续...

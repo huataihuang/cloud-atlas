@@ -42,3 +42,7 @@ OPNsense 和 pfSense 都是FreeBSD上著名的开源防火墙，只不过两者�
   - pfSense背后的Netgate公司更注重商业化，并对OPNsense fork其开源项目攻击
   - 两者原理想通，所以可以相互借鉴学习: OPNsense社区论坛较弱，不能解决很多问题，需要在TrueNAS 和 Nethserver 论坛寻求帮助
   
+OPNsense学习资源
+=================
+
+- `The Complete Beginner's Guide to OPNsense <https://www.youtube.com/playlist?list=PLf3PUjoXTtNHuXFPqGc1uVc66Bz8Vy5w1>`_ 油管BrainThaw Studios的一个入门系列(我还没有看)

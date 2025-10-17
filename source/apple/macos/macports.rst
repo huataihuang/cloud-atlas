@@ -26,7 +26,32 @@ MacPorts
 
    实际上 ``qemu`` 是通过编译源代码完成安装的， ``ports`` 会自动下载所有需要依赖的编译工具和库，自动完成 ``qemu`` 的编译安装，非常方便。
 
+卸载
+========
+
+.. note::
+
+   由于我现在切换到 :ref:`rancher_desktop` 来使用虚拟机和容器环境，所以我目前不再需要MacPorts提供的独立 :ref:`lima` 环境，故实践卸载操作。
+
+要卸载MacPorts，则首先需要将已经安装的所有ports卸载，然后手工移除安装目录，最后再移除 ``macports`` 用户和组:
+
+- 卸载所有安装的ports以及依赖:
+
+.. literalinclude:: macports/uninstall
+   :caption: 卸载ports
+
+- 移除 ``macports`` 用户和组:
+
+.. literalinclude:: macports/dscl
+   :caption: ``dscl`` 工具移除 ``macports`` 用户和组
+
+- 移除剩余的MacPorts文件(需要根据实际情况删除目录，例如你安装在不同目录下更改过 ``applications_dir`` 或 ``frameworks_dir`` 默认值):
+
+.. literalinclude:: macports/rm
+   :caption: 删除残留的MacPorts文件
+
 参考
 ========
 
 - `Installing MacPorts <https://www.macports.org/install.php#installing>`_
+- `Uninstall MacPorts <https://guide.macports.org/chunked/installing.macports.uninstalling.html>`_
