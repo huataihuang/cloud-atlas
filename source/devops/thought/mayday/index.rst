@@ -1,16 +1,14 @@
-.. _rancher_desktop:
+.. _mayday:
 
 =================================
-Rancher Desktop
+空中浩劫(Mayday)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   rancher_desktop_startup.rst
-   rancher_desktop_vm.rst
-   rancher_desktop_vm_storage.rst
-   rancher_desktop_vs_code_remote_containers.rst
+   think_mayday.rst
+   mayday_season_25.rst
 
 .. only::  subproject and html
 

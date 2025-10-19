@@ -64,6 +64,7 @@ kubernetes管理了容器规模，从边缘计算的微小集群到数据中心�
    kueue/index
    k8s_android/index
    k3s/index
+   k3d/index
    k0s/index
    platform/index
    cloud/index
