@@ -40,6 +40,16 @@ Alpine DOI(Docker Official Image)是一个包含执行软件堆栈的Alpine Linu
 
    注意 :ref:`docker_json_use_double_quotes`
 
+.. warning::
+
+   这里你很可能和我一样遇到GFW屏蔽docker registry导致的报错:
+
+   .. literalinclude:: ../../rancher/rancher_desktop/config_docker_deamon_rancher_desktop/registry_fail
+      :caption: 由于docker registry被屏蔽的报错
+      :emphasize-lines: 4,14
+
+   请参考 :ref:`config_docker_deamon_rancher_desktop` 或者 :ref:`docker_proxy`
+
 - 构建 ``alpine-base`` 镜像:
 
 .. literalinclude:: alpine_docker_image/alpine-base/build_alpine-base_image
@@ -149,6 +159,12 @@ NGINX服务 ``alpine-nginx``
 
 SSH服务 ``alpine-ssh``
 =======================
+
+.. note::
+
+   参考 :ref:`debian_tini_image` 配置 ``alpine-ssh`` 镜像
+
+
 
 
 参考
