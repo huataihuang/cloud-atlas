@@ -27,7 +27,6 @@ RUN echo "%sudo        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
 RUN unlink /etc/localtime
 RUN ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-RUN mkdir /run/sshd
 RUN ssh-keygen -A
 
 # run service when container started - sshd

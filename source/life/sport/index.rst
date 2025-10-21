@@ -12,6 +12,7 @@
 
    jabra_sport_pulse.rst
    plantronics_fit_3100.rst
+   running_shoes.rst
 
 .. only::  subproject and html
 

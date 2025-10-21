@@ -3,3 +3,15 @@ docker run -dt --name debian-ssh-supervisor --hostname debian-ssh-supervisor \
     -v /Users/admin/secrets:/home/admin/.ssh \
     -v /Users/admin/docs:/home/admin/docs \
     debian-ssh-supervisor:latest
+
+# 修正 /home/admin 目录属主权限，因为Lima虚拟机的映射Host主机 /Users/admin 目录后属主是 lima
+# 绑定目录到容器以后，如果账号id不能一致，就会导致 /home/admin 目录下映射的 .ssh 和 docs 目录无法读写
+
+# 我原本想使用 docker exec debian-ssh-supervisor chown -R admin:admin /home/admin
+# 但是容器内无法修改host主机目录属主
+
+# 最终解决需要统一 Host, Lima, Container 中 admin 账号的 id
+# 举例: 
+# - macOS 的 admin 账号id 是 uid=501(admin) gid=20(staff)
+# - Lima 的 lima 账号id 也需要调整为 uid=501(lima) gid=20(dialout)
+# - Container 的 admin 账号id 调整为 uid=501(admin) gid=20(dialout)

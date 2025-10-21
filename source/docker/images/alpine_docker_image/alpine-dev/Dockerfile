@@ -24,6 +24,14 @@ RUN ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 RUN ssh-keygen -A
 
+# developement
+RUN apk add build-base
+RUN apk add gdb strace
+RUN apk add go
+RUN apk add rust
+# nodejs选择LTS版本
+RUN apk add nodejs-lts
+
 # run service when container started - sshd
 EXPOSE 22:1122
 

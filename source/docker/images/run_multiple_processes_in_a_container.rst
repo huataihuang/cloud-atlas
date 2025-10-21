@@ -47,7 +47,8 @@
 - 运行容器
 
 .. literalinclude:: run_multiple_processes_in_a_container/run_debian-ssh-supervisor_container
-   :caption: 创建镜像
+   :caption: 运行容器(注意这里将Lima从Host主机映射的目录再绑定到容器内部，这样就能够从容器访问Host主机目录)
+
 
 参考
 =======

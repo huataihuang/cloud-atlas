@@ -164,7 +164,8 @@ SSH服务 ``alpine-ssh``
 
    参考 :ref:`debian_tini_image` 配置 ``alpine-ssh`` 镜像
 
-
+.. literalinclude:: alpine_docker_image/alpine-ssh/Dockerfile
+   :caption: 采用 ``tini`` 进程管理启动ssh服务
 
 
 参考

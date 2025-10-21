@@ -1,0 +1,21 @@
+#!/usr/bin/env ash
+
+sshd() {
+    chown -R admin:admin /home/admin
+    /usr/sbin/sshd
+}
+
+crond() {
+    # alpine linux 使用 busybox 实现cron: https://wiki.alpinelinux.org/wiki/Cron
+    /usr/sbin/crond
+}
+
+main() {
+    sshd
+    crond
+    # 在k8s不能直接shell执行结束，否则判断为pod Crash，需要改写成持续执行循环脚本
+    # 或者最后执行nginx前台运行直接输出日志到终端
+    /bin/ash -c "while true; do (echo 'Hello from tini'; date; sleep 120); done"
+}
+
+main

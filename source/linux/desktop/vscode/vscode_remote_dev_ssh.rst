@@ -55,6 +55,22 @@ VS Code远程开发-SSH模式
 
    使用 VS Code Remote SSH 方式开发的优点是比 :ref:`xpra` 更为接近本地原生程序体验，使用更为流畅和方便。
 
+连接远程服务器 :ref:`alpine_linux`
+====================================
+
+我在 :ref:`alpine_docker_image` 构建的Docker容器上尝试使用 remote ssh 开发模式，发现实际上是失败的:
+
+.. literalinclude:: vscode_remote_dev_ssh/dynamic_port_forwarding_fail
+   :caption: 远程端口启动失败
+   :emphasize-lines: 28
+
+这个报错是因为默认 ``sshd_config`` 关闭了TCP端口转发，所以需要修改 :ref:`alpine_docker_image` 运行容器的 ``/etc/ssh/sshd_config`` ，设置
+
+.. literalinclude:: vscode_remote_dev_ssh/sshd_config
+   :caption: 调整 ``AllowTcpForwarding``
+
+然后重启容器，再次执行 remote ssh 连接服务器，就能够完成vscode远程开发环境初始化，并在安装不同语言插件之后进行开发。
+
 重启服务端
 ==============
 

@@ -17,8 +17,8 @@ RUN apt -y install nginx
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # add account "admin" and give sudo privilege
-RUN groupadd -g 505 admin
-RUN useradd -g 505 -u 505 -d /home/admin admin
+RUN groupadd -g 501 admin
+RUN useradd -g 501 -u 501 -d /home/admin admin
 RUN adduser admin sudo
 RUN echo "%sudo        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
 
