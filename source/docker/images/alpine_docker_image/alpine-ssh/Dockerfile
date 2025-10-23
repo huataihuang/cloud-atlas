@@ -22,7 +22,10 @@ RUN echo "%wheel        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
 RUN apk add --no-cache tzdata
 RUN ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
+# init sshd
 RUN ssh-keygen -A
+# alpine linux sshd default use password auth, empty password will lock account, change to disable password auth
+RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 
 # run service when container started - sshd
 EXPOSE 22:1122

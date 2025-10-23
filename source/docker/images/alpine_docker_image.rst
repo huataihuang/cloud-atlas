@@ -164,9 +164,59 @@ SSH服务 ``alpine-ssh``
 
    参考 :ref:`debian_tini_image` 配置 ``alpine-ssh`` 镜像
 
+- 使用 ``tini`` 进程管理器启动需要的服务 ``ssh`` ``cron`` :
+
 .. literalinclude:: alpine_docker_image/alpine-ssh/Dockerfile
+   :language: dockerfile
    :caption: 采用 ``tini`` 进程管理启动ssh服务
 
+- 构建镜像: 
+
+.. literalinclude:: alpine_docker_image/alpine-ssh/build_alpine-ssh_image
+   :language: bash
+   :caption: 构建包含tini和ssh的alpine linux镜像
+
+- 运行容器: 其中2个bind的卷是Lima提供的HOST物理主机目录
+
+.. literalinclude:: alpine_docker_image/alpine-ssh/run_alpine-ssh_container
+   :caption: 运行容器，挂载2个从HOST主机映射到Lima虚拟机的卷(这样可以直接访问HOST主机数据)
+
+这里挂载了host主机上提供的 ``secret`` 目录，包含了容器ssh登陆的公钥
+
+.. note::
+
+   这里我遇到一个比较奇怪的问题，alpine linux系统用户账号 ``admin`` 配置了ssh公钥之后，但是我使用密钥登陆总是失败。后来发现，在alipine linux中为该 ``admin`` 设置一个密码之后，立即就能够使用密钥登陆。就好像用户账号需要密码才能激活一样，这在其他发行版中没有遇到过。
+
+   原来 alpine linux 的发行版sshd默认配置和其他发行版不同，默认配置是 ``PasswordAuthentication yes`` ，此时如果账号没有设置密码，就是 ``lock`` 状态。解决方法是:
+
+   - 为账号设置密码
+   - 修订sshd为 ``PasswordAuthentication no`` 就能够ssh密钥登陆
+   - 强制 ``passwd -u [USER]`` 解锁/激活账号(但是账号存在无密码本地登陆风险)
+
+   详见 :ref:`ssh_key_account_not_set_password`
+
+开发环境 ``alpine-dev``
+==========================
+
+- ``alpine-dev`` 包含了安装常用工具和开发环境:
+
+.. literalinclude:: alpine_docker_image/alpine-dev/Dockerfile
+   :language: dockerfile
+   :caption: 包含常用工具和开发环境的alpine linux镜像Dockerfile
+
+.. note::
+
+   详细说明见 :ref:`container_debian-dev`
+
+- 构建镜像:
+
+.. literalinclude:: alpine_docker_image/alpine-dev/build_alpine-dev_image
+   :caption: 构建镜像
+
+- 运行容器:
+
+.. literalinclude:: alpine_docker_image/alpine-dev/run_alpine-dev_container
+   :caption: 运行容器
 
 参考
 =======

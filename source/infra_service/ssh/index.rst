@@ -8,6 +8,7 @@ ssh服务
    :maxdepth: 1
 
    ssh_key.rst
+   ssh_key_account_not_set_password.rst
    ssh_tunneling.rst
    ssh_tunneling_remote_port_forwarding.rst
    ssh_tunnel_gfw_autoproxy.rst

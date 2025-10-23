@@ -35,6 +35,7 @@ Alpine Linux
    alpine_docker.rst
    alpine_nfs.rst
    alpine_dev.rst
+   alpine_install_calibre.rst
 
 .. only::  subproject and html
 

@@ -25,9 +25,46 @@ apk软件仓库
 
 .. note::
 
-   根据 ``/etc/alpine-release`` 配置可以知道本机的版本，所以对应选择 ``v3.14``
+   根据 ``/etc/alpine-release`` 配置可以知道本机的版本，所以对应选择 ``v3.22`` (例如我现在2025年10月发行版)
 
    ``main`` 只包含基础软件包，很多软件包都位于 ``community`` ，例如 ``libvirt-daemon`` / ``docker`` 等虚拟化软件
+
+   通常大多数软件不需要激活 ``edge`` 分支，
+
+.. _alpine_upgrade_edge:
+
+alpine linux升级到滚动版本 ``edge`` 
+======================================
+
+有些软件包属于testing状态，没有包含在默认的 ``main`` 和 ``commnity`` 仓库中，例如 :ref:`alpine_install_calibre` 就会遇到报错:
+
+.. literalinclude:: alpine_apk/no_such_package
+   :caption: 安装软件包没有包含在仓库中报错
+
+`edge/testing仓库提供了 calibre软件包 <https://pkgs.alpinelinux.org/package/edge/testing/x86_64/calibre>`_ 
+
+升级到 ``edge`` 版本进行安装(我试了同时添加stable和edge的仓库，安装edge仓库中软件包虽然能安装成功，但是运行会报库文件无法找到错误):
+
+- 在 ``/etc/apk/repositories`` 修订成 ``edge/testing`` 仓库:
+
+.. literalinclude:: alpine_apk/repositories_edge
+   :caption: 在 ``/etc/apk/repositories`` 添加 ``edge/testing`` 仓库
+   :emphasize-lines: 4-6
+
+- 执行更新:
+
+.. literalinclude:: alpine_apk/update_upgrade
+   :caption: 一条命令完整更新alpine linux系统
+
+完成后提示如下:
+
+.. literalinclude:: alpine_apk/update_upgrade_output
+   :caption: 大版本升级提示
+
+- **正确步骤** 参考 https://alpinelinux.org/posts/2025-10-01-usr-merge.html 完成完成升级:
+
+.. literalinclude:: alpine_apk/upgrade_edge
+   :caption: 完整升级
 
 更新系统
 ==============
@@ -171,3 +208,4 @@ apk搜索软件包
 ========
 
 - `Alpine Linux package management <https://wiki.alpinelinux.org/wiki/Alpine_Linux_package_management>`_
+- `How to add a edge/testing package to Alpine Linux? <https://stackoverflow.com/questions/62218240/how-to-add-a-edge-testing-package-to-alpine-linux>`_

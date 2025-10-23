@@ -54,7 +54,9 @@ tini运行ssh ``debian-ssh-tini``
    :caption: 登陆容器检查卷挂载
    :emphasize-lines: 6,7
 
-开发环境 ``debian-dev``
+.. _container_debian-dev:
+
+容器化开发环境 ``debian-dev``
 ===============================
 
 在 ``debian-ssh-tini`` 基础上，增加开发工具包安装:
