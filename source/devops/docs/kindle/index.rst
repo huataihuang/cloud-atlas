@@ -9,6 +9,7 @@ Kindle在，书未老
 
    kindle_life.rst
    calibre_remove_drm.rst
+   calibre_ebook_translator.rst
    use_kindle_read_pdf.rst
    kindle_book_format.rst
    convert_doc_to_kindle.rst

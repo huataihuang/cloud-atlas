@@ -6,6 +6,11 @@ Kobo安装和使用koreader
 
 `koreader.rocks <https://koreader.rocks>`_ 提供了 `koreader releases <https://github.com/koreader/koreader/releases>`_ 适配不同设备，其中包括Kobo
 
+koreader
+===========
+
+``koreader`` 是一个功能非常多的跨平台阅读器软件，它甚至提供了ssh服务以允许用户通过scp复制电子书。
+
 安装
 ======
 
@@ -28,4 +33,4 @@ Kobo安装和使用koreader
 - `简体中文版的 KOReader用户指南 <https://koreader.rocks/user_guide/zh_Hans.html>`_
 - `reddit帖子: 帮忙安装 Koreader？ <https://www.reddit.com/r/kobo/comments/1gksgdr/help_installing_koreader/?tl=zh-hans>`_ 提供了有效的信息: `Alternative Manual Installation Method based on NickelMenu <https://github.com/koreader/koreader/wiki/Installation-on-Kobo-devices#alternative-manual-installation-method-based-on-nickelmenu>`_
 - `Kobo Libra 2 + KOReader 装机与使用 <https://blog.loikein.one/posts/2023-05-20-kobo-libra-2-koreader/>`_
-- **请不要使用** 中文版 `Kobo的KOReader安装教程 <https://github.com/koreader/koreader/wiki/%E5%A6%82%E4%BD%95%E5%9C%A8Kobo%E4%B8%8A%E5%AE%89%E8%A3%85KOReader>`_ ，中文版已经严重过时，我当时没有了解到这个问题，按照中文版进行导致安装失败，不得已恢复出厂设置重新开始
+- 中文版 `Kobo的KOReader安装教程 <https://github.com/koreader/koreader/wiki/%E5%A6%82%E4%BD%95%E5%9C%A8Kobo%E4%B8%8A%E5%AE%89%E8%A3%85KOReader>`_ 落后于英文wiki谨慎参考，以英文版为准:我当时没有了解到这个问题，按照中文版进行导致安装失败，不得已恢复出厂设置重新开始

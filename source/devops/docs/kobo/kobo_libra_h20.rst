@@ -31,6 +31,13 @@ Kobo Libra H2O上市时售价169.99美金，比Kobo Forma(8英寸)的280美金�
 - Kobo支持阅读界面左侧通过手指上下滑动调节亮度，比 :ref:`kindle` 方便
 - 支持色温调节，并且可以根据时间自动调节
 
+.. note::
+
+   在使用 Calibre 电子书管理软件时，有一个选择电子书设备列表配置，有两种选项:
+
+   - Kobo Vox, Aura and Glo Families: Kobo Libra H20 看起来是属于这类(参考 `Welcome to Calibre: What device family is the Kobo libra H2O? <https://www.reddit.com/r/kobo/comments/p51jpz/welcome_to_calibre_what_device_family_is_the_kobo/>`_ 信源是 `wikipedia: Kobo eReader <https://en.wikipedia.org/wiki/Kobo_eReader>`_ Kobo touch 是最早3代2011年产品，而Libra H20算是2019年出品比较新的)
+   - Kobo and Kobo touch readers
+
 使用体验
 ============
 

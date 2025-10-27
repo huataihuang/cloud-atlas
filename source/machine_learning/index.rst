@@ -35,6 +35,7 @@ Machine Learning
    qwen/index
    comfyui/index
    freebsd/index
+   apple_silicon/index
 
 .. only::  subproject and html
 
