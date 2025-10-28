@@ -26,6 +26,7 @@ Open your mind
    learn_english.rst
    english_news.rst
    publicbook.rst
+   ebook_translate.rst
 
 .. only::  subproject and html
 
