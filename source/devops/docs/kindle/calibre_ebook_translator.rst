@@ -6,7 +6,7 @@ Calibre Ebook Translator插件
 
 **强烈安利** `Ebook-Translator-Calibre-Plugin <https://github.com/bookfere/Ebook-Translator-Calibre-Plugin>`_ ，一款Calibre电子书翻译插件!!!
 
-一直依赖，受困于中国文化审查，大陆出版的书籍往往是阉割版，甚至是扭曲版。对于像我这样英语水平有限，直接阅读原版电子书比较吃力，又不甘心浪费时间看国内翻译版本，就需要有一个能够自由翻译的工具软件。
+一直以来，受困于中国文化审查，大陆出版的书籍往往是阉割版，甚至是扭曲版。对于像我这样英语水平有限，直接阅读原版电子书比较吃力，又不甘心浪费时间看国内翻译版本，就需要有一个能够自由翻译的工具软件。
 
 `Ebook-Translator-Calibre-Plugin <https://github.com/bookfere/Ebook-Translator-Calibre-Plugin>`_ 作为开源Calibre插件，能够借助 Goole Translator 或者 DeepL 等免费引擎，甚至收费的ChatGPT引擎来完成电子书翻译。只要翻译引擎支持的语言都能实现电子书全文翻译。
 
@@ -16,10 +16,28 @@ Calibre Ebook Translator插件
 - 从 `GitHub: bookfere/Ebook-Translator-Calibre-Plugin <https://github.com/bookfere/Ebook-Translator-Calibre-Plugin>`_ 下载最新的RELEASE版本，下载的文件是一个 ``Ebook-Translator-Calibre-Plugin_v2.4.1.zip`` 压缩文件，不需要解压缩
 
 - 启动 Calibre ，然后选择菜单 ``Calibre > Preferences``
-- 点击 ``Plugins`` 按钮，然后点击 ``Load plugin from file`` 完成安装
-- 设置:
+- 点击 ``Plugins`` 按钮，然后点击右下角 ``Load plugin from file`` ，在文件选择对话框中选择刚才下载的 ``Ebook-Translator-Calibre-Plugin_v2.4.1.zip`` ，然后点击 ``Open`` 完成安装
 
-  - 需要设置翻墙代理，否则无法连接Google Translate
+.. figure:: ../../../_static/devops/docs/kindle/epub-translator_preferences_plugin.png
+
+.. figure:: ../../../_static/devops/docs/kindle/epub-translator_preferences_plugin_from_file.png
+
+设置
+=====
+
+- 需要设置翻墙代理，否则无法连接Google Translate( ``Translate Book按钮下拉菜单选Setting`` => ``HTTP Proxy`` )
+
+.. figure:: ../../../_static/devops/docs/kindle/epub-translator_setting.png
+
+.. figure:: ../../../_static/devops/docs/kindle/epub-translator_setting_proxy.png
+
+- 在设置中有一个 ``Engine`` 面板可以调整翻译的目标语言( ``Target Language`` )，对于大陆用户选择 ``Chinese(Simplified)`` 可以免去每次翻译epub电子书重新选择语言；此外，选择 ``Google`` 作为翻译引擎( ``Translation Engine`` )也是不错的选择，免费且实用:
+
+.. figure:: ../../../_static/devops/docs/kindle/epub-translator_setting_engine.png
+
+- 设置中 ``Content`` 面板可以调整翻译后内容是 "中英文对照" ( ``Below original`` ) 还是 "完全中文" ( ``With no original`` )，可以按需选择。例如，我只想获得完整翻译的中文书籍，那么就选择 ``With no original`` )
+
+.. figure:: ../../../_static/devops/docs/kindle/epub-translator_setting_content.png
 
 使用
 =======
@@ -37,3 +55,7 @@ Calibre Ebook Translator插件
 
 .. figure:: ../../../_static/devops/docs/kindle/epub-translator_example.png
 
+参考
+======
+
+- `Ebook Translator官网 <https://translator.bookfere.com/>`_
