@@ -21,6 +21,23 @@ wpa_supplicant
 
    ip link set wlan0 up
 
+我在 :ref:`mba11_late_2010` 上遇到报错:
+
+.. literalinclude:: alpine_wireless/ip_link_up_error
+   :caption: 执行激活wlan0报错
+
+实际上此时通过 ``ifconfig -a`` 是能够看到 ``wlan0`` 接口的，但是为何无法激活呢？
+
+检查 ``dmesg`` 日志可以看到是加载 ``firmware`` 错误:
+
+.. literalinclude:: alpine_wireless/brcm_firmware_error
+   :caption: 无线网卡 ``wlan0`` 无法激活的原因是系统没有安装 ``brcm`` firmware
+
+解决方法很简单，补充安装 ``linux-firmware-brcm`` :
+
+.. literalinclude:: alpine_wireless/install_brcm_firmware
+   :caption: 安装broadcom无线网卡firmware
+
 - 使用以下命令添加Wi-Fi网络到 ``wpa_supplicant`` ::
 
    wpa_passphrase 'ExampleWifiSSID' 'ExampleWifiPassword' > /etc/wpa_supplicant/wpa_supplicant.conf
