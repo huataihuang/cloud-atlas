@@ -1,12 +1,19 @@
-.. _alpine_wireless_broadcom:
+.. _alpine_wireless_broadcom-wl:
 
-================================
-设置Alpine Linux无线(Broadcom)
-================================
+=======================================
+设置Alpine Linux无线: ``broadcom-wl``
+=======================================
 
 .. note::
 
-   首次在Macbook Pro上安装Alpine Linux时，默认系统没有识别出Broadcom无线网卡，非常折腾的一次配置，暂时没有解决。不过，我在 :ref:`pi_3` 上安装Alpine Linux非常顺利能够识别无线网卡，所以配置无线记录在 :ref:`alpine_wireless` 
+   在 :ref:`mbp15_late_2013` 和 :ref:`mba13_early_2014` 上安装Alpine Linux时，默认系统没有识别出Broadcom无线网卡:
+
+   - Broadcom ``BCM4360`` 使用 **wl** 芯片，需要使用 ``broadcom-wl`` 驱动，该驱动是non-free，默认没有包含在仓库中
+   - 需要使用源代码自行编译 ``broadcom-wl`` 驱动来安装
+
+   本文重点记录如何在Alpine Linux编译 ``broadcom-wl`` 驱动来支持 Broadcom ``BCM4360``
+
+   :ref:`pi_3` 上安装Alpine Linux非常顺利能够识别无线网卡，所以配置无线记录在 :ref:`alpine_wireless`
 
 - 安装pciutils::
 
@@ -19,6 +26,72 @@
 显示::
 
    03:00.0 Network controller: Broadcom Inc. and subsidiaries BCM4360 802.11ac Wireless Network Adapter (rev 03)
+
+**wl** 驱动编译
+==================
+
+- 安装编译环境:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/build_env
+   :caption: 安装编译环境
+
+- 下载驱动源代码仓库:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/clone_wl_source
+   :caption: 下载 ``broadcom-wl`` 源代码
+
+- 编译安装:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/build_wl_source
+   :caption: 编译 ``broadcom-wl``
+
+问题排查
+-----------
+
+我在执行 ``make`` 时遇到报错:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/unaligned.h_not_found
+   :caption: 缺少 ``asm/unaligned.h``
+   :emphasize-lines: 7
+
+我检查了 ``linux-headers`` 包含了 :
+
+.. literalinclude:: alpine_wireless_broadcom-wl/unaligned.h_src
+   :caption: 内核头文件 unaligned.
+
+google AI提示是较新的内核更改了头文件位置，从 ``asm/unaligned.h`` 移动到了 ``linux/unaligned.h`` ，所以修改 ``src/wl/sys/wl_linux.c`` 然后重新编译即可
+
+但是我发现重启操作系统，并且确认 ``lsmod | grep wl`` 已经看到了如下内核加载:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/lsmod_wl
+   :caption: 内核模块加载
+
+检查系统日志 ``dmesg`` :
+
+.. literalinclude:: alpine_wireless_broadcom-wl/dmesg_wifi
+   :caption: 检查系统日志
+   :emphasize-lines: 2,3
+
+奇怪，怎么针对 ``BCM4360`` 加载了 ``b43`` 驱动?加载失败
+
+尝试修改 ``/etc/modprobe.d/blacklist.conf`` 添加阻断 ``b43`` :
+
+.. literalinclude:: alpine_wireless_broadcom-wl/blacklist.conf
+   :caption: 阻断 ``b43`` 加载
+
+但是重启后还是没有识别出 ``wlan0`` 
+
+检查 ``dmesg`` 日志，甚至没有看到 ``broadcom`` 相关信息
+
+我发现一个奇怪的现象， ``lspci`` 显示 ``BCM4360`` 加载的内核模块是 ``bcma-pci-bridge`` :
+
+.. literalinclude:: alpine_wireless_broadcom-wl/lspci_bcm4360
+   :caption: 使用 ``lspci -vv -s 03:00.0`` 显示 ``BCM4360`` 使用的驱动是 ``bcma-pci-bridge``
+   :emphasize-lines: 7
+
+
+无线安装配置
+=============
 
 - 安装无线配置软件::
 
@@ -111,6 +184,7 @@
 参考
 ========
 
+- `Alpine Linux wiki: Wi-Fi <https://wiki.alpinelinux.org/wiki/Wi-Fi>`_
 - `Connecting to a wireless access point <https://wiki.alpinelinux.org/wiki/Connecting_to_a_wireless_access_point>`_
 - `Broadcom wireless package installation <https://dev.alpinelinux.org/~clandmeter/other/forum.alpinelinux.org/forum/networking/broadcom-wireless-package-installation.html>`_
 - `Alpine Linux: Raspberry Pi <https://wiki.alpinelinux.org/wiki/Raspberry_Pi>`_

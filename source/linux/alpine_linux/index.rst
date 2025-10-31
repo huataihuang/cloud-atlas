@@ -24,7 +24,7 @@ Alpine Linux
    alpine_static_ip.rst
    alpine_setup_disk.rst
    alpine_wireless.rst
-   alpine_wireless_broadcom.rst
+   alpine_wireless_broadcom-wl.rst
    alpine_extended.rst
    alpine_apk.rst
    alpine_ssh_docker.rst
