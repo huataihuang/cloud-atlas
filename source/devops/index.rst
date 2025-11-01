@@ -16,6 +16,8 @@ DevOps
    terraform/index
    heroku/index
    ansible/index
+   ostree/index
+   nix/index
    jsonnet/index
    airflow/index
    checkov/index

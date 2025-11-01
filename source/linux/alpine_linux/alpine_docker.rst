@@ -7,9 +7,10 @@ Alpine Linux运行Docker
 安装
 ======
 
-- 使用 :ref:`alpine_apk` 添加 ``Community`` 仓库，然后执行以下命令安装docker ::
+- 使用 :ref:`alpine_apk` 添加 ``Community`` 仓库，然后执行以下命令安装docker :
 
-   apk add docker
+.. literalinclude:: alpine_docker/install_docker
+   :caption: 安装docker
 
 - 将自己的账号加入到 ``docker`` 组::
 

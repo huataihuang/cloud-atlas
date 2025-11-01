@@ -11,17 +11,20 @@ foot支持CJK，也就是支持中文，但是由于 :ref:`wayland` 对输入法
 配置
 =======
 
-``foot`` 会加载位于 ``$XDG_CONFIG_HOME/foot/foot.ini``` 配置文件(默认就是 ``RHOME/.config/foot/foot.ini`` )。一般是将模板配置文件从 ``/etc/xdg/foot/foot.ini`` 复制过来进行修改，修订的配置项会覆盖默认配置而达到修改目标。
+``foot`` 会加载位于 ``$XDG_CONFIG_HOME/foot/foot.ini``` 配置文件(默认就是 ``$HOME/.config/foot/foot.ini`` )。一般是将模板配置文件从 ``/etc/xdg/foot/foot.ini`` 复制过来进行修改，修订的配置项会覆盖默认配置而达到修改目标。
 
 终端类型
 =============
 
-如果没有配置 ``foot.init`` ，那么在默认终端配置实际上就是 ``TERM=foot`` ，但是这个终端类型不被很多终端模拟程序支持，例如使用 :ref:`tmux` 时，就会提示报错:
+解决方法一
+-------------
+
+如果没有配置 ``foot.ini`` ，那么在默认终端配置实际上就是 ``TERM=foot`` ，但是这个终端类型不被很多终端模拟程序支持，例如远程ssh到其他服务器上使用 :ref:`tmux` 时，就会提示报错:
 
 .. literalinclude:: foot/unsuitable_terminal_err
    :caption: 对于 ``foot`` 终端类型，没有得到 :ref:`tmux` 支持而报错
 
-解决方法就是修订 ``RHOME/.config/foot/foot.ini`` :
+解决方法就是修订 ``$HOME/.config/foot/foot.ini`` :
 
 .. literalinclude:: foot/foot.ini
    :caption: 配置 ``foot.ini`` 设置终端类型 ``xterm-256color``
@@ -38,7 +41,13 @@ foot支持CJK，也就是支持中文，但是由于 :ref:`wayland` 对输入法
 
    默认 ``foot`` 运行是为每个窗口启动一个foot进程(非daemon模式)
 
+解决方法二
+--------------
+
+既然是远程服务器上缺少 ``foot`` 对应的 ``terminfo`` ，那么将本地安装了 ``foot`` 的主机上的对应terminfo复制到远程服务器上也能解决这个问题: 本地安装了 ``foot`` 时有一个 ``/usr/share/terminfo/f/foot`` 终端信息文件，复制为远程服务器的 ``~/.terminfo/f/foot`` 就能够让远程服务器识别 ``foot`` 类型终端。注意目录结构是 ``terminfo/f/`` !
+
 参考
 ======
 
 - `archlinux wiki: Foot <https://wiki.archlinux.org/title/Foot>`_
+- `Things break after I ssh into a remote machine <https://codeberg.org/dnkl/foot/wiki#user-content-things-break-after-i-ssh-into-a-remote-machine>`_

@@ -106,19 +106,27 @@ alpine linux 提供了一个结合使用 ``eudev`` 和 ``elogind`` 的自动化S
    :language: bash
    :caption: 设置 ``$XDG_RUNTIME_DIR`` 环境变量
 
+sway配置
+===============
+
 - 安装一些辅助工具:
 
 .. literalinclude:: alpine_sway/install_sway_utils
    :caption: 安装 sway 桌面 工具
 
-配置
---------
+- 复制配置以便定制:
 
 .. literalinclude:: alpine_sway/cp_config
    :caption: 复制配置文件
 
+- 激活touchpad支持(对于Macbook非常有用，参考 :ref:`archlinux_sway` )
+
+.. literalinclude:: ../arch_linux/archlinux_sway/config_touchpad
+   :language: bash
+   :caption: sway配置touchpad
+
 PipeWire配置
-~~~~~~~~~~~~~
+----------------
 
 Sway compositor 不参与音频播放，并且屏幕共享功能需要 PipeWire，所以为了实现音频播放，建议同时安装PipeWire。Alpine Linux v3.22版本开始，提供了脚本可以在OpenRC中将PipeWire作为用户服务启动。
 
@@ -206,7 +214,7 @@ alpine linux 提供了2个 ``Noto Sans CJK（思源黑体）`` 字体软件包: 
    :caption: 在 ~/.config/sway/config 中 **最后** 添加运行 fcitx5 的配置
 
 rime候选字框
-===============
+------------------
 
 我遇到一个问题是虽然安装了 ``fcitx-gtk3`` ，已经看到状态栏显示了 ``rime`` 图标，并且按下 ``ctrl+space`` 也确实看到了 ``en`` 和 ``rime图标`` 来回切换，但是就是不出现候选字符框
 
@@ -226,7 +234,11 @@ rime候选字框
 
    经过尝试，我发现在 alpine linux 中安装 ``rime-plum-data`` 就相当于 arch linux 中安装 ``librime-data`` 软件包(根据arch linux wiki说明，该元软件包是librime的依赖项，会随之安装输入方案)
 
+桌面应用
+============
 
+- :ref:`firefox` 建议安装一些插件
+- 默认音频是mute的，需要安装 ``alsa-utils`` 工具来调整音量( :ref:`archlinux_alsa` )
 
 参考
 ======

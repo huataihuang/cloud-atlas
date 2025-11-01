@@ -1,16 +1,14 @@
-.. _podman:
+.. _nixos:
 
 =================================
-podman
+NixOS
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   intro_podman.rst
-   ../../linux/alpine_linux/alpine_podman.rst
-   buildah.rst
-   skopeo.rst
+   intro_nixos.rst
+   nixpkgs.rst
 
 .. only::  subproject and html
 

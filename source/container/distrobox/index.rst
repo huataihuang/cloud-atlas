@@ -1,16 +1,14 @@
-.. _podman:
+.. _distrobox:
 
 =================================
-podman
+distrobox
 =================================
 
 .. toctree::
    :maxdepth: 2
 
-   intro_podman.rst
-   ../../linux/alpine_linux/alpine_podman.rst
-   buildah.rst
-   skopeo.rst
+   intro_distrobox.rst
+   ../../linux/alpine_linux/alpine_distrobox.rst
 
 .. only::  subproject and html
 

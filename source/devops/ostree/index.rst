@@ -1,16 +1,13 @@
-.. _podman:
+.. _ostree:
 
 =================================
-podman
+OSTree
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   intro_podman.rst
-   ../../linux/alpine_linux/alpine_podman.rst
-   buildah.rst
-   skopeo.rst
+   intro_ostree.rst
 
 .. only::  subproject and html
 

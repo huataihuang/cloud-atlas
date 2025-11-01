@@ -45,6 +45,11 @@
 .. literalinclude:: alpine_wireless_broadcom-wl/build_wl_source
    :caption: 编译 ``broadcom-wl``
 
+- **重要** 必须屏蔽掉冲突内核模块，否则系统会加载错误模块并导致 ``wlan0`` 不可见 
+
+.. literalinclude:: alpine_wireless_broadcom-wl/blacklist.conf_fixed
+   :caption: 修订 ``/etc/modprobe.d/blacklist.conf``
+
 问题排查
 -----------
 
@@ -89,6 +94,47 @@ google AI提示是较新的内核更改了头文件位置，从 ``asm/unaligned.
    :caption: 使用 ``lspci -vv -s 03:00.0`` 显示 ``BCM4360`` 使用的驱动是 ``bcma-pci-bridge``
    :emphasize-lines: 7
 
+- 补充安装firmware(似乎应该先安装?):
+
+.. literalinclude:: alpine_wireless_broadcom-wl/install_firmware
+   :caption: 安装firmware-brcm
+
+但是没有解决问题
+
+仔细看了一下 `GitHub: antoineco/broadcom-wl <https://github.com/antoineco/broadcom-wl>`_ ，原来 ``wl`` 模块和以下内核模块不兼容:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/incompatible_modules
+   :caption: 不兼容 ``wl`` 的冲突模块
+
+- 解决了: 修订 ``/etc/modprobe.d/blacklist.conf`` 添加:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/blacklist.conf_fixed
+   :caption: 修订 ``/etc/modprobe.d/blacklist.conf``
+
+然后重启系统就能够正常看到 ``wlan0`` 无线网卡了
+ 
+
+``akms`` 安装wl驱动(参考)
+===========================
+
+.. warning::
+
+   我尝试本段落在安装编译dkms时候没有成功，因为最终上文的手工编译安装 ``wl.ko`` 成功，所以放弃本段，仅记录参考
+
+`Broadcom wl driver for alpine linux <https://codeberg.org/NeYurii/broadcom-wl-alpine>`_ 采用了 ``akms`` 来编译安装apline linux的dkms
+
+- 按照 `Setting up the build environment on HDD <https://wiki.alpinelinux.org/wiki/Setting_up_the_build_environment_on_HDD>`_ 设置好编译环境
+- 获取代码仓库:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/git_broadcom-wl-alpine
+   :caption: 获取源代码
+
+- 编译软件包
+
+.. literalinclude:: alpine_wireless_broadcom-wl/abuild
+   :caption: 编译安装包
+
+- 编译后的软件包位于 ``~/packages`` 目录，通过 ``doas apk add ./broadcom-wl-6.30.223.271-r_.apk`` 安装，实际安装过程会有一个 ``dkms`` 内核编译，不过我的实践在ibianyi过程失败，遂放弃...
 
 无线安装配置
 =============
@@ -101,18 +147,22 @@ google AI提示是较新的内核更改了头文件位置，从 ``asm/unaligned.
 
    ip link
 
-安装firmware(可能)
+.. warning::
+
+   以下内容为早期探索，实际上是Broadcom ``b43`` 编译安装步骤，和 ``broadcom-wl`` 不同，仅供参考
+
+安装 ``b43`` firmware
 ======================
 
 .. note::
 
-   以前的经验是对于私有软件(驱动)需要安装对应的firmware
+   这段不需要了，因为 ``b43`` 源代码包含firmware部分，可以通过源代码安装firmware，见下文
 
 如果没有看到 ``wlan0`` 设备，则说明需要安装无线网卡的firmware::
 
    apk add linux-firmware
 
-`alpine linux linux-firmware <https://pkgs.alpinelinux.org/package/edge/main/x86/linux-firmware>`_ 包含了90+以上驱动fireware，其中就包含了 ``linux-firmware-brcm`` (但是我初步验证似乎没有成功，所以还是按照官方文档从源代码编译安装Broadcom firmware)
+`alpine linux linux-firmware <https://pkgs.alpinelinux.org/package/edge/main/x86/linux-firmware>`_ 包含了90+以上驱动fireware，其中就包含了 ``linux-firmware-brcm`` (我可能搞错firmware软件包了 ``linux-firmware-brcm`` 是用于比较陈旧的braodcom芯片，另外从源代码编译 ``broadcom-wl`` 驱动包会自动处理获取和安装需要的firmware)
 
 完整安装 ``linux-firmware`` 非常缓慢，所以建议只安装需要的firmware::
 
@@ -124,8 +174,8 @@ google AI提示是较新的内核更改了头文件位置，从 ``asm/unaligned.
 
 查看需要安装信息
 
-编译驱动
-===========
+编译b43驱动
+===============
 
 官方文档 `Connecting to a wireless access point <https://wiki.alpinelinux.org/wiki/Connecting_to_a_wireless_access_point>`_ 已经说明了Broadcom芯片需要手工编译安装驱动
 

@@ -1,16 +1,13 @@
-.. _podman:
+.. _toolbox:
 
 =================================
-podman
+Toolbox
 =================================
 
 .. toctree::
    :maxdepth: 2
 
-   intro_podman.rst
-   ../../linux/alpine_linux/alpine_podman.rst
-   buildah.rst
-   skopeo.rst
+   intro_toolbox.rst
 
 .. only::  subproject and html
 

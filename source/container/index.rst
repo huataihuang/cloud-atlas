@@ -10,6 +10,8 @@ Container
    podman/index
    colima/index
    linuxserver/index
+   distrobox/index
+   toolbox/index
 
 .. only::  subproject and html
 
