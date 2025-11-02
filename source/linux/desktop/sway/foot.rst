@@ -13,6 +13,35 @@ foot支持CJK，也就是支持中文，但是由于 :ref:`wayland` 对输入法
 
 ``foot`` 会加载位于 ``$XDG_CONFIG_HOME/foot/foot.ini``` 配置文件(默认就是 ``$HOME/.config/foot/foot.ini`` )。一般是将模板配置文件从 ``/etc/xdg/foot/foot.ini`` 复制过来进行修改，修订的配置项会覆盖默认配置而达到修改目标。
 
+配色
+------
+
+通过修改 ``foot.init`` 的 ``[colors]`` 段落可以定制foot终端配色。
+
+比较方便的方法是使用已经配置好的的配色themes，发行版可以能在 ``/usr/share/foot/themes`` 中提供了配色，就可以在 ``foot.init`` 中添加一段 ``[main]`` 来包含这个配色 theme :
+
+.. literalinclude:: foot/theme
+   :caption: 修订 ``~/.config/foot/foot.ini`` 设置配色
+
+我从 `GitHub: catppuccin/foot <https://github.com/catppuccin/foot>`_ 下载配色themes文件存放到 ``~/.config/foot/themes/`` 目录下，采用上述方法设置:
+
+.. literalinclude:: foot/theme_mocha
+   :caption: 修订 ``~/.config/foot/foot.ini`` 设置配色 ``catppuccin-mocha.ini``
+
+字体
+-----------
+
+默认终端字体是 ``font=monospace:size=8`` ，字体可能偏小，我调整为 ``9``
+
+此外，如果要实现中文字体更美观，可以选择:
+
+.. literalinclude:: foot/font
+   :caption: 字体设置
+
+字体名称是通过 ``fc-list`` 过滤找寻
+
+不过，我觉得 ``monospace`` 已经足够美观，特别是对于英文字体显示排版更为好看
+
 终端类型
 =============
 

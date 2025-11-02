@@ -25,22 +25,21 @@ snap软件包安装
 通过apt安装
 -------------
 
-- 官方提供了debian/ubuntu的x86_64软件安装源，首先准备依赖环境::
+- 官方提供了debian/ubuntu的x86_64软件安装源，首先安装签名证书:
 
-   sudo apt update
-   sudo apt install software-properties-common apt-transport-https wget
+.. literalinclude:: vscode_linux/sign_key
+   :caption: 在系统中添加微软仓库证书
 
-- 导入Microsoft GPG key::
 
-   wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add -
+- 添加VS Code软件仓库源:
 
-- 添加VS Code软件仓库源::
+.. literalinclude:: vscode_linux/repo
+   :caption: 添加软件仓库
 
-   sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
+- 安装Visual Studio Code软件包:
 
-- 安装Visual Studio Code软件包::
-
-   sudo apt install code
+.. literalinclude:: vscode_linux/install
+   :caption: 安装code
 
 RHEL/CentOS安装VS Code(x86)
 ==============================
@@ -79,3 +78,4 @@ ARM版本VS Code
 =========
 
 - `How to Install Visual Studio Code on Ubuntu 20.04 <https://linuxize.com/post/how-to-install-visual-studio-code-on-ubuntu-20-04/>`_
+- `Visual Studio Code on Linux <https://code.visualstudio.com/docs/setup/linux>`_

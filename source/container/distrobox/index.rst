@@ -1,7 +1,7 @@
 .. _distrobox:
 
 =================================
-distrobox
+Distrobox
 =================================
 
 .. toctree::
@@ -9,6 +9,10 @@ distrobox
 
    intro_distrobox.rst
    ../../linux/alpine_linux/alpine_distrobox.rst
+   distrobox_debian.rst
+   distrobox_alpine.rst
+   distrobox_vscode.rst
+   distrobox_swift.rst
 
 .. only::  subproject and html
 

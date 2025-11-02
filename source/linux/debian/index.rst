@@ -9,6 +9,7 @@ Debian
 
    debian_init.rst
    debian_init_vm.rst
+   debian_init_container.rst
    debian_programming.rst
    debian_alternatives.rst
    debian_downgrade_kernel.rst
