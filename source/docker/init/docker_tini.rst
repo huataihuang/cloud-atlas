@@ -118,9 +118,25 @@ WHY?
 
 上面我也提到了，如果不使用 ``bash`` 结束，我们也可以编译一个 ``pause`` 程序，请参考 `Void (Linux) distribution <https://voidlinux.org>`_ (一个完全独立的发行版)提供的工具集 `void-runit <https://github.com/void-linux/void-runit>`_ 中的 `pauese.c <https://github.com/void-linux/void-runit/blob/master/pause.c>`_
 
-
 构建Tini的多服务容器
-=======================
+========================
+
+使用Tini作为容器进程管理器的要点:
+
+- 使用脚本包装需要启动的服务进程
+- 程序要关闭 ``daemon`` 模式，然后使用 ``&`` 符号放到后台运行，这样进程管理 Tini 能够感知进程是否正常运行(或死亡)
+- 当任何一个进程退出(SIGLILL,SIGTERM等)，Tini会感知到进程退出
+- Tini会搜集子进程的退出状态并执行进程表中必要的清理，避免被杀死的进程进入zombie僵尸
+- 容器的默认配置是Tini在任何子进程终止时自动退出，由于Tini是PID 1，这会导致整个容器停止
+
+以下是 :ref:`distrobox_alpine` 的 Dockerfile，其中包含Tini包装脚本 ``/entrypoint.sh`` 案例:
+
+.. literalinclude:: ../../container/distrobox/distrobox_alpine/Dockerfile
+   :caption: 同时运行crond和ssh的容器(也可以启动更多程序，如nginx)
+   :emphasize-lines: 13-53
+
+构建Tini的多服务容器(旧方法，归档)
+====================================
 
 上面我们已经实现了一个在tini下启动sshd的方法，那么我们现在来构建多个服务
 
@@ -139,3 +155,4 @@ WHY?
 .. literalinclude:: docker_tini/Dockerfile.ssh_cron_bash
    :language: bash
    :caption: 将 entrypoint_ssh_cron_bash 脚本复制到容器内部作为 tini 调用的 /entrypoint.sh 脚本来启动多个服务
+

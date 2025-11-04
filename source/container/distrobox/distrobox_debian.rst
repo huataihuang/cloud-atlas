@@ -18,7 +18,10 @@ Disgrobox运行Debian
 安装运行debian容器
 ====================
 
+- 停止容器:
 
+.. literalinclude:: distrobox_debian/stop
+   :caption: 停止容器
 
 参考
 =======

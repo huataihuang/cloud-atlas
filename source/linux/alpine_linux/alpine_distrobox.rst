@@ -60,15 +60,25 @@ Alpine Linux运行Distrobox
    :emphasize-lines: 18
 
 ssh访问
-----------------
+====================
 
-在 :ref:`distrobox_debian` 容器中运行了一个 :ref:`ssh` 服务，但是要让外部能够访问需要创建容器时设置端口映射:
+在 :ref:`distrobox_debian` 容器中需要外部能够访问需要创建容器时设置端口映射:
 
 .. literalinclude:: alpine_distrobox/create_debian_ssh
-   :caption: 启动容器时添加端口映射以便能够访问ssh服务
+   :caption: 启动容器时添加端口映射以便能够访问ssh服务(只有创建容器时可以映射端口)
+
+.. note::
+
+   默认创建的 ``distrobox`` 容器内部有一个 ``sshd`` 进程，但是不是常规的 ``openssh-server`` ，似乎是一个 ssh agent::
+
+      nobody    2400  0.0  0.0   6736  3856 ?        S    Nov02   0:00 sshd: /usr/sbin/sshd [listener] 0 of 10-100 startups
+
+   没有监听端口22
+
+- 需要在容器内部安装 ``openssh-server`` : :ref:`distrobox_debian_ssh`
 
 异常排查
-=============
+--------------
 
 我在启用了端口映射 ``--publish 2222:22`` 之后:
 
@@ -93,7 +103,16 @@ ssh访问
 
 `Unable to access /dev/tty0 in a rootless container #18870 <https://github.com/containers/podman/discussions/18870>`_ 提到似乎rootless容器确实不能访问 ``/dev/tty*`` 
 
-我不确定为何会导致，准备重新开始再搞一次
+.. warning::
+
+   没有找到原因
+
+   睡了一觉，醒来重新创建::
+
+      distrobox rm debian-dev
+      distrobox create --name debian-dev --image debian-dev:latest --additional-flags "-p 2222:22"
+
+   居然就成功了
 
 容器目录
 =============

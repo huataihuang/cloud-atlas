@@ -27,15 +27,20 @@ Distrobox运行VS Code(基于debian容器)
 使用
 =======
 
-我最初以为我在 :ref:`debian` 容器中运行 :ref:`vscode` ，是一种远程开发模式，所有的编译环境是在 :ref:`debian` 容器中进行的。但是，实践发现，原来这个模式是一种网络图形模式，实际计算(编译)部分是在本地Host主机上。
+我发现在 ``distrobox`` 运行的容器中不太容易区分出是在容器中还是在Host主机中，这应该是 ``distrobox`` 的一个特性，即将容器无缝运行在Host主机上。表现的特征是在 ``distrobox enter`` 进入容器以后，执行 ``hostname`` 看到的依然是物理主机 ``hostname`` 。
 
-这带来一个问题，就是 :ref:`vscode` 相当于运行在Host主机上，所有的ToolChain是在 :ref:`alpine_linux` 主机上。那么，就需要在Host主机上安装开发环境才能正常工作，例如 :ref:`swift_on_linux` 是不能工作在 :ref:`alpine_linux` 。
+我在 VSCode 的 ``Terminal`` 中就遇到上述困惑，差点以为自己还在Host主机。
 
-有点绕...
+另外，在VSCode启动 ``Terminal`` 的SHELL不是 ``bash`` 而是 ``sh`` ，这和 ``distrobox enter`` 进入容器以后就能直接使用bash不一样。这导致在 ``Terminal`` 环境中不能直接 ``. ~/.profile`` 来激活 :ref:`swift` Toolchain。
 
-但是，我的目标是保持 :ref:`alpine_linux` Host 主机尽可能 "纯净" ，而开发环境全部在容器中运行，例如 :ref:`distrobox_debian` , :ref:`distrobox_alpine` 分别运行我的不同开发环境。
+我暂时采用的方法:
 
-所以，我需要采用 :ref:`vscode_remote_dev_ssh` 来实现这个架构
+- 使用 ``Ctrl+Shift+P or Cmd+Shift+P`` 打开Command Palette
+- 输入选择 ``Terminal: Select Default Profile``
+- 选择 ``bash``
+
+这样打开 ``Terminal`` 就是 ``bash`` (但是不知道为何 ``env | grep SHELL`` 还是显示 ``sh`` )，至少能够 ``. ~/.profile`` 不报错并成功激活 :ref:`swift` Toolchain。不过，我还是没有找到如何自动使用 ``~/.profile`` ，奇怪
+
 
 启用 ``distrobox`` 容器ssh访问
 ---------------------------------

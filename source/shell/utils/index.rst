@@ -28,6 +28,7 @@ Shell 实用工具
    update-alternatives.rst
    qrencode.rst
    lftp.rst
+   ss.rst
 
 .. only::  subproject and html
 
