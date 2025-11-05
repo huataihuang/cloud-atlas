@@ -49,6 +49,22 @@ rootless容器内 ``root`` 用户
 
 建议 ``rootless`` 容器采用服务使用 ``1024`` 以上端口，同时在 Host 主机上 ``-p <HOST_PORT>:<CONTAINER_PORT>`` 将容器内服务端口映射到Host主机，然后在Host主机上使用 :ref:`nginx_reverse_proxy` 对外提供服务。
 
+rootless容器用户uid/gid映射
+-----------------------------
+
+当我执行以下命令将Host主机 ``/home/admin`` 目录卷绑定到容器内部 ``/home/admin`` 以便实现类似 :ref:`distrobox` 默认将挂载Host主机用户目录。
+
+.. literalinclude:: alpine_podman/run
+   :caption: 执行标准 podman 运行镜像来实现 tini 启动多个服务，用户目录映射
+
+但是我发现 ``rootless`` 容器内部 ``/home/admin`` 属于 ``root`` 用户。我最初以为是 ``Dockerfile`` 中创建容器 ``admin`` 用户uid/gid和Host不一致导致的，修订 ``Dockerfile`` 确保创建容器的admin用户 ``uid/gid`` 和Host主机一致。但是发现启动 ``rootless`` 容器以后，容器内映射挂载的Host主机 ``/home/admin`` 依然是属于 ``root`` 用户的。
+
+要解决这个问题需要使用 ``--userns keep-id:uid=$uid,gid=$gid`` :
+
+.. literalinclude:: alpine_podman/run_keep-id
+   :caption: 通过 ``keep-id`` 来确保UID/GID映射
+   :emphasize-lines: 4,5
+
 获取socket
 ============
 

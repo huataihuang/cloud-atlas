@@ -2,6 +2,9 @@ FROM alpine:latest
 
 ENV container=docker
 
+ARG ADMIN_UID=1000
+ARG ADMIN_GID=1000
+
 RUN apk update && apk upgrade
 
 # tini process manager
@@ -9,7 +12,7 @@ RUN apk add --no-cache tini
 
 # tini entrypoint script: "here documents" / "here scripts"
 # Enable BuildKit: Ensure your Docker daemon is configured to use BuildKit, which is typically enabled by default in recent Docker versions. If not, you might need to set the DOCKER_BUILDKIT=1 environment variable when running docker build.
-RUN << 'EOF' > /entrypoint.sh
+RUN cat << 'EOF' > /entrypoint.sh
 #!/usr/bin/env ash
 set -e
 
@@ -60,7 +63,9 @@ RUN chmod +x /entrypoint.sh
 RUN apk add --no-cache openssh sudo bind-tools tmux
 
 # add account "admin" and give sudo privilege
-RUN adduser -u 501 -G wheel -h /home/admin -s /bin/sh -D admin
+# "admin" uid/gid same as host (alpine linux)
+RUN addgroup -g ${ADMIN_GID} admin
+RUN adduser -u ${ADMIN_UID} -G admin,wheel -h /home/admin -s /bin/sh -D admin
 RUN echo "%wheel        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
 
 # set TIMEZONE to Shanghai
@@ -92,7 +97,7 @@ RUN apk add nodejs-lts
 
 # Use Tini as the ENTRYPOINT and pass the wrapper script as its argument.
 # The `--` separates Tini arguments from the command to be executed.
-ENTRYPOINT ["/bin/bin/tini", "--", "/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
 
 # The CMD is empty because the entrypoint handles everything.
 CMD []
