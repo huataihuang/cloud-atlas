@@ -11,7 +11,7 @@ Distrobox环境容器中ssh服务
 
 在 :ref:`distrobox_alpine` 实践中，我尝试:
 
-.. literalinclude:: distrobox_alpine/run_alpine-dev_init-hooks
+.. literalinclude:: distrobox_alpine/create_alpine-dev_init-hooks
    :caption: 配置 ``--init-hooks "sudo rc-service sshd start"`` 尝试容器启动时启动ssh服务
    
 结果启动失败，检查 ``podman logs alpine-dev`` 显示ssh服务早已启动，重复执行启动ssh导致报错:
@@ -58,8 +58,8 @@ Distrobox环境容器中ssh服务
    :caption: 检查发现容器内部无法绑定 ``1024`` 以下端口
    :emphasize-lines: 2,6,24
 
-解决
---------
+解决方案(思路)
+---------------
 
 想到在部署 :ref:`alpine_podman` 时，选择采用 ``rootless`` 模式运行，是不是这个原因导致呢？
 
@@ -75,4 +75,61 @@ Distrobox环境容器中ssh服务
 
 - 另外在容器内部，虽然能够通过 ``--init-hooks`` 去执行 ``/usr/sbin/sshd -D &`` 命令，但是进行一旦挂掉，容器内部没有进程管理器是无法自动重启 ``sshd`` 服务的，所以我最后还是决定通过 ``tini`` 进程管理器来维护 ``sshd`` 服务
 
+调整容器内服务端口( ``1024以上`` )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+由于我考虑 :ref:`docker_tini` 管理容器内多进程可能更为优雅，所以我尝试采用 :ref:`here_document` 改进过的 ``Dockerfile`` :
+
+.. literalinclude:: ../../docker/init/docker_tini/Dockerfile
+   :caption: 采用 ``1122`` 端口来运行容器内 ``ssh`` 服务
+   :emphasize-lines: 75
+
+- 使用 :ref:`podman` 构建镜像:
+
+.. literalinclude:: ../../linux/alpine_linux/alpine_podman/build
+   :caption: 构建镜像
+
+- 创建通过 ``Dockerfile`` 构建镜像的容器:
+
+.. literalinclude:: distrobox_alpine/create_alpine-dev
+   :caption: 去除 ``init-hooks`` 参数，尝试通过 ``tini`` 启动容器中多个服务方式来运行 ``distrobox``
+
+- 创建成功后，执行以下命令来进入容器(运行容器):
+
+.. literalinclude:: distrobox_alpine/run
+   :caption: 进入容器
+
+但是发现容器内没有 ``sshd`` 进程，这是为什么？
+
+``distrobox`` 覆盖了 ``Dockerfile`` 的 ``ENTRYPOINT`` 和 ``CMD`` 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+原来 ``distrobox enter`` 不会执行 ``Dockerfile`` 中的 ``ENTRYPOINT`` ，因为 ``distrobox`` 的主要功能是提供一个交互的shell环境，通过 ``distrobox`` 内置的脚本和用户shell **覆盖镜像内的默认entrypoint和command** 来实现:
+
+- 轻量级容器环境: ``Distrobox`` 被设计成一个轻量级集成容器环境，就像一个常规的系统shell一样运行，而不是一个标准的面向应用的容器
+
+- 默认行为是shell: ``distrobox enter`` 默认命令进入容器时实际上是使用当前用户的shell( ``bash`` 或 ``zsh`` )
+
+  - 这也解释了为何我在 :ref:`distrobox_swift` 运行 :ref:`distrobox_vscode` 时始终没有执行容器内部 ``~/.profile`` 的原因
+
+- ``Distrobox`` 使用自己的 **entrypoint** : 当执行 ``distrobox create`` 创建distrobox容器时，一个名为 ``distrobox-init`` 的脚本被设置为容器的实际 ``entrypoint`` 。这个脚本处理所有必要的设置，例如安装缺失的依赖，设置用户uid/gid，并挂载Host主机的目录。当完成设置以后，就会加载用户shell或指定命令，完全 **bypass** 掉原生镜像中的 ``ENTRYPOINT`` 和 ``CMD``
+
+在 ``distrobox`` 初始化设置中执行定制脚本
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``distrobox create`` 阶段提供了 ``--init-hooks`` 或 ``--pre-init-hooks`` 来运行容器设置完成但还没有加载最终shell时可以运行的脚本。也就是说，可以在 ``--init-hooks`` 中指定运行 ``sshd`` :
+
+.. literalinclude:: distrobox_sshd/create_alpine-dev_init-hooks
+   :caption: 在 ``distrobox`` 中使用 ``--init-hooks`` 运行 ``sshd`` 服务
+
+通过上述方式构建的 ``distrobox`` 容器，使用 ``distrobox enter alpine-dev`` 检查，就可以看到容器内部运行了 ``sshd`` 服务，也就能够在Host主机通过 ``ssh localhost -p 1122`` 登录
+
+更好的方案
+============
+
+实际上 ``Distrobox`` 不适合作为标准容器来运行远程服务，而是作为桌面系统的补充，无缝运行一些需要在轻量级隔离环境中安装的桌面应用，特别是类似 :ref:`alpine_linux` ``musl`` 库无法正常运行的依赖 ``glibc`` 的应用。
+
+对于上述需要运行 ``sshd`` 服务，甚至多个应用服务的远程开发测试环境，实际上适合采用标准的 :ref:`podman` 或 :ref:`docker` 来 **run** ，这样就能够充分利用 :ref:`docker_tini` 进程管理器来运行和监视多个服务进程，并在服务进程退出时及时终止容器，符合标准 :ref:`container` 运行或 :ref:`kubernetes` 运行:
+
+.. literalinclude:: ../../linux/alpine_linux/alpine_podman/run
+   :caption: 通过标准 ``podman`` 运行镜像来实现 ``tini`` 启动多个服务

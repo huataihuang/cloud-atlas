@@ -28,7 +28,7 @@ Distrobox运行Alpine Linux
 
 - 准备 :ref:`alpine_docker_image` ``alpine-dev`` :
 
-.. literalinclude:: distrobox_alpine/Dockerfile
+.. literalinclude:: ../../docker/init/docker_tini/Dockerfile
    :caption: ``alpine-dev`` 镜像 Dockerfile
 
 - 构建镜像:
@@ -56,10 +56,15 @@ Distrobox运行Alpine Linux
 
    我参考 :ref:`distrobox_debian` 使用 ``--init-hook "sudo service ssh start"`` 来启动ssh服务，配置:
 
-   .. literalinclude:: distrobox_alpine/run_alpine-dev_init-hooks
+   .. literalinclude:: distrobox_alpine/create_alpine-dev_init-hooks
       :caption: 配置 ``--init-hooks "sudo rc-service sshd start"`` 尝试容器启动时启动ssh服务
       
-   结果启动失败
+   结果启动:
+
+   .. literalinclude:: distrobox_alpine/run
+      :caption: 运行容器
+
+   失败
 
    检查 ``podman logs alpine-dev`` 显示ssh服务早已启动，重复执行启动ssh导致报错:
 

@@ -42,6 +42,13 @@ Alpine Linux运行Podman
 .. literalinclude:: alpine_podman/admin_rootless
    :caption: 设置 ``admin`` 用户能够rootless运行podman
 
+rootless容器内 ``root`` 用户
+--------------------------------
+
+在 :ref:`distrobox_sshd` 实践中发现，当 ``podman`` 采用 ``rootless`` 模式运行容器时，在容器内部的 ``root`` 用户实际上并不等同于Host上root用户权限，无法在低于 ``1024`` 端口上启动服务。
+
+建议 ``rootless`` 容器采用服务使用 ``1024`` 以上端口，同时在 Host 主机上 ``-p <HOST_PORT>:<CONTAINER_PORT>`` 将容器内服务端口映射到Host主机，然后在Host主机上使用 :ref:`nginx_reverse_proxy` 对外提供服务。
+
 获取socket
 ============
 
@@ -51,6 +58,20 @@ Alpine Linux运行Podman
    :caption: 启动socket
 
 默认socket位于 ``/run/podman/podman.sock``
+
+构建镜像
+=============
+
+``podman`` 构建镜像和 :ref:`docker_images` 非常类似，甚至连命令也一样，在包含 ``Dockerfile`` 的目录中( 这里采用 :ref:`alpine_docker_image` 的 ``alpine-dev`` Dockerfile )，执行以下命令构建镜像:
+
+.. literalinclude:: alpine_podman/build
+   :caption: 构建镜像
+
+运行容器
+=============
+
+.. literalinclude:: alpine_podman/run
+   :caption: 运行容器
 
 共享目录
 ===========

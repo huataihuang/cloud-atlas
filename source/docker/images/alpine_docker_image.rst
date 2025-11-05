@@ -208,6 +208,12 @@ SSH服务 ``alpine-ssh``
 
    详细说明见 :ref:`container_debian-dev`
 
+上述 ``Dockerfile`` 使用的 ``entrypoint.sh`` 脚本还可以通过 :ref:`here_document` 方式结合到 ``Dockerfile`` 中，并且做了一些改进，更适合docker或 :ref:`kubernetes` 环境使用
+
+.. literalinclude:: ../init/docker_tini/Dockerfile
+   :caption: 同时运行crond和ssh的容器(也可以启动更多程序，如nginx)，改进包装脚本
+   :emphasize-lines: 13-53
+
 - 构建镜像:
 
 .. literalinclude:: alpine_docker_image/alpine-dev/build_alpine-dev_image
