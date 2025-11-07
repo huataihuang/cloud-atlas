@@ -80,9 +80,9 @@ Distrobox环境容器中ssh服务
 
 由于我考虑 :ref:`docker_tini` 管理容器内多进程可能更为优雅，所以我尝试采用 :ref:`here_document` 改进过的 ``Dockerfile`` :
 
-.. literalinclude:: ../../docker/init/docker_tini/Dockerfile
+.. literalinclude:: ../../docker/images/alpine_docker_image/alpine-dev/Dockerfile_podman
    :caption: 采用 ``1122`` 端口来运行容器内 ``ssh`` 服务
-   :emphasize-lines: 75
+   :emphasize-lines: 120
 
 - 使用 :ref:`podman` 构建镜像:
 

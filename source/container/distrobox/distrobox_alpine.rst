@@ -28,7 +28,7 @@ Distrobox运行Alpine Linux
 
 - 准备 :ref:`alpine_docker_image` ``alpine-dev`` :
 
-.. literalinclude:: ../../docker/init/docker_tini/Dockerfile
+.. literalinclude:: ../../docker/images/alpine_docker_image/alpine-dev/Dockerfile_podman
    :caption: ``alpine-dev`` 镜像 Dockerfile
 
 - 构建镜像:

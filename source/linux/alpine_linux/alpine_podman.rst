@@ -65,6 +65,10 @@ rootless容器用户uid/gid映射
    :caption: 通过 ``keep-id`` 来确保UID/GID映射
    :emphasize-lines: 4,5
 
+.. note::
+
+   更详细解决方案见 :ref:`podman_rootless_volumes`
+
 获取socket
 ============
 

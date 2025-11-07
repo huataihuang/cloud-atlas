@@ -34,6 +34,8 @@ Alpine Linux
    alpine_kvm.rst
    alpine_docker.rst
    alpine_podman.rst
+   alpine_ssh_syslog.rst
+   alpine_syslog.rst
    alpine_distrobox.rst
    alpine_nfs.rst
    alpine_dev.rst

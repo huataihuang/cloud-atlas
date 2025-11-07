@@ -131,9 +131,8 @@ WHY?
 
 以下是 :ref:`distrobox_alpine` 的 Dockerfile，其中包含Tini包装脚本 ``/entrypoint.sh`` 案例:
 
-.. literalinclude:: docker_tini/Dockerfile
+.. literalinclude:: ../images/alpine_docker_image/alpine-dev/Dockerfile_podman
    :caption: 同时运行crond和ssh的容器(也可以启动更多程序，如nginx)，改进包装脚本
-   :emphasize-lines: 13-53
 
 上述Dockerfile将原本单独的 ``/entrypoint.sh`` 脚本合并到Dockerfile中，采用 :ref:`here_document` 方式生成，不仅容易分发Dockerfile，也非常容易修订脚本。
 

@@ -208,11 +208,6 @@ SSH服务 ``alpine-ssh``
 
    详细说明见 :ref:`container_debian-dev`
 
-上述 ``Dockerfile`` 使用的 ``entrypoint.sh`` 脚本还可以通过 :ref:`here_document` 方式结合到 ``Dockerfile`` 中，并且做了一些改进，更适合docker或 :ref:`kubernetes` 环境使用
-
-.. literalinclude:: ../init/docker_tini/Dockerfile
-   :caption: 同时运行crond和ssh的容器(也可以启动更多程序，如nginx)，改进包装脚本
-   :emphasize-lines: 13-53
 
 - 构建镜像:
 
@@ -223,6 +218,30 @@ SSH服务 ``alpine-ssh``
 
 .. literalinclude:: alpine_docker_image/alpine-dev/run_alpine-dev_container
    :caption: 运行容器
+
+.. _alpine-dev_dockerfile:
+
+改进 ``alpine-dev``
+------------------------
+
+在学习实践 :ref:`distrobox` 、 :ref:`podman` 以及 :ref:`docker_tini` 时，我改进了上述 ``Dockerfile`` 来更加灵活地配置容器内用户目录以及启动多个由 ``tini`` 管理的进程:
+
+- ``entrypoint.sh`` 脚本通过 :ref:`here_document` 方式结合到 ``Dockerfile`` 中
+- 参考 :ref:`distrobox` 的用户目录映射方式，将Host主机的admin HOME目录映射进容器，并使用相同的 ``uid/gid``
+- 适应 :ref:`podman` rootless 无法运行低于 1024 端口服务的特性，将ssh服务调整到1122端口
+
+.. literalinclude:: alpine_docker_image/alpine-dev/Dockerfile_podman
+   :caption: 同时运行crond和ssh的容器(也可以启动更多程序，如nginx)，改进包装脚本
+
+- 构建镜像: 通过获取构建时当前用户的 ``uid/gid`` 来设置 ``podman build`` 的 ``Dockerfile`` 参数，这样能够实现动态构建指定 ``uid/gid`` :
+
+.. literalinclude:: alpine_docker_image/alpine-dev/Dockerfile_podman_build
+   :caption: 动态获取Host主机 **admin用户** ``uid/gid`` 来对应构建镜像中 **admin用户** ``uid/gid`` 
+
+- 运行容器: 当前Host主机 ``admin`` 用户目录会和容器内 ``admin`` 用户目录绑定映射，方便使用
+
+.. literalinclude:: alpine_docker_image/alpine-dev/Dockerfile_podman_run
+   :caption: 映射绑定 ``admin`` 用户目录
 
 参考
 =======

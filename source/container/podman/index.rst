@@ -9,6 +9,7 @@ podman
 
    intro_podman.rst
    ../../linux/alpine_linux/alpine_podman.rst
+   podman_rootless_volumes.rst
    buildah.rst
    skopeo.rst
 

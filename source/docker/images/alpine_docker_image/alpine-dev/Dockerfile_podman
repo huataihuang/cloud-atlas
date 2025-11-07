@@ -5,10 +5,35 @@ ENV container=docker
 ARG ADMIN_UID=1000
 ARG ADMIN_GID=1000
 
-RUN apk update && apk upgrade
+RUN cat << 'EOF' > /README
 
-# tini process manager
-RUN apk add --no-cache tini
+# How
+
+use docker or podman to build and run container, command syntax is same:
+
+- Host's admin HOME will bind to HOME in container, use Host's environment to set same uid/gid
+
+  - if not use HOME in Host, can use other secret directory to store admin's public key and bind to container's /home/admin/.ssh directory
+
+- ssh port change to 1122 because poeman rootless container cannot use port below 1024
+
+# BUILD
+
+podman build --build-arg ADMIN_UID=$(id -u) --build-arg ADMIN_GID=$(id -g) \
+        -t alpine-dev:latest .
+
+# RUN
+
+export uid=$(id -u)
+export gid=$(id -g)
+
+podman run -dt --name alpine-dev --hostname alpine-dev \
+     -p 1122:1122 \
+     -v /home/admin:/home/admin \
+     --user $uid:$gid \
+     --userns keep-id:uid=$uid,gid=$gid \
+     alpine-dev:latest
+EOF
 
 # tini entrypoint script: "here documents" / "here scripts"
 # Enable BuildKit: Ensure your Docker daemon is configured to use BuildKit, which is typically enabled by default in recent Docker versions. If not, you might need to set the DOCKER_BUILDKIT=1 environment variable when running docker build.
@@ -29,9 +54,14 @@ trap shutdown SIGTERM SIGINT
 
 # --- Start the services in the background ---
 
+# Start syslog (failed bind, now can't use)
+sudo syslogd -n &
+SYSLOGD_PID=$!
+echo "SYSLOGD started with PID $SYSLOGD_PID"
+
 # Start Crond 
 # Use the -f flag to run in the foreground (daemon off mode)
-/usr/sbin/crond -f &
+sudo /usr/sbin/crond -f &
 CRON_PID=$!
 echo "Cron started with PID $CRON_PID"
 
@@ -43,7 +73,8 @@ echo "Cron started with PID $CRON_PID"
 
 # Start SSHD
 # Use the -D flag to prevent forking into the background
-/usr/sbin/sshd -D -q &
+# only sshd daemon (without flags) logging through syslogd, so set "-E log_file"
+sudo /usr/sbin/sshd -D -E /var/log/sshd.log &
 SSHD_PID=$!
 echo "SSHD started with PID $SSHD_PID"
 
@@ -59,14 +90,21 @@ EOF
 
 RUN chmod +x /entrypoint.sh
 
+RUN apk update && apk upgrade
+
+# tini process manager
+RUN apk add --no-cache tini
+
 # Devops utilities
-RUN apk add --no-cache openssh sudo bind-tools tmux
+RUN apk add --no-cache openssh openssl sudo bind-tools tmux
 
 # add account "admin" and give sudo privilege
 # "admin" uid/gid same as host (alpine linux)
 RUN addgroup -g ${ADMIN_GID} admin
-RUN adduser -u ${ADMIN_UID} -G admin,wheel -h /home/admin -s /bin/sh -D admin
-RUN echo "%wheel        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
+RUN adduser -u ${ADMIN_UID} -G admin -h /home/admin -s /bin/sh -D admin
+RUN echo "%admin        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
+# account without password will be locked, so set admin's password randomly, only login through ssh
+RUN RANDOM_PASSWORD=$(openssl rand -base64 12 | head -c 16) && echo "admin:$RANDOM_PASSWORD" | chpasswd
 
 # set TIMEZONE to Shanghai
 RUN apk add --no-cache tzdata
@@ -74,26 +112,34 @@ RUN ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 # init sshd
 RUN ssh-keygen -A
+# speed connect
+RUN echo "UseDNS no" >> /etc/ssh/sshd_config
 # alpine linux sshd default use password auth, empty password will lock account, change to disable password auth
 RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 # podman rootless container can't use service port below 1024
 RUN echo "Port 1122" >> /etc/ssh/sshd_config
+# enable sshd logging
+RUN echo "SyslogFacility AUTH" >> /etc/ssh/sshd_config
+RUN echo "LogLevel INFO" >> /etc/ssh/sshd_config
+
+# config syslogd, split auth log
+RUN echo "auth,authpriv.* /var/log/auth.log" >> /etc/syslog.conf
 
 # developement
 RUN apk add build-base
 RUN apk add gdb strace
 RUN apk add go
 RUN apk add rust
-# nodejs选择LTS版本
+# nodejs choice LTS version
 RUN apk add nodejs-lts
 
 # run services when container started
-# 现在已经不能使用(早期docker版本可以) EXPOSE 22:1122
-# 定义输出多个端口使用 EXPOSE 22 80 443 8080 9000
-# 定义输出端口范围 EXPOSE 5000-5010
-# 定义输出端口范围及协议 EXPOSE 20000-20100/udp
+# NOW cannot use: EXPOSE 22:1122
+# define multiple ports: EXPOSE 22 80 443 8080 9000
+# define port range: EXPOSE 5000-5010 
+# define port range with udp protocol: EXPOSE 20000-20100/udp 
 
-# 对于开发环境可能在容器中使用不同服务端口，所以不定义 EXPOSE 则允许任意端口输出
+# to development environment, not define any ports for freely use
 
 # Use Tini as the ENTRYPOINT and pass the wrapper script as its argument.
 # The `--` separates Tini arguments from the command to be executed.
