@@ -37,4 +37,5 @@ Podman rootless容器的卷挂载
 参考
 =====
 
-- `How to debug issues with volumes mounted on rootless containers <https://www.redhat.com/en/blog/debug-rootless-podman-mounted-volumes>`_
+- `How to debug issues with volumes mounted on rootless containers <https://www.redhat.com/en/blog/debug-rootless-podman-mounted-volumes>`_ Red Hat官方博客关于rootless容器如何排查卷挂载的指南，我当时为了解决rootless容器内admin用户目录属主问题参考
+- `Podman Troubleshooting <https://github.com/containers/podman/blob/main/troubleshooting.md#34-passed-in-devices-or-files-cant-be-accessed-in-rootless-container-uidgid-mapping-problem>`_

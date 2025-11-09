@@ -75,6 +75,9 @@ foot支持CJK，也就是支持中文，但是由于 :ref:`wayland` 对输入法
 
 既然是远程服务器上缺少 ``foot`` 对应的 ``terminfo`` ，那么将本地安装了 ``foot`` 的主机上的对应terminfo复制到远程服务器上也能解决这个问题: 本地安装了 ``foot`` 时有一个 ``/usr/share/terminfo/f/foot`` 终端信息文件，复制为远程服务器的 ``~/.terminfo/f/foot`` 就能够让远程服务器识别 ``foot`` 类型终端。注意目录结构是 ``terminfo/f/`` !
 
+.. literalinclude:: foot/terminfo_foot
+   :caption: 复制foot的terminfo脚本
+
 参考
 ======
 

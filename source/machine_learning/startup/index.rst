@@ -14,6 +14,7 @@
    install_anaconda.rst
    install_conda.rst
    install_conda_freebsd.rst
+   install_ml_env_alpine.rst
    ml_python.rst
 
 .. only::  subproject and html

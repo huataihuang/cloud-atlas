@@ -2,8 +2,10 @@ FROM alpine:latest
 
 ENV container=docker
 
-ARG ADMIN_UID=1000
-ARG ADMIN_GID=1000
+ARG USER=admin
+ARG GROUP=admin
+ARG UID=1000
+ARG GID=1000
 
 RUN cat << 'EOF' > /README
 
@@ -96,15 +98,15 @@ RUN apk update && apk upgrade
 RUN apk add --no-cache tini
 
 # Devops utilities
-RUN apk add --no-cache openssh openssl sudo bind-tools tmux
+RUN apk add --no-cache openssh openssl sudo bind-tools tmux git
 
 # add account "admin" and give sudo privilege
 # "admin" uid/gid same as host (alpine linux)
-RUN addgroup -g ${ADMIN_GID} admin
-RUN adduser -u ${ADMIN_UID} -G admin -h /home/admin -s /bin/sh -D admin
-RUN echo "%admin        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
+RUN addgroup -g ${GID} ${USER}
+RUN adduser -u ${UID} -G ${GROUP} -h /home/${USER} -s /bin/sh -D ${USER}
+RUN echo "%${GROUP}        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
 # account without password will be locked, so set admin's password randomly, only login through ssh
-RUN RANDOM_PASSWORD=$(openssl rand -base64 12 | head -c 16) && echo "admin:$RANDOM_PASSWORD" | chpasswd
+RUN RANDOM_PASSWORD=$(openssl rand -base64 12 | head -c 16) && echo "${USER}:$RANDOM_PASSWORD" | chpasswd
 
 # set TIMEZONE to Shanghai
 RUN apk add --no-cache tzdata
@@ -112,6 +114,8 @@ RUN ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 # init sshd
 RUN ssh-keygen -A
+# vscode remote ssh need 'AllowTcpForwarding'
+RUN sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/g' /etc/ssh/sshd_config
 # speed connect
 RUN echo "UseDNS no" >> /etc/ssh/sshd_config
 # alpine linux sshd default use password auth, empty password will lock account, change to disable password auth
@@ -132,6 +136,23 @@ RUN apk add go
 RUN apk add rust
 # nodejs choice LTS version
 RUN apk add nodejs-lts
+
+# Python virtualenv
+USER ${USER}
+# machine learning environment
+RUN sh -c "cd /home/${USER} && python3 -m venv venv/ml"
+# Install NumPy, Matplotlib (Deep Learning from Scratch)
+RUN sh -c "source /home/${USER}/venv/ml/bin/activate && pip install --upgrade pip && pip install numpy matplotlib"
+
+# TensorFlow wheels built for glibc-based distros, so cannot install direct. Need compile from source. I will do it later...
+#RUN sh -c "source /home/${USER}/venv/ml/bin/activate && pip install --upgrade pip && pip install numpy scipy matplotlib scikit-learn tensorflow-cpu==2.20.0 pillow"
+
+# Sphinx doc environment
+RUN sh -c "cd /home/${USER} && python3 -m venv venv/sphinx"
+RUN sh -c "source /home/${USER}/venv/sphinx/bin/activate && pip install sphinx sphinx_rtd_theme sphinxnotes-strike sphinxcontrib-video sphinxcontrib-youtube myst-parser jieba"
+
+# run entrypoint.sh needs root
+USER root
 
 # run services when container started
 # NOW cannot use: EXPOSE 22:1122

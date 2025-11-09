@@ -22,6 +22,7 @@ ssh服务
    ssh_proxycommand.rst
    ssh_proxyjump.rst
    openssh_legacy_options.rst
+   ssh_enhance_setup.rst
    openssh_2fa.rst
    
 .. only::  subproject and html
