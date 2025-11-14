@@ -12,9 +12,15 @@ VNC服务器
 安装wayvnc
 ---------------
 
-- 我在 :ref:`asahi_linux` 上使用 :ref:`sway` ，安装方法和 :ref:`arch_linux` 相同::
+- 我在 :ref:`asahi_linux` 上使用 :ref:`sway` ，安装方法和 :ref:`arch_linux` 相同:
 
-   pacman -S wayvnc
+.. literalinclude:: wayland_vnc/arch_install_wayvnc
+   :caption: 在 Arch Linux上安装 ``wayvnc``
+
+- 在 :ref:`alpine_linux` 仓库也同样提供了 ``wayvnc`` ，通过 :ref:`alpine_apk` 安装:
+
+.. literalinclude:: wayland_vnc/alpine_install_wayvnc
+   :caption: 在 Alpine Linux 环境安装 ``wayvnc``
 
 启动
 --------
@@ -86,6 +92,9 @@ VNC客户端
 
 Wayland的VNC客户端可以采用 `wlvncc <https://github.com/any1/wlvncc>`_ 。WayVNC 0.5支持使用OpenH268 RFB协议扩展的H.264编码。
 
+源代码编译wlvncc
+--------------------
+
 - 编译依赖::
 
    GCC/clang
@@ -111,11 +120,25 @@ Wayland的VNC客户端可以采用 `wlvncc <https://github.com/any1/wlvncc>`_ �
 
 .. note::
 
-   使用体验: 能够访问和连接 :ref:`macos` 共享的桌面，但是中文输入法切换存在问题，即使我避开了Win键，看起来能够输入中文，但是用空格键确认会卡住。后续我再尝试一下RDP方式访问桌面程序看看能否解决。
-
-.. note::
-
    `waypipe <https://gitlab.freedesktop.org/mstoeckl/waypipe>`_ 实现了类似 ``ssh -X`` 的远程服务Wayland应用本地显示功能，有机会要实践一下，应该非常有用。
+
+发行版安装wlvncc
+-------------------
+
+- :ref:`alpine_linux` 仓库提供了 ``wlvncc`` :
+
+.. literalinclude:: wayland_vnc/alpine_install_wlvncc
+   :caption: Alpine Linux 安装 wlvncc
+
+使用
+-------
+
+我现在主力使用 :ref:`mba13_early_2014` 运行 :ref:`alpine_linux` 作为自己的移动工作电脑，远程访问 :ref:`macos` 来运行开发(甚至机器学习)，所以采用 ``wlvncc`` 来远程连接macOS的 ``screen sharing`` :
+
+- 远程服务器端的macOS屏幕分辨率需要按照本地客户端 :ref:`mba13_early_2014` 分辨率调整为 ``1440x900`` ，这样能够清晰平滑地使用远程桌面屏幕
+- 支持中文输入，也就是我在本地按下 ``ctrl+space`` 能够在远程服务器上启用中文输入进行输入，和本地的 :ref:`fcitx` 中文输入没有冲突，应该是键盘组合键被VNC优先捕捉传输给了远程macOS
+
+能够满足基本的远程开发工作，可以实现(虽然无法完全获得macOS touchpad体验)较好地进行iOS开发工作
 
 参考
 =======

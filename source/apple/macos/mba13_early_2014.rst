@@ -18,7 +18,7 @@ MacBook Air 13" Early 2014
 - 128GB PCIe-base flash storage(公司配置的是最低乞丐版)
 - 显卡: Intel HD Graphics 5000 显存 1.5GB
 
-  - 外接显示器最高分辨率 2560x1600
+  - 外接显示器最高分辨率 2560x1600(但是我实践发现能够驱动我的AOC 4K显示器)
 
 - 屏幕: 13.3-inch 分辨率1440x900
 
@@ -28,7 +28,7 @@ MacBook Air 13" Early 2014
 
 .. note::
 
-   为了能够让硬件充分发挥，我采用 :ref:`gentoo_linux` 来实现
+   为了能够让硬件充分发挥，我采用 :strike:`gentoo_linux` :ref:`alpine_linux` 来运行 :ref`sway` 桌面，尽可能选择轻量级应用，还是可以一战的。我主要将其作为类似 :ref:`chromeos` 的图形桌面，将大量计算任务安排到远程服务器上运行。
 
 参考
 ======

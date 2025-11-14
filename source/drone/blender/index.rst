@@ -1,15 +1,14 @@
-.. _drone:
+.. _blender:
 
 =================================
-Drone
+Blender
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   awesome_drones.rst
-   cad/index
-   blender/index
+   intro_blender.rst
+   alpine_blender.rst
 
 .. only::  subproject and html
 
