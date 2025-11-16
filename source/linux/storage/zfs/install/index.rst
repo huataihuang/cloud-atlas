@@ -12,6 +12,7 @@ ZFS安装
    archlinux_zfs-dkms_x86.rst
    archlinux_zfs-dkms_arm.rst
    archlinux_root_on_zfs.rst
+   alpine_zfs.rst
    fedora_zfs.rst
    ubuntu_zfs.rst
    raspberry_pi_os_zfs.rst

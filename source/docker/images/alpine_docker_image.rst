@@ -231,6 +231,7 @@ SSH服务 ``alpine-ssh``
 - 适应 :ref:`podman` rootless 无法运行低于 1024 端口服务的特性，将ssh服务调整到1122端口
 
 .. literalinclude:: alpine_docker_image/alpine-dev/Dockerfile_podman
+   :language: dockerfile
    :caption: 同时运行crond和ssh的容器(也可以启动更多程序，如nginx)，改进包装脚本
 
 - 构建镜像: 通过获取构建时当前用户的 ``uid/gid`` 来设置 ``podman build`` 的 ``Dockerfile`` 参数，这样能够实现动态构建指定 ``uid/gid`` :

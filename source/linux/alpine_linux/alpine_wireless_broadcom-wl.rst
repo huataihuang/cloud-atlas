@@ -147,6 +147,26 @@ google AI提示是较新的内核更改了头文件位置，从 ``asm/unaligned.
 
    ip link
 
+遗留问题
+----------
+
+源代码安装会执行 ``akms`` 配置，后续内核升级会自动出发 ``wl`` 内核模块编译，但是实践发现 ``akms`` 触发的内核模块编译会出错:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/akms_error
+   :caption: ``akms`` 编译 ``wl`` 内核模块报错
+
+这个 ``wlc_hybrid.o_shipped`` 是 Broadcom STA wireless driver软件包提供的私有文件，我发现我的系统中有2个位置包含了这个大约 ``7.0M`` 大小的文件:
+
+.. literalinclude:: alpine_wireless_broadcom-wl/wlc_hybrid.o_shipped
+   :caption: 系统中现有的 ``wlc_hybrid.o_shipped``
+
+而且 ``/home/admin/broadcom-wl/lib/`` 目录下就只有这一个文件和LICENSE.txt，所以我直接复制到缺乏文件的 ``akms`` 目录(该目录下没有 ``lib`` 目录):
+
+.. literalinclude:: alpine_wireless_broadcom-wl/cp_wlc_hybrid.o_shipped
+   :caption: 复制 ``wlc_hybrid.o_shipped``
+
+
+
 .. warning::
 
    以下内容为早期探索，实际上是Broadcom ``b43`` 编译安装步骤，和 ``broadcom-wl`` 不同，仅供参考
