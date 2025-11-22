@@ -36,7 +36,7 @@ LFS分区(和FreeBSD一起Dualboot)
 
 注意:
 
-  - ``efi`` 分区将是 FreeBSD 和 Linux 共用的FAT32分区
+  - ``efi`` 分区将是 **FreeBSD 和 Linux 共用的FAT32分区**
   - ``1.6T`` 的分区4 (freebsd-zfs) 是之前 :ref:`freebsd_zfs_stripe` 中的一个分区，该分区上的 ``zdata`` zpool我已经销毁，所以这个分区将删除重建，分别用于 :ref:`lfs` 以及重新构建一个 :ref:`freebsd_zfs_stripe` ``zdata``
   - ``diskid/DISK-54UA4072K7AS`` 也是 :ref:`freebsd_zfs_stripe` 构建的分区，后续将清理掉重新构建 :ref:`freebsd_zfs_stripe` ``zdata``
 
@@ -63,12 +63,15 @@ LFS分区(和FreeBSD一起Dualboot)
    :caption: 使用 gpart 再次检查磁盘分区，可以看到空白部分
    :emphasize-lines: 2,9
 
+创建分区(两块磁盘)
+----------------------
+
 - 在系统盘上创建一个 ``linux-data`` 类型的Linux分区256G，并将该系统盘剩余空间创建为zfs分区
 
 .. literalinclude:: lfs_partition_freebsd/gpart_add_partition
    :caption: 使用 gpart 创建一个 ``linux-data`` 和 ``freebsd-zfs`` 分区
 
-另一个数据磁盘则完整划分一个ZFS分区
+:strike:`另一个数据磁盘则完整划分一个ZFS分区` (下文我修订为只使用一块磁盘，即系统盘)
 
 .. literalinclude:: lfs_partition_freebsd/gpart_add_partition_zfs
    :caption: 使用 gpart 将数据盘完整划分为一个ZFS分区
@@ -84,8 +87,30 @@ LFS分区(和FreeBSD一起Dualboot)
    :caption: 使用 gpart 检查最终的分股情况
    :emphasize-lines: 3,11,12
 
+创建分区(一块磁盘)
+-----------------------
+
+我现在将一块数据盘撤掉，只剩下使用系统盘来构建存储，所以相当于上述步骤的一部分: 
+
+  - 在系统盘上创建一个 ``freebsd-ufs`` 类型的FreeBSD分区60G，用于 :ref:`vnet_thick_jail` (当时为了排查Jail问题)
+  - 在系统盘上创建一个 ``linux-data`` 类型的Linux分区200G
+  - 该系统盘剩余空间创建为zfs分区
+
+.. literalinclude:: lfs_partition_freebsd/gpart_add_partition_ufs_lfs_zfs
+   :caption: 使用 gpart 创建一个 ``freebsd-ufs`` , ``linux-data`` 和 ``freebsd-zfs`` 分区
+
+所以当前最终完成的分区:
+
+.. literalinclude:: lfs_partition_freebsd/gpart_add_partition_lfs_zfs
+   :caption: 使用 gpart 创建一个 ``freebsd-ufs`` , ``linux-data`` 和 ``freebsd-zfs`` 分区
+   :emphasize-lines: 6-8
+
+
 构建ZFS
 ==========
+
+两块NVMe磁盘构建
+-------------------
 
 上述2个NVMe磁盘的 ``1.3T`` 和 ``1.8T`` 分区，采用 :ref:`freebsd_zfs_stripe` 方式再次重建 ``zdata`` :
 
@@ -103,6 +128,15 @@ LFS分区(和FreeBSD一起Dualboot)
    :caption: zpool ``zdata`` 跨了2块磁盘
    :emphasize-lines: 3,4
 
+一块NVMe磁盘构建
+-------------------
+
+后期我为了能够将3块NVMe用于在 :ref:`raspberry_pi` 上构建 :ref:`ceph` ，所以将 :ref:`freebsd` 上2块NVMe构建的 ``zdata`` 再次拆除，然后仅仅用一块NVMe磁盘的 ``1.3T`` 分区来重新构建 ``zdata`` :
+
+.. literalinclude:: lfs_partition_freebsd/zpool_list_output_one
+   :caption: 单块NVMe ``zpool list -v`` 输出详情
+   :emphasize-lines: 2
+
 构建ZFS的dataset
 ------------------
 
@@ -116,3 +150,14 @@ LFS分区(和FreeBSD一起Dualboot)
 
 .. literalinclude:: lfs_partition_freebsd/restore_zdata
    :caption: 恢复 ``zdata`` 上数据集
+
+下一步
+==========
+
+通常我们会用一个常规安装的Linux( :ref:`debian` 或 :ref:`fedora` )来作为基础系统，安装变硬工具来完成LFS的编译构建。但是我不想这么简单，而是采用 :ref:`linux_jail_rocky-base` 来构建:
+
+- 服务器继续运行 :ref:`freebsd`
+- 通过 :ref:`freebsd_xfs` 为系统格式化和挂载好LFS目标构建分区
+- XFS挂载目录提供给 :ref:`linux_jail_rocky-base` ，就能够在Linux容器内部来构建新的LFS系统
+
+  - :ref:`linux_jail_xfs`
