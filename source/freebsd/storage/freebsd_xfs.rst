@@ -65,6 +65,16 @@ FreeBSD使用Linux XFS文件系统
 
 - 配置 :strike:`/etc/fstab` **没有找到如何在/etc/fstab中配置xfs以fuse方式挂载的方法**
 
+异常挂起
+----------
+
+我在配置了 :ref:`linux_jail_xfs` 之后发现一个奇怪的现象，一旦执行fuse挂载 
+
+.. literalinclude:: freebsd_xfs/fuse_mount
+   :caption: 使用 ``lklfuse`` 挂载XFS文件系统
+
+则访问 ``/lfs`` 目录会导致出现进程D住(所以也无法执行 ``df`` )，这让我非常困扰，所以我放弃了FUSE方式来使用Linux文件系统，而采用比较成熟的FreeBSD内核级别 :ref:`freebsd_ext4`
+
 下一步
 ========
 

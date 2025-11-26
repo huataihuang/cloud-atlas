@@ -6,14 +6,17 @@ LFS准备工作
 
 .. note::
 
-   中文社区翻译的LFS文档在2024年3月1日发布翻译版本12.2已经紧跟官方文档，非常方便实践，主要参考
+   中文社区翻译的LFS文档是我主要的参考:
+
+   - :strike:`2024年3月1日发布翻译版本12.2` (2024年9月实践) 
+   - 2025年9月1日发布的 ``版本 12.4-中文翻译版`` 是我2025年11月再次实践的参考
 
 .. note::
 
    LFS分为两个分支:
 
-   - `Linux From Scratch 版本 12.2-systemd-中文翻译版 发布于 2024 年 9 月 1 日 <https://lfs.xry111.site/zh_CN/12.2-systemd/>`_
-   - `Linux From Scratch 版本 12.2-中文翻译版 发布于 2024 年 9 月 1 日 <https://lfs.xry111.site/zh_CN/12.2/>`_
+   - `Linux From Scratch 版本 12.4-systemd-中文翻译版 发布于 2025 年 9 月 1 日 <https://lfs.xry111.site/zh_CN/12.4-systemd/>`_
+   - `Linux From Scratch 版本 12.4-中文翻译版 发布于 2025 年 9 月 1 日 <https://lfs.xry111.site/zh_CN/12.4/>`_
 
    考虑到我的底座系统是为了运行 :ref:`kvm` 和 :ref:`docker` ，没有复杂的主机服务，纯粹是运行环境，所以我目前采用 sysv 版本
 
@@ -30,7 +33,11 @@ LFS的目标架构是 AMD/Intel 的 x86(32位) 和 x86_64(64位) CPU (需要修�
 
 构建LFS至少需要一个现有的Linux系统:
 
-- 可以是一个已经正在运行的Linux系统，现代Linux发行版(需要较新版本，对内核有和工具链有要求)，我在 :ref:`lfs_mba` 中先安装一个 :ref:`arch_linux` 作为编译基础环境(同时也是向arch linux发行版学习软件组合和配置方法)
+- 可以是一个已经正在运行的Linux系统，现代Linux发行版(需要较新版本，对内核有和工具链有要求):
+
+  - 2024年9月实践我尝试 :ref:`lfs_mba` 中先安装一个 :ref:`arch_linux` 作为编译基础环境(同时也是向arch linux发行版学习软件组合和配置方法)，不过最终完整实现是在 :ref:`lfs_partition_optane` 环境的 :ref:`hpe_dl360_gen9` 通过 :ref:`ubuntu_linux` 来构建LFS
+  - 2025年11月实践我在 :ref:`linux_jail_rocky-base` 上通过 :ref:`linux_jail_ext` 来构建LFS
+
 - 也可以是某个发行版的LiveCD运行一个编译环境，例如我就使用 :ref:`fedora` 的一个LiveCD来完成，具体是通过 :ref:`create_vm` 运行Fedoraa LiveCD系统来编译构建
 
 32位 vs. 64位

@@ -160,4 +160,4 @@ LFS分区(和FreeBSD一起Dualboot)
 - 通过 :ref:`freebsd_xfs` 为系统格式化和挂载好LFS目标构建分区
 - XFS挂载目录提供给 :ref:`linux_jail_rocky-base` ，就能够在Linux容器内部来构建新的LFS系统
 
-  - :ref:`linux_jail_xfs`
+  - :ref:`linux_jail_xfs` **已完成**

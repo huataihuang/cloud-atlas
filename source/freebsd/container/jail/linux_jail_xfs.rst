@@ -12,6 +12,8 @@ Jail容器不是Linux虚拟机，实际上依然是FreeBSD系统，无法直接�
    :caption: 调整 ``/etc/jail.conf.d/lrdev.conf`` 增加Nullfs绑定 XFS fuse挂载目录
    :emphasize-lines: 22,23
 
+上述容器启动和停止时XFS目录挂载和卸载也可以改写成 
+
 而公共配置部分不需要调整，保留 ``/etc/jail.conf`` 不变:
 
 .. literalinclude:: vnet_thin_jail/jail.conf_common
@@ -33,3 +35,4 @@ Jail容器不是Linux虚拟机，实际上依然是FreeBSD系统，无法直接�
    :caption: 进入 ``lrdev`` 的Linux环境
 
 此时在容器内部就可以访问Host主机挂载的 :ref:`freebsd_xfs`
+

@@ -19,6 +19,7 @@ FreeBSD Jail
    linux_jail_ubuntu-base.rst
    linux_jail_rocky-base.rst
    linux_jail_xfs.rst
+   linux_jail_ext.rst
    linux_jail_nvidia_cuda.rst
    linux_jail_nvidia_cuda_rocky.rst
    linux_jail_archive.rst

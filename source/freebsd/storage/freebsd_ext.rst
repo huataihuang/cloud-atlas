@@ -26,7 +26,12 @@ FreeBSD在内核中集成了Linux EXT文件系统支持，但是需要注意:
    .. literalinclude:: freebsd_ext/install_e2fsprogs-core
       :caption: 安装 ``e2fsprogs-core`` 来支持EXT文件系统创建
 
-- 执行以下命令将已经创建好EXT4文件系统的 ``/dev/diskid/DISK-Y39B70RTK7ASp4`` 磁盘分区挂载:
+- 使用 ``e2fsprogs`` 工具进行分区格式化:
+
+.. literalinclude:: freebsd_ext/mkfs
+   :caption: 格式化分区ext4文件系统
+
+- 执行以下命令将已经创建好EXT4文件系统的 ``/dev/diskid/DISK-Y39B70RTK7ASp6`` 磁盘分区挂载:
 
 .. literalinclude:: freebsd_ext/mount
    :caption: 使用 ``ext2fs`` 驱动挂载EXT文件系统
@@ -41,6 +46,16 @@ FreeBSD在内核中集成了Linux EXT文件系统支持，但是需要注意:
       :caption: 当Host主机物理磁盘分区被虚拟机透传使用时，Host主机无法挂载该分区
 
    当然，只要停止使用该分区的虚拟机之后，就可以完成Host主机挂载EXT分区了
+
+- 配置 ``/etc/fstab`` 在操作系统启动时自动挂载
+
+.. literalinclude:: freebsd_ext/fstab
+   :caption: 自动挂载配置 ``/etc/fstab``
+
+- 配置操作系统启动时自动加载 ``ext2fs`` 内核模块，即在 ``/boot/loader.conf`` 中添加:
+
+.. literalinclude:: freebsd_ext/loader.conf
+   :caption: 配置启动时加载 ``ext2fs`` 内核模块
 
 参考
 ========
