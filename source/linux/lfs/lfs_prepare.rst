@@ -43,21 +43,24 @@ LFS的目标架构是 AMD/Intel 的 x86(32位) 和 x86_64(64位) CPU (需要修�
 32位 vs. 64位
 ----------------
 
-- LFS官方文档是构建纯粹的64位系统，也就是值运行64位可执行程序
-- 如果要构建 ``multi-lib`` 系统(同时支持32位和64位)则需要两次编译很多应用(考虑到现代硬件需要巨大的内存，远超4GB，所以我也按照官方文档构建 **纯粹64位系统** 以便获得一个精简的能够用于物理主机host底座的OS)
+- 在相同硬件上，64位系统比比32位稍快，但磁盘占用较大: 对应防火墙或小型VPS反而是使用32位CPU和软件较好
+- :ref:`blfs` 部分软件的构建或运行过程需要超过4GB内存，所以将LFS作为桌面系统是，LFS官方推荐构建64位系统
+- LFS官方文档是构建纯粹的64位系统，也就是只运行64位可执行程序
+- 如果要构建 ``multi-lib`` 系统(同时支持32位和64位)则需要两次编译很多应用，并且较为复杂: `Multilib Linux From Scratch <https://www.linuxfromscratch.org/~thomas/multilib/index.html>`_ 维护了LFS的multilib版本
+- 考虑到现代硬件需要巨大的内存，远超4GB，所以我也按照官方文档构建 **纯粹64位系统** 以便获得一个精简的能够用于物理主机host底座的OS)
 
 .. _lfs_wget:
 
 软件包选择
 =============
 
-**LFS的目标是构建一个完整且基本可用的系统** ，但是LFS并不是最小可用系统，因为LFS中有一些软件包并不是必须安装的(具体列表见 `LFS vi. 本书选择软件包的逻辑 <https://lfs.xry111.site/zh_CN/12.1/prologue/package-choices.html>`_ )
+**LFS的目标是构建一个完整且基本可用的系统** ，但是LFS并不是最小可用系统，因为LFS中有一些软件包并不是必须安装的(具体列表见 `LFS vi. 本书选择软件包的逻辑 <https://lfs.xry111.site/zh_CN/12.4/prologue/package-choices.html>`_ )
 
 勘误和安全公告
 ======================
 
-- `LFS 12.1 勘误表列出的所有修正项 <https://www.linuxfromscratch.org/lfs/errata/12.1/>`_
-- `LFS 12.1 手册发布后发现的安全缺陷列表 <https://www.linuxfromscratch.org/lfs/advisories/>`_ 请根据安全公告建议在构建过程中对相关操作进行修正
+- `LFS 12.4 勘误表列出的所有修正项 <https://www.linuxfromscratch.org/lfs/errata/12.4/>`_
+- `LFS 12.4 发布后发现的安全缺陷列表 <https://www.linuxfromscratch.org/lfs/advisories/>`_ 请根据安全公告建议在构建过程中对相关操作进行修正
 
   - **要将 LFS 系统实际用作桌面或服务器系统，那么即使在 LFS 系统构建完成后，也要继续关注安全公告并修复列出的所有安全缺陷**
 
@@ -67,7 +70,7 @@ LFS的目标架构是 AMD/Intel 的 x86(32位) 和 x86_64(64位) CPU (需要修�
 宿主机(也就是用来编译构建LFS的物理主机):
 
 - 建议至少4个CPU，内存8GB
-- `LFS 宿主系统需求 <https://lfs.xry111.site/zh_CN/12.1/chapter02/hostreqs.html>`_ 列出了基本软件包版本要求(大多数发行版都能满足)，并且提供了一个检查脚本
+- `LFS 宿主系统需求 <https://lfs.xry111.site/zh_CN/12.4/chapter02/hostreqs.html>`_ 列出了基本软件包版本要求(大多数发行版都能满足)，并且提供了一个检查脚本
 
 .. literalinclude:: lfs_prepare/version-check.sh
    :caption: 执行检查主机环境
@@ -87,6 +90,11 @@ LFS的目标架构是 AMD/Intel 的 x86(32位) 和 x86_64(64位) CPU (需要修�
 .. literalinclude:: lfs_prepare/yacc
    :caption: 设置yacc
    :language: bash
+
+此外，我在 :ref:`linux_jail_rocky-base` 容器环境中构建，有如下提示，我忽略掉::
+
+   OK:    Linux Kernel 5.15.0 >= 5.4
+   ERROR: Linux Kernel does NOT support UNIX 98 PTY
 
 分阶段构建LFS
 =====================
@@ -120,8 +128,8 @@ LFS对分区没有硬性规定，但是有一些建议:
 
 LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核且根分区并没有极端的性能要求，我目前按照官方文档采用默认的 ext4 文件系统)
 
-我的分区
-----------------
+我的分区(2024年9月)
+---------------------
 
 - ``/dev/sda1`` vfat 格式， ``EFI System`` ，设置200M
 - ``/dev/sda2`` :ref:`ext` 4 文件系统，挂载为 ``/boot`` 分区，设置512M
@@ -139,6 +147,15 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
    :caption: 对LFS分区后分区信息
    :emphasize-lines: 8-10
 
+我的分区(2025年11月)
+---------------------
+
+2025年11月我在FreeBSD系统上通过 :ref:`linux_jail_ext` 来实现物理主机(FreeBSD)上的 :ref:`freebsd_ext4` ，所以在 :ref:`linux_jail` 中是NullFS，需要从物理主机上查看分区信息( ``gpart print`` 见 :ref:`lfs_partition_freebsd` ):
+
+.. literalinclude:: lfs_partition_freebsd/gpart_add_partition_lfs_zfs
+   :caption: ``linux-data`` 分区是LFS的根分区， ``efi`` 是和FreeBSD共用的ESP启动FAT32分区
+   :emphasize-lines: 2,7
+
 设置环境变量
 =================
 
@@ -146,6 +163,17 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 
 .. literalinclude:: lfs_prepare/env
    :caption: ``/etc/profile`` 中添加LFS环境变量
+
+.. note::
+
+   :ref:`linux_jail_ext` 采用 ``/ext4_lfs`` 作为LFS环境变量
+
+.. warning::
+
+   任何时候重新进入工作环境都必须确保 ``$LFS`` 变量正确设置，且 ``umask`` 被设置为 ``022`` :
+
+   .. literalinclude:: lfs_prepare/check_env
+      :caption: 检查环境
 
 挂载分区
 ============
@@ -159,6 +187,11 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 
 .. literalinclude:: lfs_prepare/mount_output
    :caption: 挂载分区情况
+
+.. note::
+
+   :ref:`linux_jail_ext` 不需要这个步骤，完全由Host主机挂载磁盘分区并通过 ``NullFS`` 绑定到容器内部的目录 ``/ext4_lfs``
+
 
 准备工作已经完成，现在可以开始准备软件包了
 
@@ -180,6 +213,26 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 .. literalinclude:: lfs_prepare/md5sum
    :caption: 使用LFS提供的 md5sums 文件校验下载的软件包
 
+输出中有类似如下的报错信息:
+
+.. literalinclude:: lfs_prepare/md5sum_error
+   :caption: 使用LFS提供的 md5sums 文件校验下载的软件包，报错信息表示没有下载成功
+   :emphasize-lines: 4,5,7,8
+
+所以通过以下方式修订:
+
+.. literalinclude:: lfs_prepare/fix
+   :caption: 尝试重新下载文件
+
+.. warning::
+
+   实际上是部分文件的服务器被GFW屏蔽导致无法下载，需要曲线完成
+
+下载补丁文件:
+
+.. literalinclude:: lfs_prepare/patches
+   :caption: 下载补丁文件
+
 .. note::
 
    对于LFS稳定版，可以从 `LFS官方镜像网站直接下载打包好的软件包文件 <https://www.linuxfromscratch.org/lfs/mirrors.html#files>`_
@@ -188,7 +241,10 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 
    部分文件可能会因为上游下载源更改无法下载，需要手工处理
 
-此外，还需要 `下载LFS必要的补丁 <https://lfs.xry111.site/zh_CN/12.2/chapter03/patches.html>`_ (需要按照文档内容)
+此外，还需要 `下载LFS必要的补丁 <https://www.linuxfromscratch.org/lfs/view/stable/chapter03/patches.html>`_ (需要按照文档内容)
+
+.. literalinclude:: lfs_prepare/patches
+   :caption: 下载补丁
 
 在LFS文件系统中创建有限目录布局
 ==================================
@@ -307,6 +363,13 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 
    参考 `GCC官方文档: Options That Control Optimization <https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html>`_ : ``If you use multiple -O options, with or without level numbers, the last such option is the one that is effective.`` ，也就是说，后一个 ``-O`` 参数实际生效，也就是 ``-O3``
 
+.. warning::
+
+   我现在编译为了能够求稳定，编译优化参数还是采用默认的 ``-O2`` :
+
+   .. literalinclude:: lfs_prepare/makeflags_o2
+      :caption: 现在还是采用默认 ``-O2``
+
 最后确保构建临时工具所需环境就绪，强制bash shell读取刚才创建的配置文件:
 
 .. literalinclude:: lfs_prepare/source_profile
@@ -316,4 +379,4 @@ LFS假设根文件系统 ``/`` 采用 ext4 文件系统 (考虑到简化内核�
 参考
 ======
 
-- `Linux From Scratch 版本 12.2-中文翻译版 发布于 2024 年 9 月 1 日 <https://lfs.xry111.site/zh_CN/12.2/>`_
+- `Linux From Scratch 版本 12.4-中文翻译版 发布于 2025 年 9 月 1 日 <https://lfs.xry111.site/zh_CN/12.4/>`_
