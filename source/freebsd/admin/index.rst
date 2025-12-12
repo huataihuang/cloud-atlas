@@ -11,6 +11,7 @@ FreeBSD管理
    freebsd_update.rst
    freebsd_update_upgrade.rst
    freebsd_15_alpha_update_upgrade.rst
+   freebsd_15_stable_upgrade_release.rst
    freebsd_check.rst
    freebsd_user_group.rst
    add_lib32_after_install_freebsd.rst

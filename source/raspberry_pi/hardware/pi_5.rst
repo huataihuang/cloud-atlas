@@ -8,6 +8,9 @@
 ============
 
 - 处理器: Broadcom BCM2712 quad-core Arm Cortex A76 processor @ 2.4GHz (大约是上一代 :ref:`pi_4` 的2~3倍性能)
+
+  - 内置 ``H.265`` (HEVC)硬件加速解码( **但是不支持H.264硬件解码** ，所以播放H.264视频会非常卡顿)
+
 - 内存: 最高8GB(LPDDR4-4267)
 - 存储接口: PCIe 2.0 X1 接口FPC连接器
 - PWM控制风扇接口(需要主动散热)

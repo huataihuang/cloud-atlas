@@ -9,6 +9,7 @@ Rocky Linux
 
    almalinux_vs_rockylinux.rst
    rockylinux_novnc.rst
+   rockylinux_epel.rst
 
 .. only::  subproject and html
 

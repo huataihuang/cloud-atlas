@@ -43,6 +43,7 @@ Alpine Linux
    alpine_swift.rst
    alpine_install_calibre.rst
    alpine_sway.rst
+   alpine_wine.rst
 
 .. only::  subproject and html
 

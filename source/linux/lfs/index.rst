@@ -23,6 +23,7 @@ LFS(Linux from scratch)
    lfs_partition_freebsd.rst
    lfs_mba.rst
    lfs_prepare.rst
+   lfs_build.rst
    lfs_cross_toolchain/index
    lfs_cross_build_tools.rst
    lfs_chroot_build_tools.rst

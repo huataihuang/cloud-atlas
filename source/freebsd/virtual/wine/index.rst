@@ -9,6 +9,7 @@ WINE
 
    intro_wine.rst
    freebsd_wine.rst
+   ../../../linux/alpine_linux/alpine_wine.rst
 
 .. only::  subproject and html
 

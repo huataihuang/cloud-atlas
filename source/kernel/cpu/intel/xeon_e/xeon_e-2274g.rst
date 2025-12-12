@@ -7,7 +7,7 @@ Intel Xeon E-2274G
 Intel Xeon E-2274G是我在淘宝上找到的最便宜的内置GPU的 :ref:`xeon_e` 二代(我不知道为何只有这款特别便宜):
 
 - 2019年Q2发布
-- Cofee Lake 微处理器架构
+- Cofee Lake 微处理器架构(Intel第八代微处理器架构)
 - ``14nm`` 光刻工艺
 - 4核心8线程(至强处理器相当于同时代的i7)
 - 基本频率 4.00 GHz / 最大睿频 4.90 GHz

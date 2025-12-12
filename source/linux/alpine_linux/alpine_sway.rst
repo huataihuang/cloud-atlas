@@ -30,7 +30,11 @@ NVIDIA显卡
 Intel显卡
 --------------
 
-:ref:`mba13_early_2014` 使用的是 Intel 显卡(CPU集成的iGPU)
+.. note::
+
+   :ref:`mba13_early_2014` 使用的是 Intel 显卡(CPU集成的iGPU)，但是处理器是早期的 ``Haswell`` 架构，内置的iGPU不支持 ``x265`` (HEVC)硬件加速，所以在VLC播放当前主流的x265编码mkv视频会非常卡顿，无法观看。所以需要在高端GPU环境做视频转换为 ``x264`` mp4格式来兼容播放，或者使用 :ref:`jellyfin` 来在线转换播放
+
+   我组装的服务器使用了 :ref:`xeon_e-2274g` 是第八代Cofee Lake 微处理器架构，则内置支持 ``x265`` 硬件加速视频解码
 
 - 首先安装Mesa驱动:
 
@@ -41,6 +45,10 @@ Intel显卡
 
   - ``intel-media-driver`` : VAAPI驱动，用于硬件加速视频编码和解码，用于Intel Broadwell(第五代CPU)及更新
   - ``libva-intel-driver`` : VAAPI驱动，用于早于Broadwell的设备，例如我的 :ref:`mba13_early_2014` 是 HASWELL 处理器，就使用这个驱动
+
+    - Intel显卡通过 ``VA-API`` 来加速视频解码，所以当使用 VLC 来播放视频时，需要系统安装好 ``libva-intel-driver``
+    - 相关信息也可以参考 `Fedora 43 Post Install Guide <https://github.com/devangshekhawat/Fedora-43-Post-Install-Guide>`_
+
   - ``linux-firmware-i915`` : 如果在dmesg中出现i915驱动报有关firmware错误，则安装这个软件包
 
 .. literalinclude:: alpine_sway/install_intel-driver
