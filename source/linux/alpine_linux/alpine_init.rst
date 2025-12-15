@@ -30,4 +30,6 @@ Alpine Linux初始化
 - :ref:`alpine_apk` 安装一些必要的 :ref:`devops` 应用:
 
 .. literalinclude:: alpine_init/apk_devops
-   :caption: 安装devops需要的一些工具应用
+   :caption: 安装devops需要的一些工具应用(常规安装)
+
+对于 :ref:`ish` 的Alpine Linux因为没有磁盘操作，所以不用安装 ``util-linux``

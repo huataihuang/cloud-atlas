@@ -23,7 +23,24 @@ iSH特点
 
 - 模拟器运行了完整的 :ref:`alpine_linux` 所以在iOS中可以构建完整的Linux环境，作为日常工作桌面
 
-  - 不过我的iPad Pro是一代产品，性能极弱，在本地运行linux虚拟机的性能很差，所以为了方便使用，我实际采用aliyun的ECS虚拟机来提供统一的工作平台
+  - 不过我的iPad Pro是一代产品 :strike:`性能极弱` ，实践发现计算密集型程序运行极慢，我最初以为是早期设备硬件不足。但后来改为使用 :ref:`ipad_mini5` 执行 ``make html`` 编译Cloud Atlas :ref:`sphinx` 文档才确定是虚拟化性能问题
+
+  - 为了方便使用，我实际采用VPS虚拟机来提供统一的工作平台
+
+跨架构模拟性能
+---------------
+
+在 iSH 中，实际底层运行的是 i686 (x86) :ref:`qemu` 虚拟机，但是在苹果设备 :ref:`ios` 和 :ref:`macos` 的物理主机是 :ref:`arm` 架构， 通过 qemu 实现架构的指令转换，这个过程没有任何硬件加速，造成巨大的性能开销。
+
+在将 iSH 作为终端使用时，延迟还不太明显。但是，一旦通过 :ref:`alpine_init` 构建完整的Linux系统，尝试 :ref:`mobile_work` 本地进行开发编译等计算密集性任务，立即暴露出这个架构的短板: 和原生架构硬件加速的 :ref:`kvm` 性能有 **百倍** (至少两个数量级)差距:
+
+举例: 完整 ``make html`` 构建Cloud Atlas(本 :ref:`sphinx_doc` 项目)竟然花费了将近13个小时:
+
+.. literalinclude:: intro_ish/make_html_ish
+   :caption: 跨架构纯软件虚拟化性能极差
+   :emphasize-lines: 2
+
+解决的方式是采用 :ref:`utm` 的JIT模式运行同架构模拟(ARM on ARM)，这样的同架构ARM64虚拟化性能损失远小于x86跨架构模拟。当然，采用远程VPS虚拟机开发也能绕开这个问题。
 
 初始化
 =========
