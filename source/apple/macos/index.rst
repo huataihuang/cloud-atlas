@@ -55,6 +55,7 @@ macOS
    macos_recovery.rst
    reset_mac.rst
    fix_macbook_stuck_shift.rst
+   fix_macbook_slow.rst
    xbar.rst
    kitty.rst
    macos_shared_library.rst

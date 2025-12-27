@@ -23,7 +23,7 @@ iSH特点
 
 - 模拟器运行了完整的 :ref:`alpine_linux` 所以在iOS中可以构建完整的Linux环境，作为日常工作桌面
 
-  - 不过我的iPad Pro是一代产品 :strike:`性能极弱` ，实践发现计算密集型程序运行极慢，我最初以为是早期设备硬件不足。但后来改为使用 :ref:`ipad_mini5` 执行 ``make html`` 编译Cloud Atlas :ref:`sphinx` 文档才确定是虚拟化性能问题
+  - 不过我的iPad Pro是一代产品 :strike:`性能极弱` ，实践发现计算密集型程序运行极慢，我最初以为是早期设备硬件不足。但后来改为使用 :ref:`ipad_mini5` 执行 ``make html`` 编译Cloud Atlas :ref:`sphinx_doc` 文档才确定是虚拟化性能问题
 
   - 为了方便使用，我实际采用VPS虚拟机来提供统一的工作平台
 

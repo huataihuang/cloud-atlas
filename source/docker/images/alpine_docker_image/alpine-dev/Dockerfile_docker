@@ -1,0 +1,178 @@
+# syntax=docker/dockerfile:1
+
+FROM alpine:latest
+
+ENV container=docker
+
+ARG USER=admin
+ARG GROUP=admin
+ARG UID=501
+ARG GID=501
+
+RUN cat << 'EOF' > /README
+
+# How
+
+use docker or podman to build and run container, command syntax is same:
+
+- Host's admin HOME will bind to HOME in container, use Host's environment to set same uid/gid
+
+  - if not use HOME in Host, can use other secret directory to store admin's public key and bind to container's /home/admin/.ssh directory
+
+- ssh port change to 1122 because poeman rootless container cannot use port below 1024
+
+# BUILD
+
+podman build --build-arg ADMIN_UID=$(id -u) --build-arg ADMIN_GID=$(id -g) \
+        -t alpine-dev:latest .
+
+# RUN
+
+export uid=$(id -u)
+export gid=$(id -g)
+
+podman run -dt --name alpine-dev --hostname alpine-dev \
+     -p 1122:1122 \
+     -v /home/admin:/home/admin \
+     --user $uid:$gid \
+     --userns keep-id:uid=$uid,gid=$gid \
+     alpine-dev:latest
+EOF
+
+# tini entrypoint script: "here documents" / "here scripts"
+# Enable BuildKit: Ensure your Docker daemon is configured to use BuildKit, which is typically enabled by default in recent Docker versions. If not, you might need to set the DOCKER_BUILDKIT=1 environment variable when running docker build.
+RUN cat << 'EOF' > /entrypoint.sh
+#!/usr/bin/env ash
+set -e
+
+# Function to gracefully shut down all background processes
+function shutdown() {
+    echo "Shutting down services..."
+    kill ${CRON_PID} ${NGINX_PID} ${SSHD_PID}
+    wait ${CRON_PID} ${NGINX_PID} ${SSHD_PID}
+    echo "Services stopped."
+}
+
+# Trap termination signals to call the shutdown function
+trap shutdown SIGTERM SIGINT
+
+# --- Start the services in the background ---
+
+# Start syslog (failed bind, now can't use)
+sudo syslogd -n &
+SYSLOGD_PID=$!
+echo "SYSLOGD started with PID $SYSLOGD_PID"
+
+# Start Crond 
+# Use the -f flag to run in the foreground (daemon off mode)
+sudo /usr/sbin/crond -f &
+CRON_PID=$!
+echo "Cron started with PID $CRON_PID"
+
+# Start Nginx
+# Use the -g "daemon off;" flag to run in the foreground
+# nginx -g "daemon off;" &
+# NGINX_PID=$!
+# echo "Nginx started with PID $NGINX_PID"
+
+# Start SSHD
+# Use the -D flag to prevent forking into the background
+# only sshd daemon (without flags) logging through syslogd, so set "-E log_file"
+sudo /usr/sbin/sshd -D -E /var/log/sshd.log &
+SSHD_PID=$!
+echo "SSHD started with PID $SSHD_PID"
+
+# Wait for any process to exit
+# If any service fails, 'wait -n' returns its exit status, and 'set -e'
+# ensures the script exits, which tells Tini to stop.
+wait -n
+
+# If we reach here, one process has exited.
+# Call shutdown to terminate the others cleanly before exiting the script.
+shutdown
+EOF
+
+RUN chmod +x /entrypoint.sh
+
+RUN apk update && apk upgrade
+
+# tini process manager
+RUN apk add --no-cache tini
+
+# Devops utilities
+RUN apk add --no-cache openssh openssl sudo bind-tools tmux git neovim
+
+# add account "admin" and give sudo privilege
+# "admin" uid/gid same as host (alpine linux)
+# be care about host's uid and gid, when I use macOS, gid=20(staff) is already in alpine linux, then report error
+RUN addgroup -g ${GID} ${GROUP}
+RUN adduser -u ${UID} -G ${GROUP} -h /home/${USER} -s /bin/sh -D ${USER}
+RUN echo "%${GROUP}        ALL=(ALL)       NOPASSWD: ALL" >> /etc/sudoers
+# account without password will be locked, so set admin's password randomly, only login through ssh
+RUN RANDOM_PASSWORD=$(openssl rand -base64 12 | head -c 16) && echo "${USER}:$RANDOM_PASSWORD" | chpasswd
+
+# set TIMEZONE to Shanghai
+RUN apk add --no-cache tzdata
+RUN ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+# init sshd
+RUN ssh-keygen -A
+# vscode remote ssh need 'AllowTcpForwarding'
+RUN sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/g' /etc/ssh/sshd_config
+# speed connect
+RUN echo "UseDNS no" >> /etc/ssh/sshd_config
+# alpine linux sshd default use password auth, empty password will lock account, change to disable password auth
+RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+# podman rootless container can't use service port below 1024
+RUN echo "Port 1122" >> /etc/ssh/sshd_config
+# enable sshd logging
+RUN echo "SyslogFacility AUTH" >> /etc/ssh/sshd_config
+RUN echo "LogLevel INFO" >> /etc/ssh/sshd_config
+
+# config syslogd, split auth log
+RUN echo "auth,authpriv.* /var/log/auth.log" >> /etc/syslog.conf
+
+# developement
+RUN apk add build-base
+RUN apk add gdb strace
+RUN apk add go
+RUN apk add rust
+# nodejs choice LTS version
+RUN apk add nodejs-lts
+# I use graphviz for sphinx docs, you may not need
+RUN apk add graphviz
+
+# Python virtualenv
+USER ${USER}
+# machine learning environment
+RUN sh -c "cd /home/${USER} && python3 -m venv venv/ml"
+# Install NumPy, Matplotlib (Deep Learning from Scratch)
+RUN sh -c "source /home/${USER}/venv/ml/bin/activate && pip install --upgrade pip && pip install numpy matplotlib"
+
+# TensorFlow wheels built for glibc-based distros, so cannot install direct. Need compile from source. I will do it later...
+#RUN sh -c "source /home/${USER}/venv/ml/bin/activate && pip install --upgrade pip && pip install numpy scipy matplotlib scikit-learn tensorflow-cpu==2.20.0 pillow"
+
+# Sphinx doc environment
+RUN sh -c "cd /home/${USER} && python3 -m venv venv/sphinx"
+RUN sh -c "source /home/${USER}/venv/sphinx/bin/activate && pip install sphinx sphinx_rtd_theme sphinxnotes-strike sphinxcontrib-video sphinxcontrib-youtube myst-parser jieba"
+
+# user profile
+RUN echo "alias vi=nvim" >> /home/${USER}/.profile
+
+# run entrypoint.sh needs root
+USER root
+
+# run services when container started
+# NOW cannot use: EXPOSE 22:1122
+# define multiple ports: EXPOSE 22 80 443 8080 9000
+# define port range: EXPOSE 5000-5010 
+# define port range with udp protocol: EXPOSE 20000-20100/udp 
+
+# to development environment, not define any ports for freely use
+
+# Use Tini as the ENTRYPOINT and pass the wrapper script as its argument.
+# The `--` separates Tini arguments from the command to be executed.
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
+
+# The CMD is empty because the entrypoint handles everything.
+CMD []

@@ -102,8 +102,6 @@ Rancher Desktop实际上是一个Electron程序，包装了一系列开源工具
 
 果然解决了启动问题，能够正常启动 ``qemu-system-x86_64``
 
-
-
 参考
 ======
 
