@@ -10,7 +10,7 @@ tmux意思是 ``terminal multiplexer`` (终端多路器) ，它的功能是在�
 
 .. note::
 
-   另一个常用的终端多路器是 ``screen`` ，在Red Hat Enterprise Linux 7及之前版本包含了 ``screen`` ，但是从 RHEL 8/CentOS 8开始， ``tmux`` 取代了 ``screen`` ，原因是screen代码台陈旧，Red Hat已经不再维护screen软件包，并且 ``tmux`` 代码代码更好并且支持新功能。 - `The 'screen' package is deprecated and not included in RHEL8.0.0. <https://access.redhat.com/solutions/4136481>`_
+   另一个常用的终端多路器是 ``screen`` ，在Red Hat Enterprise Linux 7及之前版本包含了 ``screen`` ，但是从 RHEL 8/CentOS 8开始， ``tmux`` 取代了 ``screen`` ，原因是screen代码台陈旧，Red Hat已经不再维护screen软件包，并且 ``tmux`` 代码更好并且支持新功能。 - `The 'screen' package is deprecated and not included in RHEL8.0.0. <https://access.redhat.com/solutions/4136481>`_
 
 安装tmux
 ============
@@ -141,6 +141,40 @@ tmux的 ``前导键`` 是 ``ctrl-b`` ，也就是按下 ``ctrl-b`` 就进入发�
 --------
 
 结合 ``ctrl-b`` 和 ``?`` 可以查看帮助
+
+中文显示和终端
+===================
+
+我在一次远程登录到 :ref:`alpine_linux` 服务器上，当通过 ``podman exec`` 进入 :ref:`alpine_podman_image` 构建的容器，发现一个奇怪的问题: 
+
+没有使用 ``tmux`` 时， ``cat`` 一个中文内容的文本是能够正常显示中文的。但是，当进入tmux后同样 ``cat`` 这个文件，中文显示为下划线( ``_`` )。
+
+然而，在这台 :ref:`alpine_linux` HOST主机上，使用 ``tmux`` 却没有这个现象。
+
+究竟是什么环境差异导致?
+
+**Gemini解释** 通常原因是tmux的保护机制: 当tmux认为当前终端不支持 ``UTF-8`` 时，会将所有非 ``ASCII`` 字符强制替换为下划线以防止终端崩溃。这里tmux推测方法是通过环境变量 ``LC_ALL`` , ``LC_CTYPE`` 或 ``LANG`` 。
+
+果然，我对比发现HOST主机的 :ref:`alpine_linux` 中，环境变量 ``LANG=C.UTF-8`` ；而进入容器环境中缺少这个 ``UTF-8`` 环境变量。我修订容器中用户的环境变量:
+
+.. literalinclude:: tmux/env_utf-8
+   :caption: 设置环境变量 ``LANG`` 指定UTF-8
+
+然后再次在 :ref:`podman` 容器环境运行 ``tmux`` 就能正常使用中文。
+
+这说明 :ref:`alpine_podman_image` 构建容器时，有必要注入 ``LANG=C.UTF-8`` 环境变量
+
+.. note::
+
+   另外一种解决方法是强制开启UTF-8模式: ``tmux`` 命令的 ``-u`` 参数可以让tmux忽略环境变量检测，强制tmux开启Unicode支持。
+
+   注意，服务器端可能需要安装 ``musl-locale`` 软件包并具体设置支持 ``UTF-8`` locale
+
+.. note::
+
+   在没有使用 ``tmux`` 之前，容器内部虽然没有设置 ``LANG=C.UTF-8`` 环境变量，但不影响中文显示，这是因为数据流是通过服务器发送到客户端终端，由客户端终端负责解码显示。此时客户端能够识别UTF-8进行显示就没有问题。
+
+   当服务器端运行了 ``tmux`` 之后，tmux负责接收服务器的数据进行处理，然后再转发给客户端。此时tmux判断环境是否支持UTF-8就非常重要，可能会误判导致转发前把所有中文拦截并改写为下划线。
 
 tmux-config
 ================

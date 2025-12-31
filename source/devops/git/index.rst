@@ -9,6 +9,7 @@ git
 
    git_startup.rst
    git-lfs.rst
+   git_bfg.rst
    git_commit_or_stash.rst
    git_merge_rebase.rst
    git_merge_fix_conflicts.rst

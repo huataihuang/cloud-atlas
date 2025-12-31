@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  dev-env:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alpine-dev-toolkit
+
+    # use UID Alias map (if userns_mode: "keep-id" ERROR, you can use this underlayer map)
+    user: "1000:1000"                            # force container admin
+
+    # force admin
+    # user: "admin"
+    # Podman special: keep HOST UID same as Container
+    # if podman-compose report error, please startup with --pod=no
+    userns_mode: "keep-id"
+    # override Docker images entrypoint
+    entrypoint: ["/bin/sh", "-c", "sleep infinity"]
+
+    environment:
+      # when use Podman Rootless, 1000 in container always mapped to HOST's current user
+      # so we do not need NEW_UID, but remain 
+      - NEW_UID=1000
+      - NEW_GID=1000
+      - TZ=Asia/Shanghai
+
+    volumes:
+      # persistence admin's home directory(include languages cache, config, ssh key, etc)
+      # "container_home_data" is HOST "~/.local/share/containers/storage/volumes/container_home_data/_data"
+      - admin_home_data:/home/admin
+
+      # :Z means Podman automatic fix SELinux/Ownership
+      # :U means remap Host directory ownership to Container User, not need chown (Magic)
+      # :z means Podman mount direcoty can be shared by many containers
+      - /home/admin/docs:/workspace:rw,z
+
+      # special config map
+      - ~/.ssh/id_rsa:/home/admin/.ssh/id_rsa:ro,z
+      - ~/.gitconfig:/home/admin/.gitconfig:ro,z
+    
+    # debug and permit
+    cap_add:
+      - SYS_PTRACE        # allow GDB debug
+    security_opt:
+      # Podman have many limits, so we need disable "seccomp" to permit GDB
+      - seccomp:unconfined # disable security compute limit
+      # if Alpine use SELinux, need following line:
+      - label=disable
+    
+    # keep container run in background
+    stdin_open: true
+    tty: true
+
+volumes:
+  # define persistent home directory
+  admin_home_data:

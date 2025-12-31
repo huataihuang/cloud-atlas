@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  dev-env:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER: admin
+        GROUP: admin
+        UID: 1000
+        GID: 1000
+    
+    container_name: alpine-fullstack-dev
+    
+    # enviroment: pass HOST UID/GID to entrypoint.sh
+    environment:
+      - NEW_UID=${USER_ID:-1000}
+      - NEW_GID=${GROUP_ID:-1000}
+    
+    # mount volumes
+    volumes:
+      # map source codes
+      - .:/workspace
+      # persistence admin's home directory(include languages cache, config, ssh key, etc)
+      - admin-home:/home/admin
+      # (option) cache separately
+      - node-cache:/home/admin/.npm
+      - go-cache:/home/admin/go
+      - cargo-cache:/home/admin/.cargo
+    
+    # debug and permit
+    cap_add:
+      - SYS_PTRACE        # allow GDB debug
+    security_opt:
+      - seccomp:unconfined # disable security compute limit
+    
+    # keep container run in background
+    stdin_open: true
+    tty: true
+
+volumes:
+  admin-home:
+  node-cache:
+  go-cache:
+  cargo-cache:

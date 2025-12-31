@@ -1,18 +1,13 @@
-.. _podman:
+.. _podman_images:
 
 =================================
-podman
+podman images
 =================================
 
 .. toctree::
    :maxdepth: 2
 
-   intro_podman.rst
-   ../../linux/alpine_linux/alpine_podman.rst
-   podman_rootless_volumes.rst
-   buildah.rst
-   skopeo.rst
-   images/index
+   alpine_podman_image.rst
 
 .. only::  subproject and html
 

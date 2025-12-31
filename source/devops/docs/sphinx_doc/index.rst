@@ -41,6 +41,7 @@ Sphinx文档
    readthedocs_slow_builds.rst
    readthedocs_auto_build.rst
    sphinx_favicon.rst
+   sphinx_memory.rst
 
 .. only::  subproject and html
 

@@ -14,6 +14,13 @@ swap文件
 .. literalinclude:: linux_swap/swapfile
    :caption: 设置8G swap文件
 
+在 :ref:`sphinx_memory` 中为 :ref:`alpine_linux` 设置 ``2GB`` swap 文件:
+
+.. literalinclude:: linux_swap/swapfile_alpine_2g
+   :caption: 设置alpine linux 的2G swap文件
+
+
+
 .. _dphys-swapfile:
 
 dphys-swapfile
