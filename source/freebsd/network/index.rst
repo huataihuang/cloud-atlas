@@ -14,6 +14,8 @@ FreeBSD网络
    freebsd_static_ip.rst
    bridge/index
    freebsd_route.rst
+   freebsd_firewall.rst
+   freebsd_pf.rst
    freebsd_nat.rst
    freebsd_usb_tethering_wifi.rst
    freebsd_proxy.rst

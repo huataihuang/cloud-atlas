@@ -11,6 +11,8 @@ FreeBSD中文环境配置和 :ref:`linux_chinese` 相似，分文2部分:
 
 .. warning::
 
+   2025年下半年，我在
+
    由于目前开源社区处于 ``X window`` 转到 :ref:`wayland` 过渡期，特别是中文输入法支持配置和正常使用非常麻烦，所以为了能够降低心智负担，我暂时放弃使用 :ref:`sway` 桌面，改为成熟且方便的 :ref:`xfce` 桌面。以往在 :ref:`linux_desktop` 折腾消耗了大量的时间精力，在FreeBSD上实在不想重蹈覆辙了。
 
 .. note::
@@ -68,10 +70,16 @@ FreeBSD中文环境配置和 :ref:`linux_chinese` 相似，分文2部分:
 
   - ``~/.config/fcitx5`` ( :download:`fcitx5.tar.gz <../../_static/freebsd/desktop/fcitx5.tar.gz>` ) : ``fcitx5`` 框架配置
 
-- :strike:`复制启动配置` (这个步骤不再需要，目前安装会自动在FXCE环境添加自动启动配置):
+- :strike:`复制启动配置` (这个步骤不再需要，目前安装会自动在 :ref:`xfce` 环境添加自动启动配置):
 
 .. literalinclude:: freebsd_chinese/desktop
    :caption: 复制 ``fcitx5`` 的Desktop启动配置
+
+- 对于 :ref:`sway` 环境，现在(2025年12月 FreeBSD RELEASE-15)已经完美支持 :ref:`fcitx` (无需补丁)，只需要修订 ``~/.config/sway/config`` 添加一行配置:
+
+.. literalinclude:: ../../linux/desktop/chinese/fcitx_sway/config_add
+   :language: bash
+   :caption: 在 ``~/.config/sway/config`` 中田间运行 fcitx5 的配置
 
 参考
 =====

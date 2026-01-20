@@ -8,6 +8,7 @@ GPT
    :maxdepth: 1
 
    think_gpt.rst
+   think_gpt_again.rst
    gpt_startup.rst
    gpt_radar.rst
    ruby/index

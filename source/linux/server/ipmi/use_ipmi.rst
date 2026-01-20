@@ -21,6 +21,11 @@ IPMI(Intelligent Platform Management Interface, 智能平台管理接口)是提�
 IPMI硬件和软件要求
 ===================
 
+- 软件安装:
+
+.. literalinclude:: use_ipmi/ubuntu_install
+   :caption: ubuntu环境安装ipmitool
+
 在Linux平台上要配置IPMI需要有 ``/dev/ipmi0`` 设备存在，如果缺少该设备， ``ipmitool`` 工具就无法工作。此时需要使用如下方法创建设备：
 
 - 如果是SuSE，RedHat或CentOS执行(需要安装 ``OpenIPMI`` 工具包)，在 :ref:`systemd` 体系中，是 ``openipmi.service``

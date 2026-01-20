@@ -17,6 +17,10 @@ FreeBSD Sway桌面
 .. literalinclude:: freebsd_sway/intel_gpu
    :caption: Intel显卡内核模块加载
 
+.. note::
+
+   当执行了 ``kldload i915kms`` 命令加载了Intel显卡的内核驱动以后，会看到屏幕分辨率立即变高。如果没有变化则通常是驱动不匹配(主机非intel显卡)
+
 Sway安装
 =========
 
@@ -59,7 +63,7 @@ Sway配置
              timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' \
              before-sleep 'swaylock -f -c 000000'
 
-需要配置一些环境变量以便用户能够运行sway，例如 ``XDG`` 运行目录。通常显示管理器会处理这些环境变量，但是从控制台终端启动时需要自己处理::
+需要配置一些环境变量以便用户能够运行sway，例如 ``XDG`` 运行目录。通常显示管理器会处理这些环境变量， :strike:`但是从控制台终端启动时需要自己处理` 我在FreeBSD 15上实践验证，可以备用配置 ``XDG_RUNTIME_DIR`` 花镜变量，默认进入就提供了设置好的环境变量(建议验证一下 ``env | grep XDG`` 输出) ::
 
    export XDG_RUNTIME_DIR=/tmp/`id -u`-runtime-dir
    test -d "$XDG_RUNTIME_DIR" || \
@@ -67,11 +71,15 @@ Sway配置
 
 注意，如果使用 ``sh`` 作为SHELL，则编辑 ``~/.shrc`` 添加::
 
-   export XDG_RUNTIME_DIR=/var/run/user/`id -u`
+   export XDG_RUNTIME_DIR=/tmp/`id -u`-runtime-dir
 
 如果使用 ``tcsh`` 作为SHELL，则编辑 ``~/.cshrc`` 添加::
 
-   setenv XDG_RUNTIME_DIR /var/run/user/`id -u`
+   setenv XDG_RUNTIME_DIR /tmp/`id -u`-runtime-dir
+
+.. note::
+
+   我在 FreeBSD 15 上实践已经不需要自己手工配置 ``XDG_RUNTIME_DIR`` 环境变量，默认设置了 ``XDG_RUNTIME_DIR=/var/run/xdg/$USER``
 
 .. note::
 
@@ -85,7 +93,14 @@ Sway配置
 - 为了能够更好实用sway，安装一些和i3兼容的程序::
 
    # pkg install alacritty dmenu dmenu-wayland
-   pkg install sway swayidle swaylock-effects alacritty dmenu-wayland dmenu
+   pkg install sway swayidle swaylock-effects dmenu-wayland dmenu foot
+
+- 需要安装字体(前面精简安装 ``sway`` 可能默认没有字体软件包，这会导致状态栏显示方框)，这里安装简体中文字体和核心字体::
+
+   # 安装基础中文字体(Noto Sans CJK)
+   pkg install noto-sc noto-basic
+
+另外，我发现如果系统没有字体(我遇到精简安装sway没有安装上述字体)，不仅状态栏文字显示为方框，而且也无法启动 :ref:`foot` 这样的终端程序(例如按快捷键 ``$mod+Return`` )。此时我误以为快捷键无效(甚至修改配置调整 ``$mod`` )，实际上是字体没有安装导致无法运行程序而已。
 
 启动sway
 ==========

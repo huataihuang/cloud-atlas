@@ -51,9 +51,9 @@ SOCKS
 
 然后配置本地APT使用代理 ``/etc/apt/apt.conf.d/proxy.conf`` ::
 
-   Acquire::http::Proxy "socks5h://127.0.0.1:10080";
-   Acquire::https::Proxy "socks5h://127.0.0.1:10080";
-   Acquire::socks::Proxy "socks5h://127.0.0.1:10080";
+   Acquire::http::Proxy "socks5h://127.0.0.1:1080";
+   Acquire::https::Proxy "socks5h://127.0.0.1:1080";
+   Acquire::socks::Proxy "socks5h://127.0.0.1:1080";
 
 proxy.conf
 ============

@@ -8,6 +8,8 @@ Linux视频
    :maxdepth: 1
 
    mpv.rst
+   mpv_intel_gpu.rst
+   mpv_script.rst
 
 .. only::  subproject and html
 

@@ -12,8 +12,10 @@ FreeBSD桌面
    freebsd_wayland_sway.rst
    freebsd_xfce4.rst
    freebsd_sway.rst
+   freebsd_sway_intel-driver.rst
    freebsd_hikari.rst
    freebsd_chinese.rst
+   freebsd_multimedia.rst
    tuning_freebsd_for_mbp.rst
    freebsd_vnc.rst
    freebsd_synergy.rst

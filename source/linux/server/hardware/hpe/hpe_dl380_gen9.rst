@@ -30,4 +30,149 @@ HPE ProLiant DL380 Gen9服务器
 
     - :ref:`amd_firepro_s7150x2` 部署 :ref:`mxgpu` 实现 :ref:`flight_simulator`
 
+第二个GPU扩展槽
+===================
 
+和 :ref:`hpe_dl360_gen9` 类似，购买的二手DL380是没有 ``HPE DL380 Gen9 Secondary 3 Slot GPU Ready Riser Kit（次级/2号 3插槽 GPU 扩展卡套件）`` ，需要从淘宝上购买。不过 `HPE ProLiant DL380 Gen9 Server QuickSpecs <https://support.hpe.com/hpesc/public/docDisplay?docId=c04346247&docLocale=en_US>`_ 提供的配件信息 ``719073-B21`` 在淘宝上是搜索不到的。
+
+根据淘宝搜索和Goolgle Gemini分析，综合如下:
+
+在 HPE 的零件体系中，一个扩展卡套件通常有三个相关的编号，它们指代的都是同一个东西：
+
+- 719073-B21：销售单号（Option Part Number），买整盒新机件时用的。
+- 777283-001：备件编号（Spare Part Number），售后维修更换时用的。
+- 729810-001：组件/板卡编号（Assembly Number），通常直接印在绿色电路板（PCB）上。
+
+实际上在淘宝上搜索 "HP DL380 扩展" 能够找到上述 ``777283-001`` 和 ``729810-001`` ，也就是符合要求的第二个GPU扩展槽。
+
+需要注意对比 **Secondary（2号）GPU Ready 扩展笼** :
+
+- 插槽数量：该扩展笼必须有 3 个 PCIe 插槽（2个 x16，1个 x8）
+- 电源接口：作为 "GPU Ready" 版本，板卡上应该带有一个 10-pin（10针）的供电接口（用于连接显卡供电线）
+
+安装要求
+----------
+
+2 号扩展槽正常工作，服务器必须满足以下条件：
+
+- **必须安装第二颗处理器 (CPU 2)** ：2 号扩展槽的 PCIe 通道是由第二颗 CPU 直接提供的。如果服务器只安装了一颗 CPU，这个扩展笼插入后将无法被系统识别，插在上面的显卡也不会通电。
+- **电源功率** : 在该槽位运行高性能显卡（如 Tesla K80/M40/P100 等），需确保服务器配备了双 800W 或 1400W 的电源，单 500W 电源可能无法承载 GPU 的瞬时功耗
+
+配件要求:
+
+- GPU 供电线：连接扩展笼 10-pin 接口与显卡 6-pin/8-pin 接口的线缆
+- 高性能风扇：HPE 官方要求加装 GPU 后，机箱内的 6 个风扇位必须全部换成 **高性能版本** （标签上通常有红色标识），否则系统可能会报错或由于散热不足导致显卡降频
+
+PCIe
+========
+
+- 第一个扩展笼(Riser Card): （部件号：719076-B21 / 745034-001）包含 3 个插槽
+
+  - 要支持 PCIe Bifurcation，DL380 Gen9 必须升级到 System ROM (BIOS) v2.30 或更高版本
+  - 推荐版本: 最新的 v3.08 (2024年发布) 或更高，后期版本不仅优化了分叉后的信号稳定性，还修正了第三方 NVMe 转接卡引起的 iLO 风扇转速过高逻辑
+  - (极有可能)只在Riser 1(第一个扩展笼)支持 :ref:`pcie_bifurcation` 拆分成 ``x4x4`` : 被动式（无 PLX 芯片）的 1 分 4 转接卡要求主板不仅能拆分数据信号，还要能为 4 块硬盘提供独立的参考时钟（RefClock）。Gen9 的主板电路设计通常只在 x16 槽位上提供 1 到 2 组参考时钟，这限制了它最多只能拆分为 x8x8
+  - 插入第三方 NVMe 卡（不论是否分叉）后，iLO 4 会因为无法读取第三方卡的温度，默认将风扇转速拉高到 40%-60% (噪音巨大)
+
+.. csv-table:: 1号扩展笼插槽规格表 (标配型)
+   :file: hpe_dl380_gen9/riser1.csv
+   :widths: 20,20,20,20,20
+   :header-rows: 1
+
+.. note::
+
+   - **物理与电子带宽不一致** : Slot 1 和 Slot 2 的插槽虽然看起来是全长的 x16 接口，实际提供的带宽只有 x8。这意味着如果你把显卡插在这里，它只能以 x8 的速度运行。
+   - **CPU 直连** : 1号扩展笼的所有 3 个插槽全部由 CPU 1 提供信号(即使服务器只安装一个CPU也能工作)
+   - **Slot 3 的限制** : 物理只支持 x8 ，所以无法安装全长 x16 的大型显卡
+   - **Bifurcation (分叉)** : Riser 上搞 PCIe 分叉，通常是针对 Slot 1 或 Slot 2，且由于硬件布线的固化为x8，所以最多只能支持 ``x8x8``
+
+电源
+=======
+
+购买了两个 :ref:`amd_radeon_instinct_mi50` ，峰值功率300W，合计有600w功率要求。在我的服务器硬件配置，功耗估计:
+
+.. csv-table:: DL380服务器功耗估计
+   :file: hpe_dl380_gen9/power.csv
+   :widths: 40,20,20,20
+   :header-rows: 1
+
+由于整机峰值功耗接近 1300 W，所以安装 **两个完全相同的 1400W 铂金电源（Flex Slot Platinum Plus）**
+
+- **1400W 电源的电压要求** : HP服务器BIOS可以配置两个相同规格电源冗余模式，也就是 **双电源默认是“自动负载均衡”模式，即两个电源同时工作。** (HPE官方明确禁止混插不同功率容量电源，会被系统识别为"不匹配（Mismatched）"导致不稳定，甚至为把偶硬件而 **拒绝开机或自动关机** )
+
+  - 两个电源各承担约 50% 的功耗输出
+  - 优点：由于每个电源都只在半载左右运行，转换效率较高，且由于发热分散，电源的寿命会更长。
+  - 切换：如果其中一个电源模块损坏或断电，另一个电源会瞬间接管 100% 的负载，确保服务器不宕机。
+
+- 不建议单电源: 虽然单个1400W电源也能满足峰值功率要求，但是长期高负载会缩短电源使用寿命，并且一旦电源故障瞬间掉电关机对硬件冲击可能损坏昂贵的GPU设备
+
+查看电源模式
+--------------
+
+- iLO 4 管理界面：登录 iLO，在 Power Management -> Power Settings 里可以看到当前的电源冗余状态和实时功率计
+- BIOS 设置：开机按 F9 进入 System Utilities -> System Configuration -> BIOS/Platform Configuration (RBSU) -> Power Management -> Redundancy Mode 进行修改
+
+高性能风扇
+============
+
+HPE ProLiant DL380 Gen9服务器的GPU安装装载服务器后端，对于 :ref:`amd_radeon_instinct_mi50` 这样大功率被动散热设备，散热是一个很大的挑战: 冷却气流从服务器前端吸入，经过CPU和内存模块再对GPU进行降温散热，整个气流通道很长且阻碍较多。
+
+所以HPE官方要求服务器只要安装了GPU，就需要将常规散热风扇替换成高性能风扇，以加大散热气流:
+
+- 高性能风扇（部件号：719074-001 或 761510-001），淘宝上能够找到的配件标号是 ``777285-001`` ，实际上是Gen 10使用的配件，但是和Gen 9完全通用
+
+  - 高性能风扇的电流通常是 2.1A 至 2.65A 之间，如果标签上写的电流小于 1.0A 则表明是常规风扇
+  - 高性能风扇外壳顶部的拉环部分是红色提手(常规风扇是蓝色)
+
+- :ref:`amd_radeon_instinct_mi50` 和 :ref:`tesla_p10` 都是 **被动散热(Passive Cooling)** ，完全依赖服务器机箱内部的6个风扇产生的风压强行吹过显卡的散热鳍片
+- 固件锁定：当服务器检测到 PCIe 插槽中有大功率 GPU 存在时，iLO 固件会自动锁定一个较高的风扇基础转速
+
+为降低高速风扇噪音:
+
+- **更新 iLO 4 固件** ：确保 iLO 4 固件升级到最新版本（2.70 及以上）新版本对风扇调速算法有所优化
+- **Thermal Configuration 设置** : 在 BIOS 中，将 Thermal Configuration 设置为 "Optimal Cooling"
+- 如果使用标配风扇，HPE DL380 G9 的 iLO 固件检测到GPU存在为防止硬件烧毁，会强行将标配风扇推到 100% 全速运转，但是风压不足，散热效果还是达不到要求；所以改为专为GPU和165W+ CPU设计的高性能风扇，并设置 "Optimal Cooling" Thermal configuration，在非高压力下还是会维持在相对稳定的转速和噪音
+
+存储
+=======
+
+我发现自己以前购买 :ref:`hpe_dl360_gen9` 时候由于不了解 SAS 和 SATA 的区别，但是考虑自己完全使用 :ref:`zfs` 来构建存储，不需要RAID卡，所以没有选配 ``P440ar`` 阵列卡。但是实际上带来了后续的不足:
+
+``P440ar`` 阵列卡支持SAS硬盘，并向下兼容SATA硬盘；如果没有选配这块阵列卡，那么8盘位背板是连接到主板自带 ``B140i`` 控制器，仅支持 SATA 硬盘。
+
+实际上二手市场有大量淘汰的SAS硬盘价格低廉，由于服务器没有配置 ``P440ar`` 阵列卡无法选购，实际降低了扩展性。
+
+选配要点:
+
+- ``P440ar`` 阵列卡（备件号：726736-001 或 749974-001）的 ``ar`` 代表 ``Adaptive RAID`` ，是插在主板中心位置专用的扁平槽位上，不占用PCIe位置
+- 需要配套的 Mini-SAS HD 弯头线缆。这根线一头连接 P440ar 卡上的两个端口，另一头连接前面 8 盘位背板上的两个端口
+- P440ar 通常配有一块 FBWC 缓存卡 和一根连到 智能存储电池（Smart Storage Battery） 的线(在淘宝上这个"缓存电容/电池"需要单独购买):
+
+  - 如果跑 :ref:`zfs` ，会把 ``P440ar`` 设置为 ``HBA(直通)`` 模式，由ZFS接管缓存逻辑，所以没有这块电池SAS硬盘也能正常工作
+  - 如果改为RAID模式，则需要这块缓存电池，否则会极大限制写入速度
+
+阵列卡配置(整理记录，目前还没有硬件可供实践):
+
+- 开机按 ``F10`` 进入 ``Intelligent Provisioning``
+- 选择 ``Smart Storage Administrator (SSA)``
+- 选择 ``P440ar`` 控制器，在配置选项里找到 ``Configure Devices Into HBA Mode``
+
+这一步非常关键： **只有开启了 HBA Mode，Linux系统 和 ZFS 才能直接识别到 SAS 硬盘的物理底层，性能才是最强的**
+
+存储规划
+---------
+
+考虑到经济性和技术挑战优化，针对我目前具备的 DL380 ，最理想的存储架构:
+
+- 
+
+ZFS优化(待实践)
+-----------------
+
+
+
+参考
+======
+
+- `HPE ProLiant DL380 Gen9 Server QuickSpecs <https://support.hpe.com/hpesc/public/docDisplay?docId=c04346247&docLocale=en_US>`_
+- `HPE ProLiant DL380 Gen9 Power Supplies Overview | Power Supply Options | How to Install Hotswap PSU <https://www.youtube.com/watch?v=k0-HzEpQ2NQ>`_
+- Google Gemini

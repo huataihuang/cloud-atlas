@@ -9,7 +9,10 @@ sway - i3兼容Wayland compositor
 
    intro_sway.rst
    build_sway_on_pi.rst
+   sway_config.rst
+   sway_status.rst
    run_sway.rst
+   use_sway.rst
    ../../gentoo_linux/gentoo_sway.rst 
    sway_apps.rst
    sway_with_nvidia.rst
