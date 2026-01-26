@@ -9,24 +9,32 @@ Wayland环境(sway)截屏
 - 通过 sway 的快捷键执行脚本，完成屏幕截图
 - 简单的截图标记(文字和线框等)
 
+Wayland截图工具
+================
+
 参考 `Taking Screenshots on Wayland <https://seeminglyrandom.net/posts/wayland-screenshot/>`_ 略作修改(主要是我 :ref:`archlinux_on_mba` ，而 :ref:`mba11_late_2010` 没有 ``print`` 按键):
 
 - 在 :ref:`arch_linux` 上安装以下软件包:
 
 .. literalinclude:: sway_screenshot/install
-   :caption: 安装截屏需要的软件包
+   :caption: 安装截屏需要的软件包(arch linux)
+
+对于 :ref:`freebsd_sway` 则安装:
+
+.. literalinclude:: sway_screenshot/install_on_freebsd
+   :caption: 安装截屏需要的软件包(FreeBSD)
 
 - 创建 ``~/bin/screenshot.sh`` 脚本(注意需要通过 ``chmod +x ~/bin/acreenshot.sh`` 设置可执行属性):
 
 .. literalinclude:: sway_screenshot/screenshot.sh
    :caption: 创建 ``~/bin/screenshot.sh`` 脚本
 
-- 配置 ``~/.config/sway/config`` (只做了一点点修改以适应我的使用，你也可以自己定义不同的快捷键) :
+- (arch linux)配置 ``~/.config/sway/config`` (只做了一点点修改以适应我的使用，你也可以自己定义不同的快捷键) :
 
 .. literalinclude:: sway_screenshot/config
    :caption: 配置 ``~/.config/sway/config``
 
-注意，我这里用 ``$mod+z`` 代理 ``PRINT`` 键。使用 ``ctrl+$mod+c`` 组合键重新加载 :ref:`sway` 配置就可以开始使用截屏功能
+注意，我这里用 ``$mod+z`` 代理 ``PRINT`` 键(如果键盘上没有 ``PRINT`` 键)。使用 ``ctrl+$mod+c`` 组合键重新加载 :ref:`sway` 配置就可以开始使用截屏功能
 
 .. figure:: ../../../_static/linux/desktop/sway/sway_screen_shot_region.png
    

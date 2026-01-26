@@ -13,6 +13,7 @@ FreeBSD桌面
    freebsd_xfce4.rst
    freebsd_sway.rst
    freebsd_sway_intel-driver.rst
+   freebsd_sway_screenshot.rst
    freebsd_hikari.rst
    freebsd_chinese.rst
    freebsd_multimedia.rst

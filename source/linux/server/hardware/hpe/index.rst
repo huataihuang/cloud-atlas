@@ -12,7 +12,8 @@ HPE服务器
    hpe_dl160_gen9.rst
    dl360+pi_one_machine.rst
    dl360_bios.rst
-   dl360_bios_upgrade.rst
+   hpe_dl360_firmware_upgrade.rst
+   hpe_dl380_firmware_upgrade.rst
    dl360_config_mem.rst
    pcie_bifurcation.rst
    uefitool_pcie_bifurcation.rst

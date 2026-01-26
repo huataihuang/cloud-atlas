@@ -1,8 +1,8 @@
-.. _dl360_bios_upgrade:
+.. _hpe_dl360_firmware_upgrade:
 
-=====================
-HPE DL360 BIOS升级
-=====================
+=========================
+HPE DL360 firmware升级
+=========================
 
 HP服务器的驱动升级以及各种软件包下载都需要购买HPE服务，这对个人购买的二手服务器显然不合适。
 
@@ -20,6 +20,10 @@ HP服务器的驱动升级以及各种软件包下载都需要购买HPE服务，
 
    - `Updating Hewlett-Packard Enterprise servers using HPE SPP <https://www.adaptive.lv/en/2021/07/28/updating-hewlett-packard-enterprise-servers-using-hpe-spp/>`_ 提供了一步步操作截图
    - `Smart Update Manager 8.5.0 User Guide <http://itdoc.hitachi.co.jp/manuals/ha8000v/hard/Gen10/SUM/881504-008_en.pdf>`_ 提供了官方文档
+
+.. warning::
+
+   我在DL360上升级firmware采用了 SPP 光盘升级，在 :ref:`hpe_dl380_firmware_upgrade` 中采用分步骤手工升级
 
 下载
 =========
@@ -236,7 +240,7 @@ rpm包升级(未完成)
 :ref:`hp_ilo` 提供了非常好的系统观察页面，其中 ``System Information >> Firmware`` 可以显示系统中所有firmware版本，也就是如果必要，这些firmware都应该更新到最新，以提供最大优化:
 
 .. csv-table:: HPE DL360 gen9 Firmware Version
-   :file: dl360_bios_upgrade/dl360_firmware.csv
+   :file: hpe_dl360_firmware_upgrade/dl360_firmware.csv
    :widths: 25, 25, 20, 15, 15
    :header-rows: 1
 

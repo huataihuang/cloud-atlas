@@ -128,7 +128,7 @@ HPE ProLiant DL380 Gen9服务器的GPU安装装载服务器后端，对于 :ref:
 
 为降低高速风扇噪音:
 
-- **更新 iLO 4 固件** ：确保 iLO 4 固件升级到最新版本（2.70 及以上）新版本对风扇调速算法有所优化
+- **更新 iLO 4 固件** ：确保 iLO 4 固件升级到最新版本（2.70 及以上）新版本对风扇调速算法有所优化( 我的实践 :ref:`hp_ilo_upgrade` 到版本 2.82)
 - **Thermal Configuration 设置** : 在 BIOS 中，将 Thermal Configuration 设置为 "Optimal Cooling"
 - 如果使用标配风扇，HPE DL380 G9 的 iLO 固件检测到GPU存在为防止硬件烧毁，会强行将标配风扇推到 100% 全速运转，但是风压不足，散热效果还是达不到要求；所以改为专为GPU和165W+ CPU设计的高性能风扇，并设置 "Optimal Cooling" Thermal configuration，在非高压力下还是会维持在相对稳定的转速和噪音
 
@@ -168,7 +168,10 @@ HPE ProLiant DL380 Gen9服务器的GPU安装装载服务器后端，对于 :ref:
 ZFS优化(待实践)
 -----------------
 
+firmeare升级
+==============
 
+- :ref:`hpe_dl380_firmware_upgrade`
 
 参考
 ======

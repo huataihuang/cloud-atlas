@@ -15,7 +15,7 @@ Sysbench性能测试
 
 .. note::
 
-   我在 :ref:`dl360_bios_upgrade` 前后采用sysbench进行性能测试，以观察BIOS升级对性能的影戏
+   我在 :ref:`hpe_dl360_firmware_upgrade` 前后采用sysbench进行性能测试，以观察BIOS升级对性能的影戏
 
 安装(旧方法归档)
 =================
@@ -85,7 +85,7 @@ sysbench现在提供了二进制安装仓库方法，通过 packagecloud ，可�
 
 输出结果如下
 
-.. literalinclude:: ../../linux/server/hardware/hpe/dl360_bios_upgrade/before/sysbench_fileio
+.. literalinclude:: ../../linux/server/hardware/hpe/hpe_dl360_firmware_upgrade/before/sysbench_fileio
    :language: bash
    :emphasize-lines: 22-24,27-28
    :caption: sysbench fileio
@@ -101,7 +101,7 @@ sysbench现在提供了二进制安装仓库方法，通过 packagecloud ，可�
 
 输出结果:
 
-.. literalinclude:: ../../linux/server/hardware/hpe/dl360_bios_upgrade/before/sysbench_cpu
+.. literalinclude:: ../../linux/server/hardware/hpe/hpe_dl360_firmware_upgrade/before/sysbench_cpu
    :language: bash
    :emphasize-lines: 18-19
    :caption: sysbench cpu 
@@ -123,7 +123,7 @@ sysbench现在提供了二进制安装仓库方法，通过 packagecloud ，可�
 
 输出结果:
 
-.. literalinclude:: ../../linux/server/hardware/hpe/dl360_bios_upgrade/before/sysbench_threads
+.. literalinclude:: ../../linux/server/hardware/hpe/hpe_dl360_firmware_upgrade/before/sysbench_threads
    :language: bash
    :emphasize-lines: 14-15
    :caption: sysbench threads
@@ -139,7 +139,7 @@ sysbench现在提供了二进制安装仓库方法，通过 packagecloud ，可�
 
 输出结果:
 
-.. literalinclude:: ../../linux/server/hardware/hpe/dl360_bios_upgrade/before/sysbench_mutex
+.. literalinclude:: ../../linux/server/hardware/hpe/hpe_dl360_firmware_upgrade/before/sysbench_mutex
    :language: bash
    :emphasize-lines: 14
    :caption: sysbench mutex
@@ -157,7 +157,7 @@ sysbench现在提供了二进制安装仓库方法，通过 packagecloud ，可�
 
 输出结果:
 
-.. literalinclude:: ../../linux/server/hardware/hpe/dl360_bios_upgrade/before/sysbench_memory
+.. literalinclude:: ../../linux/server/hardware/hpe/hpe_dl360_firmware_upgrade/before/sysbench_memory
    :language: bash
    :emphasize-lines: 18,20
    :caption: sysbench memory
