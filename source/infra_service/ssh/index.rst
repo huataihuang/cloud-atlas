@@ -24,6 +24,7 @@ ssh服务
    openssh_legacy_options.rst
    ssh_enhance_setup.rst
    openssh_2fa.rst
+   dropbear.rst
    
 .. only::  subproject and html
 

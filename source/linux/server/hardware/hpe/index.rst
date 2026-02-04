@@ -19,6 +19,8 @@ HPE服务器
    uefitool_pcie_bifurcation.rst
    plx_8747_pcie_bifurcation.rst
    dl360_nvme_storage.rst
+   p440ar.rst
+   h240ar.rst
    dl360_tesla_p10.rst
    hpe_dl360_gen9_hard_drive_kits.rst
    flexiblelom_bay_intel_i350.rst

@@ -43,7 +43,7 @@ Intel显卡
 
 - 按照Intel不同CPU/iGPU安装以下驱动之一:
 
-  - ``intel-media-driver`` : VAAPI驱动，用于硬件加速视频编码和解码，用于Intel Broadwell(第五代CPU)及更新
+  - ``intel-media-driver`` : VAAPI驱动，用于硬件加速视频编码和解码，用于Intel Broadwell(第五代CPU, 2014年10月27日发布)及更新
   - ``libva-intel-driver`` : VAAPI驱动，用于早于Broadwell的设备，例如我的 :ref:`mba13_early_2014` 是 HASWELL 处理器，就使用这个驱动
 
     - Intel显卡通过 ``VA-API`` 来加速视频解码，所以当使用 VLC 来播放视频时，需要系统安装好 ``libva-intel-driver``
@@ -87,16 +87,14 @@ alpine linux 提供了一个结合使用 ``eudev`` 和 ``elogind`` 的自动化S
 .. literalinclude:: alpine_sway/setup-desktop_sway_command_output
    :caption: 自动化方式安装sway执行过程的提示
 
-手工安装方式(废弃)
+手工安装方式
 ---------------------
 
-.. warning::
+.. note::
 
-   **手柄配置没有成功** 最后还是采用自动配置方法简单实用
+   第一次在alpine linux上 **手动配置没有成功** (启动 ``sway`` 出现segment fault)，所以改为采用自动配置方法完成。 自动化步骤采用了 ``eudev`` 和 ``elogind`` ，和我的手工步骤不同。
 
-   我按照文档执行手工安装，有些步骤没有完全按照文档(例如软件包)，我遇到的问题是启动 ``sway`` 出现segment fault
-
-   没有找出原因，最后我采用上面自动化安装sway完成，自动化步骤采用了 ``eudev`` 和 ``elogind`` ，和我的手工步骤不同。
+   不过，因为后来在 :ref:`freebsd_sway` 实践时最终解决了安装运行和中文输入，并且手工安装非常精简，所以我重新尝试在alpine linux采用手工安装方式。
 
 - 安装sway桌面:
 
@@ -108,7 +106,7 @@ alpine linux 提供了一个结合使用 ``eudev`` 和 ``elogind`` 的自动化S
 .. literalinclude:: alpine_sway/install_seated
    :caption: 安装设置seatd
 
-配置环境变量:
+配置环境变量(现在可能不需要了，seatd会自动处理):
 
 .. literalinclude:: ../gentoo_linux/gentoo_sway/bashrc
    :language: bash
@@ -133,8 +131,8 @@ sway配置
    :language: bash
    :caption: sway配置touchpad
 
-PipeWire配置
-----------------
+PipeWire配置(可能不需要)
+-------------------------
 
 Sway compositor 不参与音频播放，并且屏幕共享功能需要 PipeWire，所以为了实现音频播放，建议同时安装PipeWire。Alpine Linux v3.22版本开始，提供了脚本可以在OpenRC中将PipeWire作为用户服务启动。
 
@@ -157,8 +155,11 @@ Sway compositor 不参与音频播放，并且屏幕共享功能需要 PipeWire�
 .. literalinclude:: alpine_sway/sway_config_portal
    :caption: 设置 ``~/.config/sway/config`` 在开头添加一行环境变量配置
 
-启动
----------
+启动sway
+===========
+
+第一次失败的排查
+----------------------
 
 - 首先尝试直接启动 ``sway`` 命令
 
@@ -175,6 +176,22 @@ Sway compositor 不参与音频播放，并且屏幕共享功能需要 PipeWire�
 .. warning::
 
    我发现自动安装步骤比我手工安装步骤要完整，并且没有遇到启动问题。所以我重新用自动安装方法安装，这个crash问题就没有了
+
+第二次排查(成功)
+-------------------
+
+我在最近一次 :ref:`mba11_late_2010` 手工部署sway最终成功，不过也在启动say时候遇到过如下报错:
+
+.. literalinclude:: alpine_sway/renderer
+   :caption: 启动sway显示renderer错误
+
+这个错误实际上就是手册 `Alpine Linux wiki: NVIDIA <https://wiki.alpinelinux.org/wiki/NVIDIA>`_ 提到的 ``driver auto-selection does not work`` 只不过我的现象和手册说的不一样(手册举例的现象是看不到鼠标指针，而我遇到的是压根进不了sway)，通过在环境配置 ``~/.profile`` 添加如下配置解决:
+
+.. literalinclude:: alpine_sway/profile_nouveau
+   :caption: 添加环境变量强制使用 ``nouveau`` 驱动
+
+配置自动登录sway
+=================
 
 - 终端自动启动，配置 ``~/.profile`` :
 
@@ -215,6 +232,11 @@ alpine linux 提供了2个 ``Noto Sans CJK（思源黑体）`` 字体软件包: 
 .. literalinclude:: alpine_sway/profile
    :caption: 添加fcitx配置
    :emphasize-lines: 3,4,5,8
+
+这里配置和我在 :ref:`freebsd_sway` 中有点不同，不过验证是正常工作的，完整配置如下( :ref:`mba11_late_2010` ):
+
+.. literalinclude:: alpine_sway/profile_all
+   :caption: 完整 ``~/.profile`` 配置
 
 - 修订 ``~/.config/sway/config`` :
 

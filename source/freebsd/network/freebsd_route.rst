@@ -27,6 +27,9 @@ FreeBSD的路由设置方法和 :ref:`linux` 略有不同
 .. literalinclude:: freebsd_route/netstat-4_output
    :caption: 检查IPv4路由
 
+默认路由设置
+==============
+
 - 命令行设置默认路由:
 
 .. literalinclude:: freebsd_route/route_default
@@ -37,8 +40,8 @@ FreeBSD的路由设置方法和 :ref:`linux` 略有不同
 .. literalinclude:: freebsd_route/route_delete_default
    :caption: 删除默认路由
 
-配置
-=======
+默认路由配置
+-------------
 
 为保持FreeBSD重启后默认路由，需要配置 ``/etc/rc.conf`` :
 
@@ -46,6 +49,22 @@ FreeBSD的路由设置方法和 :ref:`linux` 略有不同
    :caption: 设置 ``/etc/rc.conf`` 默认路由
 
 修订配置文件后，使用如下命令:
+
+.. literalinclude:: freebsd_route/restart_configured_interfaces
+   :caption: 重启服务使配置路由生效
+
+静态路由
+==========
+
+静态路由配置
+---------------
+
+- 修订 ``/etc/rc.conf`` :
+
+.. literalinclude:: freebsd_route/rc.conf_static_route
+   :caption: 静态路由配置
+
+- 然后重启网路服务更新路由:
 
 .. literalinclude:: freebsd_route/restart_configured_interfaces
    :caption: 重启服务使配置路由生效

@@ -20,11 +20,13 @@ NVIDIA GPU
    tesla_p10.rst
    tesla_p100.rst
    tesla_t10_vs_t4.rst
+   tesla_a2.rst
    nvidia_a100.rst
    nvidia_h100.rst
    nvidia_sxm_socket.rst
    nvidia_gpu_mem_clock.rst
    install_nvidia_linux_driver.rst
+   install_nvidia_linux_driver_ubuntu.rst
 
 .. only::  subproject and html
 

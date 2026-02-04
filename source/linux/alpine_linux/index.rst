@@ -42,6 +42,7 @@ Alpine Linux
    alpine_dev.rst
    alpine_swift.rst
    alpine_install_calibre.rst
+   alpine_xfce.rst
    alpine_sway.rst
    alpine_wine.rst
 

@@ -135,6 +135,20 @@ HPE ProLiant DL380 Gen9服务器的GPU安装装载服务器后端，对于 :ref:
 存储
 =======
 
+M.2 SSD存储
+-------------
+
+DL360/DL380 gen9最佳存储(不考虑成本)是采用M.2 :ref:`nvme` SSD存储:
+
+- 内置 :ref:`pcie_bifurcation` 控制器的PCIE阵列卡，例如 ``JEYI佳翼PCIE4.0x8阵列卡`` 能够将X8或X16拆分为4个 M.2 接口NVMe SSD存储
+
+  - 只需要占用一个PCIe接口就能够安装4块 M.2 NVMe SSD存储，获得最高速和极大容量的静音存储
+
+但是很不幸，在2025年开始AI狂飙的时代，内存和存储的产能被企业级AI所吞噬，导致个人使用的内存、SSD存储价格翻倍甚至翻数倍，可能在最近一到两年都无法回到正常的价格体系。所以，当前性价比已降低了很多，也迫使我退而采用二手SAS机械硬盘来组建 :ref:`zfs_raidz` 来实现经济型的大容量存储(最自身也是一个极大的技术挑战，如何构建靠性能、可靠、静音的存储)
+
+SAS存储
+---------
+
 我发现自己以前购买 :ref:`hpe_dl360_gen9` 时候由于不了解 SAS 和 SATA 的区别，但是考虑自己完全使用 :ref:`zfs` 来构建存储，不需要RAID卡，所以没有选配 ``P440ar`` 阵列卡。但是实际上带来了后续的不足:
 
 ``P440ar`` 阵列卡支持SAS硬盘，并向下兼容SATA硬盘；如果没有选配这块阵列卡，那么8盘位背板是连接到主板自带 ``B140i`` 控制器，仅支持 SATA 硬盘。
@@ -158,12 +172,21 @@ HPE ProLiant DL380 Gen9服务器的GPU安装装载服务器后端，对于 :ref:
 
 这一步非常关键： **只有开启了 HBA Mode，Linux系统 和 ZFS 才能直接识别到 SAS 硬盘的物理底层，性能才是最强的**
 
+.. note::
+
+   DL380 gen9 可以配置两种Flexible Smart Array控制器:
+
+   - P440ar Flexible Smart Array控制器
+   - P840ar Flexible Smart Array控制器
+
 存储规划
 ---------
 
-考虑到经济性和技术挑战优化，针对我目前具备的 DL380 ，最理想的存储架构:
+考虑到经济性和技术挑战优化，针对我目前具备的 DL380 ，最理想的(省钱)存储架构:
 
-- 
+- :ref:`p440ar` 成本25元
+- DL380 g9 2.5寸 8盘位 SAS 硬盘背板 硬盘笼 777279-001 带线: 可以连接 :ref:`p440ar` 在第二个硬盘笼安装8块SAS硬盘
+- **2块** Intel S3710  ``400GB`` SSD存储: 构建 zfs 
 
 ZFS优化(待实践)
 -----------------
@@ -178,4 +201,6 @@ firmeare升级
 
 - `HPE ProLiant DL380 Gen9 Server QuickSpecs <https://support.hpe.com/hpesc/public/docDisplay?docId=c04346247&docLocale=en_US>`_
 - `HPE ProLiant DL380 Gen9 Power Supplies Overview | Power Supply Options | How to Install Hotswap PSU <https://www.youtube.com/watch?v=k0-HzEpQ2NQ>`_
+- `HPE ProLiant DL380 Gen9服务器用户指南 <https://support.hpe.com/hpesc/public/docDisplay?docId=c04471512>`_
+- `Setup Overview for the HPE ProLiant DL380 Gen9 Server <https://support.hpe.com/hpesc/public/docDisplay?docId=c05266907&docLocale=en_US>`_
 - Google Gemini

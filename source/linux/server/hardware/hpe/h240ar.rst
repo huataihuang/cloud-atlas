@@ -1,0 +1,37 @@
+.. _h240ar:
+
+======================
+HPE H240ar 存储阵列卡
+======================
+
+我最初为了能够在 :ref:`hpe_dl380_gen9` 上安装和使用SAS机械硬盘，购买了 :ref:`p240ar` ，但是很不幸买到的二手卡有硬件故障。考虑到我主要采用 :ref:`zfs` 而不依赖主机硬件RAID，所以 :ref:`p440ar` 设置的是HBA直通模式，这带来以下不足：
+
+- 完全浪费了硬件RAID功能，而且p440ar的复杂的ROC芯片缓存逻辑，可能会因为没有电池或缓存故障导致宕机
+- p440ar卡的硬件RAID功能在没有电池支持时会报错并且导致降速
+- p440ar卡的发热量较简化的HBA卡大，对机箱狭窄的DL380不利
+
+实际上市场上有大量LSI 9211-8i 或 LSI 9300-8i HBA卡，是一种非常适合 :ref:`zfs` 这种不需要硬件RAID的 ``IT Mode固件卡`` :
+
+- LSI 隶属于 broadcom (博通): 绝大多数阵列卡（包括 :ref:`p440ar` ）底层用的其实都是 LSI 的芯片
+- IT Mode 固件: 标准的 LSI 卡通常带 RAID 功能（IR Mode）; "IT Mode" (Initiator Target) 是一种特殊的固件，它彻底抹去了 RAID 逻辑直接把硬盘交给操作系统，非常适合 :ref:`zfs` 使用
+- 需要注意第三方LSI卡可能会导致 :ref:`hp_ilo` 无法读取硬盘温度，这会导致服务器风扇强制拉高到 40%-60%，产生巨大的噪音
+
+我最后退掉了故障的 :ref:`p440ar` 改为非常廉价的 **HPE H240ar** :
+
+- 淘宝二手最低只需要 15RMB
+- 和 :ref:`p440ar` 一样，不需要额外占用 PCIe 槽，不需要换 SAS 线
+- HPE 原厂卡，iLO 能识别(避免风扇噪音)
+- 没有复杂的 ROC 芯片缓存逻辑，不会像 P440ar 那样因为没电池或缓存故障而导致 ROC 1 宕机
+- 发热量比 P440ar 低得多
+
+直通（HBA）模式
+=================
+
+H240ar 支持两种工作模式：RAID Mode（简单的硬件 RAID 0/1/5）和 HBA Mode（纯直通）
+
+针对 :ref:`zfs` 需要确保H240ar使用 **HBA Mode**
+
+参考
+=======
+
+- `HPE H240ar, H240, and H241 Smart HBA User Guide <https://support.hpe.com/hpesc/public/docDisplay?docId=c04441332&docLocale=en_US>`_
