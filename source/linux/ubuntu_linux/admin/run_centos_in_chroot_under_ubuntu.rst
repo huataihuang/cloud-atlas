@@ -4,7 +4,7 @@
 在Ubuntu中构建chroot环境运行CentOS
 =====================================
 
-我在 :ref:`dl360_bios_upgrade` 时发现，在企业级Linux市场，果然 :ref:`redhat_linux` 占据了主导地位: HP官方网站只提供Windows安装包和RPM安装包。但这也带来了一点困扰:
+我在 :ref:`hpe_dl360_firmware_upgrade` 时发现，在企业级Linux市场，果然 :ref:`redhat_linux` 占据了主导地位: HP官方网站只提供Windows安装包和RPM安装包。但这也带来了一点困扰:
 
 - 虽然可以通过 :ref:`alien` 将RPM包转换成DEB包，但是我发现一个非常尴尬的事情: HP官网提供了大量的软件包，但是没有明确软件包如何对应于硬件，而服务器硬件组合实在太繁多，很难确定我现有的 :ref:`hpe_dl360_gen9` 硬件配置是否需要安装更新包
 - 同一个软件包可以能包含了针对多种硬件的firmware更新，但列出的型号很难确定和 ``dmidecode`` 或 ``lspci`` 对应
@@ -143,13 +143,13 @@ CentOS 7已经不再提供 ``MAKEDEV`` 脚本，所以需要在 ``chroot`` 内�
 
 .. note::
 
-   后来发现 :ref:`dl360_bios_upgrade` 还需要用户账号登陆，所以再添加以下bind，将操作系统的账号密码也映射到chroot环境::
+   后来发现 :ref:`hpe_dl360_firmware_upgrade` 还需要用户账号登陆，所以再添加以下bind，将操作系统的账号密码也映射到chroot环境::
 
       mount -o bind /etc/passwd ${chroot_dir}/etc/passwd
       mount -o bind /etc/shadow ${chroot_dir}/etc/shadow
       mount -o bind /etc/group ${chroot_dir}/etc/group
 
-   当添加了上述 ``passwd`` 等文件后， :ref:`dl360_bios_upgrade` 过程中通过WEB浏览器访问 Smart Update Manager 管理界面就能够正常使用系统 ``root`` 账号登陆
+   当添加了上述 ``passwd`` 等文件后， :ref:`hpe_dl360_firmware_upgrade` 过程中通过WEB浏览器访问 Smart Update Manager 管理界面就能够正常使用系统 ``root`` 账号登陆
 
 进入chroot::
 
@@ -178,7 +178,7 @@ CentOS 7已经不再提供 ``MAKEDEV`` 脚本，所以需要在 ``chroot`` 内�
 
 可以验证这是一个完整的可工作的CentOS 7系统。
 
-现在就可以在这个基础上完成 :ref:`dl360_bios_upgrade` ，即通过HP官方提供的 SPP 光盘，一条脚本命令进行升级
+现在就可以在这个基础上完成 :ref:`hpe_dl360_firmware_upgrade` ，即通过HP官方提供的 SPP 光盘，一条脚本命令进行升级
 
 参考
 ======

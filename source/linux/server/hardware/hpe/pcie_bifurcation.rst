@@ -56,7 +56,7 @@ PCIe bifurcation
 
 ``System Configuration > BIOS/Platform Configuration (RBSU) > PCIe Device Configuration > PCIe Bifurcation Options``
 
-对于 :ref:`hpe_dl360_gen9` 我执行完成 :ref:`dl360_bios_upgrade` 然后经过多方验证，发现 :ref:`hpe_dl360_gen9` 对 ``PCIe bifurcation`` 支持有限，见下文。
+对于 :ref:`hpe_dl360_gen9` 我执行完成 :ref:`hpe_dl360_firmware_upgrade` 然后经过多方验证，发现 :ref:`hpe_dl360_gen9` 对 ``PCIe bifurcation`` 支持有限，见下文。
 
 .. note::
 

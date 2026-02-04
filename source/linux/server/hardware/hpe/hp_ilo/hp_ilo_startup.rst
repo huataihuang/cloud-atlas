@@ -80,7 +80,7 @@ Linux驱动和工具
 
 .. note::
 
-   BIOS 升级参考 :ref:`dl360_bios_upgrade`
+   BIOS 升级参考 :ref:`hpe_dl360_firmware_upgrade`
 
 - 通过iLO WEB方式升级:
 

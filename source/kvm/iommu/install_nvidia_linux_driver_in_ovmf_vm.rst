@@ -77,7 +77,7 @@ NVIDIA passthrough via ovmf需要Host主机内核参数 ``pci=realloc``
 
 - 对于NVIDIA GPU，物理主机的BIOS需要激活 :ref:`hpe_server_pcie_64bit_bar_support` 来支持正确的pci设备所需的内存窗口大小和区域(BAR)
 - 如果BIOS比较古老不支持上述 ``64-Bit Addressing`` 或者 ``Large BAR`` 配置，则可以通过物理服务器的Linux操作系统内核参数 ``pci=realloc`` 来由内核更改PCI设备内存窗口和区域(BAR)
-- 实际上我已经在 :ref:`hpe_dl360_gen9` 完成了 :ref:`dl360_bios_upgrade` ，并通过 激活 :ref:`hpe_server_pcie_64bit_bar_support` 支持，所以没有必要配置物理主机内核参数 ``pci=realloc`` (两者目的是相同的)。这也是为何在物理主机上添加了内核参数 ``pci=realloc`` 前后效果相同的原因。
+- 实际上我已经在 :ref:`hpe_dl360_gen9` 完成了 :ref:`hpe_dl360_firmware_upgrade` ，并通过 激活 :ref:`hpe_server_pcie_64bit_bar_support` 支持，所以没有必要配置物理主机内核参数 ``pci=realloc`` (两者目的是相同的)。这也是为何在物理主机上添加了内核参数 ``pci=realloc`` 前后效果相同的原因。
 
 需要注意的是，上述配置都是在物理服务器上完成，但是这样依然不能使得虚拟机正确
 

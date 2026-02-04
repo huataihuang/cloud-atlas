@@ -19,7 +19,7 @@ Linux是完全开源的操作系统，任何人都能够定制自己的发行版
 
 .. note::
 
-   我觉得在企业级Linux市场， :ref:`redhat_linux` 占据了极大优势。这点我在 :ref:`dl360_bios_upgrade` 时特别有感触，因为在HP的服务器支持驱动和firmware更新下载中，只提供Windows安装包和RPM包，压根就没有提供给Ubuntu/Debian系可用的安装包。这也侧面反映了Linux企业市场的格局。
+   我觉得在企业级Linux市场， :ref:`redhat_linux` 占据了极大优势。这点我在 :ref:`hpe_dl360_firmware_upgrade` 时特别有感触，因为在HP的服务器支持驱动和firmware更新下载中，只提供Windows安装包和RPM包，压根就没有提供给Ubuntu/Debian系可用的安装包。这也侧面反映了Linux企业市场的格局。
 
 - ``桌面视角`` : `DistroWatch Page Hit Ranking <https://distrowatch.com/dwres.php?resource=popularity>`_ 是 DistroWatch.com 统计访问发行版页面点击数来反映网站访客使用Linux发行版和其他免费操作系统(如 :ref:`freebsd` )的情况，可以管窥Linux **桌面发行版** 流程程度。观察基于 :ref:`debian` 和 :ref:`arch_linux` 的再发行版比较流行。 
 
