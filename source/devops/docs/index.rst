@@ -15,7 +15,7 @@ DevOps 文档
    docs_as_code.rst
    write_doc.rst
    static_website.rst
-   obsidian.rst
+   obsidian/index
    sphinx_doc/index
    tiddlywiki/index
    mkdocs/index

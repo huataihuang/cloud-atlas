@@ -1,4 +1,4 @@
-.. _obsidian:
+.. _intro_obsidian:
 
 ==============================
 Obsidian Markdown知识管理
@@ -33,6 +33,9 @@ Obsidian 黑曜石
 感受
 ======
 
-``Obsidian`` 提供了比较有意思的功能，不过我还是实用 :ref:`mkdocs` 来完成自己的知识库。主要原因是我希望更简单的解决方案，所有的文档同步存储和同步，我可以实用自建方案来解决。
+``Obsidian`` 提供了比较有意思的功能，虽然我最初采用 :ref:`mkdocs` ，但是我越来越觉得跨平台多设备是非常重要的特性，例如我需要在 :ref;`freebsd_sway` 上使用 :ref:`obsidian_freebsd` ，同时在我的 :ref:`iphone` :ref:`ipad` 上同步进行编辑，就需要考虑平台的通用性和易用性。
 
-不过，如果你想要更简便的方案，或许可以尝试一下 `Obsidian.md <https://obsidian.md>`_
+参考
+======
+
+- `Obsidian.md <https://obsidian.md>`_
