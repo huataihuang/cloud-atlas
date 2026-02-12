@@ -26,6 +26,8 @@ Alpine Linux
    alpine_setup_disk.rst
    alpine_wireless.rst
    alpine_wireless_broadcom-wl.rst
+   alpine_wireless_broadcom-wl_quickstart.rst
+   alpine_asix_usb_network_adapter.rst
    alpine_extended.rst
    alpine_apk.rst
    alpine_ssh_docker.rst

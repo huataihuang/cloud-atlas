@@ -10,6 +10,7 @@ sway - i3兼容Wayland compositor
    intro_sway.rst
    build_sway_on_pi.rst
    sway_config.rst
+   sway_dpi.rst
    sway_status.rst
    run_sway.rst
    use_sway.rst

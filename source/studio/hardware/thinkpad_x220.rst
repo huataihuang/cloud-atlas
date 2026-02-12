@@ -24,6 +24,7 @@ x220.mdonnelltech.com
 
 - CPU: Core i5-2410M @ 2.30GHz, 3MB L3 cache
 - 内存: 16G (自己配置micron 16GB 1866MHz DDR3内存)
+- 屏幕: 12.5寸 LED背光 1366x768 (默认配置的屏幕显示效果不佳，角度稍偏几乎无法看清，淘宝上有后期发布的IPS屏幕替换，可以大幅改善)
 - 硬盘: Intel SSDSCC2KW51 (512G)
 
 MiniPCI Express slot
@@ -73,3 +74,4 @@ BIOS微码
 - `THINKPAD X220 MODIFIED BIOS UPDATE FROM A BOOTABLE USB <http://x220.mcdonnelltech.com/bios/>`_
 - `ThinkWiki: Category:X220 <https://www.thinkwiki.org/wiki/Category:X220>`_
 - `Thinkwiki: MiniPCI Express slot <https://www.thinkwiki.org/wiki/MiniPCI_Express_slot>`_
+- `百度百科: 联想ThinkPad X220 <https://baike.baidu.com/item/%E8%81%94%E6%83%B3ThinkPad%20X220/4693157>`_

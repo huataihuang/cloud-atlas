@@ -4,6 +4,10 @@
 设置Alpine Linux无线: ``broadcom-wl``
 =======================================
 
+.. warning::
+
+   本文的方法现在可能已经失效，我在 Alpine Linux 升级到内核 ``6.12.67-0-lts`` 时，已无法完成 ``broadcom-wl`` 源代码编译，之前简单手工修订已无法解决。不过，gemini提供了一些参考信息，我整理在 :ref:`alpine_wireless_broadcom-wl_quickstart` ，准备在后续实践。
+
 .. note::
 
    在 :ref:`mbp15_late_2013` 和 :ref:`mba13_early_2014` 上安装Alpine Linux时，默认系统没有识别出Broadcom无线网卡:
