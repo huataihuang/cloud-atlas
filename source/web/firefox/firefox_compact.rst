@@ -14,6 +14,10 @@ Firefox优化UI紧凑方法
   - 搜索 ``browser.uidensity.hardcoded.compact`` 将该项指双击改为 ``true``
   - 右击工具栏，将Tab栏改为垂直，并通过快捷键 ``ctrl-alt-z`` 控制tab工具栏的展示，这样可以极大优化tab的占用
 
+.. note::
+
+   上述设置Firefox的 ``Compact Mode`` 在Linux下实践成功，但是在FreeBSD上提示不支持
+
 - 调整界面缩放比例 (UI Density) -- **实测有效** ``这个方法强烈推荐``
 
   - 进入 ``about:config``

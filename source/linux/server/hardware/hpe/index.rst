@@ -32,6 +32,7 @@ HPE服务器
    hpe_server_monitor.rst
    dl360_gen9_pci_bus_error.rst
    nmi_iock_error.rst
+   hp_z8_g4.rst
 
 .. only::  subproject and html
 
