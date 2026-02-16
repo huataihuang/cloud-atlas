@@ -4,7 +4,7 @@
 ``ROCm`` 快速起步
 ======================
 
-AMD官方提供了主要Linux发行版安装ROCm的方法，我的实践在 :ref:`debian` 上完成
+AMD官方提供了主要Linux发行版安装ROCm的方法，我的实践在 :ref:`debian` 和 :ref:`ubuntu_linux` 上完成
 
 安装
 =======

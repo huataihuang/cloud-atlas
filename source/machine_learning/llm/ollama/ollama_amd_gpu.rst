@@ -25,10 +25,10 @@ Ollama使用AMD GPU运行大模型
 
 - 安装 :strike:`ROCm` 和 AMDGPU驱动( :ref:`rocm_quickstart` )
 
-.. literalinclude:: ../../hardware/amd_gpu/rocm/rocm_quickstart/ubuntu_24.04_install
+.. literalinclude:: ../../rocm/rocm_quickstart/ubuntu_24.04_install
    :caption: :strike:`在 Ubuntu 24.04 上安装 ROCm` **这步不需要**
 
-.. literalinclude:: ../../hardware/amd_gpu/rocm/rocm_quickstart/amdgpu_driver_install
+.. literalinclude:: ../../rocm/rocm_quickstart/amdgpu_driver_install
    :caption: Ubuntu 24.04 安装 amdgpu 驱动
 
 安装Ollama

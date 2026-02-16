@@ -107,12 +107,12 @@ PCI passthru
 
 虽然看上去成功安装了 ``ROCm`` 和  ``AMDGPU driver`` ，但是我发现 ``rocm-smi`` 输出显示没有可用的AMD GPU:
 
-.. literalinclude:: ../../../../machine_learning/hardware/amd_gpu/rocm/rocm_quickstart/rocm-smi_no_gpu
+.. literalinclude:: ../../../../machine_learning/rocm/rocm_quickstart/rocm-smi_no_gpu
    :caption: ``rocm-smi`` 显示没有可用AMD GPU
 
 - 检查 ``dmesg | grep amdgpu`` 发现初始化异常，通过完整的 ``dmesg`` 显示，似乎 ``atom_bios`` （看起来是bhyve模拟的bios存在问题不能支持 ``amdgpu`` )
 
-.. literalinclude:: ../../../../machine_learning/hardware/amd_gpu/rocm/rocm_quickstart/dmesg_amdgpu_error
+.. literalinclude:: ../../../../machine_learning/rocm/rocm_quickstart/dmesg_amdgpu_error
    :caption: 检查系统日志发现AMD GPU初始化失败
    :emphasize-lines: 35,36
 
@@ -132,7 +132,7 @@ PCI passthru
 
 上述帖子提供了手工下载Firmware的方法: 在 `debian firmware-nonfree <http://ftp.debian.org/debian/pool/non-free-firmware/f/firmware-nonfree/>`_ 提供下载:
 
-.. literalinclude:: ../../../../machine_learning/hardware/amd_gpu/rocm/rocm_quickstart/firmware-amd-graphics
+.. literalinclude:: ../../../../machine_learning/rocm/rocm_quickstart/firmware-amd-graphics
    :caption: 手工安装 firmware-amd-graphics
 
 .. warning::

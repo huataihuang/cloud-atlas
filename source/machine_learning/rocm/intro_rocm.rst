@@ -8,7 +8,7 @@ AMD ROCm 是一个在AMD Instinct 加速卡和AMD Radeon GPU上运行HPC和AI工
 
 ROCm是一个软件堆栈，主要由开源软件构成，从底层内核到高层最终用户应用程序，提供了对AMD GPU的编程工具:
 
-.. figure:: ../../../../_static/machine_learning/hardware/amd_gpu/rocm/rocm-software-stack-6_4_0.jpg
+.. figure:: ../../_static/machine_learning/rocm/rocm-software-stack-6_4_0.jpg
 
    AMD ROCm 软件堆栈
 

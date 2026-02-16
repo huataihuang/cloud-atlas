@@ -10,7 +10,6 @@ AMD GPU
    amd_gpu_infra.rst
    amd_firepro_s7150x2.rst
    amd_radeon_instinct_mi50.rst
-   rocm/index
    amd_gpu_monitor.rst
 
 

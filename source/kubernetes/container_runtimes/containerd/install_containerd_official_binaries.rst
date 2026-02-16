@@ -6,7 +6,7 @@
 
 在 :ref:`k8s_dnsrr` ，由于Kubernetes 1.24移除了Docker支持，改为采用最新的 ``dockerd`` 运行时，以下为部署实践
 
-- 首先停滞 ``kubelet`` 并卸载之前安装的Docker相关软件:
+- 首先停止 ``kubelet`` 并卸载之前安装的Docker相关软件:
 
 .. code:: bash
 
