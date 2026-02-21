@@ -12,6 +12,7 @@ Docker 镜像
    fedora_image.rst
    fedora_tini_image.rst
    ubuntu_tini_image.rst
+   ubuntu_image.rst
    run_multiple_processes_in_a_container.rst
    alpine_docker_image.rst
    archlinux_docker_image.rst

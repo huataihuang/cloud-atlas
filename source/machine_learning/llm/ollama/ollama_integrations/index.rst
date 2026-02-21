@@ -1,16 +1,14 @@
-.. _docker_network:
+.. _ollama_integrations:
 
 =================================
-Docker网络
+Ollama 集成
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   docker_proxy.rst
-   docker_proxy_quickstart.rst
-   docker_proxy_socks_quickstart.rst
-   docker_expose_publish_port.rst
+   coding/index
+   ollama_integrate_openclaw.rst
 
 .. only::  subproject and html
 

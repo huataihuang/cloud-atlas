@@ -12,6 +12,7 @@ Docker GPU设备
    nvidia_p4_pi_docker.rst
    nvidia-driver_pi_os.rst
    bhyve_ubuntu_tesla_p4_docker.rst
+   container_direct_access_amd_gpu.rst
    amd_container_toolkit.rst
 
 .. only::  subproject and html

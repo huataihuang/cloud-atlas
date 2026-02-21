@@ -15,7 +15,13 @@ AMD Container Toolkit
 
 这个AMD Container Toolkit有2个主要组件:
 
-- ``amd-container-runtime`` : 一个定制的 :ref:`container_runtimes` (包装了 :ref:`runc` ) 
+- ``amd-container-runtime`` : 一个定制的 :ref:`container_runtimes` (包装了 ``runc`` ) 来将AMD GPUs注入容器
+- ``amd-ctk`` (Container Toolkit CLI): 管理GPU配置，运行时设置以及容器编排集成的命令行工具
+
+:ref:`container_direct_access_amd_gpu` vs. AMD Container Toolkit
+--------------------------------------------------------------------
+
+
 
 参考
 =========

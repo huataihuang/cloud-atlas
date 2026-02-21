@@ -19,6 +19,13 @@ Hacker News上有一个讨论 `Reminder: You don't need ollama, running llamacpp
 
    我感觉深入学习 ``llama.cpp`` 的部署可能更可以控制底层技术，并且减轻中间层的消耗。但是也带来很多细节需要花费精力。这是一个投入产出的平衡，有待探索。
 
+Ollama Coding
+====================
+
+Ollama现在可以通过 ``ollama launch XXX`` 加载一种特殊的 :ref:`ollama_coding_integrations` :
+
+- 
+
 参考
 ======
 

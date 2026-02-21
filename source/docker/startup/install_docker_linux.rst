@@ -46,9 +46,10 @@ Debian/Ubuntu平台安装Docker
 使用Ubuntu发行版的软件仓库安装Docker
 -----------------------------------------
 
-Ubuntu默认发行版本 ``docker.io`` 是可以兼容在Ubuntu主推的LXD系统中，但是版本会较Docker官方低一些。安装非常简便::
+Ubuntu默认发行版本 ``docker.io`` 是可以兼容在Ubuntu主推的LXD系统中，但是版本会较Docker官方低一些。安装非常简便:
 
-   sudo apt install docker.io
+.. literalinclude:: install_docker_linux/ubuntu_install
+   :caption: 在Ubuntu中安装发行版提供的docker
 
 安装完成后docker服务就已经启动，此时可以使用以下命令查看docker容器::
 
@@ -158,7 +159,7 @@ Arch Linux发行版的 ``docker`` 软件包就是Docker CE版本，可以直接�
 
 .. note::
 
-   实践发现上述将用户添加到 ``docker`` 用户组不能立即生效。我尝试直接重启 ``docker`` 服务未生效，实际是重启了操作系统之后才生效。
+   注意修订用户组之后需要用户退出重新登录才能生效，如果ssh远程访问并且使用了 :ref:`ssh_multiplexing` ，则需要kill掉本地ssh客户端连接重新登录才行
 
 快速起步
 ===========

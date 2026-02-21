@@ -9,6 +9,8 @@ AMD官方提供了主要Linux发行版安装ROCm的方法，我的实践在 :ref
 安装
 =======
 
+.. _install_rocm:
+
 RCOm安装
 ----------
 
@@ -49,6 +51,8 @@ RCOm安装
    安装提示 "下载需要 4,365 MB，另外需要 25.3 GB 附加安装空间"，所以我需要先扩容虚拟机磁盘空间:
 
    我检查发现原来 :ref:`bhyve_ubuntu` 我配置的是稀疏卷(60G)，但是安装的系统只分配了一半的磁盘空间，所以我执行 :ref:`bhyve_ubuntu_extend_ext4_on_lvm`
+
+.. _install_amdgpu:
 
 AMDGPU驱动安装
 ------------------
@@ -108,6 +112,10 @@ AMDGPU驱动安装
 
 异常排查
 ============
+
+.. note::
+
+   这段异常是和 :ref;`bhyve` 相关的，后续我直接在 Ubuntu 中安装 amdgpu 驱动就没有这个问题。所以如果只是常规在Linux安装，应该不会有下面这段异常。
 
 虽然看上去成功安装了 ``ROCm`` 和  ``AMDGPU driver`` ，但是我发现 ``rocm-smi`` 输出显示没有可用的AMD GPU:
 

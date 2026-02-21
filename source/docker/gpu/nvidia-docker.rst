@@ -4,6 +4,12 @@
 Docker运行NVIDIA容器
 ==========================
 
+.. warning::
+
+   2023年8月以后， ``nvidia-docker`` 已经停止开发，按照 `Build and run Docker containers leveraging NVIDIA GPUs <https://github.com/NVIDIA/nvidia-docker>`_ 官方文档指引，现在解决方法是采用 ``NVIDIA Container Tookit`` 。(前半部分 ``cuda-driver`` 还是要安装的)
+
+   请参考 :ref:`nvidia_p4_pi_docker` 实践，安装部署 :ref:`nvidia_container_toolkit` 来实现容器中使用NVIDIA GPU
+
 .. image:: ../../_static/docker/nvidia_container_runtime_for_docker.png
 
 在机器学习中，需要通过GPU加速矩阵计算来实现卷积神经网络CNN。在云计算环境中， :ref:`gpu_passthrough_with_kvm` 可以将一块物理GPU显卡分割成多块虚拟GPU卡提供给虚拟机使用。同样类似，在Docker容器中，nVidia通过 ``nvidia-container-runtime-hook`` 将Host主机的GPU驱动共享给容器，这样就不需要在每个容器中单独安装驱动。
@@ -21,12 +27,6 @@ Docker运行NVIDIA容器
    Nvidia官方网站提供了 `CUDA Drivers for MAC <https://www.nvidia.com/object/mac-driver-archive.html>`_ 可以在Mac平台支持CUDA开发。
 
    在 `nvidia GEFORCE 驱动下载 <https://www.geforce.com/drivers>`_ 可以获取最新的Linux驱动。
-
-.. warning::
-
-   2023年8月以后， ``nvidia-docker`` 已经停止开发，按照 `Build and run Docker containers leveraging NVIDIA GPUs <https://github.com/NVIDIA/nvidia-docker>`_ 官方文档指引，现在解决方法是采用 ``NVIDIA Container Tookit`` 。(前半部分 ``cuda-driver`` 还是要安装的)
-
-   请参考 :ref:`nvidia_p4_pi_docker` 实践，安装部署 ``NVIDIA Container Tookit`` 来实现容器中使用NVIDIA GPU
 
 安装NVIDIA图形卡的CUDA
 =========================
