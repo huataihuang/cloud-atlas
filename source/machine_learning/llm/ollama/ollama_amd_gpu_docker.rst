@@ -20,6 +20,32 @@
 
 此时容器运行了Ollama服务( ``/bin/ollama serve`` )
 
+需要注意，上述运行命令Ollama服务默认只监听 ``127.0.0.1`` ，所以后续使用 :ref:`ollama_webui` 会无法连接服务端口，并且没有 ``OLLAMA_ORIGINS`` (防止跨域报错)也会导致问题
+
+运行Ollama+Open WebUI
+----------------------
+
+为了方便使用，可以运行一个Ollama容器以及一个Open WebUI容器，并让两者通过 ``host`` 网络模式或利用 ``--add-host`` 参数互通:
+
+- 改进Ollama容器命令，监听所有接口并允许跨域:
+
+.. literalinclude:: ollama_amd_gpu_docker/docker_run_ollama
+   :caption: 运行Ollama容器并监听所有接口和允许跨域
+
+- 启动Open WebUI并连接:
+
+.. literalinclude:: ollama_amd_gpu_docker/docker_run_webui
+   :caption: 运行Open WebUI并连接Ollama
+
+这里: 
+
+  - ``--add-host=host.docker.internal:host-gateway`` 在 Open WebUI 容器内部映射了一个特殊的域名 ``host.docker.internal`` ，指向物理宿主机
+  - ``-e OLLAMA_BASE_URL=http://host.docker.internal:11435`` WebUI通过这个地址找到Ollama的服务端口，也就是宿主机的 ``1435`` 端口
+
+.. note::
+
+   更为方便的结合运行方式: :ref:`docker_compose_ollama` ，可以一键运行多个容器组合
+
 模型选择
 ==============
 
@@ -128,8 +154,6 @@ Qwen3-Coder-Next
 
 .. literalinclude:: ollama_amd_gpu_docker/MyCoder
    :caption: 导入并运行
-
-
 
 Llama3
 -------

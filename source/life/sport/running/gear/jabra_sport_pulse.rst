@@ -9,16 +9,16 @@ Jabra Sport Pulse蓝牙运动耳机
 - 蓝牙无线，在运动中不羁绊
 - 提供基本的心率监测功能，部分提供了Apple Watch运动功能
 
-.. figure:: ../../_static/life/sport/jabra_sport_pulse.png
+.. figure:: ../../../../_static/life/sport/running/gear/jabra_sport_pulse.png
    :scale: 30
 
-.. figure:: ../../_static/life/sport/jabra_sport_pulse_1.jpg
+.. figure:: ../../../../_static/life/sport/running/gear/jabra_sport_pulse_1.jpg
    :scale: 50
 
-.. figure:: ../../_static/life/sport/jabra_sport_pulse_2.jpg
+.. figure:: ../../../../_static/life/sport/running/gear/jabra_sport_pulse_2.jpg
    :scale: 50
 
-.. figure:: ../../_static/life/sport/jabra_sport_pulse_3.jpg
+.. figure:: ../../../../_static/life/sport/running/gear/jabra_sport_pulse_3.jpg
    :scale: 50
 
 这款蓝牙运动耳机在国内没有销售，亚马逊美国网站上售价是60美金，淘宝上可以找到最低价位是 399 元。

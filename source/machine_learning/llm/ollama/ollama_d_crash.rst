@@ -1,4 +1,4 @@
-.. _ollma_d_crash:
+.. _ollama_d_crash:
 
 ===============================
 Ollama异常:大量kworker ``D``
@@ -8,7 +8,7 @@ Ollama异常:大量kworker ``D``
 
 此时检查发现系统负载极高，Load超过 250+，但同时CPU是完全空闲的。
 
-.. literalinclude:: ollma_d_crash/top
+.. literalinclude:: ollama_d_crash/top
    :caption: 检查 ``top`` 输出
    :emphasize-lines: 1
 
@@ -16,12 +16,12 @@ Ollama异常:大量kworker ``D``
 
 - 检查哪些进程 ``D`` 住了:
 
-.. literalinclude:: ollma_d_crash/ps
+.. literalinclude:: ollama_d_crash/ps
    :caption: 使用 ``ps`` 检查进程D
 
 - 根据进程，检查堆栈:
 
-.. literalinclude:: ollma_d_crash/stack
+.. literalinclude:: ollama_d_crash/stack
    :caption: 检查D住进程堆栈
    :emphasize-lines:  4,14,15,25
 
@@ -29,7 +29,7 @@ Ollama异常:大量kworker ``D``
 
 - 检查 ``dmesg`` 可以看到hang住的异常:
 
-.. literalinclude:: ollma_d_crash/dmesg
+.. literalinclude:: ollama_d_crash/dmesg
    :caption: ``dmesg`` 异常hang日志
 
 从 ``amdgpu: Freeing queue vital buffer 0x75acbea00000, queue evicted`` 报错拉坎，似乎AMD GPU驱动( ``admgpu`` ) 在释放一个GPU队列的内存buffer时(evicted驱逐)出现了错误: 也可能驱动程序重置了队列或GPU

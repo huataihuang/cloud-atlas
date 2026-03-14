@@ -1,15 +1,15 @@
-.. _sport:
+.. _running:
 
 =================================
-运动
+跑步
 =================================
 
-对于IT工作者，身体始终是一切的基础，无论是学习还是工作，都需要良好的身体素质。
 
 .. toctree::
    :maxdepth: 1
 
-   running/index
+   marathon/index
+   gear/index
 
 .. only::  subproject and html
 

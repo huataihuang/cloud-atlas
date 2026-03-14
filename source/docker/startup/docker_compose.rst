@@ -10,6 +10,8 @@ Compose是一个定义运行多个容器Docker应用程序，通过Compose，可
 
    有点类似Kubernetes的Pod，可以定义一组容器相互关联。
 
+   安装请参考 :ref:`install_docker-ce`
+
 Compose可以工作在所有环境：production, staging, development, testing, 类似的CI工作流。
 
 使用Compose有3个基本步骤：

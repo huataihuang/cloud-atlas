@@ -158,26 +158,25 @@ NVIDIA持久化服务
       curl -s -L https://nvidia.github.io/nvidia-docker/ubuntu18.04/nvidia-docker.list | \
         sudo tee /etc/apt/sources.list.d/nvidia-docker.list
 
-.. _install_docker-ce:
-
 安装 ``docker-ce``
 ~~~~~~~~~~~~~~~~~~~
 
-在安装 ``nvidia-docker2`` 工具之前，需要确保系统使用的是最新官方Docker版本，即 ``docker-ce`` ，参考 `official documentation <https://docs.docker.com/install/linux/docker-ce/ubuntu/>`_ 先卸载发行版docker，然后安装官方docker::
+在安装 ``nvidia-docker2`` 工具之前，需要确保系统使用的是最新官方Docker版本，即 ``docker-ce`` ，参考 `official documentation <https://docs.docker.com/install/linux/docker-ce/ubuntu/>`_ 先卸载发行版docker，然后安装官方docker:
 
-   # remove all previous Docker versions
-   sudo apt remove docker docker-engine docker.io
+.. literalinclude:: ../startup/install_docker-ce/remove_docker.io
+   :caption: 卸载docker.io
 
-   # add Docker official GPG key
-   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+.. literalinclude:: ../startup/install_docker-ce/rm_dir
+   :caption: 清理残留目录(可选)
 
-   # Add Docker repository (for Ubuntu Bionic) 注意：nvidia-docker会检查docker-ce版本，强制要求 ubuntu-bionic
-   # 所以这里必须采用 bionic 仓库安装 docker-ce
-   sudo add-apt-repository \
-       "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+.. literalinclude:: ../startup/install_docker-ce/apt_repo
+   :caption: 设置Docker apt仓库
 
-   sudo apt update
-   sudo apt install docker-ce
+.. literalinclude:: ../startup/install_docker-ce/apt_install
+   :caption: 安装Docker官方软件包
+
+.. literalinclude:: ../startup/install_docker-ce/start_docker
+   :caption: 启动docker服务
 
 安装 ``nvidia-docker``
 ~~~~~~~~~~~~~~~~~~~~~~~~

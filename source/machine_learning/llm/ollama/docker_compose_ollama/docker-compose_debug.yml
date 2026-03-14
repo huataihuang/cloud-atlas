@@ -1,0 +1,28 @@
+services:
+  ollama-amd:
+    image: ollama/ollama:rocm
+    container_name: ollama-amd
+    restart: unless-stopped
+    # 临时使用 root 用户运行，排除权限崩溃
+    user: root 
+    ports:
+      - "11435:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+      - HSA_OVERRIDE_GFX_VERSION=9.0.6
+      # 先不设 VISIBLE_DEVICES，让它扫全量
+      - OLLAMA_DEBUG=1 # 开启详细调试日志
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    # 关键：透传所有渲染节点，有些 MI50 需要访问 /dev/dri/renderD128 之外的控制节点
+    privileged: true 
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    volumes:
+      - ollama_data:/root/.ollama
+
+volumes:
+  ollama_data:

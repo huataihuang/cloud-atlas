@@ -1,15 +1,16 @@
-.. _sport:
+.. _marathon:
 
 =================================
-运动
+马拉松
 =================================
 
-对于IT工作者，身体始终是一切的基础，无论是学习还是工作，都需要良好的身体素质。
 
 .. toctree::
    :maxdepth: 1
 
-   running/index
+   shanghai_marathon_2015.rst
+   tokyo_marathon_2026.rst
+   marathon_training.rst
 
 .. only::  subproject and html
 

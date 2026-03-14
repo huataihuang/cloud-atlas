@@ -1,0 +1,67 @@
+services:
+  # 1. Ollama 服务 (AMD ROCm)
+  ollama-amd:
+    image: ollama/ollama:rocm
+    container_name: ollama-amd
+    restart: unless-stopped
+    ports:
+      - "11435:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+      - HSA_OVERRIDE_GFX_VERSION=9.0.6
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    volumes:
+      - ollama_data:/root/.ollama
+
+  # 2. Open WebUI
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama-amd:11434
+    depends_on:
+      - ollama-amd
+
+  # 3. AMD GPU Exporter (监控核心)
+  # 注意：这需要宿主机安装了 ROCm 驱动，因为它要读取物理 GPU 数据
+  amdgpu-exporter:
+    image: rocm/device-metrics-exporter:v1.4.2
+    container_name: amdgpu-exporter
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/kfd:/dev/kfd
+
+  # 4. Prometheus (时序数据库)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  # 5. Grafana (可视化面板)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  ollama_data:
+  open-webui_data:
