@@ -145,6 +145,51 @@ Docker compose运行
 
    目前发现操作系统启动以后，容器启动后系统有大量的  [kworker/22:21+events] 的进程是D状态。怀疑Docker容器没有正确挂载物理服务器设备（/dev/kfd 和 /dev/dri）
 
+排查没有识别AMD GPU
+======================
+
+我仔细观察了 ``docker logs ollama-amd`` 输出日志:
+
+.. literalinclude:: docker_compose_ollama/logs_runner_crashed
+   :caption: 日志显示 ollama 运行AMD GPU的rocm时候出现crashed
+   :emphasize-lines: 8,9,14,17,21
+
+日志的第8，9行显示Ollama尝试使用 ``/usr/lib/ollama/rocm`` 来测试两块GPU卡是否支持；但是很不幸，后续日志显示测试名利出现 ``runner crashed`` (第14，17行日志)。这导致Ollama放弃使用GPU，转而采用CPU架构(第21行日志)
+
+我检查Host主机 ``dmesg`` 日志，发现有关于 ``amdgpu`` 的日志错误:
+
+.. literalinclude:: docker_compose_ollama/host_dmesg
+   :caption: Host主机dmesg显示 amdgpu 错误
+   :emphasize-lines: 1,2
+
+上述日志是启动 ``ollama-amd`` 容器后出现的(我对比了关闭容器启动后，上述报错不再出现)，那么这里为何会出现 ``[drm:amddrm_sched_entity_push_job [amd_sched]] *ERROR* Trying to push to a killed entity``
+
+Google Gemini提出的改进建议主要有:
+
+- 既然物理主机 ``rocm-smi`` 正常，但是运行容器就触发内核报错 ``Trying to push to a killed entity`` ，这说明 **ROCm驱动与Docker容器在硬件抽象层(Hardware Abstraction Layer)的握手失败**
+
+  - 我以为可能需要安装 :ref:`amd_container_toolkit` ，不过AMD的ROCm容器主要依赖内核驱动(KFD/DRM)的直接透传，和 :ref:`nvidia_container_toolkit` 不同不需要处理复杂的库映射，所以这里并不需要安装 ``amd container toolkit``
+  - gemini提示我当前使用的 Ubuntu 24.04 内核 6.8 可能太新，而 MI50(GFX906)属于较老的硬件架构，在处理容器级硬件重置时存在严重的同步问题
+
+- 为了能够兼容旧硬件，添加特定的硬件访问呢环境变量来规避内核调度错误，修订 ``docker-compose.yml`` :
+
+.. literalinclude:: docker_compose_ollama/docker-compose-gfx9.yml
+   :caption: 添加兼容硬件架构的环境参数
+   :emphasize-lines: 6,7
+
+不过，我实践下来，上述修订方法并没有解决，报错依旧
+
+- gemini另外一个建议我觉得很有可能: 回退ROCm版本，因为 :ref:`amd_radeon_instinct_mi50` 我当时在调研时就发现官方RELEASE说明中最高只有ROCm 5.7.1版本是明确支持MI50的，最新的ROCm 6.x发布文档中已经声明不再支持GCN 5代，也就是 **不再明确支持MI50** ，虽然在Reddit帖子中有人报告在ROCm 6.3.2中依然可以使用MI50（我的实践也验证物理主机上使用似乎没有问题，但是看来容器兼容性存在限制）
+
+但是存在一个问题，就是 Ollama 官方镜像的哪个TAG对应使用的是 ROCM 5.7 呢？
+
+Google了一下，找到一个早期Ollama构建Dockerfile中指定 ``ROCM_VERSION=5.7`` 的案例 `prawilny/ollama-rocm-docker <https://github.com/prawilny/ollama-rocm-docker/blob/master/Dockerfile>`_ ，也就是说，我需要到Ollama官方源代码仓库中搜索找到对应这样的Dockerfile的TAG，来找到合适的官方镜像版本
+
+我在 ``GitHub: ollama/ollama/Dockerfile <https://github.com/ollama/ollama/blob/main/Dockerfile>`_ 中查看，发现当前的Dockerfile中已经使用了 ``ROCMVERSION=7.2`` ，所以需要找出早期版本。Gemini提供了一些线索:
+
+- 查找 2024年2月到3月 左右的提交。当时正是 ROCm 从 5.7 迁移到 6.0 的窗口期
+- 尝试 ``ollama/ollama:0.1.29-rocm`` ，原因是: 在 0.1.30 之前，Ollama 普遍使用的是 ROCm 5.x 基础镜像。0.1.29 是一个公认的在老旧硬件上比较稳定的版本
+
 参考
 ======
 
