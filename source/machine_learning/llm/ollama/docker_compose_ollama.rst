@@ -11,8 +11,13 @@ Docker compose运行
 
 - 创建 ``docker-compose.yml`` 组合docker容器:
 
-.. literalinclude:: docker_compose_ollama/docker-compose.yml
-   :caption: 组合了Ollama+WebUI+Grafana的 ``docker-compose.yml``
+.. literalinclude:: docker_compose_ollama/docker-compose-final.yml
+   :caption: 指定镜像将Ollama容器回退到 ``ROCm 5.7``
+   :emphasize-lines: 4
+
+.. note::
+
+   这里的配置是经过反复排查和验证后得到的可行配置，详细排查见下文 :ref:`debue_docker_compose_ollama`
 
 - 上述配置中 :ref:`prometheus` 需要引用一个 ``prometheus.yml`` 配置来抓取GPU数据:
 
@@ -58,10 +63,17 @@ Docker compose运行
 
    下载指定模型，例如 ``llama3.3:70b-instruct-q4_K_M``
 
-异常问题排查
-==============
+.. _debue_docker_compose_ollama:
 
-我在运行 ``llama3.3:70b-instruct-q4_K_m`` 模型时发现 AMD MI50 两块GPU完全没有负载，而CPU疯狂运算。gemini提示虽然设置了正确的 ``HSA_OVERRIDE_GFX_VERSION`` ，但是对于70B大模型需要防范几个问题:
+docker compose运行Ollama异常排查
+==================================
+
+我最初采用的 ``docker-compose.yml`` 使用了默认最新的 ``ollama`` 镜像， ``docker-compose.yml`` 配置如下:
+
+.. literalinclude:: docker_compose_ollama/docker-compose.yml
+   :caption: 组合了Ollama+WebUI+Grafana的 ``docker-compose.yml``
+
+但是，启动运行后发现运行 ``llama3.3:70b-instruct-q4_K_m`` 模型时发现 AMD MI50 两块GPU完全没有负载，而CPU疯狂运算。gemini提示虽然设置了正确的 ``HSA_OVERRIDE_GFX_VERSION`` ，但是对于70B大模型需要防范几个问题:
 
 - 70B 模型在 Q4 量化下约占 42GB。Ollama 默认可能认为单块 MI50（32GB）装不下，或者因为你没有设置 并行显卡参数，导致它放弃 GPU 直接回退到 CPU
 
@@ -171,13 +183,13 @@ Google Gemini提出的改进建议主要有:
   - 我以为可能需要安装 :ref:`amd_container_toolkit` ，不过AMD的ROCm容器主要依赖内核驱动(KFD/DRM)的直接透传，和 :ref:`nvidia_container_toolkit` 不同不需要处理复杂的库映射，所以这里并不需要安装 ``amd container toolkit``
   - gemini提示我当前使用的 Ubuntu 24.04 内核 6.8 可能太新，而 MI50(GFX906)属于较老的硬件架构，在处理容器级硬件重置时存在严重的同步问题
 
-- 为了能够兼容旧硬件，添加特定的硬件访问呢环境变量来规避内核调度错误，修订 ``docker-compose.yml`` :
+- 为了能够兼容旧硬件，添加特定的硬件访问环境变量来规避内核调度错误，修订 ``docker-compose.yml`` :
 
 .. literalinclude:: docker_compose_ollama/docker-compose-gfx9.yml
    :caption: 添加兼容硬件架构的环境参数
    :emphasize-lines: 6,7
 
-不过，我实践下来，上述修订方法并没有解决，报错依旧
+不过，我实践下来， **上述修订方法并没有解决，报错依旧**
 
 - gemini另外一个建议我觉得很有可能: 回退ROCm版本，因为 :ref:`amd_radeon_instinct_mi50` 我当时在调研时就发现官方RELEASE说明中最高只有ROCm 5.7.1版本是明确支持MI50的，最新的ROCm 6.x发布文档中已经声明不再支持GCN 5代，也就是 **不再明确支持MI50** ，虽然在Reddit帖子中有人报告在ROCm 6.3.2中依然可以使用MI50（我的实践也验证物理主机上使用似乎没有问题，但是看来容器兼容性存在限制）
 
@@ -185,10 +197,84 @@ Google Gemini提出的改进建议主要有:
 
 Google了一下，找到一个早期Ollama构建Dockerfile中指定 ``ROCM_VERSION=5.7`` 的案例 `prawilny/ollama-rocm-docker <https://github.com/prawilny/ollama-rocm-docker/blob/master/Dockerfile>`_ ，也就是说，我需要到Ollama官方源代码仓库中搜索找到对应这样的Dockerfile的TAG，来找到合适的官方镜像版本
 
-我在 ``GitHub: ollama/ollama/Dockerfile <https://github.com/ollama/ollama/blob/main/Dockerfile>`_ 中查看，发现当前的Dockerfile中已经使用了 ``ROCMVERSION=7.2`` ，所以需要找出早期版本。Gemini提供了一些线索:
+我在 `GitHub: ollama/ollama/Dockerfile <https://github.com/ollama/ollama/blob/main/Dockerfile>`_ 中查看，发现当前的Dockerfile中已经使用了 ``ROCMVERSION=7.2`` ，所以需要找出早期版本。Gemini提供了一些线索:
 
 - 查找 2024年2月到3月 左右的提交。当时正是 ROCm 从 5.7 迁移到 6.0 的窗口期
 - 尝试 ``ollama/ollama:0.1.29-rocm`` ，原因是: 在 0.1.30 之前，Ollama 普遍使用的是 ROCm 5.x 基础镜像。0.1.29 是一个公认的在老旧硬件上比较稳定的版本
+
+.. literalinclude:: docker_compose_ollama/docker-compose-final.yml
+   :caption: 指定镜像将Ollama容器回退到 ``ROCm 5.7``
+   :emphasize-lines: 4
+
+果然，通过指定 ``ollama:0.1.29-rocm`` 能够避免启动容器启动Ollama进程crash，检查Host主机的 ``dmesg`` 日志可以看到没有再出现异常的 ``*ERROR* Trying to push to a killed entity`` ，系统也没有再出现D住的进程
+
+通过确认 ``docker logs ollama-amd`` 也可以看到容器正常初始化
+
+.. literalinclude:: docker_compose_ollama/docker_logs_init
+   :caption: 检查ollama-amd容器日志可以看到正常初始化
+   :emphasize-lines: 20,27
+
+使用异常排查
+==================
+
+我在实际通过Open WebUI下载 ``llama3.3:70b-instruct-q4_K_M`` 模型运行时出现报错: ``500: exception done_getting_tensors: wrong number of tensors; expected 724, got 723`` ，此时检查 ``docker logs ollama-amd`` 可以看到日志:
+
+.. literalinclude:: docker_compose_ollama/wrong_number_of_tensors
+   :caption: 运行日志报错显示错误的tensors数量
+
+检查模型:
+
+.. literalinclude:: docker_compose_ollama/ollama_list
+   :caption: 检查模型列表
+
+输出显示
+
+.. literalinclude:: docker_compose_ollama/ollama_list_output
+   :caption: 检查模型可以看到列表
+
+上述报错实际上很可能是模型下载过程中由于网络波动导致某个分块(blob)不完整，所以通过以下命令删除掉模型并重新下载:
+
+.. literalinclude:: docker_compose_ollama/pull_model
+   :caption: 重新下载模型
+
+但是很不幸，我重新拉取模型之后，再次测试依然是相同的报错。看起来并不是模型下载问题，因为使用 ``ollama pull`` 下载模型最后有校验，显示下载是成功的
+
+另一个怀疑点是 **Ollama 0.1.29 的 GGUF 格式兼容性** : Llama 3.3 及其权重格式在不断更新。这里我使用的 ``0.1.29`` 是较早的版本，而 ``llama3.3:70b`` 默认拉取的可能是使用较新 ``llama.cpp`` 工具链量化的 ``GGUF`` 文件。新版 ``GGUF`` 可能包含旧版 Ollama 无法识别的 ``Metadata`` 层。
+
+gemini建议我尝试:
+
+- 尝试拉取版本更早、兼容性更好的 Llama 3 镜像进行测试: ``ollama pull llama3:70b-instruct-q4_K_M`` ，如果Llama 3能够成功而 3.3 失败的话，就表明是版本不兼容
+- 另一个尝试是采用5.x系列中较晚发布的 ``ollama:0.1.32-rocm`` 看看能否在不导致驱动崩溃情况下运行Llama 3.3
+
+我首先调整了镜像，改为采用 ``ollama/ollama:0.1.32-rocm`` ，并且为了能够不重复下载model，我修订了容器挂载的卷目录，即 ``docker-compose.yml`` 如下:
+
+.. literalinclude:: docker_compose_ollama/docker-compose_final_0.1.32-rocm.yml
+   :caption: 调整ollama镜像并设置指定的数据目录
+
+但是发现ollama-amd容器的日志同样报错 ``done_getting_tensors: wrong number of tensors; expected 724, got 723`` :
+
+.. literalinclude:: docker_compose_ollama/logs_ollama-amd
+   :caption: ``ollama-amd`` 日志显示报错
+   :emphasize-lines: 7,11
+
+看来模型文件下载应该是正常的，而且 ``ollama:0.1.32-rocm`` 这样稍微新一点的镜像也没有解决问题，那么是否要尝试llama3的模型看看是否是旧版Ollama不支持Llama3.3的新tensor结构？
+
+.. literalinclude:: docker_compose_ollama/pull_llama3
+   :caption: 尝试下载一个较早的 llama3 模型
+
+我在 `I can't run llama3.1 #6048 <https://github.com/ollama/ollama/issues/6048>`_ 找到的解释看起来说明了原因(也是加载模型报tensors数量不一致): 原因是Ollama依赖 :ref:`llama.cpp` ，最新的 llama.cpp 创建的GGUF文件不能被旧版本llama.cpp 处理，如果要使用旧版本llama.cpp需要自己使用旧版本llama.cpp来转换hf到GGUF。
+
+另外Hugging Face上 `Missing Tensors in Q5_K_S + Q5_K_M #8 <https://huggingface.co/bartowski/Meta-Llama-3.1-70B-Instruct-GGUF/discussions/8>`_ 也是同样的报错问题，需要使用较新版本的 :ref:`llama.cpp` 来处理，所以在我这种使用旧版 Ollama 的情况，也同样是因为旧版 :ref:`llama.cpp` 无法处理新版本GGUF导致的
+
+我这里大概率是因为我为了能够在Ollama中使用旧版本ROCm，使用了早期版本的Ollama镜像，这种旧版本Ollama镜像打包的是旧版本 :ref:`llama.cpp` ，无法处理最新的GGUF文件。
+
+解决的方法可能是:
+
+- 采用早期的llama3，那些早期的llama3通常会使用旧版本llama.cpp创建的GGUF。这种方法可能会成功，但是带来的问题是无法体验最新的模型
+- 另一种方式我感觉是自己用旧版本 :ref:`llama.cpp` 来转换模型的hf文件到 GGUF，这样理论上能体验最新版本的模型，就是比较麻烦一些 ，我准备参考 `Llama 3.1 GGUF incompatibility using latest release of llama.cpp and text-generation-webui. #6301 <https://github.com/oobabooga/text-generation-webui/issues/6301>`_ 提供的hf转GGUF方法来实现
+
+另外，我想到的一个方法是对于我现在使用的旧硬件 :ref:`amd_radeon_instinct_mi50` ，如果不是用容器直接物理主机运行Olama，那么有可能是可以直接使用最新版本的ROCm (之前我记得尝试用物理主机运行Ollama是成功的，看起来去掉容器化这层是有可能使用最版本ROCm，这样或许会减少很多麻烦)
+
 
 参考
 ======
