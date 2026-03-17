@@ -49,11 +49,10 @@ SOCKS
 
    ssh -D 10080 -C huatai@<remote_server>
 
-然后配置本地APT使用代理 ``/etc/apt/apt.conf.d/proxy.conf`` ::
+然后配置本地APT使用代理 ``/etc/apt/apt.conf.d/proxy.conf`` :
 
-   Acquire::http::Proxy "socks5h://127.0.0.1:1080";
-   Acquire::https::Proxy "socks5h://127.0.0.1:1080";
-   Acquire::socks::Proxy "socks5h://127.0.0.1:1080";
+.. literalinclude:: apt/proxy.conf
+   :caption: 配置APT代理 ``/etc/apt/apt.conf.d/proxy.conf``
 
 proxy.conf
 ============

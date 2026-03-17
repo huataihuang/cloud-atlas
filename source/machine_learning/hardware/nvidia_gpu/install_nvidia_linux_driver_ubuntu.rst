@@ -48,6 +48,9 @@
 
 - 安装完成后重启系统，并执行 ``nvidia-smi`` 确认GPU正确初始化
 
+.. literalinclude:: install_nvidia_linux_driver_ubuntu/nvidia-smi_output
+   :caption: 输出显示初始状态
+
 参考
 ======
 

@@ -27,6 +27,7 @@ NVIDIA GPU
    nvidia_gpu_mem_clock.rst
    install_nvidia_linux_driver.rst
    install_nvidia_linux_driver_ubuntu.rst
+   nvidia_gpu_fan_control.rst
 
 .. only::  subproject and html
 

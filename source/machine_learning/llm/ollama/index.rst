@@ -15,6 +15,7 @@ ollama
    ollama_nvidia_gpu.rst
    ollama_amd_gpu.rst
    ollama_amd_gpu_docker.rst
+   ollama_nvidia_a2_gpu_docker.rst
    docker_compose_ollama.rst
    ollama_d_crash.rst
    ollama_llm_plan.rst

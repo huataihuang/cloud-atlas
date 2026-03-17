@@ -9,6 +9,7 @@ llama.cpp
 
    intro_llama.cpp.rst
    llama.cpp_startup.rst
+   convert_hf_guff.rst
    install/index
    llama_cpu_optimize/index
    bench/index

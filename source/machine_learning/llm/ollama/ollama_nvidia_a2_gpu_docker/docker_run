@@ -1,0 +1,81 @@
+# 官方运行命令
+# docker run -d --gpus=all -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+
+# 创建ai-network网络用于连接不同容器
+docker network create ai-network
+
+# 创建存储数据目录
+export data_dir=/home/admin/docker
+mkdir -p $data_dir/{ollama_data,open-webui_data,prometheus_data,grafana_data}
+
+# 优化参数运行ollama
+docker run -d --gpus=all \
+  --network ai-network \
+  -v $data_dir/ollama_data:/root/.ollama \
+  -p 11434:11434 \
+  --name ollama \
+  -e OLLAMA_HOST=0.0.0.0 \
+  -e OLLAMA_FLASH_ATTENTION=1 \
+  -e OLLAMA_KEEP_ALIVE=24h \
+  --restart always \
+  ollama/ollama
+
+# 运行open-webui
+docker run -d \
+  --network ai-network \
+  -p 3000:8080 \
+  -v $data_dir/open-webui_data:/app/backend/data \
+  -e OLLAMA_BASE_URL=http://ollama:11434 \
+  --name open-webui \
+  --restart always \
+  ghcr.io/open-webui/open-webui:main
+
+# 运行NVIDIA DCGM Exporter抓取显卡温度、显存、功耗等监控数据
+# 具体版本号见 https://github.com/NVIDIA/dcgm-exporter
+# 官方 nvcr.io 镜像需要注册登录非常麻烦，改为直接冲Docker Hub下载
+# DCGM_EXPORTER_VERSION=4.5.2-4.8.1-distroless && \
+docker run -d \
+  --gpus all \
+  --cap-add SYS_ADMIN \
+  -p 9400:9400 \
+  --network ai-network \
+  --name nvidia-exporter \
+  --restart always \
+  nvidia/dcgm-exporter:latest
+  #nvcr.io/nvidia/dcgm-exporter:$DCGM_EXPORTER_VERSION
+
+# 可以在宿主机上验证是否监控数据抓取成功
+curl http://localhost:9400/metrics | grep DCGM_FI_DEV_GPU_TEMP
+
+# 创建prometheus.yml
+cat <<EOF > /home/admin/docker/prometheus_data/prometheus.yml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'gpu-metrics'
+    static_configs:
+      - targets: ['nvidia-exporter:9400']
+  - job_name: 'ollama'
+    static_configs:
+      - targets: ['ollama:11434']
+EOF
+
+# 运行Prometheus
+docker run -d \
+  --network ai-network \
+  --name prometheus \
+  -p 9090:9090 \
+  -v $data_dir/prometheus_data:/etc/prometheus \
+  --restart always \
+  prom/prometheus
+
+# 运行Grafana
+docker run -d \
+  --network ai-network \
+  --name grafana \
+  -p 3001:3000 \
+  -v $data_dir/grafana_data:/var/lib/grafana \
+  -e "GF_SECURITY_ADMIN_PASSWORD=admin" \
+  --restart always \
+  grafana/grafana

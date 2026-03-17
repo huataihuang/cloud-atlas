@@ -17,6 +17,7 @@ Machine Learning
    basic/index
    startup/index
    concept/index
+   hugging_face/index
    deep_learning/index
    reinforcement_learning/index
    gpt/index

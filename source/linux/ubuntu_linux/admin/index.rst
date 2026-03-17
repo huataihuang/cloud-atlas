@@ -20,6 +20,7 @@ Ubuntu系统管理
    ubuntu_grub.rst
    ubuntu_serial_console.rst
    run_centos_in_chroot_under_ubuntu.rst
+   ubuntu_username_admin.rst
 
 .. only::  subproject and html
 
