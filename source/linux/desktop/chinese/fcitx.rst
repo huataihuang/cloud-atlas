@@ -46,6 +46,16 @@ debian/ubuntu
 
 详细实践见 :ref:`fcitx_sway`
 
+彩蛋
+============
+
+- 在 :ref:`fcitx_sway` 环境中，按下 ``ctrl+;`` 会弹出一个最近复制的5个剪贴板内容，这是内置的 ``clipboard`` 组件功能，会记录最近通过 ``ctrl+c`` 或鼠标选中的文本，方便快速回溯和粘贴。注意，这个功能依赖 ``wl-clipboard`` 才能正常在 :ref:`sway` 环境工作
+
+- 编辑 ``~/.config/fcitx5/data/QuickPhrase.mb`` 可以添加 ``关键字+空格+对应内容`` 来设置快捷短语输入。这样只要按下 ``ctrl+.`` ，直接输入自定义关键字，然后空格或回车就能够快速输入一段文字
+
+.. literalinclude:: fcitx/QuickPhrase.mb
+   :caption: QuickPhrase.md 示例
+
 参考
 ======
 

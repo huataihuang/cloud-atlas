@@ -34,9 +34,23 @@ ModelScope
 .. literalinclude:: modelscope/Mistral.Modelfile
    :caption: Modelfile
 
+- 编写 ``Qwen3-Coder.Modelfile``
+
+.. literalinclude:: modelscope/Qwen3-Coder.Modelfile
+   :caption: Modelfile
+
+- 编写 ``Qwen3.5-35B-A3B.Modelfile``
+
+.. literalinclude:: modelscope/Qwen3.5-35B-A3B.Modelfile
+   :caption: Modelfile
+
 这里的 ``From`` 配置必须是Ollama容器内部的路径，我这里采用了 :ref:`ollama_nvidia_a2_gpu_docker` 方法，在容器内部
 
 - 执行导入:
 
 .. literalinclude:: modelscope/ollama_create
    :caption: 导入模型
+
+.. note::
+
+   导入命令 ``ollama create`` 只是创建模型索引，实际运行模型需要使用 ``ollama run``

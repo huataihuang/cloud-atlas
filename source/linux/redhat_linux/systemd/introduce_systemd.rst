@@ -48,6 +48,14 @@ Systemd引入了 ``systemd units`` 概念，这些通过位于目录中的单元
 
 当然，还有著名的 :ref:`freebsd` 完全不使用 ``systemd``
 
+隐藏彩蛋
+==========
+
+有时候需要重启系统进入BIOS设置，我以前在使用FreeBSD时候通过 ``efibootmag -F`` 切换重启(可能也可以使用 ``efibootmgr --fw-setup`` )，后来发现在Linux系统中，如果使用了 ``systemd`` ，还可以使用如下方法:
+
+.. literalinclude:: introduce_systemd/fw-setup
+   :caption: 通过 systemd 重启系统进入BIOS
+
 参考
 ======
 

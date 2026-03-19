@@ -7,6 +7,10 @@
 安装驱动
 ==========
 
+.. note::
+
+   在配置使用GPU之前，请先完成 :ref:`gpu_bios`
+
 - :ref:`install_nvidia_linux_driver_ubuntu` : 在Host主机上仅安装NVIDIA驱动来支持安装 :ref:`nvidia_container_toolkit` ，这样就可以容器化运行 :ref:`cuda`
 
 .. literalinclude:: ../../hardware/nvidia_gpu/install_nvidia_linux_driver_ubuntu/devices

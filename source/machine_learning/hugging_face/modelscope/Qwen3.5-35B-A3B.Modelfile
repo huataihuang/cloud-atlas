@@ -1,0 +1,39 @@
+# 指向你下载的 GGUF 文件路径
+FROM ./Qwen3.5-35B-A3B/Qwen3.5-35B-A3B-Q4_K_M.gguf
+
+# 包含视觉投影文件
+ADAPTER ./Qwen3.5-35B-A3B/mmproj-F16.gguf
+
+# --- 硬件与资源优化参数 ---
+
+# 强制所有模型层进入 GPU (双 A2 会自动平摊)
+PARAMETER num_gpu 99
+
+# 设置上下文窗口：针对 32GB 显存，建议初始设为 16384 (16k)
+# 若后续处理长视频或大文档需更多空间，可调至 32768
+PARAMETER num_ctx 16384
+
+# 针对 A2 显存带宽优化的推理参数
+PARAMETER temperature 0.7
+PARAMETER top_p 0.8
+PARAMETER repeat_penalty 1.1
+
+# --- 多模态与对话模板 ---
+
+# Qwen3.5 专用的 ChatML 模板
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+{{ .Response }}<|im_end|>"""
+
+# 停止词配置
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
+
+# --- SRE 专家系统提示词 ---
+SYSTEM """你是一个部署在私有云环境（双 Tesla A2）中的全能 AI 助手。
+你不仅精通 Linux 服务器运维、Kubernetes 架构和 Rust/Go 开发，
+还具备强大的多模态理解能力，能够分析用户提供的图片和视频文件。
+在提供代码建议时，优先考虑性能优化和安全性。"""

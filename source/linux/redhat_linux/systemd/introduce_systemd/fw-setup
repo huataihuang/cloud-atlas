@@ -1,0 +1,1 @@
+systemctl reboot --firmware-setup
