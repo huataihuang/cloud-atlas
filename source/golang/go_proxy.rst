@@ -6,6 +6,9 @@
 
 Go程序可以理解环境变量 ``http_proxy`` 和 ``no_proxy`` ，但是当使用 ``go get`` 和 ``go install`` 都是使用SCM来完成的，所以还需要配置 :ref:`git_proxy` 。目前我实践下来需要以下步骤:
 
+配置go的HTTP代理
+===================
+
 - 配置 ``http_proxy`` 和 ``https_proxy`` 环境变量;
 
 .. literalinclude:: go_proxy/env
@@ -18,8 +21,17 @@ Go程序可以理解环境变量 ``http_proxy`` 和 ``no_proxy`` ，但是当使
    :language: bash
    :caption: 全局配置git使用HTTP/HTTPS代理
 
-归档
-========
+配置go的socks代理
+===================
+
+更为简单的方式是采用 :ref:`ssh_tunneling_dynamic_port_forwarding` 方式下的 ``socksh`` 代理
+
+.. literalinclude:: go_proxy/socks_proxy
+   :language: bash
+   :caption: 配置socks代理环境变量
+
+归档(现在不用了)
+===================
 
 .. warning::
 

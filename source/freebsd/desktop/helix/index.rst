@@ -8,6 +8,7 @@ Helix编辑器
    :maxdepth: 1
 
    helix_startup.rst
+   helix_lsp.rst
    helix_lfs.rst
 
 .. only::  subproject and html

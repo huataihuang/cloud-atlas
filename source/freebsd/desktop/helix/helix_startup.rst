@@ -32,6 +32,19 @@ FreebSD发行版已经提供了Helix，可以通过 ``pkg`` 安装:
 .. literalinclude:: helix_startup/freebsd_install_helix
    :caption: FreeBSD安装helix
 
+Ubuntu
+---------
+
+Ubuntu官方发行版没有直接提供helix，而是通过snap提供安装:
+
+.. literalinclude:: helix_startup/ubuntu_snap_install_helix
+   :caption: 通过snap在Ubuntu上安装helix
+
+如果要通过 :ref:`apt` 安装helix，可以使用Helix官方维护的PPA:
+
+.. literalinclude:: helix_startup/ubuntu_apt_install_helix
+   :caption: 通过Helix官方PPA安装helix
+
 使用
 =======
 

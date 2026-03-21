@@ -16,7 +16,7 @@ Rust是开源基金会Mozilla推动开发，借鉴了现代语言研究成果，
 
 .. literalinclude:: rust_startup/install_rust.sh
    :language: bash
-   :caption: Liinux平台安装Rust
+   :caption: Linux平台安装Rust
 
 如果需要查看安装参数帮助::
 
@@ -26,7 +26,13 @@ Rust是开源基金会Mozilla推动开发，借鉴了现代语言研究成果，
 
 .. literalinclude:: rust_startup/install_rust.sh_direct
    :language: bash
-   :caption: Liinux平台直接安装Rust
+   :caption: Linux平台直接安装Rust
+
+FreeBSD通过pkg安装rust
+------------------------
+
+.. literalinclude:: rust_startup/freebsd_install_rust
+   :caption: 在FreeBSD上安装rust
 
 更新Rust
 ------------

@@ -10,7 +10,48 @@ Node.js开发环境
 - :ref:`freebsd` 提供了 ``pkg`` 和 ``prots`` (源代码)两种安装方式
 
 .. literalinclude:: nodejs_dev_env/freebsd_install_node
-   :caption: 在FreeBS上安装
+   :caption: 在FreeBS上使用pkg安装
+
+.. literalinclude:: nodejs_dev_env/freebsd_install_node_ports
+   :caption: 在FreeBS上使用ports安装
+
+在使用 ``npm`` 安装 :ref:`helix_lsp` 中基于node的 ``pyright`` 和 ``yaml-language-server`` :
+
+.. literalinclude:: ../../freebsd/desktop/helix/helix_lsp/install_npm_lsp
+   :caption: 安装基于ndoe的LSP
+
+会提示:
+
+.. literalinclude:: nodejs_dev_env/install_npm_lsp_notice
+   :caption: 安装基于node的LSP的提示信息
+
+这里可以按提示升级 npm:
+
+.. literalinclude:: nodejs_dev_env/upgrade_npm
+   :caption: 使用npm升级npm
+
+不过考虑到FreeBSD系统稳定性避免冲突，建议还是通过 ``pkg`` 来管理版本，而不是通过 ``npm`` 自主升级
+
+.. note::
+
+   ``npm fund`` 是开源项目依赖底层库的开源开发者请求资金支持，通过该命令能够看到哪些软件包维护者的请求。可以忽略，也可以在安装时加上 ``--no-fund`` 参数，或者永久关闭:
+
+   .. literalinclude:: nodejs_dev_env/no_fund
+      :caption: 关闭fund提示
+
+.. note::
+
+   这里提示 ``npm warn Unknown global config "python".`` 这是因为在 ``/usr/local/etc/npmrc`` 中有如下配置:
+
+   .. literalinclude:: nodejs_dev_env/npmrc
+      :caption: ``/usr/local/etc/npmrc``
+
+   可以通过如下命令删除配置:
+
+   .. literalinclude:: nodejs_dev_env/npm_config_delete
+      :caption: 全局删除python配置
+
+   删除配置不会影响LSP安装
 
 nvm
 ========

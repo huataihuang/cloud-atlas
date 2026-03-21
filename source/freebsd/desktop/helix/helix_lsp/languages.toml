@@ -1,0 +1,60 @@
+# --- 1. Python 配置 (支持多 GPU 脚本开发) ---
+[[language]]
+name = "python"
+scope = "source.python"
+# 同时启用 Pyright (类型检查) 和 Ruff (极速格式化/校验)
+language-servers = [ "pyright", "ruff" ]
+auto-format = true
+
+[language-server.pyright]
+command = "pyright-langserver"
+args = ["--stdio"]
+config.python.analysis = { typeCheckingMode = "basic", autoSearchPaths = true }
+
+[language-server.ruff]
+command = "ruff"
+args = ["server", "--preview"]
+
+# --- 2. 通用 YAML 配置 (Docusaurus / K8s / Docker) ---
+[[language]]
+name = "yaml"
+scope = "source.yaml"
+# 优先使用通用的 yaml-language-server
+language-servers = [ "yaml-language-server" ]
+auto-format = true
+# 强制缩进为 2 个空格 (YAML 标准)
+indent = { tab-width = 2, unit = "  " }
+
+[language-server.yaml-language-server]
+command = "yaml-language-server"
+args = ["--stdio"]
+# 自动关联常见的 JSON Schema 以实现智能补全
+[language-server.yaml-language-server.config.yaml]
+completion = true
+hover = true
+[language-server.yaml-language-server.config.yaml.schemas]
+"kubernetes" = "*.yaml"
+"https://json.schemastore.org/github-workflow.json" = ".github/workflows/*.yaml"
+"https://json.schemastore.org/docker-compose.json" = "docker-compose.yml"
+
+# --- Ansible 专用配置 ---
+[[language]]
+name = "ansible"
+scope = "source.ansible"
+# 识别典型的 Ansible 文件名模式
+file-types = ["yml", "yaml", { glob = "*/tasks/*.yml" }, { glob = "*/roles/*.yml" }, { glob = "playbook.yml" }]
+# 当目录下存在这些文件时，激活 Ansible 模式
+roots = ["ansible.cfg", ".ansible-lint", "inventory"]
+# 叠加使用：Ansible 补全参数，YAML 校验语法
+language-servers = [ "ansible-language-server", "yaml-language-server" ]
+indent = { tab-width = 2, unit = "  " }
+
+[language-server.ansible-language-server]
+command = "ansible-language-server"
+args = ["--stdio"]
+
+# --- 4. 辅助工具：全局 Formatter (可选) ---
+# 如果你安装了 prettier (npm install -g prettier)，可以作为通用格式化器
+[language.formatter]
+command = "prettier"
+args = ["--parser", "yaml"]
