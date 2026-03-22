@@ -8,6 +8,7 @@
    :maxdepth: 1
 
    dl_hardware.rst
+   think_machine.rst
    nvidia_gpu/index
    amd_gpu/index
    intel_gpu/index

@@ -10,6 +10,7 @@ Helix编辑器
    helix_startup.rst
    helix_lsp.rst
    helix_lfs.rst
+   helix_llm-ls.rst
 
 .. only::  subproject and html
 

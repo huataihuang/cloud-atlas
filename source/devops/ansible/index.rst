@@ -8,7 +8,7 @@ Ansible
    :maxdepth: 1
 
    introduce_ansible.rst
-   install_ansible_freebsd.rst
+   freebsd_ansible.rst
    ansible_config_raid.rst
 
 .. only::  subproject and html

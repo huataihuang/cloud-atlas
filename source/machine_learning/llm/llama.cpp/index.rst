@@ -14,6 +14,7 @@ llama.cpp
    llama_cpu_optimize/index
    bench/index
    coding/index
+   llama-cpp-python/index
 
 
 .. only::  subproject and html

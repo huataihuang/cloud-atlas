@@ -102,7 +102,7 @@ go
 
 这里 ``dlv`` 是调试工具，可以在Helix中设置断电、单步执行代码，所以补充安装 ``delve`` :
 
-.. literalinclude:: helix_lsp/fix_golangci-lint`
+.. literalinclude:: helix_lsp/fix_golangci-lint
    :caption: 修复 golangci-lint 报错
 
 这里 ``go install`` 需要访问github.com，所以需要 :ref:`go_proxy` :
