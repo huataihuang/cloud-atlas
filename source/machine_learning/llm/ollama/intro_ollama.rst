@@ -22,7 +22,7 @@ Hacker News上有一个讨论 `Reminder: You don't need ollama, running llamacpp
 Ollama Coding
 ====================
 
-Ollama现在可以通过 ``ollama launch XXX`` 加载一种特殊的 :ref:`ollama_coding_integrations` :
+Ollama现在可以通过 ``ollama launch XXX`` 加载一种特殊的 :ref:`ollama_integrations_coding` :
 
 - 
 

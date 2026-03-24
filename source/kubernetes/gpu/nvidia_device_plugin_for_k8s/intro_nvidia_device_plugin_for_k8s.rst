@@ -1,7 +1,7 @@
-.. _nvidia_device_plugin_for_k8s:
+.. _intro_nvidia_device_plugin_for_k8s:
 
 =============================================
-NVIDIA device plugin for Kubernetes
+NVIDIA device plugin for Kubernetes简介
 =============================================
 
 参考

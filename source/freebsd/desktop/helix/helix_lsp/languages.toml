@@ -1,9 +1,20 @@
-# --- 1. Python 配置 (支持多 GPU 脚本开发) ---
+[language-server.llm-ls]
+command = "llm-ls"
+
+[language-server.llm-ls.config]
+# 指向你的 Ollama 地址
+url = "http://192.168.6.200:11434/api/generate"
+# 设定你模型名称
+model = "qwen3.5-coder-30b-a3b-instruct-q4_k_m"
+# 针对 Ollama 的提示词模板（FIM: Fill-In-the-Middle）
+backend = "ollama"
+
+# --- Python 配置 (支持多 GPU 脚本开发) ---
 [[language]]
 name = "python"
 scope = "source.python"
 # 同时启用 Pyright (类型检查) 和 Ruff (极速格式化/校验)
-language-servers = [ "pyright", "ruff" ]
+language-servers = [ "pyright", "ruff", "llm-ls" ]
 auto-format = true
 
 [language-server.pyright]
@@ -15,12 +26,45 @@ config.python.analysis = { typeCheckingMode = "basic", autoSearchPaths = true }
 command = "ruff"
 args = ["server", "--preview"]
 
-# --- 2. 通用 YAML 配置 (Docusaurus / K8s / Docker) ---
+# --- go 语言配置 (支持 gopls + golangci-lint + llm-ls) ---
+[[language]]
+name = "go"
+scope = "source.go"
+# 激活 gopls (补全/定义), golangci-lint (校验), llm-ls (AI 续写)
+# language-servers = [ "gopls", "golangci-lint-lsp", "llm-ls" ]
+# 目前改为仅激活 gopls, llm-ls
+language-servers = [ "gopls", "llm-ls" ]
+auto-format = true
+# 使用 Go 官方标准的 gofmt 进行格式化
+formatter = { command = "gofmt" }
+
+[language-server.gopls]
+command = "gopls"
+# 针对 SRE 开发场景优化 gopls 配置
+[language-server.gopls.config]
+usePlaceholders = true
+completeUnimported = true
+staticcheck = true
+analyses = { unusedparams = true, unreachable = true }
+
+#[language-server.golangci-lint-lsp]
+#command = "golangci-lint-langserver"
+
+# 我尝试 --out-format json 失败
+# 另外，FreeBSD发行版提供的golangci-lint版本似乎和编译安装的golangci-lint-langserver版本不匹配，检查 :log-open 显示:
+# golangci-lint-lsp err <- "jsonrpc2 handler: notification \"exit\" handling error: jsonrpc2: code -32601 message: method not supportd: exit\n"
+# 所以我最终取消了 golangci-lint-lsp 支持，可能以后集成到Linux平台的CI系统中使用
+# 
+#[language-server.golangci-lint-lsp.config]
+# 强制开启代码检查
+#command = ["golangci-lint", "run", "--out-format", "json", "--issues-exit-code", "1"]
+
+# --- 通用 YAML 配置 (Docusaurus / K8s / Docker) ---
 [[language]]
 name = "yaml"
 scope = "source.yaml"
 # 优先使用通用的 yaml-language-server
-language-servers = [ "yaml-language-server" ]
+language-servers = [ "yaml-language-server", "llm-ls" ]
 auto-format = true
 # 强制缩进为 2 个空格 (YAML 标准)
 indent = { tab-width = 2, unit = "  " }
@@ -46,14 +90,14 @@ file-types = ["yml", "yaml", { glob = "*/tasks/*.yml" }, { glob = "*/roles/*.yml
 # 当目录下存在这些文件时，激活 Ansible 模式
 roots = ["ansible.cfg", ".ansible-lint", "inventory"]
 # 叠加使用：Ansible 补全参数，YAML 校验语法
-language-servers = [ "ansible-language-server", "yaml-language-server" ]
+language-servers = [ "ansible-language-server", "yaml-language-server", "llm-ls" ]
 indent = { tab-width = 2, unit = "  " }
 
 [language-server.ansible-language-server]
 command = "ansible-language-server"
 args = ["--stdio"]
 
-# --- 4. 辅助工具：全局 Formatter (可选) ---
+# --- 辅助工具：全局 Formatter (可选) ---
 # 如果你安装了 prettier (npm install -g prettier)，可以作为通用格式化器
 [language.formatter]
 command = "prettier"

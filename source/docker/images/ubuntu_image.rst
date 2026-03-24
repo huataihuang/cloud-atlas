@@ -10,5 +10,23 @@ Ubuntu镜像(纯粹版本)
 
 沿用 :ref:`podman_images` 实践经验，我现在调整构建 Ubuntu 镜像，来为 :ref:`container_direct_access_amd_gpu` 提供基础
 
-Dockerfile
+base镜像
 =============
+
+首先创建一个基础镜像
+
+- 创建 Dockerfile 为Ubuntu构建基本的系统升级和用户帐号环境:
+
+.. literalinclude:: ubuntu_image/base/Dockerfile
+   :caption: 基础镜像Dockerfile
+
+- 执行镜像构建:
+
+.. literalinclude:: ubuntu_image/base/build
+   :caption: 执行镜像构建
+
+- 运行容器:
+
+.. literalinclude:: ubuntu_image/base/run
+   :caption: 运行容器
+

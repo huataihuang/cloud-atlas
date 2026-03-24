@@ -31,6 +31,6 @@ Python Bindings for llama.cpp简介
 - 不仅是服务器，也是库: 可以直接在Python脚本中 ``import llama_cpp`` ，就像普通函数一样进行推理，而不需要通过HTTP协议绕一圈
 
 .. csv-table:: ``llama-cpp-python`` 和 Ollama对比
-   :file: intro_llama-cpp-python/compar.csv
+   :file: intro_llama-cpp-python/compare.csv
    :widths: 20, 40, 40
    :header-rows: 1

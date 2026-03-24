@@ -1,16 +1,13 @@
-.. _freebsd_program:
+.. _truss:
 
 =================================
-FreeBSD开发
+truss
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   freebsd_programming_tools.rst
-   freebsd_nvim_ide.rst
-   truss/index
-   dtrace/index
+   truss_startup.rst
 
 .. only::  subproject and html
 
