@@ -9,14 +9,14 @@
 .. literalinclude:: freebsd_ansible/install
    :caption: 安装Ansible
 
-我使用 :ref:`helix` ，所以对应配置 :ref:`helix_lsp` 的 ``ansible-language-server`` :
+我使用 :ref:`helix` ，所以对应配置 :ref:`freebsd_helix_lsp` 的 ``ansible-language-server`` :
 
-.. literalinclude:: ../../freebsd/desktop/helix/helix_lsp/ansible_lsp
+.. literalinclude:: ../../freebsd/desktop/helix/freebsd_helix_lsp/ansible_lsp
    :caption: 安装ansible-language-server 
 
-并配置 :ref:`helix_lsp` 的 ``~/.config/helix/languages.toml`` :
+并配置 :ref:`freebsd_helix_lsp` 的 ``~/.config/helix/languages.toml`` :
 
-.. literalinclude:: ../../freebsd/desktop/helix/helix_lsp/languages.toml
+.. literalinclude:: ../../freebsd/desktop/helix/freebsd_helix_lsp/languages.toml
    :caption: ansible LSP支持
    :emphasize-lines: 41-54
 

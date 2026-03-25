@@ -1,8 +1,12 @@
-.. _helix_lsp:
+.. _freebsd_helix_lsp:
 
-===========================================
-Helix结合LSP(Language Server Protocol)
-===========================================
+====================================================
+FreeBSD环境Helix结合LSP(Language Server Protocol)
+====================================================
+
+.. note::
+
+   本文实践在FreeBSD上进行，和 :ref:`ubuntu_helix_lsp` 有较大差异
 
 .. note::
 
@@ -27,10 +31,10 @@ python+yaml+ansible
 
 - 安装基于node的LSP
 
-.. literalinclude:: helix_lsp/install_npm_lsp
+.. literalinclude:: freebsd_helix_lsp/install_npm_lsp
    :caption: 安装基于node的LSP
 
-.. literalinclude:: helix_lsp/install
+.. literalinclude:: freebsd_helix_lsp/install
    :caption: 安装基于node的LSP
 
 - 由于我也使用 :ref:`ansible` ，所以先安装ansible，然后再配置helix能够解析ansible语法
@@ -40,18 +44,18 @@ python+yaml+ansible
 
 检查LSP是否安装成功:
 
-.. literalinclude:: helix_lsp/health
+.. literalinclude:: freebsd_helix_lsp/health
    :caption: 检查LSP
 
 这里提示信息有一些错误:
 
-.. literalinclude:: helix_lsp/health_output
+.. literalinclude:: freebsd_helix_lsp/health_output
    :caption: 检查LSP时输出信息
 
 这里 ``python`` 相关的 LSP 工具如下:
 
 .. csv-table:: LSP核心工具对比
-   :file: helix_lsp/python_lsp.csv
+   :file: freebsd_helix_lsp/python_lsp.csv
    :widths: 20,20,30,30
    :header-rows: 1
 
@@ -59,23 +63,23 @@ Helix使用 :ref:`rust` 开发，所以对Ruff支持非常丝滑，Ruff不仅能
 
 建议同时启用 ``Pyright+Ruff`` ，所以先安装 ``py311-ruff`` :
 
-.. literalinclude:: helix_lsp/install_ruff
+.. literalinclude:: freebsd_helix_lsp/install_ruff
    :caption: 安装ruff
 
 另外，针对yaml LSP建议同时安装ansible-language-server方便编辑 :ref:`ansible` 的特殊YAML:
 
-.. literalinclude:: helix_lsp/ansible_lsp
+.. literalinclude:: freebsd_helix_lsp/ansible_lsp
    :caption: 安装ansible-language-server 
  
 - 最后，综上完成配置 ``~/.config/helix/languages.toml`` :
 
-.. literalinclude:: helix_lsp/languages.toml
+.. literalinclude:: freebsd_helix_lsp/languages.toml
    :caption: 配置 ``~/.config/helix/languages.toml``
    :language: toml
 
 注意，虽然上述配置已经完成，但是 ``hx --health ansible`` 还是有一些报错:
 
-.. literalinclude:: helix_lsp/hx_health_ansible_output
+.. literalinclude:: freebsd_helix_lsp/hx_health_ansible_output
    :caption: ansible相关的hx报错
    :emphasize-lines: 8-10
 
@@ -83,7 +87,7 @@ Helix使用 :ref:`rust` 开发，所以对Ruff支持非常丝滑，Ruff不仅能
 
 由于ansible本质上是YAML，所以最快且最稳妥的方法是将YAML的查询文件"借"给ansible使用:
 
-.. literalinclude:: helix_lsp/fix_ansible_helix
+.. literalinclude:: freebsd_helix_lsp/fix_ansible_helix
    :caption: 修复ansible查询文件
 
 go
@@ -91,18 +95,18 @@ go
 
 - 安装 ``gopls`` :
 
-.. literalinclude:: helix_lsp/go
+.. literalinclude:: freebsd_helix_lsp/go
    :caption: 安装 ``gopls```
 
 - 此时检查 ``hx --health go`` 有如下提示:
 
-.. literalinclude:: helix_lsp/go_health_output
+.. literalinclude:: freebsd_helix_lsp/go_health_output
    :caption: 检查go环境有部分报错
    :emphasize-lines: 3,5
 
 这里 ``dlv`` 是调试工具，可以在Helix中设置断电、单步执行代码，所以补充安装 ``delve`` :
 
-.. literalinclude:: helix_lsp/fix_golangci-lint
+.. literalinclude:: freebsd_helix_lsp/fix_golangci-lint
    :caption: 修复 golangci-lint 报错
 
 这里 ``go install`` 需要访问github.com，所以需要 :ref:`go_proxy` :
@@ -113,12 +117,12 @@ go
 
 需要注意，通过 ``go install`` 安装的二进制软件位于 ``~/go/bin`` 目录，所以需要添加到环境变量中以确保能够找到 ``golangci-lint-langserver`` 命令:
 
-.. literalinclude:: helix_lsp/go_path
+.. literalinclude:: freebsd_helix_lsp/go_path
    :caption: 设置GO程序路径
 
 完成上述安装配置之后，再次执行 ``hx --health go`` 就能看到正确的设置:
 
-.. literalinclude:: helix_lsp/go_health_output_ok
+.. literalinclude:: freebsd_helix_lsp/go_health_output_ok
    :caption: 正确的设置输出信息
 
 rust
@@ -131,5 +135,5 @@ rust
 
 - 安装LSP:
 
-.. literalinclude:: helix_lsp/rust
+.. literalinclude:: freebsd_helix_lsp/rust
    :caption: 安装rust的LSP

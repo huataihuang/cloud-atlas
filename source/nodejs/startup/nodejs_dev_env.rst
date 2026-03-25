@@ -15,9 +15,9 @@ Node.js开发环境
 .. literalinclude:: nodejs_dev_env/freebsd_install_node_ports
    :caption: 在FreeBS上使用ports安装
 
-在使用 ``npm`` 安装 :ref:`helix_lsp` 中基于node的 ``pyright`` 和 ``yaml-language-server`` :
+在使用 ``npm`` 安装 :ref:`freebsd_helix_lsp` 中基于node的 ``pyright`` 和 ``yaml-language-server`` :
 
-.. literalinclude:: ../../freebsd/desktop/helix/helix_lsp/install_npm_lsp
+.. literalinclude:: ../../freebsd/desktop/helix/freebsd_helix_lsp/install_npm_lsp
    :caption: 安装基于ndoe的LSP
 
 会提示:
