@@ -23,6 +23,12 @@ llm-ls提供的功能:
   - :ref:`ollama`
   - OpenAI compatible APIs (如 :ref:`llama-cpp-python` 提供模拟OpenAI API的web服务器`)
 
+服务端
+===========
+
+.. literalinclude:: helix_llm-ls/docker_exec_qwen3
+   :caption: 运行qwen3-coder
+
 安装llm-ls
 ============
 

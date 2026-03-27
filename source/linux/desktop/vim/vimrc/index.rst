@@ -8,6 +8,7 @@ The Ultimate vimrc
    :maxdepth: 1
 
    intro_vimrc.rst
+   simple_vimrc.rst
    my_vimrc.rst
    omnicompletion.rst
    vim-snipmate.rst

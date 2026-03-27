@@ -88,10 +88,10 @@ proxy.conf
 
 第三方软件仓库也称为  ``Launchpad PPA (Personal Package Archive)`` 
 
-第三方软件仓库需要使用 ``apt-add-repository`` 命令添加，不过这个工具命令默认没有安装，所以首先执行::
+第三方软件仓库需要使用 ``apt-add-repository`` 命令添加，不过这个工具命令默认没有安装，所以首先执行:
 
-   sudo apt install software-properties-common
-   sudo apt update
+.. literalinclude:: apt/software-properties-common
+   :caption: 通过安装 ``software-properties-common`` 获得 ``apt-add-repository``
 
 然后可以使用以下命令添加PPA::
 

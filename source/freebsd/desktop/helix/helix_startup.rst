@@ -24,16 +24,20 @@ Helix快速起步
 安装
 =========
 
-FreebSD
------------
+.. _freebsd_install_helix:
+
+FreebSD安装Helix
+-----------------
 
 FreebSD发行版已经提供了Helix，可以通过 ``pkg`` 安装:
 
 .. literalinclude:: helix_startup/freebsd_install_helix
    :caption: FreeBSD安装helix
 
-Ubuntu
----------
+.. _ubuntu_install_helix:
+
+Ubuntu安装Helix
+----------------
 
 Ubuntu官方发行版没有直接提供helix，而是通过snap提供安装:
 
@@ -41,6 +45,9 @@ Ubuntu官方发行版没有直接提供helix，而是通过snap提供安装:
    :caption: 通过snap在Ubuntu上安装helix
 
 如果要通过 :ref:`apt` 安装helix，可以使用Helix官方维护的PPA:
+
+.. literalinclude:: ../../../linux/ubuntu_linux/admin/apt/software-properties-common
+   :caption: 通过安装 ``software-properties-common`` 获得 ``apt-add-repository``
 
 .. literalinclude:: helix_startup/ubuntu_apt_install_helix
    :caption: 通过Helix官方PPA安装helix

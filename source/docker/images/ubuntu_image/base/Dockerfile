@@ -4,7 +4,7 @@ FROM ubuntu:latest
 RUN apt update -y && apt upgrade -y
 
 # Devops utilities
-RUN apt -y install sudo openssh-client bind9-dnsutils tmux git neovim
+RUN apt -y install sudo openssh-client bind9-dnsutils tmux git vim
 
 # create admin (UID/GID 1000)
 ARG USER=admin
@@ -26,4 +26,8 @@ RUN groupadd -g 993 render && \
 
 RUN sed -i 's/%sudo	ALL=(ALL:ALL) ALL/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' /etc/sudoers
 
+USER $USER
+COPY vimrc /home/$USER/.vimrc 
+
+USER root
 CMD ["/bin/bash"]

@@ -30,6 +30,25 @@ Go程序可以理解环境变量 ``http_proxy`` 和 ``no_proxy`` ，但是当使
    :language: bash
    :caption: 配置socks代理环境变量
 
+.. note::
+
+   我的实践发现在 :ref:`ubuntu_image` 容器中使用 ``socks5h`` 协议会失败，改为 ``socks5`` 协议则成功。有点奇怪的是Host主机是正常的
+
+使用官方go代理
+===============
+
+上述使用socks代理或http代理都是采用操作系统底层proxy功能，实际上Go内置了专有的代理机制，更为透明且高效。在国内，可以使用 `Goproxy.cn <https://goproxy.cn/>`_ 提供的Go模块代理:
+
+.. literalinclude:: go_proxy/goproxy.cn
+   :caption: 使用 goproxy.cn 提供的模块代理
+
+然后就能正常安装Go模块
+
+另外，也能在命令行使用，例如在 :ref:`ubuntu_image` 制作时在 ``Dockerfile`` 中使用:
+
+.. literalinclude:: go_proxy/dockerfile
+   :caption: 在Dockerfile中使用代理安装Go模块`
+
 归档(现在不用了)
 ===================
 
