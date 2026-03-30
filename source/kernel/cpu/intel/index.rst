@@ -15,4 +15,5 @@ Intel CPU架构
    intel_rst/index
    xeon_e5/index
    xeon_e/index
+   xeon_w/index
    intel_core/index

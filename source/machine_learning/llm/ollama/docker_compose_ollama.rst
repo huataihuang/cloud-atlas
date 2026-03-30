@@ -191,7 +191,7 @@ Google Gemini提出的改进建议主要有:
 
 不过，我实践下来， **上述修订方法并没有解决，报错依旧**
 
-- gemini另外一个建议我觉得很有可能: 回退ROCm版本，因为 :ref:`amd_radeon_instinct_mi50` 我当时在调研时就发现官方RELEASE说明中最高只有ROCm 5.7.1版本是明确支持MI50的，最新的ROCm 6.x发布文档中已经声明不再支持GCN 5代，也就是 **不再明确支持MI50** ，虽然在Reddit帖子中有人报告在ROCm 6.3.2中依然可以使用MI50（我的实践也验证物理主机上使用似乎没有问题，但是看来容器兼容性存在限制）
+- gemini另外一个建议我觉得很有可能: 回退ROCm版本，因为 :ref:`amd_mi50` 我当时在调研时就发现官方RELEASE说明中最高只有ROCm 5.7.1版本是明确支持MI50的，最新的ROCm 6.x发布文档中已经声明不再支持GCN 5代，也就是 **不再明确支持MI50** ，虽然在Reddit帖子中有人报告在ROCm 6.3.2中依然可以使用MI50（我的实践也验证物理主机上使用似乎没有问题，但是看来容器兼容性存在限制）
 
 但是存在一个问题，就是 Ollama 官方镜像的哪个TAG对应使用的是 ROCM 5.7 呢？
 
@@ -273,7 +273,7 @@ gemini建议我尝试:
 - 采用早期的llama3，那些早期的llama3通常会使用旧版本llama.cpp创建的GGUF。这种方法可能会成功，但是带来的问题是无法体验最新的模型
 - 另一种方式我感觉是自己用旧版本 :ref:`llama.cpp` 来转换模型的hf文件到 GGUF，这样理论上能体验最新版本的模型，就是比较麻烦一些 ，我准备参考 `Llama 3.1 GGUF incompatibility using latest release of llama.cpp and text-generation-webui. #6301 <https://github.com/oobabooga/text-generation-webui/issues/6301>`_ 提供的hf转GGUF方法来实现
 
-另外，我想到的一个方法是对于我现在使用的旧硬件 :ref:`amd_radeon_instinct_mi50` ，如果不是用容器直接物理主机运行Olama，那么有可能是可以直接使用最新版本的ROCm (之前我记得尝试用物理主机运行Ollama是成功的，看起来去掉容器化这层是有可能使用最版本ROCm，这样或许会减少很多麻烦)
+另外，我想到的一个方法是对于我现在使用的旧硬件 :ref:`amd_mi50` ，如果不是用容器直接物理主机运行Olama，那么有可能是可以直接使用最新版本的ROCm (之前我记得尝试用物理主机运行Ollama是成功的，看起来去掉容器化这层是有可能使用最版本ROCm，这样或许会减少很多麻烦)
 
 最终解决
 ---------

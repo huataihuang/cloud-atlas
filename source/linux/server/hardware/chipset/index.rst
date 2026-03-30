@@ -9,6 +9,7 @@
 
    pcie.rst
    intel_c610.rst
+   intel_c422.rst
    intel_c246.rst
    nasse_c246.rst
    above_4g_decoding.rst

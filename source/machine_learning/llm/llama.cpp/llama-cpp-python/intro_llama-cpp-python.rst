@@ -25,7 +25,7 @@ Python Bindings for llama.cpp简介
 - 无依赖WEB服务器: 自带基于FastAPI的服务器，可以直接模拟OpenAI的API接口。这样任何支持OpenAI后端的插件(如 :ref:`vscode` 的Continue,Cursor,Copilot等)都可以无缝切换
 - 极致的硬件控制:
 
-  - 异构计算: 可以精确指定多少Layer跑在 :ref:`amd_radeon_instinct_mi50` ，多少Layer跑在 :ref:`tesla_a2` 上(通过不同的 ``n_gpu_layers`` 参数)
+  - 异构计算: 可以精确指定多少Layer跑在 :ref:`amd_mi50` ，多少Layer跑在 :ref:`tesla_a2` 上(通过不同的 ``n_gpu_layers`` 参数)
   - 内存压缩: 支持GGUF格式的所有量化级别(从Q2_K到Q8_O)，这对于管理显存非常重要
 
 - 不仅是服务器，也是库: 可以直接在Python脚本中 ``import llama_cpp`` ，就像普通函数一样进行推理，而不需要通过HTTP协议绕一圈

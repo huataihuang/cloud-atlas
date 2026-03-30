@@ -9,7 +9,7 @@
 准备工作
 ==============
 
-- 两块32GB的 :ref:`amd_radeon_instinct_mi50` 能够运行32B推理模型，甚至可以运行量化版70B模型
+- 两块32GB的 :ref:`amd_mi50` 能够运行32B推理模型，甚至可以运行量化版70B模型
 - :ref:`container_direct_access_amd_gpu` 为运行Ollama准备好 :ref:`docker` 运行环境
 
 运行Ollama容器
@@ -53,7 +53,7 @@
 
    本段模型对比选择由gemini推荐
 
-由于服务器安装了 两块32GB的 :ref:`amd_radeon_instinct_mi50` ，合计 **64GB** 显存适合运行 70B 级别（大模型门槛）和 MoE（混合专家）架构模型
+由于服务器安装了 两块32GB的 :ref:`amd_mi50` ，合计 **64GB** 显存适合运行 70B 级别（大模型门槛）和 MoE（混合专家）架构模型
 
 通用类型
 ---------

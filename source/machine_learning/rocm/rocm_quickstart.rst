@@ -91,7 +91,7 @@ AMDGPU驱动安装
 .. literalinclude:: rocm_quickstart/rocminfo_gfx906_output
    :caption: ``rocminfo`` 信息中包含显卡GPU信息
 
-可以看到我的 :ref:`amd_radeon_instinct_mi50` 显示为 ``gfx906``
+可以看到我的 :ref:`amd_mi50` 显示为 ``gfx906``
 
 - 检查GPU是否检测到(这里遇到了异常)
 
@@ -130,13 +130,13 @@ AMDGPU驱动安装
 
 看起来驱动初始化异常，可能原因(可能性从高到低):
 
-  - :ref:`bhyve_amd_gpu_passthru` 对这款 :ref:`amd_radeon_instinct_mi50` 驱动对虚拟化支持存在问题
+  - :ref:`bhyve_amd_gpu_passthru` 对这款 :ref:`amd_mi50` 驱动对虚拟化支持存在问题
   
     - 可能需要裸物理主机安装一个Ubuntu来对比验证
     - 可能需要再部署一个 :ref:`lfs` 来对比Linux环境 :ref:`iommu` :ref:`ovmf_gpu_nvme`
 
   - AMDGPU driver可能需要降级到低版本来支持旧GPU
-  - :ref:`amd_radeon_instinct_mi50` 硬件问题
+  - :ref:`amd_mi50` 硬件问题
 
 我看到Reddit上的一个帖子 `Mi50 32gb (Working config, weirdness and performance) <https://www.reddit.com/r/LocalLLaMA/comments/1mi5s6w/mi50_32gb_working_config_weirdness_and_performance/>`_ 可以正常使用ROCm和AMDGPU驱动(非虚拟机)
 

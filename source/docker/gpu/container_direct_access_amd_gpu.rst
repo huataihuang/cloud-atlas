@@ -31,7 +31,7 @@
 
 .. note::
 
-   我的服务器安装了 2块 :ref:`tesla_a2` 和 2块 :ref:`amd_radeon_instinct_mi50` ，所以在上面的设备检查会看到4个 ``renderD...`` 设备:
+   我的服务器安装了 2块 :ref:`tesla_a2` 和 2块 :ref:`amd_mi50` ，所以在上面的设备检查会看到4个 ``renderD...`` 设备:
 
    在Linux的Direct Rendering Manager(DRM)子系统中，所有具备渲染能力的GPU都会占用一个 ``renderD`` 编号。要区分设备厂商，可以通过 ``renderD*/device/vendor`` 来区分:
 

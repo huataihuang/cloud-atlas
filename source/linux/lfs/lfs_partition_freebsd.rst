@@ -6,7 +6,7 @@ LFS分区(和FreeBSD一起Dualboot)
 
 我组装 :ref:`nasse_c246` 的电脑，部署了 :ref:`freebsd` 系统来构建 :ref:`freebsd_machine_learning` 。但是，实践中遇到了一些挫折:
 
-原本想 :ref:`bhyve_nvidia_gpu_passthru` ，但是NVIDIA显卡在 :ref:`bhyve` 中PCI passthru无法完成，这阻碍了我进一步的 :ref:`machine_learning` 学习。由于我购买了2块 :ref:`amd_radeon_instinct_mi50` ，所以准备继续尝试 :ref:`bhyve_amd_gpu_passthru` 。
+原本想 :ref:`bhyve_nvidia_gpu_passthru` ，但是NVIDIA显卡在 :ref:`bhyve` 中PCI passthru无法完成，这阻碍了我进一步的 :ref:`machine_learning` 学习。由于我购买了2块 :ref:`amd_mi50` ，所以准备继续尝试 :ref:`bhyve_amd_gpu_passthru` 。
 
 不过， :ref:`nvidia_gpu` 是目前 :ref:`machine_learning` 的主流硬件，我需要充分发挥所以的硬件来构建实验环境。所以，我考虑同时安装 :ref:`lfs` ，构建一个 Dualboot 环境:
 

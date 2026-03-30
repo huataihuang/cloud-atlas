@@ -1,16 +1,13 @@
-.. _server_dell:
+.. _rclone:
 
 =================================
-Dell服务器
+rclone 云存储同步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   dell_r630.rst
-   dell_r640.rst
-   dell_r640_vs_r630.rst
-   dell_t5820.rst
+   intro_rclone.rst
    
 .. only::  subproject and html
 

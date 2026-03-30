@@ -21,3 +21,12 @@ Ubuntu环境Helix结合LSP(Language Server Protocol)
 
    为了能够简化环境，我在 :ref:`ubuntu_image` 时，采用复制 ``/etc/apt/sources.list.d/maveonair-ubuntu-helix-editor-noble.sources`` 配置文件来添加仓库进行安装
 
+安装LSP
+=========
+
+和 :ref:`ubuntu_image` 方式相同，首先安装语言和对应的LSP:
+
+- 安装 :ref:`golang` LSP:
+
+.. literalinclude:: ../../../golang/go_lsp/install
+   :caption: 安装LSP

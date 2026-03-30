@@ -10,6 +10,8 @@
    :maxdepth: 1
 
    llm_token.rst
+   flashattention.rst
+   pagedattention.rst
 
 .. only::  subproject and html
 

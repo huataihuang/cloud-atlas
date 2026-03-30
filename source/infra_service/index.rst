@@ -26,6 +26,7 @@ Infra-Service
    syslog/index
    samba/index
    nfs/index
+   rclone/index
    asciinema/index
    guacamole/index
    web_terminal/index

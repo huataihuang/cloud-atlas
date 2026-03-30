@@ -6,7 +6,7 @@ huggingface-cli
 
 `Hugging Face <https://huggingface.co/>`_ 提供了 ``huggingface-cli`` 工具用于下载Model，不仅可以下载原始权重，也可以下载各种量化版本。
 
-我在 :ref:`docker_compose_ollama` 遇到一个问题: 由于 :ref:`amd_radeon_instinct_mi50` 硬件架构比较陈旧，需要使用早期版本的 :ref:`ollama` 容器镜像，这导致后端 :ref:`llama.cpp` 无法兼容目前主流的 :ref:`llama` 3.3官方提供的GUFF格式，所以需要自己下载原始HuggingFace(HF)格式文件，使用旧版 :ref:`llama.cpp` 工具链来转换成兼容GUFF格式。
+我在 :ref:`docker_compose_ollama` 遇到一个问题: 由于 :ref:`amd_mi50` 硬件架构比较陈旧，需要使用早期版本的 :ref:`ollama` 容器镜像，这导致后端 :ref:`llama.cpp` 无法兼容目前主流的 :ref:`llama` 3.3官方提供的GUFF格式，所以需要自己下载原始HuggingFace(HF)格式文件，使用旧版 :ref:`llama.cpp` 工具链来转换成兼容GUFF格式。
 
 准备工作
 ===============

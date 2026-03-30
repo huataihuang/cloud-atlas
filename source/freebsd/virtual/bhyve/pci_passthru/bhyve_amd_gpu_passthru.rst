@@ -4,9 +4,9 @@
 在bhyve中实现AMD GPU passthrough
 ===================================
 
-和 :ref:`bhyve_intel_gpu_passthru` 类似，尝试 :ref:`amd_radeon_instinct_mi50` 设置 bhyve 的PCIe passthru，思路相同:
+和 :ref:`bhyve_intel_gpu_passthru` 类似，尝试 :ref:`amd_mi50` 设置 bhyve 的PCIe passthru，思路相同:
 
-- 通过bhyve passthru将host主机的 :ref:`amd_radeon_instinct_mi50` 直通给ubuntu虚拟机，采用之前已经部署好的 ``idev`` 虚拟机
+- 通过bhyve passthru将host主机的 :ref:`amd_mi50` 直通给ubuntu虚拟机，采用之前已经部署好的 ``idev`` 虚拟机
 
 安装 :ref:`vm-bhyve`
 ======================
@@ -101,7 +101,7 @@ PCI passthru
 
 .. warning::
 
-   目前我没有解决 :ref:`amd_radeon_instinct_mi50` 的 :ref:`bhyve_pci_passthru` 问题: 我感觉类似 :ref:`bhyve_nvidia_gpu_passthru` 存在兼容支持问题。
+   目前我没有解决 :ref:`amd_mi50` 的 :ref:`bhyve_pci_passthru` 问题: 我感觉类似 :ref:`bhyve_nvidia_gpu_passthru` 存在兼容支持问题。
 
    由于需要尽快构建 :ref:`machine_learning` 环境，我暂时放弃并改为直接在 :ref:`ubuntu_linux` 物理主机上先 :ref:`rocm_quickstart` ，验证无误后再迁移到 :ref:`ovmf_gpu_nvme` (并分别尝试 Ubuntu 环境和 :ref:`lfs` 环境)。最后再返回 FreeBSD 环境构建。
 
@@ -118,13 +118,13 @@ PCI passthru
 
 看起来驱动初始化异常，可能原因(可能性从高到低):
 
-  - :ref:`bhyve_amd_gpu_passthru` 对这款 :ref:`amd_radeon_instinct_mi50` 驱动对虚拟化支持存在问题
+  - :ref:`bhyve_amd_gpu_passthru` 对这款 :ref:`amd_mi50` 驱动对虚拟化支持存在问题
 
     - 可能需要裸物理主机安装一个Ubuntu来对比验证
     - 可能需要再部署一个 :ref:`lfs` 来对比Linux环境 :ref:`iommu` :ref:`ovmf_gpu_nvme`
 
   - AMDGPU driver可能需要降级到低版本来支持旧GPU
-  - :ref:`amd_radeon_instinct_mi50` 硬件问题
+  - :ref:`amd_mi50` 硬件问题
 
 我看到Reddit上的一个帖子 `Mi50 32gb (Working config, weirdness and performance) <https://www.reddit.com/r/LocalLLaMA/comments/1mi5s6w/mi50_32gb_working_config_weirdness_and_performance/>`_ 可以正常使用ROCm和AMDGPU驱动(非虚拟机)
 

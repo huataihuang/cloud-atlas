@@ -8,6 +8,7 @@ Intel OpenVINO
    :maxdepth: 1
 
    intro_openvino.rst
+   vnni.rst
    openvino_genai.rst
 
 .. only::  subproject and html

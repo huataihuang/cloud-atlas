@@ -9,7 +9,7 @@ Ollama使用AMD GPU运行大模型
 
 .. note::
 
-   之前尝试在 :ref:`amd_firepro_s7150x2` 尝试部署AMD ROCm软件堆栈来支持运行不同的LLM ，但是因为硬件支持兼容性原因失败。后来我又购买了较新的 :ref:`amd_radeon_instinct_mi50` 完成 :ref:`rocm_quickstart` ，理论上支持使用 ``Ollama`` 。
+   之前尝试在 :ref:`amd_firepro_s7150x2` 尝试部署AMD ROCm软件堆栈来支持运行不同的LLM ，但是因为硬件支持兼容性原因失败。后来我又购买了较新的 :ref:`amd_mi50` 完成 :ref:`rocm_quickstart` ，理论上支持使用 ``Ollama`` 。
 
    我最初尝试部署在  :ref:`bhyve_amd_gpu_passthru` 实现，但很不幸 admgpu 驱动没有能够正确初始化，失败了
 
@@ -96,7 +96,7 @@ Ollama使用AMD GPU运行大模型
   - AMD Radeon系列最低看来是 AMD Radeon Pro W7800
   - :ref:`pytorch` 2.4.1/Stable 支持的 ROCm 版本最低是 6.1 ，但是不支持 Radeon 7000 系列
 
-:ref:`amd_radeon_instinct_mi50` 实践笔记
+:ref:`amd_mi50` 实践笔记
 =============================================
 
 - 执行 ``ollama serve`` 命令，然后检查控制台输出:
@@ -105,7 +105,7 @@ Ollama使用AMD GPU运行大模型
    :caption:  执行 ``ollama serve`` 终端输出
    :emphasize-lines: 6,7
 
-由于我的主机目前仅安装了 :ref:`amd_radeon_instinct_mi50` ，并且被ROCm支持，所以Ollama启动信息中看到顺利识别出 ``gfx906`` (32GB版本)
+由于我的主机目前仅安装了 :ref:`amd_mi50` ，并且被ROCm支持，所以Ollama启动信息中看到顺利识别出 ``gfx906`` (32GB版本)
 
 - 在另外一个终端上执行 ``ollama run`` 客户端命令
 

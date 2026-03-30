@@ -7,6 +7,7 @@
 .. toctree::
    :maxdepth: 1
 
+   think_server_hardware.rst
    edac.rst
    lm_sensor.rst
    hwinfo.rst

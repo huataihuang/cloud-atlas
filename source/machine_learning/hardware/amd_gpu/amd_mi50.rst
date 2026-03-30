@@ -1,4 +1,4 @@
-.. _amd_radeon_instinct_mi50:
+.. _amd_mi50:
 
 =============================
 AMD Radeon Instinct MI50
@@ -47,7 +47,7 @@ MI50规格
    MI50的性能比 :ref:`tesla_t10` 更好一些，但是功耗翻倍(300W)，所以散热和电源要求较高
 
 .. csv-table:: AMD MI10 vs. Tesla T10 vs. P10
-   :file: amd_radeon_instinct_mi50/mi50_spec.csv
+   :file: amd_mi50/mi50_spec.csv
    :widths: 25, 25, 25, 25
    :header-rows: 1
 

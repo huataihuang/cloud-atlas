@@ -74,6 +74,22 @@ CUDA Cores 和 Tensor Cores的差别
 
 随着越来越依赖海量数据集来进行更准确的模型训练和推理，CUDA cores GPU 被发现处于中等水平。 因此，Nvidia 引入了 Tensor cores。 Tensor cores 在一个时钟周期内执行多项操作表现出色。 因此，在机器学习操作方面，Tensor cores 优于 CUDA cores。
 
+如何使用Tensor Cores
+======================
+
+在使用 :ref:`ollama` 进行大模型推理的 :ref:`ollama_nvidia_a2_gpu_docker` ，可以看到监控显示Tensor Cores没有任何负载: 推理后端(Inference Backend)的工作模式与硬件特性之间不匹配。
+
+由于运行的量化类型(K-Quants)是 ``q4_K_M`` 和 ``q2_K`` ，是GUFF格式特有的量化方式。GUFF的这些量化权重的反量化(De-quantization)和矩阵运算，目前在 :ref:`llama.cpp` 中主要通过 CUDA Cores(SIMD)来完成，而不是 :ref:`tensor_cores` 。
+
+Tensor Core对输入数据的格式要求极其苛刻(通常要求 FP16, BF16 或 特定的 INT8/INT4 格式)。GGUF的位宽是不规则的，为保证精度，它在计算时会先在显存里把权重还原成FP16，然后交给CUDA Cores处理。
+
+如果Ollama没有开启 :ref:`flashattention` ，系统会回退到标准的计算模式，完全绕过Tensor Core。但是即使开启而来 FlashAttention 也不能保证能够激活Tensor Core，因为Ollama官方Docker镜像为了 **极端的兼容性** ，内部打包的 :ref:`llama.cpp` 往往采用了保守的编译策略:
+
+- **缺少架构特定优化** :要激活 :ref:`tesla_a2` 的Tensor Core，编译时需要指定 ``-DGGML_CUDA_F16=ON`` 且目标算力需要匹配 ``sm_86`` 。官方镜像为了能够让Pascal和Maxwell老卡能够跑，通常会回退到最稳妥的FP32
+- **数据对齐限制** : Tensor Core对矩阵的维度(M,N,K)有严格的 **8或16倍数对齐** 要求。Ollama在处理不同模型的Head size时，如果对齐没有做好，会自动回退到CUDA Core以确保计算正确
+
+解决的方法是采用 :ref:`vllm` ，因为vLLM使用了 :ref:`flashattention` **2** 的原生实现，并且PageAttention算子是专门为Tensor Core优化的。并且，需要采用AWQ格式的模型文件( :ref:`hugging_face` )
+
 参考
 =====
 

@@ -75,6 +75,22 @@ GPU - 深度学习关键
 
    我可能会采购非常入门的显卡来实践 :ref:`iommu` 以及 :ref:`sr-iov` 这样的虚拟化GPU技术，部署GPU集群以及使用 :ref:`kubernetes` 来实现GPU容器化部署。以及做一些初步的机器学习尝试。这部分实践暂时不需要采购昂贵的GPU，以便静待明年芯片荒度过之后，GPU降价以及新品推出实现更大的性价比，再考虑。
 
+我的硬件设备
+=============
+
+从刚开始懵懵懂懂，2021年10月1000元购买了第一块 :ref:`tesla_p10` 到2026年1月冲动地剁手了2000元的 :ref:`tesla_a2` ，我前后购买过各种型号的GPU计算卡:
+
+.. csv-table: 我先后购买的各种型号的GPU对比
+   :file: dl_hardware/devices_compare.csv
+   :widths: 20,20,20,20,20
+   :header-rows: 1
+
+需要注意，硬件规格中需要区分不同的微架构，例如 A2 的CUDA虽然只有 1280 的CUDA核心，数量上只有 P10 的CUDA核心数3840的1/3，但是A2的Ampere架构，引入了 **Concurrent Execution** (并发执行)，每个SM(流式处理器)单元可以在处理FP32浮点运算的同时，处理INT32整数运算。这使得A2的核心利用率极高，实测效率远超P10的Pascal老架构。
+
+此外，A2的Ampere架构配备了第三代 :ref:`tensor_cores` ，在处理量化模型(GGUF/AWQ/GPTQ)时，能够实现硬件加速INT8/INT4计算，速度可以反超核心数量更多的P10。
+
+此外，A2的新型Ampere架构，在支持现代推理优化技术( :ref:`flashattention` **2** , :ref:`pagedattention` )提供了硬件加速
+
 参考
 =======
 

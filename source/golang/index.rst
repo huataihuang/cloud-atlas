@@ -9,6 +9,7 @@ Go
 
    intro_golang.rst
    install_golang.rst
+   go_lsp.rst
    go_on_arch_linux.rst
    go_on_fedora.rst
    go_on_macos.rst

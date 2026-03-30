@@ -13,7 +13,7 @@ VS Code插件Continue连接Ollama实现AI辅助编程
 硬件环境和规划
 ================
 
-2026年初，我剁手了两块 :ref:`tesla_a2` ，此外在2025年剁手的 :ref:`amd_radeon_instinct_mi50` 以及更早的 :ref:`tesla_p10` ，形成了混合架构的GPU硬件。由于 :ref:`tesla_a2` 功耗极低，我准备在淘宝上购买涡轮静音风扇组装到我的台式机上，实现7x24小时持续运行的推理平台。另外也改造了 :ref:`tesla_p10` 增加了显卡散热风扇，一并安装到台式机上:
+2026年初，我剁手了两块 :ref:`tesla_a2` ，此外在2025年剁手的 :ref:`amd_mi50` 以及更早的 :ref:`tesla_p10` ，形成了混合架构的GPU硬件。由于 :ref:`tesla_a2` 功耗极低，我准备在淘宝上购买涡轮静音风扇组装到我的台式机上，实现7x24小时持续运行的推理平台。另外也改造了 :ref:`tesla_p10` 增加了显卡散热风扇，一并安装到台式机上:
 
 - 双 :ref:`tesla_a2` 合计有32GB显存，Ampere架构，具备了第二代 Tensor Core，比 :ref:`tesla_p10` 先进了两个代际
 - :ref:`tesla_p10` 24GB显存，Pascal架构，没有Tensor Core

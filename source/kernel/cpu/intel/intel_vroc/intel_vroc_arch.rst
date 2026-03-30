@@ -8,6 +8,10 @@ Intel Virtual RAID on CPU架构
 
    Intel Virtual RAID on CPU技术对硬件的最低要求是使用 Xeon Scalable Processors ，也就是 Skylake-SP 。目前我的二手硬件 :ref:`hpe_dl360_gen9` 差距实在太大(落后了2代) 是无法实践的，所以本文仅做技术搜集和索引，以后有机会再做实践。
 
+.. note::
+
+   2026年3月入手 :ref:`dell_t5820` 使用了较新的 :ref:`xeon_w-2235` 处理器，支持 VROC 技术。不过需要看有没有license，看看有没有机会实践一下
+
 Intel Virtual RAID on CPU (Intel VROC)是一种基于NVMe固态硬盘(SSDs)结合最新的Intel Xeon Scalable processor PCIe lanes实现的硬件级别RAID。这种RAID技术不使用传统的RAID HBA卡，而是CPU处理器直接访问NVMe存储，使用CPU内置的RAID功能来实现高性能NVMe RAID。
 
 Intel VROC释放了NVMe存储的性能，支持不同级别的RAID (RAID 0,1,5,10) 。
