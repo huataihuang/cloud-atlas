@@ -21,6 +21,27 @@ Dell Precision T5820 工作站
 
   - 提供了 :ref:`vnni` 指令集(AVX512升级)，为使用 :ref:`openvino` 部署CPU推理加速提供了硬件支持
 
+U.2背板和NVMe
+===============
+
+Dell T5820前面板有4个硬盘槽位，分为2个版本:
+
+- 全SATA版本: 4个槽位可以安装4个 3.5寸SATA 硬盘(通过转接支架也可以安装2.5寸SATA硬盘)
+- 2个U.2+2个SATA: 升级版本，其中2个槽位的背板换成了U.2接口。这个版本的U.2接口不仅能够安装企业级U.2接口SSD硬盘，而且通过专用的 ``NVMe Flexbay`` 能够转接NVMe SSD，这样就能够充分利旧家用型NVMe设备，如 :ref:`kioxia_exceria_g2`
+
+.. figure:: ../../../../_static/linux/server/hardware/dell/m2_u2_box.avif
+
+   通过NVMe Flexbay可以将U.2转接NVMe SSD设备
+
+.. note::
+
+   如果要使用企业级的U.2 SSD硬盘，建议购买 ``2个U.2+2个SATA`` 版本T5820，实际上是通过更换 FlexBay 1 的背板，来直接支持在主机前面方便更换 :ref:`nvme` 
+
+   `升级 Dell Precision 5820、7820 和 7920 塔式工作站中的存储 <https://www.dell.com/support/kbdoc/zh-cn/000146243/%E5%8D%87%E7%BA%A7-dell-precision-5820-7820-%E5%92%8C-7920-%E5%A1%94%E5%BC%8F%E5%B7%A5%E4%BD%9C%E7%AB%99%E4%B8%AD%E7%9A%84%E5%AD%98%E5%82%A8>`_ 视频介绍了如何安装NVMe设备，前提条件是选购 **U.2** 背板的T5820
+
+   不过，实际上U.2或NVMe的支持是通过主板集成的 PCIe0 和 PCIe1 端口提供连接，该接口也可以直接用于连接GPU设备，这样实际上可以多安装2块 :ref:`tesla_a2` : :ref:`dell_t5820_ssf-8654_tesla_a2`
+
+
 参考
 ======
 
