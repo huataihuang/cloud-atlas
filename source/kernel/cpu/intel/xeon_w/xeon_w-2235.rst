@@ -1,6 +1,5 @@
 .. _xeon_w-2235:
-
-
+ 
 ===================
 Intel Xeon W-2235
 ===================
@@ -12,6 +11,8 @@ Intel Xeon W-2235
 - 支持 Intel® Deep Learning Boost (Intel® DL Boost) on CPU 技术，也就是提供了 Intel AVX-512 指令支持 :ref:`vnni` 能够比上一代大幅加速INT8量化大模型的推理速度(3-4倍)
 
 我之所以为 :ref:`dell_t5820` 选择了 W-2235 ，主要考虑能够实践 :ref:`openvino` 的加速CPU推理，尝试新的 :ref:`machine_learning` 技术线
+
+然而很不幸，我购买的 :ref:`dell_t5820` 遇到了非常诡异的无法启动的问题，排查了一个晚上，最后从卖家那里获知，售卖的T5820最高只支持 : ``W-2225`` 。经过和gemini讨论和排查，基本确定是早期主板 :ref:`dell_t5820_crash_debug` 发现电感不足导致无法支持高电流要求的W-2235
 
 参考
 ======

@@ -21,6 +21,30 @@ Dell Precision T5820 工作站
 
   - 提供了 :ref:`vnni` 指令集(AVX512升级)，为使用 :ref:`openvino` 部署CPU推理加速提供了硬件支持
 
+内存
+-------
+
+8根DIMM内存插槽，支持 DDR4 ECC RDIMM (仅通过 :ref:`xeon_w` CPU提供支持) 和 DDR4非ECC UDIMM (通过酷睿X系列CPU提供支持):
+
+- 2666MT/s
+- 2933MT/s
+- 3200MT/s
+
+.. note::
+
+   Cascade Lake系列CPU将支持T5820每个内存槽最高64GB，所以最大支持512GB内存；但使用Sky Lake系列CPU则只支持每个内存槽最高32GB，所以最大支持256GB内存。
+
+   **内存速度取决于系统中的CPU**
+
+PCIe插槽
+---------
+
+我选择 T5820 的一个重要原因是PCIe扩展能力，该主机提供了5个 ``PCIe`` 和 1个 ``PCI`` 插槽:
+
+.. note::
+
+   T8520的PCIe物理接口都是X16，但是实际
+
 U.2背板和NVMe
 ===============
 
@@ -39,8 +63,7 @@ Dell T5820前面板有4个硬盘槽位，分为2个版本:
 
    `升级 Dell Precision 5820、7820 和 7920 塔式工作站中的存储 <https://www.dell.com/support/kbdoc/zh-cn/000146243/%E5%8D%87%E7%BA%A7-dell-precision-5820-7820-%E5%92%8C-7920-%E5%A1%94%E5%BC%8F%E5%B7%A5%E4%BD%9C%E7%AB%99%E4%B8%AD%E7%9A%84%E5%AD%98%E5%82%A8>`_ 视频介绍了如何安装NVMe设备，前提条件是选购 **U.2** 背板的T5820
 
-   不过，实际上U.2或NVMe的支持是通过主板集成的 PCIe0 和 PCIe1 端口提供连接，该接口也可以直接用于连接GPU设备，这样实际上可以多安装2块 :ref:`tesla_a2` : :ref:`dell_t5820_ssf-8654_tesla_a2`
-
+   不过，实际上U.2或NVMe的支持是通过主板集成的 PCIe0 和 PCIe1 端口提供连接，该接口也可以直接用于连接GPU设备，这样实际上可以多安装2块 :ref:`tesla_a2` : :ref:`dell_t5820_sff-8654_tesla_a2`
 
 参考
 ======

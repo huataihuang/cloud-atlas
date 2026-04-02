@@ -18,7 +18,7 @@ Intel VROC释放了NVMe存储的性能，支持不同级别的RAID (RAID 0,1,5,1
 
 Intel VROC需要使用最新的Intel Xeon Scalable processors处理器的Volume Managemnet Device(Intel VMD)硬件功能，通常是OEM/ODM提供平台配置功能。该技术对硬件兼容性有很高要求，需要参考 `Intel Virtual RAID on CPU (Intel VROC) Supported Configurations <https://www.intel.com/content/www/us/en/support/articles/000030310/memory-and-storage/ssd-software.html>`_ 选择 CPU处理器、操作系统 以及 SSD。
 
-需要注意，Intel VROC (VMD NVMe RAID) 需要license来激活处理器提供对应功能。这个license SKU决定了能够使用对RAID级别以及RAID阵列可以管理的NVMe SSD设备。此外，要组建VROC RAID需要使用Intel NVMe SSD，其他第三方NVMe SSD只支持pass-through模式。(这招真狠，估计是跟苹果学的)
+需要注意，Intel VROC (VMD NVMe RAID) 需要license来激活处理器提供对应功能。这个license SKU决定了能够使用对RAID级别以及RAID阵列可以管理的NVMe SSD设备。此外，要组建VROC RAID需要使用Intel NVMe SSD，其他第三方NVMe SSD只支持pass-through模式。
 
 参考
 =======
