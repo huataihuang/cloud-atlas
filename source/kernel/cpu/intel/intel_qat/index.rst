@@ -9,3 +9,5 @@ Intel QuickAssist 技术(Intel QAT)
 
    intel_qat_quickstart.rst
    intel_qat_with_numa.rst
+   intel_qat-8950.rst
+   intel_qat-8960_driver.rst

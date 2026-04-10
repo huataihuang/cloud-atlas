@@ -17,6 +17,7 @@ FreeBSD存储
    freebsd_ext4.rst
    freebsd_xfs.rst
    freebsd_msdos.rst
+   freebsd_linux_lvm.rst
 
 .. only::  subproject and html
 

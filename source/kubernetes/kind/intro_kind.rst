@@ -31,6 +31,18 @@ kind集群简介
 .. figure:: ../../_static/kubernetes/kind/kind_diagram.png
    :scale: 25
 
+kubernetes版本
+------------------
+
+Kind支持所有官方支持的Kubernetes版本，可以实现极低硬件环境的开发和部署测试。
+
+CRI功能
+-------------
+
+当前Kind支持 :ref:`containerd` 运行时，并且实验性支持 :ref:`podman` ，通过使用容器运行时来直接创建节点容器。
+
+同时Kind为了实现多个容器运行时的支持并且避免不必要的耦合，Kind努力实现Kubernetes CRI(容器运行时接口)涵盖的功能。
+
 参考
 =======
 

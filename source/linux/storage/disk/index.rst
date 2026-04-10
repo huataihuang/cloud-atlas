@@ -22,6 +22,7 @@ Linux磁盘
    using_apple_superdrive_on_linux.rst
    sandisk_cloudspeed_eco_gen_ii_sata_ssd.rst
    change_disk_partition_uuid.rst
+   stop_hdd.rst
 
 .. only::  subproject and html
 

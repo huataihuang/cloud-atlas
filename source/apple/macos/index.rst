@@ -15,6 +15,7 @@ macOS
    mbp15_late_2013.rst
    mbp15_2018.rst
    mac_mini_2024.rst
+   mac_mini_m5.rst
    thunderbolt.rst
    bcm943602cs.rst
    macos_big_sur_gts_root_certificate.rst
@@ -47,6 +48,7 @@ macOS
    restore_launchpad.rst
    macos_ftdi_serial.rst
    macos_vnc.rst
+   macos_synergy.rst
    macos_user_account_cmd.rst
    macos_filesystem.rst
    apfs/index

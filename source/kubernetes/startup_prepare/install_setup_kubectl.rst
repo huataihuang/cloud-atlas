@@ -14,22 +14,25 @@
 在Linux平台使用curl安装kubectl执行程序
 ----------------------------------------
 
-- 通过命令行可以直接下载64位X86 Linux版本执行程序::
+- 通过命令行可以直接下载64位X86 Linux版本执行程序:
 
-   curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+.. literalinclude:: install_setup_kubectl/get
+   :caption: 获取kubectl二进制程序
 
-- 验证(可选)::
+- 验证(可选):
 
-   curl -LO "https://dl.k8s.io/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
-   echo "$(<kubectl.sha256) kubectl" | sha256sum --check
+.. literalinclude:: install_setup_kubectl/validate
+   :caption: 验证二进制代码
 
-- 执行安装::
+- 执行安装:
 
-   sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+.. literalinclude:: install_setup_kubectl/install
+   :caption: 安装kubectl二进制程序
 
-- 验证::
+- 验证:
 
-   kubectl version
+.. literalinclude:: install_setup_kubectl/version
+   :caption: 检查kubectl版本
 
 CentOS, RHEL, Fedora 安装kubectl
 ----------------------------------

@@ -1,19 +1,13 @@
-.. _container:
+.. _lxd:
 
 =================================
-Container
+LXD
 =================================
 
 .. toctree::
    :maxdepth: 2
 
-   lxd/index
-   incus/index
-   podman/index
-   colima/index
-   linuxserver/index
-   distrobox/index
-   toolbox/index
+   intro_lxd.rst
 
 .. only::  subproject and html
 

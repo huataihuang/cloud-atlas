@@ -9,7 +9,9 @@ Kind快速起步
 
 .. note::
 
-   本段落安装实践在 :ref:`asahi_linux` ( :ref:`arm` 架构 )上完成，但方法是通用的，适合不同的Linux发行版
+   最初安装实践在 :ref:`asahi_linux` ( :ref:`arm` 架构 )上完成，但方法是通用的，适合不同的Linux发行版
+
+   后续实践主要在 :ref:`ubuntu_linux` 上完成，目前采用二进制安装方法为主
 
 使用 :ref:`golang` 安装
 --------------------------
@@ -69,8 +71,14 @@ Kind快速起步
    :language: bash
    :caption: 通过brew安装部署3个管控节点，5个工作节点kind集群，可以看到运行集群节点
 
-二进制安装kind(记录未实践)
+二进制安装kind
 ---------------------------
+
+.. note::
+
+   我现在在 :ref:`ubuntu_linux` 上安装采用本段二进制安装方法
+
+   安装中需要设置 :ref:`curl_proxy` 来绕过GFW
 
 `kind release <https://github.com/kubernetes-sigs/kind/releases>`_ 提供了不同架构下的二进制执行程序，可以直接下载使用:
 
@@ -85,6 +93,14 @@ Kind快速起步
 .. literalinclude:: kind_startup/macos_install_kind_release
    :language: bash
    :caption: 在macOS平台上安装kind
+
+- 为了方便管理集群，需要安装 :ref:`kubectl` :
+
+.. literalinclude:: ../startup_prepare/install_setup_kubectl/get
+   :caption: 获取 ``kubectl``
+
+.. literalinclude:: ../startup_prepare/install_setup_kubectl/install
+   :caption: 安装用于管理集群的 ``kubectl``
 
 安装kind(归档)
 ================
