@@ -6,7 +6,7 @@ MacPorts安装旧版本qemu
 
 我在旧版本 macOS Big Sur 11.7.10 上执行 :ref:`macports` 安装 :ref:`qemu` 
 
-.. literalinclude:: macports/ports_install_qemu
+.. literalinclude:: macports/port_install_qemu
    :caption: 使用 ``ports`` 安装 ``qemu``
 
 遇到安装错误:

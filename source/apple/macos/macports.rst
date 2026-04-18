@@ -19,12 +19,47 @@ MacPorts
 
 - 安装 :ref:`qemu` :
 
-.. literalinclude:: macports/ports_install_qemu
+.. literalinclude:: macports/port_install_qemu
    :caption: 使用 ``ports`` 安装 ``qemu``
 
 .. note::
 
    实际上 ``qemu`` 是通过编译源代码完成安装的， ``ports`` 会自动下载所有需要依赖的编译工具和库，自动完成 ``qemu`` 的编译安装，非常方便。
+
+- 安装 ``virt-viewer`` : 用于管理我远程Linux服务器上的 :ref:`qemu` 虚拟机图形界面
+
+.. literalinclude:: macports/port_install_virt-viewer
+   :caption: 使用 ``ports`` 安装 ``virt-viewer``
+
+安装完 ``virt-viewer`` 会有一些提示输出信息，需要按照进行操作:
+
+启动服务: virt-viewer 依赖 avahi 和 dbus 来处理网络发现和进程间通信
+
+.. literalinclude:: macports/load_avahi_dbus
+   :caption: virt-viewer 依赖 avahi 和 dbus
+
+安装过程中安装了 Python 3.14: 如果希望在终端输入 python 或 python3 直接调用这个版本
+
+.. literalinclude:: macports/select_python
+   :caption: 设置系统默认的python和python3为ports安装的python3.14
+
+MacPorts还安装了GNU版本的常用工具(如ls,cp)，默认被重命名为gls,gcp。如果希望直接把常用的ls等指向GNU版本，则需要把 ``/opt/local/libexec/gnubin/`` 添加到 ``~/.zshrc`` 的 ``PATH`` 环境变量的最前面
+
+.. note::
+
+   如果尝试连接远程服务器上的虚拟机(比如通过 :ref:`ssh` )，则需要在连接自妇产后面手动指定Socket路径:
+
+   .. literalinclude:: macports/qemu_ssh
+      :caption: 通过ssh访问远程服务器上的虚拟机
+
+在运行 ``virt-viewer`` 之前，需要在系统中安装一个 ``xorg-server`` ，如果没有安装和运行 ``xort-server`` ，那么运行 ``virt-viewer`` 时会提示报错:
+
+.. literalinclude:: macports/virt-viewer_display_error
+   :caption: 运行X程序(virt-viewer)报错
+
+不过，我通过 ``port install xorg-server`` 安装的X环境和尝试安装 `XQuartz <https://www.xquartz.org/>`_ 运行都出现相同报错。gemini推荐采用 :ref:`homebrew` 来安装更新版本的virt-viewer来解决。暂时放弃
+
+.. 
 
 卸载
 ========

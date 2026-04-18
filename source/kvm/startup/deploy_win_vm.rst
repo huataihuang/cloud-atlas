@@ -19,17 +19,10 @@
 
 这样使用本地 ``remote viewer`` 访问 ``spice://127.0.0.1:5900`` 就可以看到Windows桌面，也就能够进行安装了。
 
-- 创建 :ref:`win10` 虚拟机::
+- 创建 :ref:`win10` 虚拟机:
 
-   virt-install \
-     --network bridge=virbr0,model=virtio \
-     --name win10 \
-     --ram=2048 \
-     --vcpus=1 \
-     --os-type=windows --os-variant=win10 \
-     --disk path=/var/lib/libvirt/images/win10.qcow2,format=qcow2,bus=virtio,cache=none,size=32 \
-     --graphics spice \
-     --cdrom=/var/lib/libvirt/images/Win10_1903_V2_English_x64.iso
+.. literalinclude:: deploy_win_vm/virt-install_win10
+   :caption: 安装win10虚拟机
 
 .. note::
 

@@ -21,9 +21,21 @@ Type 2 hypervisor通常需要修改现有操作系统来运行虚拟机，这就
 
 通常，Type 1 hypervisor需要为所有支持的硬件重新实现以便设备驱动。不过，Xen的Type 1 hypervisor是通过在hypervisor中实现一个最小化硬件集并且运行一个特殊的私有VM(Dom0)来实现一个Linux系统使用所有实际存在硬件。这样Xen就通过使用Dom0来驱动I/O使用硬件设备，实现了所有虚拟机DomUs的硬件使用。
 
+.. _kvm_hypervisor:
 
+KVM hypervisor
+==================
+
+KVM hypervisor是一个完全虚拟化实现，提供了每个VM所有类型服务，包括BIOS(basic input/output system)以及虚拟化硬件，入处理器，内存，网卡。也就是说，每个VM是一个完整模拟的主机。
+
+.. figure:: ../_static/kvm/kvm_virtualization_stack.webp
+
+   KVM开源虚拟化软件堆栈
+
+KVM是Linux的内核模块，它通过直接插入Linux内核代码来允许其实现一个hypervisor。每个VM作为一个独立的Linux进程运行在systemd之下，每个VM都有独立附加的虚拟硬件。KVM只能在支持 :ref:`intel_vt` 或 AMD-V 的处理器上运行。
 
 参考
 =======
 
 - `On the Performance of Arm Virtualization <https://www.linaro.org/blog/on-the-performance-of-arm-virtualization/>`_
+- `KVM hypervisor: a beginners’ guide <https://ubuntu.com/blog/kvm-hyphervisor>`_

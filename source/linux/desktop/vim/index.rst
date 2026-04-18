@@ -22,6 +22,7 @@ Vim
    vim_basic.rst
    vim_gz.rst
    vim_ctags.rst
+   vim_hex_edit.rst
 
 .. only::  subproject and html
 

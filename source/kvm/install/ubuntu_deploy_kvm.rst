@@ -64,6 +64,17 @@ Ubuntu部署KVM
 安装必要软件包
 -----------------
 
+- Ubuntu 24.04:
+
+.. literalinclude:: ubuntu_deploy_kvm/install
+   :caption: 在Ubuntu 24.04上安装KVM相关软件包 
+
+.. note::
+
+   当前Ubuntu对KVM相关的虚拟化软件包进行了 **解耦和重命名** 以前使用 ``qemu-kvm`` 安装软件包现在改名为 ``qemu-system-x86`` 或 ``qemu-system-arm`` 等。如果你直接安装 ``qemu-system`` 则会安装大量不同架构的执行包，如 ``qemu-system qemu-system-arm qemu-system-common qemu-system-data qemu-system-gui qemu-system-mips qemu-system-misc qemu-system-modules-opengl qemu-system-modules-spice qemu-system-ppc qemu-system-s390x qemu-system-sparc qemu-system-x86``
+
+   所以建议直接安装 ``qemu-system-x86``
+
 - Ubuntu 18.10及以上版本::
 
    sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virtinst
@@ -96,6 +107,11 @@ Ubuntu部署KVM
 
 添加用户到用户组
 --------------------
+
+- 由于Ubuntu 24.04默认权限较严，为了避免频繁使用 ``sudo`` 来管理虚拟机，建议将用户假如 ``libvirt`` 和 ``kvm`` 组：
+
+.. literalinclude:: ubuntu_deploy_kvm/adduser
+   :caption: 将当前用户组加入 ``libvirt`` 和 ``kvm`` 组
 
 - Karmic(9.10)及以后版本（但不包括14.04 LTS）需要确保用户已经添加到组 ``libvirt`` 中::
 
@@ -138,3 +154,4 @@ Ubuntu部署KVM
 =====
 
 - `KVM/Installation <https://help.ubuntu.com/community/KVM/Installation>`_
+- `KVM hypervisor: a beginners’ guide <https://ubuntu.com/blog/kvm-hyphervisor>`_

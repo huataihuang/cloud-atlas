@@ -10,6 +10,7 @@ NVIDIA GPU
    nvidia_gpu_infra.rst
    nvlink/index
    nvidia-smi.rst
+   nvflash.rst
    nvidia_mig/index
    ../../../kvm/vgpu/index
    nvidia_dcgm/index

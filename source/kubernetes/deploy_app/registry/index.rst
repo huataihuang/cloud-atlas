@@ -8,3 +8,4 @@ Kubernetes部署registry仓库
    :maxdepth: 1
 
    k8s_deploy_registry_startup.rst
+   harbor/index

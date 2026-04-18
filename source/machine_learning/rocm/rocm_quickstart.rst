@@ -66,10 +66,23 @@ AMDGPU驱动安装
    - Host主机安装 AMDGPU 驱动
    - 容器内部安装 ROCm
 
+.. note::
+
+   请根据 `AMD Support: Search or Browse Drivers and Support by Product <https://www.amd.com/en/support/download/drivers.html>`_ 页面提供的选项，选择自己产品对应的安装驱动包。
+
+   例如 :ref:`amd_mi50` 经过筛选后可以看到 `Instinct™ MI50 (32GB) Drivers and Downloads - Latest Version <https://www.amd.com/en/support/downloads/drivers.html/accelerators/instinct/instinct-mi-series/instinct-mi50-32gb.html>`_ 当前(202604)可以获得最高版本是 ``Radeon™ Software for Linux® version 25.35.1 for Ubuntu 24.04.4 HWE`` 
+
+   但是， :ref:`amd_mi50_flash_pro_vii_rom` 转换的 Radeon PRO VII 则可以看到 `Radeon™ PRO VII Drivers and Downloads - Latest Version <https://www.amd.com/en/support/downloads/drivers.html/graphics/radeon-pro/radeon-pro-vii-series/radeon-pro-vii.html>`_ 支持没有持续更新，终止于2023年8月，最高只支持 ``Radeon™ Pro Software for Enterprise on Ubuntu 22.04.3 Installer`` 版本是 ``23.Q3``
+
+   注意: Ubuntu操作系统需要升级成 :ref:`ubuntu_lts_hwe`
+
 - 安装AMDGPU驱动: 
 
 .. literalinclude:: rocm_quickstart/amdgpu_driver_install
    :caption: Ubuntu 24.04 安装 amdgpu 驱动
+
+.. literalinclude:: rocm_quickstart/amdgpu_driver_install_24.04_lts_hwe
+   :caption: 在 Ubuntu 24.04.4 LTS (HWE) 安装最新版本ROCm 7.2.1
 
 - 驱动安装完成后，在host主机上可以看到加载了 ``amdgpu`` 内核模块( ``lsmod | grep amd`` ):
 
@@ -216,6 +229,7 @@ AMDGPU驱动安装
 参考
 ======
 
+- `ROCm™ Software 7.2.1 > Quick start installation guide <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html>`_
 - `ROCm™ Software 6.3.2 > Quick start installation guide <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html#rocm-install-quick>`_
 - `ROCm™ Software 6.3.2 > Post-installation instructions <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/post-install.html>`_
 - `Instinct MI50 on consumer hardware <https://www.reddit.com/r/ROCm/comments/1kwirmw/instinct_mi50_on_consumer_hardware/>`_
