@@ -15,6 +15,9 @@ Dell服务器
    dell_t5820_nvme.rst
    dell_t5820_gpu.rst
    dell_t5820_sff-8654_tesla_a2.rst
+   dell_t5820_config_aperture_size.rst
+   dell_t5820_rebaruefi.rst
+   dell_t5820_flash_modified_bios.rst
    
 .. only::  subproject and html
 
