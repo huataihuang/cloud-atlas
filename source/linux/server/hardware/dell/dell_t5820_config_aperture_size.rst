@@ -6,7 +6,7 @@
 
 我在尝试通过 :ref:`amd_mi50_change_vbios_bar_size` 来解决 :ref:`dell_t5820` 不支持resize BAR，也就是不能够支持大规格BAR，遇到手工修订VBIOS的困难无法解决。从另一个角度来说，既然 :ref:`amd_mi50` 无法修订BAR size，那么从主机BIOS角度来说，其实可以通过忽略GPU上报BAR size来解决。这个思路是在gemini提示后，google到 :ref:`gentoo_linux` Wiki中的一篇 `User:0xdc/Drafts/Configure Intel GPU Aperture Size via hidden UEFI settings <https://wiki.gentoo.org/wiki/User:0xdc/Drafts/Configure_Intel_GPU_Aperture_Size_via_hidden_UEFI_settings>`_ 触发的
 
-.. warnging::
+.. warning::
 
    实际上我搞错了概念，我以为调整 :ref:`dell_t5820` 的BIOS中 ``Aperture Size`` 能够忽略掉 :ref:`amd_mi50` 这种计算卡要求大规格BAR的请求，实际上搞错了 ``Aperture Size`` 和 ``ReBAR`` 的对应关系:
 
@@ -75,7 +75,7 @@ UEFITool是一个遵循UEFI平台接口规范的firmware镜像查看和编辑器
 
 如果一切顺利的话， 按照Gentoo Linux Wiki `User:0xdc/Drafts/Configure Intel GPU Aperture Size via hidden UEFI settings <https://wiki.gentoo.org/wiki/User:0xdc/Drafts/Configure_Intel_GPU_Aperture_Size_via_hidden_UEFI_settings>`_ 就能够从官方的 ``bios.bin`` 中搜索到内容是 ``Aperture Size`` 的内容，就可以将这部分导出为 ``section.bin`` ，让后续的 ``ifextract`` 工具(该工具能将二进制文件内容解析转换成人能够读取的变量设置)来处理解析 
 
-.. warngin::
+.. warning::
 
    很不幸，我的实践验证前面采用的 ``binwalk`` 方法没有正确提取出PFS载荷，在UEFITools中无法使用该文件
 
@@ -208,9 +208,9 @@ U盘启动方法:实践失败
    - ``SMM Security Mitigation`` 设置为 ``Disabled`` (这个参数开启会导致无法修改变量)
    - ``Secure Boot Enable`` 设置为 ``Disabled``
 
-- 执行(这里仅记录，因为从U盘启动没有成功）
+- 执行(这里仅记录，因为从U盘启动没有成功，实际操作见下文）
 
-.. literalinclude:: dell_t5820_config_aperture_size/run
+.. literalinclude:: dell_t5820_config_aperture_size/setup_var.efi
    :caption: 执行 ``setup_var``
 
 注入硬盘引导方法(efibootmgr):实践失败

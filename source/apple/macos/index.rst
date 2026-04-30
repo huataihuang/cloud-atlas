@@ -62,6 +62,7 @@ macOS
    kitty.rst
    macos_shared_library.rst
    macos_spoken_content.rst
+   oclp_macos.rst
 
 .. only::  subproject and html
 

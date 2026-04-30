@@ -36,7 +36,7 @@ Google AI提到了:
 
 对应排查方法:
 
-- 在终端运行 ``pmset -g thermlog`` ，古国观察到 ``CPU_Speed_Limit`` 数值小于 ``100`` 说明正在发生硬件限速
+- 在终端运行 ``pmset -g thermlog`` ，观察到 ``CPU_Speed_Limit`` 数值小于 ``100`` 说明正在发生硬件限速
 
 .. literalinclude:: fix_macbook_slow/pmset
    :caption: 在 ``make html`` 编译任务时检查 ``pmset`` 输出
@@ -76,4 +76,44 @@ Google AI提到了:
 
 我推测是不是Linux没有自动显卡支持，或者有什么电源节能管理功能绕过了这个MacBook Pro存在异常的节点组件？我甚至推测由于设备非常陈旧，是否有某个电源管理模块监控功能混乱导致macOS无法正常管理CPU频率。而我安装了Linux系统，恰恰因为不完全支持MacBook Pro的节点管理功能，误打误撞绕过了这个问题。
 
-我准备安装双系统(macOS+Linux)，对比测试一下安装Linux的性能。待续...
+暂时解决
+==========
+
+由于是非常古老的MacBook硬件，我并没有一直使用这台笔记本电脑，偶然在使用时发现这台笔记本再次无法启动，并且每次加电都会进入修复模式，强制要求我重装系统。我开始担心是硬件故障了
+
+MacBook 启动时自动进入 Recovery（恢复）模式并提示重装系统，通常意味着电脑在启动过程中遇到了无法自行修复的问题，导致无法引导进入正常的 macOS 系统:
+
+- 文件系统错误： 磁盘的目录结构或分区表出现故障
+- 磁盘空间极度不足： 如果硬盘几乎全满，系统可能无法创建必要的缓存文件来完成启动
+- 硬件故障： 对于较旧的机型（如带机械硬盘的 MacBook），可能是硬盘老化；对于新款（板载 SSD），则可能是闪存芯片故障
+
+我在Recovery过程中使用了 ``First Aid`` 工具检查macOS卷，显示正常，但是检查 ``macOS-Data`` 卷是出现报错 ``rror: (oid 0x15891b) om: btn: found zeroed-out block Ojbect map is invalid. The volume /dev/rdisk3s1 cound not be verified completely. File system check exit code is 8.`` :
+
+错误代码 ``exit code is 8`` (表示fsck_apfs发现错误但无法在线修复)配合 ``found zeroed-out block`` (发现全零块，意味着磁盘在该位置数据已经全部丢失或无法读取)和 ``Object map is invalid`` （对象映射无效），是一个比较典型的 APFS 文件系统底层元数据损坏，通常是频繁断电、强制关机、或SSD固件瞬时故障导致卷的元数据出错。
+
+- 尝试修复:
+
+.. literalinclude:: fix_macbook_slow/fix_disk
+   :caption: 尝试通过修复磁盘文件系统来避免重装系统
+
+但是很不幸，修复不成功
+
+但是幸运的时，按照提示重新安装了一遍Big Sur系统(格式化抹掉了磁盘数据)之后，整个macOS意外复活了: 已经不再像之前重装系统之后非常卡顿甚至编译也非常缓慢。
+
+这让我非常惊喜也非常疑惑，和gemini讨论之后，推测主要原因:
+
+- Late 2013 MacBook Pro (Haswell 架构)运行 macOS 11 Big Sur 出现卡顿，往往不是 NVMe 硬盘的硬件缺陷，而是 macOS 11 对非原生驱动支持的优化问题，以及 Big Sur 之后系统对索引（Spotlight）和图形加速（Metal）的需求大幅提升所致
+
+  - 显卡 (核心限制)：Late 2013 使用的是 Intel Iris Pro (GT2) 或 NVIDIA GT 750M。这些显卡不支持 Metal 2/3
+
+    - ``系统设置 -> 辅助功能 -> 显示 -> 降低透明度`` (Reduce transparency)对于非原生Metal显卡的老Mac提升明显
+
+  - 我使用了第三方NVMe( :ref:`samsung_pm9a1` )，其早期固件版本在macOS下存在Trim延迟(尤其是 7301Q 或更早版在非原生系统下会导致严重的性能衰减)
+
+    - 当 :ref:`oclp_macos` 前建议 :ref:`update_samsung_pm9a1_firmware_on_winpe`
+    - 在 OCLP 编译设置中，确保开启了 ``SetApfsTrimTimeout`` 为 ``999`` 或 ``-1`` 。这能极大缓解启动缓慢和写入时的系统假死(也就是Trim超时立即返回避免陷入长时间假死)
+
+下一步
+========
+
+在和gemini讨论 :ref:`obsidian` 无法在Big Sur安装时，gemini建议我 :ref:`oclp_macos` **15** ``Sequoia`` 来实现

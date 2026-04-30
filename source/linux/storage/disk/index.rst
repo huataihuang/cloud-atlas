@@ -23,6 +23,7 @@ Linux磁盘
    sandisk_cloudspeed_eco_gen_ii_sata_ssd.rst
    change_disk_partition_uuid.rst
    stop_hdd.rst
+   ventoy.rst
 
 .. only::  subproject and html
 

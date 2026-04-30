@@ -39,7 +39,7 @@ Docs-as-Code
 
   - ``Docusaurus`` Facebook开源的基于 React+Node.js 静态网站生成器，基于MDX框架
   - :ref:`nextra` 是 :ref:`nextjs` 开发的同样基于MDX的静态网站
-  - ``Astro`` 支持多种前端框架的文档工具 - `Astro integrations <https://docs.astro.build/en/guides/integrations-guide/#official-integrations>`_
+  - ``Astro`` 支持多种前端框架的文档工具 - `Astro integrations <https://docs.astro.build/en/guides/integrations-guide/#official-integrations>`_ (看文档架构可选多种前端框架，感觉是在太繁杂了)
   - :ref:`mkdocs`
   - :ref:`hugo`
   - :ref:`jekyll`
@@ -54,7 +54,7 @@ Docs-as-Code
 
   - ``docToolchain``
   - ``Asciidoctor`` GitHub开发的Asciidoc生成器
-  - ``Antora`` 
+  - :ref:`antora`
 
 - reStructuredText: Python社区主要使用的文档系统，也是偏重技术文档内容但不care外观的选择，例如 kernel.org
 
@@ -72,6 +72,8 @@ Docs-as-Code
 ``Asciidoc`` 和 ``reStructuredText`` 更适合后端技术领域。
 
 目前我想学习一些前端技术，所以我在选型时会选择 ``Markdown`` 流派，同时我会结合自己近期的学习路线来最终选择一个平台。可能选择基于 :ref:`nextjs` 的 :ref:`nextra` 。
+
+不过，在2026年我重新开始构建 
 
 设计图表
 ==========

@@ -30,6 +30,7 @@ Alpine Linux
    alpine_asix_usb_network_adapter.rst
    alpine_extended.rst
    alpine_apk.rst
+   alpine_apk_certificates_error.rst
    alpine_ssh_docker.rst
    busybox.rst
    openrc/index
