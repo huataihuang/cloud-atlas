@@ -4,6 +4,12 @@
 Dell Precision T5820 工作站
 =============================
 
+.. warning::
+
+   踩坑了: Dell Precision T5820的BIOS有一个缺陷，不支持 Resizable BAR，虽然常规消费级显卡没有问题，但是安装 :ref:`tesla_a2` 或 :ref:`amd_mi50` 这样数据中心计算卡是无法开机的。我反复折腾 :ref:`dell_t5820_rebaruefi` 还没有解决问题。
+
+   总之，价格低廉总有不为人知的坑在里面，市场是最好的试金石!
+
 2026年3月底剁手了二手的 Dell Precision T5820工作站，950W电源的准系统(有2个U.2位的背板)只需要1100元，是目前感觉能够承担的较为经济实惠的主机:
 
 - 静音台式工作站，应该能够解决我使用机架式 :ref:`hpe_dl380_gen9` 烦人的噪音困扰
@@ -55,7 +61,7 @@ PCIe插槽
 
 .. csv-table:: Dell T5820 PCIe (使用 :ref:`xeon_w-2225` )
    :file: dell_t5820/pcie.csv
-   :width: 20,20,30,30
+   :widths: 20,20,30,30
    :header-rows: 1
 
 U.2背板和NVMe
@@ -87,7 +93,8 @@ Dell T5820前面板有4个硬盘槽位，分为2个版本:
 T5820有一个超薄光驱位置，当然二手服务器上，这个光驱位是空的，但是有一个光驱连接的SATA接口，所以非常适合安装一块OS使用的2.5" SSD硬盘:
 
 .. figure:: ../../../../_static/linux/server/hardware/dell/cdrom_ssd.jpg
-   :caption: 通过超薄光驱转接SSD硬盘可以安装一块2.5" SSD硬盘
+   
+   通过超薄光驱转接SSD硬盘可以安装一块2.5" SSD硬盘
 
 这种超薄光驱是标准化的，可以在淘宝上找到非常廉价的转接支架
 

@@ -26,7 +26,7 @@ vs code
 为方便在服务器(虚拟机)上远程开发，采用:
 
 - :ref:`vscode_remote_dev_ssh`
-- :ref:`vscode_in_browser`
+- :ref:`code-server`
 
 开发环境
 ==============

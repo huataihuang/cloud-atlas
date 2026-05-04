@@ -10,6 +10,10 @@
 
    我感觉三星为了快速占据市场，研发和品控可能存在疏漏，而且OEM版本无法得到售后保障，所以不推荐购买!!!
 
+.. warning::
+
+   淘宝上销售的 ``PM9A1 NVMe`` 厂商标记是 ``00B00`` 这意味着没有写入任何一个主机厂定制标记，例如联想定制版后缀是 ``00BL7`` 。这导致一个非常致命的问题，无法使用联想或Dell的NVMe firmware进行更新，特别是早期OEM版本的firmware有巨大缺陷，“读取干扰（Read Disturb）”导致的数据丢失风险，以及 ``性能掉速`` 和 ``缓存回收异常`` ，我在使用过程中就遇到了 :ref:`samsung_pm9a1_timeout_failure` ，由于无法升级firmware( :ref:`update_samsung_pm9a1_firmware` 失败)，所以性能非常拉胯!!!
+
 .. note::
 
    如果经费宽裕， :strike:`建议购买` ``三星PM9A3`` (企业级)，使用寿命更长:

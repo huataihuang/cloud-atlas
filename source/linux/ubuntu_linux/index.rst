@@ -13,6 +13,7 @@ Ubuntu Linux
    ubuntu_server_init.rst
    ubuntu_desktop.rst
    upgrade_ubuntu.rst
+   upgrade_ubuntu_26.04.rst
    ubuntu_hibernate.rst
    ubuntu_hibernate_old.rst
    admin/index

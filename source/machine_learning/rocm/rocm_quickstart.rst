@@ -72,7 +72,7 @@ AMDGPU驱动安装
 
    例如 :ref:`amd_mi50` 经过筛选后可以看到 `Instinct™ MI50 (32GB) Drivers and Downloads - Latest Version <https://www.amd.com/en/support/downloads/drivers.html/accelerators/instinct/instinct-mi-series/instinct-mi50-32gb.html>`_ 当前(202604)可以获得最高版本是 ``Radeon™ Software for Linux® version 25.35.1 for Ubuntu 24.04.4 HWE`` 
 
-   但是， :ref:`amd_mi50_flash_pro_vii_rom` 转换的 Radeon PRO VII 则可以看到 `Radeon™ PRO VII Drivers and Downloads - Latest Version <https://www.amd.com/en/support/downloads/drivers.html/graphics/radeon-pro/radeon-pro-vii-series/radeon-pro-vii.html>`_ 支持没有持续更新，终止于2023年8月，最高只支持 ``Radeon™ Pro Software for Enterprise on Ubuntu 22.04.3 Installer`` 版本是 ``23.Q3``
+   但是， :ref:`amd_mi50_flash_vbios` 转换的 Radeon PRO VII 则可以看到 `Radeon™ PRO VII Drivers and Downloads - Latest Version <https://www.amd.com/en/support/downloads/drivers.html/graphics/radeon-pro/radeon-pro-vii-series/radeon-pro-vii.html>`_ 支持没有持续更新，终止于2023年8月，最高只支持 ``Radeon™ Pro Software for Enterprise on Ubuntu 22.04.3 Installer`` 版本是 ``23.Q3``
 
    注意: Ubuntu操作系统需要升级成 :ref:`ubuntu_lts_hwe`
 

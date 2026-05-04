@@ -32,3 +32,16 @@ WinPE
   - 适用场景：只有当前面两个模式都死活进不去系统时，才考虑这个
 
 我的实践验证，采用第2种方式 ``Boot in wimboot mode`` 成功启动WinPE
+
+.. _firpe:
+
+FirPE(第三方WinPE)
+=====================
+
+`FirPE维护系统 <https://firpe.cn/>`_ 是一个更为完整全面的的WinPE系统，当前版本已经基于Windows 11构建，打包了Chrome(360)，DiskGenius Pro 等完整版应用，并且集成了更多的驱动，在我的 :ref:`mbp15_late_2013` 上能够直接驱动显卡和无线网卡，几乎是开箱即用。
+
+使用方法同WinPE，也可以通过 :ref:`ventoy` 来加载运行ISO文件
+
+.. note::
+
+   另一个类似FirPE的系统是 `Edgelib PE(Edgeless) <https://www.edgeless.top/>`_ ，采用了“核心+插件”的设计思想，可以根据需要动态加载运行库插件。它的兼容性极高，甚至可以在某些配置非常古怪的服务器硬件上稳定驱动 RAID 卡和网卡。

@@ -8,6 +8,14 @@ Radeon Instinct MI50 是 AMD 于 2018年11月18日分布的专业显卡，该卡
 
 AMD Radeon Instinct MI50 有两个内存版本，一个是 16GB HBM2内存，通过4096为显存接口连接；另一个规格是 32GB 内存。这两款AMD GPU在淘宝上非常廉价，我购买的 32GB 版本(1000元)，甚至比 16GB规格 :ref:`tesla_t10` (1400元)，而从技术性能的纸面数据来看，MI50其实比T10要更好一些。这可能就是NVIDIA CUDA护城河的威力了，在AI领域，AMD的存在感非常低。
 
+实际上，MI50 32GB规格在2026年出现了戏剧性的价格暴涨，我在2025年5月购买的时候只需要1028元，但是到2026年4月时居然高达3999元(最低也需要3200元)，而原先更为廉价的16GB规格也上涨到1200元。由于这款GPU架构比较陈旧，官方驱动和 :ref:`rocm` 也已经不在明确支持，加上AMD的软件堆栈比NVIDIA落后，所以在使用上会非常折腾，看起来目前性价比已经不高。
+
+不过，去年5月-7月间，这款 MI50 32GB 性价比极高，Reddit上有一些帖子讨论 `Successfully Built My First PC for AI (Sourcing Parts from Alibaba - Under $1500!)  <https://www.reddit.com/r/LocalLLaMA/comments/1lsgtvy/comment/n1xdg6r/>`_ 讨论了这个MI50构建AI PC，在油管上也能够看到司波图制作了一期使用3张MI50 `从零把装有MI50显卡的二手服务器打造成终极ALL IN ONE主机：ZFS+SMB+Docker+KVM+三卡AI推理！ <https://www.youtube.com/watch?v=JBV13PwWw0I>`_ 
+
+.. note::
+
+   司波图启发了我，实际上我的 :ref:`hpe_dl380_gen9` 通过使用PCIe延长线也可以安装3块MI50，只可惜当时价格最低的时候只购买了2块MI50，错失了96GB显存组合运行高规格大容量LLM的方案。不过，这款MI50最大的弊端是功耗和架构陈旧，并且只适合机架服务器，所以在家使用电费和噪音是极大的困扰，实用性大为降低!!!
+
 .. figure:: ../../../_static/machine_learning/hardware/amd_gpu/mi50.jpg
 
    MI50外观
@@ -91,3 +99,4 @@ MI50规格
 - `TechPowerUP GPU Database > Radeon Instinct MI50 Specs <https://www.techpowerup.com/gpu-specs/radeon-instinct-mi50.c3335>`_
 - `WikiPedia : ROCm <https://en.wikipedia.org/wiki/ROCm>`_
 - `Reddit: Instinct MI50 on consumer hardware <https://www.reddit.com/r/ROCm/comments/1kwirmw/instinct_mi50_on_consumer_hardware/>`_
+- `Successfully Built My First PC for AI (Sourcing Parts from Alibaba - Under $1500!) <https://www.reddit.com/r/LocalLLaMA/comments/1lsgtvy/comment/n1xdg6r/>`_

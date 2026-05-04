@@ -47,9 +47,13 @@
 由于 :ref:`samsung_pm9a1` 是OEM版本，三星官方没有直接提供firmware下载，所以我是通过搜索对比发现以下两个方案可能性较高:
 
 - `联想 Critical Firmware Update for Samsung drives - ThinkStation <https://pcsupport.lenovo.com/us/en/products/workstations/thinkstation-p-series-workstations/thinkstation-p340-tiny/solutions/ht516311-critical-firmware-update-for-samsung-drives-thinkstation>`_ 这篇更新文档较为全面，不仅提供了Windows也提供了Linux更新方法。对比方法可以看到，实际上联想的Linux更新方法就是标准的Linux通过LVFS完成更新，考虑到淘宝上联想的OEM SSD很普遍，且更新方法是标准方式，所以我尝试用此方案
-- `Samsung SSD PM9A1-00B00 Firmware Update <https://www.reddit.com/r/pcmasterrace/comments/q2o52p/samsung_ssd_pm9a100b00_firmware_update/>`_ 获得升级firmware信息，下载 
+- `Samsung SSD PM9A1-00B00 Firmware Update <https://www.reddit.com/r/pcmasterrace/comments/q2o52p/samsung_ssd_pm9a100b00_firmware_update/>`_ 获得升级firmware信息，下载: 实际上我之前走了很多弯路，我当时不知道 ``00B00`` 意味着不属于任何厂商的OEM标记，导致nvme无法使用特定厂商firmware更新，强制刷入即使显示 ``success`` 其实也是无效的。唯有这个方法才有希望!!! 
 
 Linux提供了一个名为 ``fwupdmgr`` 的客户端工具来管理firmware升级，可以自动、安全、可靠地完成firmware升级，也可以用于Samsung SSD。 ``fwupd`` 服务可以工作在Linux和BSD系统上，是 `LVFS <https://lvfs.readthedocs.io/en/latest/>`_ 的组成部分。
+
+.. note::
+
+   ``LVFS`` 依然要求厂商提供的firmware和设备Model匹配，所以该方法依然是常规的更新模式，并不能解决第三方零售的无ID的NVMe更新firmware
 
 - 检查 `LVFS设备列表 <https://fwupd.org/lvfs/devices/>`_ 看看需要更新的SSD是否提供，例如使用 ``PM9A1`` 搜索，可以看到Dell，HP，Lenovo都提供了firmware
 - 使用 ``fwupd`` 更新SSD firmware:

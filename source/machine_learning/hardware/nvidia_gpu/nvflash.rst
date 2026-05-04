@@ -167,6 +167,11 @@ nvflash
 
 .. literalinclude:: nvflash/gpumode
    :caption: 切换graphics模式
+
+输出显示:
+
+.. literalinclude:: nvflash/gpumode_output
+   :caption: 切换graphics模式
    :emphasize-lines: 10,15
 
 这里输入 ``y`` 执行，但是发现 :ref:`tesla_a2` 不支持graphics模式
