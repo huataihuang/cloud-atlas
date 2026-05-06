@@ -29,6 +29,10 @@ Colima快速起步
 
    旧版macOS Big Sur不支持 ``vz`` 类型，所以必须安装 :ref:`qemu` ，而且旧版homebrew不会自动以来安装qemu，需要单独完成 :ref:`homebrew_old_qemu` 部署。
 
+.. note::
+
+   :ref:`oclp_macos` 能够在非常古老的 :re:`mbp15_late_2013` 上运行macOS 15，这样就可以运行现代化软件，也包括运行Colima，强烈推荐这种利旧的方案。
+
 - 根据安装提示，使用如下命令启动 ``colima`` 服务:
 
 .. literalinclude:: colima_startup/brew_start_colima
@@ -104,6 +108,14 @@ Colima快速起步
 .. note::
 
    根据 :ref:`lima` 官方文档 `Lima VM types <https://lima-vm.io/docs/config/vmtype/>`_ 说明， ``VZ`` 选项( :ref:`apple_virtualization` )需要 ``macOS >= 13.0`` (Lima >= 0.14)
+
+2c4g规格VZ案例
+-----------------
+
+- 在 ref:`oclp_macos` 后 :ref:`mbp15_late_2013` 也能够使用VZ模式虚拟机，性能会有提高，所以现在采用:
+
+.. literalinclude:: colima_startup/colima_vz_2c4g
+   :caption: 使用 ``VZ`` 模式运行 ``2c4g`` 虚拟机的 ``colima``
 
 多个docker虚拟机运行案例
 --------------------------

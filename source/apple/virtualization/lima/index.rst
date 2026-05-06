@@ -10,6 +10,7 @@ Lima: Linux Machines
    intro_lima.rst
    lima_startup.rst
    lima_vm_env.rst
+   lima_template_config.rst
    lima_run_freebsd.rst
    lima_run_alpine.rst
    arm-on-intel_lima.rst
