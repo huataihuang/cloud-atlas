@@ -77,6 +77,8 @@ Firefox浏览器支持通过 socks 代理访问internet，即可以通过上述s
 
 如果简单的WEB代理方式，可以使用 :ref:`macos` 内建代理设置（在网络设置中有个Proxy设置）。但是，这个代理设置通常只有应用程序使用系统代理才能工作，例如safari浏览器就使用系统代理配置，而很多应用程序，则不会使用系统代理，例如ssh等客户端。
 
+不过，需要注意的是， :ref:`oclp_macos` 的OCLP是基于 :ref:`python` 编写核心，上述 :ref:`macos` 内建代理设置是不生效的，所以需要 :ref:`clash-verge-rev` 来实现网络流量通过SOCKS5隧道发送。
+
 参考
 =====
 

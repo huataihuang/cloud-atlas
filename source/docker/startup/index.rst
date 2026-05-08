@@ -14,6 +14,7 @@ Docker 起步
    install_docker-ce.rst
    install_docker_raspberry_pi_os.rst
    archlinux_docker.rst
+   alpinelinux_docker.rst
    install_docker_centos8.rst
    rockylinux_docker.rst
    post_install/index

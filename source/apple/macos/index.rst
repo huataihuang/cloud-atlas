@@ -63,6 +63,7 @@ macOS
    macos_shared_library.rst
    macos_spoken_content.rst
    oclp_macos.rst
+   oclp_macos_firefox.rst
 
 .. only::  subproject and html
 

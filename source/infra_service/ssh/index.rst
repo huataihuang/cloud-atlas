@@ -15,6 +15,7 @@ ssh服务
    autossh.rst
    rstunnel.rst
    ssh_tunneling_dynamic_port_forwarding.rst
+   clash-verge-rev.rst
    cloudflare_tunnels.rst
    entropy_random.rst
    speed_up_ssh.rst
