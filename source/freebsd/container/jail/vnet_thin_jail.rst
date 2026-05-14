@@ -288,3 +288,24 @@ fstab配置和启动jail
    :caption: 创建jail的辅助脚本
 
 通过执行 ``./jail_zfs.sh pg-1 111`` 就可以创建一个使用 ``192.168.7.111`` 为IP的名为 ``pg-1`` 的Jail
+
+远程快速进入jail工作环境
+==========================
+
+我在jial容器 ``jdev`` 内部构建了一个 ``admin`` 用户工作环境，并且使用 :ref:`tmux` 来保持会话。这带来一个问题，每次ssh到FreeBSD服务器上，需要执行一连串的命令来恢复工作桌面:
+
+.. literalinclude:: vnet_thin_jail/jail_tmux
+   :caption: 繁琐的命令来恢复工作环境
+
+实际上 ``jexec`` 本身就支持指定运行用户( ``-u`` )，所以登陆到服务器上之后实际上只需要一条命令:
+
+.. literalinclude:: vnet_thin_jail/jexec_u
+   :caption: ``jexec -u`` 参数直接指定运行用户
+
+结合 :ref:`ssh` 的配置文件 ``~/.ssh/config`` 可以本地一键直达:
+
+.. literalinclude:: vnet_thin_jail/ssh_jexec
+   :caption: 在ssh配置文件中指定远程执行命令以便一键完成tmux工作环境恢复
+   :emphasize-lines: 7,11
+
+注意，上述 ``RemoteCommand`` 的一些组合，可以确保能够进入目录来创建或重连会话

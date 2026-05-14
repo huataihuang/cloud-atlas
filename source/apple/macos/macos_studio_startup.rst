@@ -28,9 +28,21 @@ macOS软件安装和设置
 .. figure:: ../../_static/apple/studio/magnet.png
    :scale: 75
 
+* :ref:`homebrew`
+
+很多GNU/Linux工具通过HomeBrew安装是最为快捷方便的，在macOS上，不论是 :ref:`install_run_minikube` 还是 :ref:`write_doc` (安装Python/Sphinx) ，都需要使用 :ref:`homebrew` 。
+
+* :ref:`monitorcontrol`
+
+提供外置显示器的亮度和音量调节，非常必要
+
 * iTerm2 - 替代默认Terminal的工具，功能非常强大，对于需要远程访问Linux服务器必备。
 
-* :ref:`install_docker_macos`
+* :ref:`colima`
+
+由于开源 :ref:`colima` 的轻量级采用了macOS内置的虚拟化框架，所以性能较为良好且支持 Apple Silicon。通过 :ref:`homebrew` 可以非常完美运行
+
+* :ref:`install_docker_macos` (现在放弃)
 
 如前所述，在macOS上我使用的虚拟化技术之一就是基于macOS操作系统自带Hypervisor的xhyve。在这个基础上，开源项目 :ref:`hyperkit` 成为 :ref:`docker` 和 :ref:`multipass` 的共有基础。
 
@@ -42,15 +54,14 @@ macOS软件安装和设置
 
    不过 :ref:`docker_desktop` for mac使用Linux的虚拟机来运行docker，带来和物理主机 :ref:`macos` 共享数据卷非常困难，不如直接使用Linux作为物理主机构建 :ref:`mobile_cloud_x86`
    
-* :ref:`vmware_fusion`
+* :ref:`vmware_fusion` (现在放弃)
 
 安装了Docker之后，紧接着安装VMware Fusion虚拟化软件，以便能够借助 :ref:`vmware_nested_virtual` 构建一个 :ref:`openstack` 集群，并在openstack集群之上构建Kubernetes集群或者其他分布式系统。
 
-* :ref:`homebrew`
+.. note::
 
-很多GNU/Linux工具通过HomeBrew安装是最为快捷方便的，在macOS上，不论是 :ref:`install_run_minikube` 还是 :ref:`write_doc` (安装Python/Sphinx) ，都需要使用 :ref:`homebrew` 。
+   由于在macOS平台上 :ref:`docker` 和 :ref:`vmware_fusion` 非常沉重，所以我现在改为采用 :ref:`colima` 来运行容器为主，辅助以 :ref:`lima` 运行不同的VM虚拟机
 
-* :ref:`multipass`
+* :ref:`multipass` (现在放弃)
 
 在Docker安装之后，系统已经具备了HyperKit，这样安装Multipass就不再需要安装HyperKit。可以直接安装Multipass。
-

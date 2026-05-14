@@ -15,6 +15,16 @@ Colima使用了 YAML 格式的配置文件:
 
    ``~/.colima/_templates/default.yaml`` 中有详细注释，所以可以比较清晰找到对应设置。本文仅选择部分关注点进行记录和实践
 
+VM规格调整
+==============
+
+在 :ref:`colima_startup` 实践中，根据本地host主机硬件可以调整CPU和Memory的规格，由于 :ref:`mbp15_late_2013` 硬件有限，所以我调整为 ``2c4g`` 规格
+
+修改RunTime
+===============
+
+默认 :ref:`container_runtimes` 是 :ref:`docker` ，但是考虑到轻量级和 :ref:`kubernetes` 平滑一致，我将默认runtime修订为containerd
+
 修改默认OS
 ============
 
