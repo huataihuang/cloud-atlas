@@ -31,7 +31,7 @@ Colima快速起步
 
 .. note::
 
-   :ref:`oclp_macos` 能够在非常古老的 :re:`mbp15_late_2013` 上运行macOS 15，这样就可以运行现代化软件，也包括运行Colima，强烈推荐这种利旧的方案。
+   :ref:`oclp_macos` 能够在非常古老的 :ref:`mbp15_late_2013` 上运行macOS 15，这样就可以运行现代化软件，也包括运行Colima，强烈推荐这种利旧的方案。
 
 - 根据安装提示，使用如下命令启动 ``colima`` 服务:
 
@@ -48,7 +48,10 @@ Colima快速起步
 使用
 =====
 
-- ``colima start`` 是启动一个 :ref:`container_runtimes` 的Linux虚拟机，不带任何参数就默认使用 :ref:`docker` ，此时要求系统已经 :ref:`homebrew` 安装过 :ref:`docker_desktop`
+- ``colima start`` 是启动一个 :ref:`container_runtimes` 的Linux虚拟机，不带任何参数就默认使用 :ref:`docker` ，此时要求系统已经 :ref:`homebrew` 安装过 :ref:`docker_desktop` ，如果要简化运行参数并且也想要一定的控制，那么参考 :ref:`colima_config` 配置模版，就能够以简单的命令创建自己想要的运行环境:
+
+.. literalinclude:: colima_startup/colima_start
+   :caption: 启动colima
 
 - 我为了能够适应当前 :ref:`kubernetes` 的只部署 :ref:`containerd` 运行时，没有完整的 :ref:`docker` 组件，所以我使用的启动命令是:
 
