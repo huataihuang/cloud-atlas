@@ -1,4 +1,4 @@
-.. _kobo_libra_h20:
+.. _kobo_libra_h2o:
 
 =========================
 Kobo Libra H2O

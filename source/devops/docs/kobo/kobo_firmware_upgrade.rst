@@ -4,7 +4,7 @@
 Kobo Firmware 更新
 ========================
 
-`Kobo Firmware Downloads <https://pgaskin.net/KoboStuff/kobofirmware.html>`_ 使用Kobo API提供了最新的官方firmware，也包括我购买的 :ref:`kobo_libra_h20`
+`Kobo Firmware Downloads <https://pgaskin.net/KoboStuff/kobofirmware.html>`_ 使用Kobo API提供了最新的官方firmware，也包括我购买的 :ref:`kobo_libra_h2o`
 
 - 将下载的 firmware 压缩文件解压缩，获得三个文件
 - Kobo设备通过USB线连接电脑

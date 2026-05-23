@@ -1,0 +1,26 @@
+Host *
+  ServerAliveInterval 60
+  ControlMaster auto
+  ControlPath ~/.ssh/%h-%p-%r
+  ControlPersist yes
+  StrictHostKeyChecking no
+  Compression yes
+
+Host MyProxy
+  HostName <SERVER_IP>
+  User admin
+  # 1. 保持最激进的存活探测，防范防火墙悄悄掐断连接
+  ServerAliveInterval 15
+  ServerAliveCountMax 3
+  # 2. 彻底关闭压缩，降低老 CPU 负载，减少传输延迟
+  Compression no
+  # 3. 针对代理隧道，显式关闭连接复用（避开多路复用互锁）
+  ControlMaster no
+  # 4. 优化 TCP 底层性能
+  IPQoS throughput
+  TCPKeepAlive yes
+  # 5. 采用Host主机所有接口监听代理端口，防止colima在大流量时默认转发给127.0.0.1:1080出现限流而failover到192.168.5.2实际网卡接口
+  #DynamicForward 1080
+  DynamicForward 0.0.0.0:1080
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/proxy/id_rsa

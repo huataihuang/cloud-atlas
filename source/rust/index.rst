@@ -9,6 +9,7 @@ Rust
 
    intro_rust.rst
    rust_startup.rst
+   mise.rst
 
 .. only::  subproject and html
 

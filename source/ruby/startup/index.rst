@@ -11,6 +11,7 @@ Ruby起步
    gentoo_install_ruby.rst
    ruby_version_manager.rst
    ruby_gem.rst
+   rubygems_proxy.rst
    bundler.rst
    ruby_quickstart.rst
    ruby_in_browser.rst

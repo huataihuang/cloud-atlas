@@ -4,6 +4,10 @@
 Ruby版本管理器
 =====================
 
+.. note::
+
+   现在开源软件开发环境的版本管理已经出现了更为通用且更好的 :ref:`mise` ，使用 :ref:`rust` 开发能够管理各种开发环境，所以建议采用 ``mise`` 来管理自己的开发环境，替代了早期单一且使用 :ref:`bash` 开发的 ``rvm``
+
 在 `Download Ruby <https://www.ruby-lang.org/en/downloads/>`_ 官方下载页面介绍中可以知晓，除了Linux/UNIX发行版提供的Ruby安装包，另一种常用的Ruby安装方式是采用 ``Ruby版本管理器`` 安装:
 
 - Ruby版本管理器就类似于 ``npm`` 之于 :ref:`javascript` ，可以在系统中安装不同版本的Ruby并提供切换能力，这样不同的应用可以采用不同的Ruby版本运行来满足特定需求

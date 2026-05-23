@@ -38,6 +38,32 @@ SSH Tunneling: 动态端口转发
 
 则只需要执行 ``ssh MyProxy`` 就立即建立起动态端口转发
 
+优化配置方法
+=============
+
+我在构建 :ref:`colima_socks_proxy` 使用了本文的 ``DynamicForward`` 方式来构建SSH Tunneling。但是偶然发现在执行 ``nerdctl build`` 命令构建 :ref:`colima_images` 出现报错:
+
+.. literalinclude:: ssh_tunneling_dynamic_port_forwarding/apt_error
+   :caption: 构建镜像时出现 ``apt`` 下载错误
+   :emphasize-lines: 2,7
+
+这个报错反复出现，让我很是头疼。看起来像是GFW防火墙干扰了SSH Tunnel。询问了Gemini，提出了一些改进意见:
+
+- ``Compression yes`` （开启压缩）是SSH基于gzip算法在CPU曾对数据进行压缩以后再传输，但是对于我的古老的 :ref:`mbp15_late_2013` 这种性能较差的老旧主机，需要瞬间分出大量时钟去解压缩数据流。而且， **压缩会显著增加TCP包的延迟(latency)** 在本来就不稳定的跨境链路上，高延迟极易出发防火墙的"超时阻断"或TCP窗口溢出，导致连接半路断开
+- ``ControlMaster`` :ref:`ssh_multiplexing` 让多个独立终端窗口共享一个TCP长连接，，免去重复握手的开销。但是， ``ssh -D`` 时，所有SOCKS5流量(特别是apt会发起十几个连接)会全部从一条唯一的TCP隧道内部的通道(Channels)进行多路复用。此时如果网络波动，主干TCP连接(Master Connection)被防火墙干扰了一下，那么 ``ControlMaster`` 内部的所有子通道会 **瞬间全部卡死或产生严重的粘包**
+
+所以针对恶劣网络环境的SSH隧道调优方案:
+
+.. literalinclude:: ssh_tunneling_dynamic_port_forwarding/ssh_config_tunning
+   :caption: **优化的** 配置动态端口转发的 ~/.ssh/config
+   :emphasize-lines: 12-21
+
+说明:
+
+- ``ServerAliveInterval 15`` : 将探测从 60 秒缩短到 15 秒。防火墙（GFW）对于长期没有数据交互的 TCP 链接采用的是“静默丢弃”策略（直接从路由表抹除）。15 秒一次的“心跳”能极大地保住这个连接不被悄悄断掉。
+- ``IPQoS throughput`` : 告诉 内核，这个 SSH 连接是用来跑大流量数据传输的，优先保证吞吐量，减少由于系统调度导致的丢包。
+
+
 设置Firefox浏览器使用代理
 ============================
 
