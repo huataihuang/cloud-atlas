@@ -62,6 +62,24 @@ vm类型
 
 ``mountType`` 对于 ``vz`` 虚拟机默认使用 ``virtiofs`` ，对于 ``qemu`` 虚拟机默认使用 ``sshfs`` 。需要注意 ``virtiofs`` 对依赖的vz必须是Apple Silicon硬件，所以我在 :ref:`mbp15_late_2013` 只能使用qemu，所以要提升IO性能，改为采用 ``9p`` ，这是比sshfs性能更好的qemu内置IO支持
 
+.. note::
+
+   ``9p`` 协议（九号计划文件系统协议）：它是 QEMU 原生支持的进程间共享内存文件系统。由于它直接在 QEMU 的内存映射（Memory Mapping）中进行数据交换，省去了 ``sshfs`` 极其消耗老 CPU 的 SSH 握手和加解密损耗。对于老款 Intel 芯片来说，它的 IO 响应速度和吞吐量显著好于 ``sshfs`` 。
+
+   ``9p`` 的缺点是在极端高并发的大文件频繁读写时（比如上千个小文件的并发编译），可能会偶发文件指针锁死。但对于日常的全栈基础开发，它的性能体感相比 sshfs 好很多。
+
+.. warning::
+
+   由于 mountType（卷挂载驱动）在 Colima 的底层逻辑中属于一旦创建就无法热修改的元数据。直接执行 ``colima start`` 是不会生效的，所以需要在修订 ``~/.colima/_template/default.yaml`` 之后，通过以下命令重建VM生效:
+
+   .. literalinclude:: colima_config/restart
+      :caption: 重建colima虚拟机使存储挂载类型切换到 ``9p``
+
+   **上述操作会销毁虚拟机导致所有数据丢失，所以务必在操作前备份数据** 特别是已经花费了大量时间的 :ref:`colima_images` :
+
+   .. literalinclude:: colima_config/backup_images
+      :caption: 备份colima镜像
+
 对比编译 :ref:`sphinx_doc` 性能
 
 - 当使用 ``sshfs`` 时编译耗时超过半小时:
