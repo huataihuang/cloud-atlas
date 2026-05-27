@@ -80,13 +80,6 @@ vm类型
    .. literalinclude:: colima_config/backup_images
       :caption: 备份colima镜像
 
-对比编译 :ref:`sphinx_doc` 性能
-
-- 当使用 ``sshfs`` 时编译耗时超过半小时:
-
-.. literalinclude:: colima_config/sshfs_time
-   :caption: 使用sshfs时编译sphinx文档耗时
-
 最终配置
 ===========
 

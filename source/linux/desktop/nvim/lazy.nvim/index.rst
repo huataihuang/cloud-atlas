@@ -9,6 +9,7 @@ lazy.nvim
 
    lazy.nvim_startup.rst
    lazy.nvim_lua_treesitter.rst
+   lazy.nvim_docker.rst
 
 .. only::  subproject and html
 

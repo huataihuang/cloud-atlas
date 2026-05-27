@@ -23,6 +23,7 @@ neovim
    nvim_ansible.rst
    lazy.nvim/index
    mason.nvim/index
+   debug_nvim_crash.rst
 
 
 .. only::  subproject and html

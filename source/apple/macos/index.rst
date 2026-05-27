@@ -45,6 +45,8 @@ macOS
    missing_xcrun.rst
    vim_tmux_iterm_zsh.rst
    macos_nfs.rst
+   macos_nfs4.rst
+   macos_nfs3.rst
    restore_launchpad.rst
    macos_ftdi_serial.rst
    macos_vnc.rst

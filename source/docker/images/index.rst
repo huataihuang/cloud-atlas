@@ -24,6 +24,7 @@ Docker 镜像
    dockerfile_build_source_script.rst
    inspect_docker_image.rst
    docker_image_prune.rst
+   dockerfile_env_arg.rst
 
 .. only::  subproject and html
 

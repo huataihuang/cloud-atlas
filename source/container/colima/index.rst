@@ -11,6 +11,8 @@ Colima
    colima_startup.rst
    colima_config.rst
    colima_debug_start.rst
+   colima_mounttype_9p.rst
+   colima_nfs.rst
    colima_socks_proxy.rst
    colima_proxy.rst
    colima_proxy_archive.rst

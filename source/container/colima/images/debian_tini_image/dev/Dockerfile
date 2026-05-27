@@ -17,6 +17,11 @@ COPY apt_proxy.conf /etc/apt/apt.conf.d/proxy.conf
 #RUN --mount=type=bind,source=apt_proxy.conf,target=/etc/apt/apt.conf.d/proxy.conf \
 #    apt update -y && apt upgrade -y
     
+# 增加针对特定qemu的CPU模拟的编译设置
+# 必须使用 ENV 固化，否则容器运行时 JIT 编译器（如 Ruby YJIT）无法继承该参数
+ENV CFLAGS="-march=x86-64-v3 -O2" \
+    LANG="en_US.UTF-8" \
+    ALL_PROXY="socks5h://192.168.5.2:1080"
 
 ARG DEBIAN_FRONTEND=noninteractive
 

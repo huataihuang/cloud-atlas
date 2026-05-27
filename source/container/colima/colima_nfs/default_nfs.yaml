@@ -1,0 +1,56 @@
+cpuType: host
+vmType: qemu
+
+# mountType必须设置，这里采用sshfs，但实际不挂载
+mountType: sshfs
+# 这里挂载一个空目录，欺骗Colima，这样就不会挂载 /home/admin 目录，留给定制的NFS挂载
+mounts:
+  - location: ~/.colima/empty_mount
+    mountPoint: /tmp/colima_empty_gate
+    writable: false
+
+# Custom provision scripts for the virtual machine.
+# Provisioning scripts are executed on startup and therefore needs to be idempotent.
+provision:
+  - mode: system
+    script: |
+      #!/bin/sh
+      echo "=== [Task 1/2] Updating package list and installing system tools ==="
+      # 1. 禁用交互式弹窗，防止 apt 阻塞开机流程
+      export DEBIAN_FRONTEND=noninteractive
+
+      # 2. 规范执行更新并同步安装你需要的工具（例如 htop, vim, rsync）
+      apt-get update -y
+      apt-get install -y htop vim rsync nfs-common
+
+      echo "=== [Task 1/2] Infrastructure tools installed successfully ==="
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -e
+
+      # 1. 确保虚拟机内部的本地挂载点物理存在
+      mkdir -p /home/admin
+
+      # 2. 检查当前是否已经挂载过，避免 colima start/stop 重复挂载导致内核死锁
+      if ! mountpoint -q /home/admin; then
+        echo "=== [Colima Provision] 正在注入高性能 NFS 存储底座 ==="
+
+        # 3. 强力泵血：执行最高性能的 NFSv4 挂载命令
+        # 192.168.5.2 是 Colima 默认指向 Mac 宿主机的网关 IP
+        mount -t nfs -o \
+          nfsvers=4.1,\
+          rsize=1048576,\
+          wsize=1048576,\
+          noatime,\
+          nodiratime,\
+          actimeo=3600,\
+          hard,\
+          intr,\
+          tcp \
+          192.168.5.2:/Users/admin /home/admin
+
+        echo "=== [Colima Provision] NFS 挂载成功！ ==="
+      else
+        echo "=== [Colima Provision] /home/admin 已存在挂载，跳过 ==="
+      fi

@@ -1,0 +1,2 @@
+colima stop
+colima start
