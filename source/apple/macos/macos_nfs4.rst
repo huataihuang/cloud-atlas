@@ -4,7 +4,7 @@
 macOS系统 ``NFS v4`` 服务
 ============================
 
-我在 :ref:`colima_mounttype_9p` 实践中遇到的I/O性能问题让我非常困扰，即使做了 ``cpuType`` 的微调，但依然让我无法忍受。和gemini讨论之后，我决定放弃 :ref:`colima` 内置的 ``sshfs`` 和  ``9p`` **mountType** ，改为采用 :ref:`colima_mount_nfs` 来实现共享存储，以期能够提升容器的I/O性能。
+我在 :ref:`colima_mounttype_9p` 实践中遇到的I/O性能问题让我非常困扰，即使做了 ``cpuType`` 的微调，但依然让我无法忍受。和gemini讨论之后，我决定放弃 :ref:`colima` 内置的 ``sshfs`` 和  ``9p`` **mountType** ，改为采用 :ref:`colima_nfs` 来实现共享存储，以期能够提升容器的I/O性能。
 
 macOS 已经完全内置了极为成熟的 NFS（包括 v2, v3, v4）服务端和客户端软件堆栈，所以无需通过 :ref:`homebrew` 安装任何额外软件就可以完成配置。
 

@@ -1,0 +1,79 @@
+# =========================================================================
+# 基础设施拓扑：强开 vmnet 物理副卡
+# =========================================================================
+cpu: 4
+memory: 8
+disk: 60
+
+network:
+  address: true
+
+mounts:
+  - location: ~/.colima/empty_mount
+    mountPoint: /tmp/colima_empty_gate
+    writable: false
+
+mountType: sshfs
+
+# =========================================================================
+# 自动化自愈系统：注入满血 NFSv3 挂载与定周期自愈看门狗
+# =========================================================================
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -e
+
+      MOUNT_POINT="/Users/admin/docs"
+      EXPORT_SRC="192.168.106.1:/Users/admin/docs"
+      MOUNT_OPTS="nfsvers=3,tcp,resvport,nolock,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,soft,timeo=10,retrans=3"
+
+      # 1. 确保虚拟机内部挂载点物理存在
+      mkdir -p "$MOUNT_POINT"
+
+      # 2. 封装核心挂载/修复函数
+      do_nfs_mount() {
+        # 如果检测到挂载点陷入 EIO 泥潭（Stale），先强制物理卸载
+        if mount | grep -q "$MOUNT_POINT"; then
+          echo "=== [NFS Watchdog] 检测到挂载点异常，正在强行剥离旧句柄... ==="
+          umount -f -l "$MOUNT_POINT" || true
+        fi
+        
+        echo "=== [NFS Watchdog] 正在发起满血 NFSv3 挂载冲锋... ==="
+        mount -t nfs -o "$MOUNT_OPTS" "$EXPORT_SRC" "$MOUNT_POINT"
+      }
+
+      # 3. 首次开机保底挂载
+      if ! mountpoint -q "$MOUNT_POINT"; then
+        do_nfs_mount
+      fi
+
+      # =========================================================================
+      # 4. 绝杀：向系统注入守护看门狗脚本，每10秒检查一次，若发生 EIO 自动秒级复活
+      # =========================================================================
+      WATCHDOG_SCRIPT="/usr/local/bin/nfs_watchdog.sh"
+      
+      cat << 'EOF' > "$WATCHDOG_SCRIPT"
+      #!/bin/bash
+      MOUNT_POINT="/Users/admin/docs"
+      EXPORT_SRC="192.168.106.1:/Users/admin/docs"
+      MOUNT_OPTS="nfsvers=3,tcp,resvport,nolock,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,soft,timeo=10,retrans=3"
+
+      # 核心判官：利用 ls 测试挂载点。如果吐出错误（包括 Input/output error），说明链路已断
+      if ! ls "$MOUNT_POINT" >/dev/null 2>&1; then
+        # 再次确认是否是真正的 NFS 失联
+        if mount | grep -q "$MOUNT_POINT" || [ ! -f "$MOUNT_POINT/.watchdog_gate" ]; then
+          umount -f -l "$MOUNT_POINT" >/dev/null 2>&1 || true
+          mount -t nfs -o "$MOUNT_OPTS" "$EXPORT_SRC" "$MOUNT_POINT" >/dev/null 2>&1
+        fi
+      fi
+      EOF
+
+      chmod +x "$WATCHDOG_SCRIPT"
+
+      # 5. 将看门狗挂载到 crontab 中（每分钟高频轮询检查）
+      if ! crontab -l 2>/dev/null | grep -q "nfs_watchdog.sh"; then
+        (crontab -l 2>/dev/null; echo "* * * * * $WATCHDOG_SCRIPT") | crontab -
+      fi
+
+      echo "=== [Colima Provision] NFSv3 高性能防休眠自愈看门狗布设成功！ ==="

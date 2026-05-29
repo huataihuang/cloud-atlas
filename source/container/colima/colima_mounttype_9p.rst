@@ -85,12 +85,12 @@ Haswell i7 的指令集调优组合
 .. literalinclude:: colima_mounttype_9p/default_i7.yaml
    :caption: 设置qemu64作为CPU类型，针对i7优化
 
-- +avx 和 +avx2（高级矢量扩展）—— 编译与矩阵计算
+- ``+avx`` 和 ``+avx2`` （高级矢量扩展）—— 编译与矩阵计算
 
   - 优化场景：如果在容器里运行一些基础的 AI/ML 脚本、数据分析、或者密集型的 C++/Rust 编译器优化（LLVM 极其喜欢向量化）。
   - 威力：AVX2 允许 CPU 的寄存器一次性处理 256 位的数据。开启后，容器内的科学计算和复杂数据处理速度通常能获得 2x - 4x 的物理加速。
 
-- ``+aes``（高级加密标准指令集）—— 网络与 HTTPS
+- ``+aes`` （高级加密标准指令集）—— 网络与 HTTPS
 
   - 优化场景：git clone、gem install（走 HTTPS 拉取），以及所有走 SOCKS5 隧道的加密网络通信。
   - 威力：没有 +aes，虚拟机只能用软件模拟去解包 SSH/TLS 的加密数据，CPU 瞬间飙高；开启 +aes 后，解密工作直接下沉到 Intel 芯片的物理硬件电路，Git 克隆和网络吞吐的 CPU 占用率会瞬间暴跌。

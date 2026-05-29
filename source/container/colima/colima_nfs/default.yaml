@@ -1,0 +1,357 @@
+# Number of CPUs to be allocated to the virtual machine.
+# Default: 2
+cpu: 3
+
+# Size of the disk in GiB to be allocated to the virtual machine for container data.
+# NOTE: value can only be increased after virtual machine has been created.
+#
+# Default: 100
+disk: 100
+
+# Size of the memory in GiB to be allocated to the virtual machine.
+# Default: 2
+memory: 6
+
+# Architecture of the virtual machine (x86_64, aarch64, host).
+#
+# NOTE: value cannot be changed after virtual machine is created.
+# Default: host
+arch: host
+
+# Container runtime to be used (docker, containerd).
+#
+# NOTE: value cannot be changed after virtual machine is created.
+# Default: docker
+runtime: containerd
+
+# AI model runner (docker, ramalama).
+# Both require krunkit VM type for GPU access.
+# docker: Uses Docker Model Runner.
+# ramalama: Uses Ramalama.
+#
+# Default: docker
+modelRunner: docker
+
+# Set custom hostname for the virtual machine.
+# Default: colima
+#          colima-profile_name for other profiles
+hostname: ""
+
+# Kubernetes configuration for the virtual machine.
+kubernetes:
+  # Enable kubernetes.
+  # Default: false
+  enabled: false
+  
+  # Kubernetes version to use.
+  # This needs to exactly match a k3s version https://github.com/k3s-io/k3s/releases
+  # Default: latest stable release
+  version: v1.35.0+k3s1
+  
+  # Additional args to pass to k3s https://docs.k3s.io/cli/server
+  # Default: traefik is disabled
+  k3sArgs:
+    - --disable=traefik
+  
+  # Kubernetes port to listen on
+  # A common port is 6443, though left unbound to ensure no port conflicts
+  # Default: pick random unbound port
+  port: 0
+
+# Auto-activate on the Host for client access.
+# Setting to true does the following on startup
+#  - sets as active Docker context (for Docker runtime).
+#  - sets as active Kubernetes context (if Kubernetes is enabled).
+#  - sets as active Incus remote (for Incus runtime).
+# Default: true
+autoActivate: true
+
+# Network configurations for the virtual machine.
+network:
+  # Assign reachable IP address to the virtual machine.
+  # NOTE: this is currently macOS only and ignored on Linux.
+  # Default: false
+  address: true
+  
+  # Network mode for the virtual machine (shared, bridged).
+  # NOTE: this is currently macOS only and ignored on Linux.
+  # Default: shared
+  mode: shared
+  
+  # Network interface to use for bridged mode.
+  # This is only used when mode is set to bridged.
+  # NOTE: this is currently macOS only and ignored on Linux.
+  # Default: en0
+  interface: en0
+  
+  # Use the assigned IP address as the preferred route for the VM.
+  # Note: this only has an effect when `address` is set to true.
+  # Default: false
+  preferredRoute: false
+  
+  # Custom DNS resolvers for the virtual machine.
+  #
+  # EXAMPLE
+  # dns: [8.8.8.8, 1.1.1.1]
+  #
+  # Default: []
+  dns: []
+  
+  # DNS hostnames to resolve to custom targets using the internal resolver.
+  # This setting has no effect if a custom DNS resolver list is supplied above.
+  # It does not configure the /etc/hosts files of any machine or container.
+  # The value can be an IP address or another host.
+  #
+  # EXAMPLE
+  # dnsHosts:
+  #   example.com: 1.2.3.4
+  dnsHosts:
+    host.docker.internal: host.lima.internal
+  
+  # Replicate host IP addresses in the VM. This enables port forwarding to specific
+  # host IP addresses.
+  #   e.g. `docker run --port 10.0.1.2:8080:8080 alpine` would only forward to the
+  #   specified IP address.
+  #
+  # Default: false
+  hostAddresses: false
+  
+  # Custom gateway address for the virtual machine.
+  # The last octet needs to be 2.
+  #
+  # EXAMPLE
+  # gatewayAddress: 192.168.10.2
+  #
+  # Default: 192.168.5.2
+  gatewayAddress: 192.168.5.2
+
+# ===================================================================== #
+# ADVANCED CONFIGURATION
+# ===================================================================== #
+
+# Forward the host's SSH agent to the virtual machine.
+# Default: false
+forwardAgent: false
+
+# Docker daemon configuration that maps directly to daemon.json.
+# https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file.
+# NOTE: some settings may affect Colima's ability to start docker. e.g. `hosts`.
+#
+# EXAMPLE - disable buildkit
+# docker:
+#   features:
+#     buildkit: false
+#
+# EXAMPLE - add insecure registries
+# docker:
+#   insecure-registries:
+#     - myregistry.com:5000
+#     - host.docker.internal:5000
+#
+# Colima default behaviour: buildkit enabled
+# Default: {}
+docker: {}
+
+# Virtual Machine type (krunkit, qemu, vz)
+# NOTE: this is macOS 13 only. For Linux and macOS <13.0, qemu is always used.
+#
+# vz is macOS virtualization framework and requires macOS 13.
+# krunkit runs super‑light VMs on macOS/ARM64 with a focus on GPU access. It is experimental.
+#
+# NOTE: value cannot be changed after virtual machine is created.
+# Default: qemu
+vmType: qemu
+
+# Port forwarder for the virtual machine (ssh, grpc, none).
+# ssh is more stable but supports only TCP.
+# grpc supports both TCP and UDP, but is experimental.
+# none disables port forwarding.
+#
+# Default: ssh
+portForwarder: ssh
+
+# Utilise rosetta for amd64 emulation (requires m1 mac and vmType `vz`)
+# Default: false
+rosetta: false
+
+# Enable foreign architecture emulation via binfmt (e.g. amd64 on arm64, arm64 on amd64)
+# Default: true
+binfmt: true
+
+# Enable nested virtualization for the virtual machine (requires m3 mac and vmType `vz`)
+# Default: false
+nestedVirtualization: false
+
+# Volume mount driver for the virtual machine (virtiofs, 9p, sshfs).
+#
+# virtiofs is limited to macOS and vmType `vz`. It is the fastest of the options.
+#
+# 9p is the recommended and the most stable option for vmType `qemu`.
+#
+# sshfs is faster than 9p but the least reliable of the options (when there are lots
+# of concurrent reads or writes).
+#
+# NOTE: value cannot be changed after virtual machine is created.
+# Default: virtiofs (for vz), sshfs (for qemu)
+mountType: sshfs
+
+# Propagate inotify file events to the VM.
+# NOTE: this is experimental.
+mountInotify: false
+
+# The CPU type for the virtual machine (requires vmType `qemu`).
+# Options available for host emulation can be checked with: `qemu-system-$(arch) -cpu help`.
+# Instructions are also supported by appending to the cpu type e.g. "qemu64,+ssse3".
+# Default: host
+cpuType: host
+
+# Custom provision scripts for the virtual machine.
+# Provisioning scripts are executed on startup and therefore needs to be idempotent.
+#
+# EXAMPLE - script executed as root
+# provision:
+#   - mode: system
+#     script: apt-get install htop vim
+#
+# EXAMPLE - script executed as user
+# provision:
+#   - mode: user
+#     script: |
+#       [ -f ~/.provision ] && exit 0;
+#       echo provisioning as $USER...
+#       touch ~/.provision
+#
+# EXAMPLE - script executed after VM boot, before container runtimes start
+# provision:
+#   - mode: after-boot
+#     script: echo "VM is up, containers not yet started"
+#
+# EXAMPLE - script executed after VM and container runtimes are ready
+# provision:
+#   - mode: ready
+#     script: echo "everything is ready"
+#
+# Default: []
+# provision: []
+# ===================================================================== #
+# ADVANCED CONFIGURATION
+# ===================================================================== #
+
+# Custom provision scripts for the virtual machine.
+# Provisioning scripts are executed on startup and therefore needs to be idempotent.
+provision:
+  # -----------------------------------------------------------------
+  # 任务一：系统底层工具链补齐（使用系统管理员 root 权限执行）
+  # -----------------------------------------------------------------
+  - mode: system
+    script: |
+      #!/bin/sh
+      echo "=== [Task 1/2] Updating package list and installing system tools ==="
+      # 1. 禁用交互式弹窗，防止 apt 阻塞开机流程
+      export DEBIAN_FRONTEND=noninteractive
+      
+      # 2. 规范执行更新并同步安装你需要的工具（例如 htop, vim, rsync）
+      apt-get update -y
+      apt-get install -y htop vim rsync nfs-common
+      
+      echo "=== [Task 1/2] Infrastructure tools installed successfully ==="
+
+  # -----------------------------------------------------------------
+  # 任务二：NFS 挂载
+  # -----------------------------------------------------------------
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -e
+
+      # 1. 确保虚拟机内部的本地挂载点物理存在
+      DIR=/Users/admin/docs
+      mkdir -p ${DIR}
+
+      # 2. 检查当前是否已经挂载过，避免 colima start/stop 重复挂载导致内核死锁
+      if ! mountpoint -q ${DIR}; then
+        echo "=== [Colima Provision] 正在注入高性能 NFS 存储底座 ==="
+
+        # 核心精调参数释义：
+        # nfsvers=3,tcp        ➔ 锁死 NFSv3 走全透明 TCP 通道
+        # resvport            ➔ 击穿 macOS 特权端口拦截
+        # nolock              ➔ 禁用 NLM 锁，彻底避开被 QEMU/网络干扰的 111 端口查询，本地单机开发绝对安全
+        # rsize/wsize=1048576 ➔ 顶满 Linux 客户端硬编码的 1MB 单次 I/O 块大小极限
+        # noatime,nodiratime  ➔ 绝杀：禁止更新文件和目录的访问时间，减少一半以上的磁盘元数据交互 RTT
+        # actimeo=3600        ➔ 缓存属性失效时间拉长到1小时，对海量小文件的 git status 速度有毁灭性的加速效果
+        # hard,intr           ➔ 硬挂载模式，配合 intr 允许在宿主机卡死时通过 kill -9 强行中断，防止虚拟机内核僵死
+        
+        # 3. 强力泵血：执行最高性能的 NFSv4 挂载命令
+        # 192.168.106.1 是 Colima 默认address网络分配给Host主机网关的IP
+        mount -t nfs -o nfsvers=3,tcp,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,hard,intr 192.168.106.1:${DIR} ${DIR}
+        # soft挂载NFS稳定性不佳
+        #mount -t nfs -o nfsvers=3,tcp,resvport,nolock,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,soft,timeo=10,retrans=3 192.168.106.1:${DIR} ${DIR}
+          
+        echo "=== [Colima Provision] NFS 挂载成功！ ==="
+      else
+        echo "=== [Colima Provision] ${DIR} 已存在挂载，跳过 ==="
+      fi
+
+# Modify ~/.ssh/config automatically to include a SSH config for the virtual machine.
+# SSH config will still be generated in $COLIMA_HOME/ssh_config regardless.
+# Default: true
+sshConfig: true
+
+# The port number for the SSH server for the virtual machine.
+# When set to 0, a random available port is used.
+#
+# Default: 0
+sshPort: 0
+
+# Configure volume mounts for the virtual machine.
+# Colima mounts user's home directory by default to provide a familiar
+# user experience.
+#
+# EXAMPLE
+# mounts:
+#   - location: ~/secrets
+#     writable: false
+#   - location: ~/projects
+#     writable: true
+#
+# Colima default behaviour: $HOME is mounted as writable.
+# Default: []
+# mounts: []
+mounts: 
+  - location: ~/.colima/empty_mount
+    mountPoint: /tmp/colima_empty_gate
+    writable: false
+
+# Specify a custom disk image for the virtual machine.
+# When not specified, Colima downloads an appropriate disk image from Github at
+# https://github.com/abiosoft/colima-core/releases.
+# The file path to a custom disk image can be specified to override the behaviour.
+#
+# Default: ""
+diskImage: "https://cloud.debian.org/images/cloud/trixie/20260413-2447/debian-13-genericcloud-amd64-20260413-2447.qcow2"
+
+# Size of the disk in GiB for the root filesystem of the virtual machine.
+# This value is ignored if no runtime is in use. i.e. `none` runtime.
+# Default: 20
+rootDisk: 20
+
+# Environment variables for the virtual machine.
+#
+# EXAMPLE
+# env:
+#   KEY: value
+#   ANOTHER_KEY: another value
+#
+# Default: {}
+env:
+  # curl / git 能够完美识别 http_proxy、https_proxy 或 ALL_PROXY，优先级是小写变量最高
+  # ALL_PROXY 是一个全协议兜底变量 它不仅管 HTTP(S)，还管 ftp://、git://、甚至是内部未明确分类的其他 TCP 流量
+  http_proxy: socks5h://192.168.5.2:1080
+  https_proxy: socks5h://192.168.5.2:1080
+  all_proxy: socks5h://192.168.5.2:1080
+  no_proxy: localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,*.baidu.com
+  # 大写变量兜底防止某些应用忽略大小写
+  HTTP_PROXY: socks5h://192.168.5.2:1080
+  HTTPS_PROXY: socks5h://192.168.5.2:1080
+  ALL_PROXY: socks5h://192.168.5.2:1080
+  NO_PROXY: localhost,127.0.0.1,192.168.0.0/16,10.0.0.0/8,*.baidu.com
