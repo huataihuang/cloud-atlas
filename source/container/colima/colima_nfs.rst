@@ -4,6 +4,10 @@
 Colima使用NFS共享存储
 =======================
 
+.. note::
+
+   经过实践验证，采用NFS作为Colima的数据共享交换底层，在我的古旧的 :ref:`mbp15_late_2013` 替换 :ref:`qemu` 默认使用的 ``sshfs`` ，能够获得大约 ``5倍`` 的 I/O 性能提升。虽然探索设置有些折腾，但是能够让十几年前的硬件焕发青春，还是有点意义的。
+
 在尝试 :ref:`colima_mounttype_9p` 优化存储性能之后，我发现虽然I/O性能有一定提升，但是也带来了很多不稳定的因素:
 
 - 可能由于 :ref:`oclp_macos` 魔改的驱动插入和内核调用拦截改写，导致了需要降级为 ``qemu64`` 类型的通用模拟CPU类型，导致性能和特性大幅下降
@@ -35,10 +39,16 @@ Colima使用NFS共享存储
 - 性能测试: 和 :ref:`colima_mounttype_9p` 采用相同的编译 :ref:`sphinx_doc` 方式 ``time make html``
 
 .. literalinclude:: colima_nfs/make_html
-   :caption: 使用NFS存储方式测试编译Sphinx文档的耗时
+   :caption: 使用NFS存储方式测试编译Sphinx文档的耗时(启用resvport参数,hard)
    :emphasize-lines: 1
 
+不过，在没有启用 ``resvport`` 参数的 hard 挂载同样测试性能差一些，完成时间减慢到将近12分钟:
+
 可以看到完成时间惊人地缩短到 ``7m25s`` ，是原本使用 ``sshfs`` 时间的 1/5 不到，已经接近物理主机的的编译性能
+
+.. literalinclude:: colima_nfs/make_html_no_resvport
+   :caption: 使用NFS存储方式测试编译Sphinx文档的耗时(去除resvport参数,hard)
+   :emphasize-lines: 1
 
 .. note::
 
@@ -135,14 +145,18 @@ macOS内核提供了 **仅限主机（Host-Only）的虚拟二层交换机（Vir
 
 挂载成功!!!
 
-休眠问题
-------------
+:strike:`休眠问题`
+----------------------
 
 上述NFS挂载确实使得I/O性能得到极大提升，但是我发现当笔记本合上以后进入休眠，再次唤醒系统时会发现Colima虚拟机无法登录且容器无响应。
 
 这个问题是NFS挂载 ``hard`` 模式相关，实际上我在阿里巴巴工作时，也曾经遇到过NAS故障导致依赖NFS挂载的应用服务器无法 ``df`` 以及应用挂死的故障。
 
-推测:
+.. warning::
+
+   这段排查我实践下来已经排除，gemini提供的建议不准确
+
+gemini推测(其实我觉得不准确):
 
 - 由于我在NFS挂载的 ``/home/admin/`` 目录下工作，当MacBook合盖休眠， ``vmnet`` 虚拟网卡( ``192.168.106.1``` )随之断电。此时虚拟机内还有工作进程(例如正在使用 ``vim`` 编辑该目录下文件)
 - ``hard`` 模式下，Linux内核会立即将该I/O进程挂起，并进入不可中断的睡眠状态(D状态, Uninterruptible Sleep)
@@ -206,7 +220,7 @@ macOS内核提供了 **仅限主机（Host-Only）的虚拟二层交换机（Vir
 
 - 前述Gemini建议的NFS挂载修改为Soft模式并且快速重试应该能够改善NFS的挂起，但是根据我的经验，这种NFS挂载通常不会导致挂起，但是这里存在的问题是缓存也在NFS上，这个内核机制锁死了系统
 
-- 综上，我觉得需要放弃(或不建议)直接在NFS中输出完整的HOME目录，除非缓存目录能够从HOME目录中移出，以避免和HOME的NFS挂载冲突。
+- 综上，我 :strike:`觉得` **必须** 放弃(或不建议)直接在NFS中输出完整的HOME目录，除非缓存目录能够从HOME目录中移出，以避免和HOME的NFS挂载冲突。
 
 所以最终修订目录 ``/Users/admin`` 改为 ``/Users/admin/docs`` (挂载数据目录)
 
@@ -238,4 +252,80 @@ soft挂载的自动恢复
 
 如上所述，我最终验证确实如我推测，最核心的导致Colima VM在主机从休眠中恢复时挂起，其实就是cache缓存目录被NFS挂载HOME目录所覆盖，导致NFS暂停以后缓存机制失效而死机。
 
-最终我还是恢复了 ``hard`` 挂载，而单纯采用 ``/Users/admin/docs`` 数据目录挂载，避免了目录冲图。这种 ``hard`` 挂载模式稳定性极佳，而且解决cache目录冲图以后，就不再出现休眠恢复时死机。
+我对比了 ``hard`` 和 ``soft`` 两种挂载方式:
+
+- 只要没有 ``/Users/admin/Library/Caches/colima`` 和 ``/Users/admin`` (NFS挂载) 的挂载冲突，那么不管 ``hard`` 和 ``soft`` NFS挂载都不会导致Colima VM挂起无响应问题
+- 但是 ``soft`` 挂载和 ``hard`` 挂载表现不同的是，当macOS Host主机进入休眠，然后恢复时， ``hard`` 模式下 ``df -h`` 会卡住任何输出，而 ``soft`` 则表现为能够输出所有和NFS无关的挂载输出，并且显示I/O错误:
+
+.. literalinclude:: colima_nfs/soft_nfs_io_error
+   :caption: ``soft`` NFS挂载显示I/O错误 
+   :emphasize-lines: 1
+
+- 理论上 ``soft`` 和 ``hard`` 的NFS挂载I/O性能应该是相同的，但是实践发现在编译sphinx文档，原本 ``hard`` 挂载的完成时间是 ``7m25s`` ，现在 ``soft`` 挂载则退化成大约 ``12m`` 。Gemini提示之前soft的参数 ``timeo=5`` (表示0.5秒)太激进:
+  
+  - 编译 Sphinx 的 I/O 特征：Sphinx 在 make html 时，不仅有大文件的写入，更包含数万个小 .rst 和缓存文件的密集读写与元数据 lstat() 状态对齐。
+  - 延迟滚雪球：当虚拟机瞬间发起成百上千个小文件的 RPC 请求时，Mac 宿主机的物理磁盘或内核 nfsd 线程池即便再快，在并发洪峰下，个别 RPC 请求的响应时间也难免会超过 0.5 秒。
+  - 重传惩罚：一旦超过 0.5 秒，虚拟机内核判定触发 soft 超时。它会立刻中断当前的 TCP 传输，丢弃已经传输了一半的数据，重新发起重传（Retransmit）。这导致网络中充满了大量无效的、重复的重传风暴（Retransmission Storm）。
+  - TCP 拥塞控制踩刹车：由于频繁触发超时，Linux 内核的 TCP 拥塞控制算法（如 Cubic）会误判定“网络发生了严重拥堵”，从而强行将 TCP 滑动窗口（Window Size）和慢启动阈值调整到最低。
+
+- 我偶然发现，我在操作macOS Host主机，并且确认macOS没有休眠的情况下，Colima VM中的NFS挂载还是出现了上述NFS挂起无响应，出现 ``Input/output error`` ，这说明:
+
+  - 并非是macOS Host主机休眠导致的NFS Server无法响应或恢复缓慢导致Colima虚拟机NFS挂起
+  - 我最初怀疑是macOS的vmnet虚拟网卡在一段时间没有数据流量进入休眠导致了Colima VM到Host主机网络断开，但是通过 ``ip link`` down/up 并且确认网络正常情况下，NFS客户端挂载依然没有自动恢复，这和我之前在阿里的运维经验不同(NFS客户端应该在NAS恢复时自动恢复)。我通过持续的 ``ping 192.168.106.1`` 确认 ``vmnet`` 持续保持流量情况下，依然出现NFS挂起，这说明Colima NFS异常和 ``vmnet`` 没有直接关系
+
+- ``resvport`` 可能是导致无法重新挂载NFS的元凶:
+
+  - ``resvport`` 要求在1024端口以下对macOS服务端发起连接，这对于前一个NFS连接挂起(umount掉以后也可嫩更没有释放端口资源)再发起连接可能存在bug还是使用原先的 ``resvport``
+  - 去掉这个 ``resvport`` 参数以后，我验证发现至少 ``soft`` 挂载能够轻松地 ``umount`` 并且重新 ``mount``
+
+- 我现在怀疑是Colima VM自身的NFS软件堆栈在长时间没有数据传输情况下进入了假死状态，这个问题可能和虚拟化有关
+
+  - 为了验证假设，我采用简单的脚本命令每10秒钟向NFS挂载目录写入一个时间戳，看看是否能够通过保持数据读写来keepalive:
+
+.. literalinclude:: colima_nfs/keepalive.sh
+   :caption: 持续写入NFS文件看能否保活
+
+**经过验证，采用每10秒写入一次NFS能够keepalive保持Colima VM的挂载正常**
+
+还是恢复了 ``hard`` 挂载，而单纯采用 ``/Users/admin/docs`` 数据目录挂载，避免了目录冲图。这种 ``hard`` 挂载模式稳定性极佳。
+
+最后，在 ``default.yaml`` 中采用了 ``crontab`` 方式每分钟写一次 ``/Users/admin/nfs_watchdog`` 文件的时间戳记录，这样就能够保证NFS不挂死:
+
+.. literalinclude:: colima_nfs/nfs_watchdog
+   :caption: 定时每分钟写一次nfs_watchdog文件来保持NFS keepalive
+   :language: bash
+
+性能参数
+==========
+
+``resvport``
+---------------
+
+在 macOS 的NFS Clinet启用 ``resvport`` 对性能影响很大:
+
+- ``resvport`` (reserved port)指NFS客户单使用一个私有的低于1024"保留的"TCP/UDP源端口来连接服务器，这意味着客户端具备root权限(常规用户无法绑定低于1024的端口)。这个设计是NFS历史上用于验证请求是从私有的信任的客户端发起的。
+- macOS 对 ``noresvport`` 发起的请求会采用更为严格要求的安全沙箱进行隔离，这导致性能消耗严重
+
+通过 :ref:`sphinx_doc` 的 ``time make html`` 对比，大致能够得出采用 ``resvport`` 的I/O性能大约比 ``noresvport`` 提升 36% :
+
+.. literalinclude:: colima_nfs/make_html
+   :caption: 使用NFS存储方式测试编译Sphinx文档的耗时( ``启用`` resvport参数,hard)
+   :emphasize-lines: 1
+
+不过，在没有启用 ``resvport`` 参数的 hard 挂载同样测试性能差一些，完成时间减慢到将近12分钟:
+
+.. literalinclude:: colima_nfs/make_html_no_resvport
+   :caption: 使用NFS存储方式测试编译Sphinx文档的耗时( ``去除`` resvport参数,hard)
+   :emphasize-lines: 1
+
+需要注意:
+
+- ``resvport`` 是 “动作型参数” ，和通常通过 ``-o`` 传递给NFS client的 "状态型参数" ( ``rsize,wsize,noatime,soft`` 等)不同: 
+
+  - 状态型参数是在整个挂载生命周期内，文件西欧通难过如何表现，内核需要通过状态型参数永久记录在系统的 ``mount`` 表中供调用者查询
+  - 动作型参数( ``resvport`` )本质上是一个 "临时的连接协商指令" ，内核的 RPC 客户端（ ``sunrpc`` ）在建立物理 TCP 三次握手的那一瞬间，看到 ``resvport`` ，就会启动特权端口分配逻辑（在 ``0–1023`` 之间挑一个绑死）。一旦 TCP 握手成功（ ``ESTABLISHED`` ），这个参数的使命就彻底完成了。 Linux 内核并不会把这个属于套接字（Socket）层面的临时握手标记，当成文件系统的属性保存在 ``/proc/mounts`` 里，所以使用 ``mount`` 命令差看不到，而需要通过以下命令检查客户端端口:
+
+.. literalinclude:: colima_nfs/ss_2049
+   :caption: 检查NFS客户端端口
+
+这里可以看到客户端本地端口是 ``812``

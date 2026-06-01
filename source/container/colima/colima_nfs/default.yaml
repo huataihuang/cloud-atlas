@@ -252,7 +252,8 @@ provision:
       
       # 2. 规范执行更新并同步安装你需要的工具（例如 htop, vim, rsync）
       apt-get update -y
-      apt-get install -y htop vim rsync nfs-common
+      apt-get install -y htop vim rsync nfs-common cron
+      systemctl enable --now cron
       
       echo "=== [Task 1/2] Infrastructure tools installed successfully ==="
 
@@ -265,31 +266,52 @@ provision:
       set -e
 
       # 1. 确保虚拟机内部的本地挂载点物理存在
-      DIR=/Users/admin/docs
-      mkdir -p ${DIR}
+      MOUNT_POINT="/Users/admin/docs"
+      mkdir -p ${MOUNT_POINT}
+
+      EXPORT_SRC="192.168.106.1:/Users/admin/docs"
+      # 使用 soft 模式，配合超短超时，防止手工和自动化脚本卡死
+      #MOUNT_OPTS="nfsvers=3,tcp,nolock,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,soft,timeo=5,retrans=2"
+
+      # 使用 hard 模式，获取更好性能
+      MOUNT_OPTS="nfsvers=3,tcp,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,hard,intr"
 
       # 2. 检查当前是否已经挂载过，避免 colima start/stop 重复挂载导致内核死锁
-      if ! mountpoint -q ${DIR}; then
+      if ! mountpoint -q ${MOUNT_POINT}; then
         echo "=== [Colima Provision] 正在注入高性能 NFS 存储底座 ==="
 
         # 核心精调参数释义：
         # nfsvers=3,tcp        ➔ 锁死 NFSv3 走全透明 TCP 通道
-        # resvport            ➔ 击穿 macOS 特权端口拦截
-        # nolock              ➔ 禁用 NLM 锁，彻底避开被 QEMU/网络干扰的 111 端口查询，本地单机开发绝对安全
+        # resvport            ➔ 强制使用 Linux 的特权端口（Privileged Port，即小于 1024 的端口）去连接，实践发现可能是导致休眠恢复后再次mount报错"mount.nfs: mount system call failed for /Users/admin/docs" 的原因，取消该参数
+        # nolock              ➔ 禁用 NLM 锁，彻底避开被 QEMU/网络干扰的 111 端口查询，本地单机开发安全
         # rsize/wsize=1048576 ➔ 顶满 Linux 客户端硬编码的 1MB 单次 I/O 块大小极限
-        # noatime,nodiratime  ➔ 绝杀：禁止更新文件和目录的访问时间，减少一半以上的磁盘元数据交互 RTT
-        # actimeo=3600        ➔ 缓存属性失效时间拉长到1小时，对海量小文件的 git status 速度有毁灭性的加速效果
+        # noatime,nodiratime  ➔ 禁止更新文件和目录的访问时间，减少一半以上的磁盘元数据交互 RTT
+        # actimeo=3600        ➔ 缓存属性失效时间拉长到1小时，对海量小文件的 git status 速度很大的加速效果
         # hard,intr           ➔ 硬挂载模式，配合 intr 允许在宿主机卡死时通过 kill -9 强行中断，防止虚拟机内核僵死
         
-        # 3. 强力泵血：执行最高性能的 NFSv4 挂载命令
+        # 3. NFS挂载采用NFS v3
         # 192.168.106.1 是 Colima 默认address网络分配给Host主机网关的IP
-        mount -t nfs -o nfsvers=3,tcp,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,hard,intr 192.168.106.1:${DIR} ${DIR}
-        # soft挂载NFS稳定性不佳
-        #mount -t nfs -o nfsvers=3,tcp,resvport,nolock,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,soft,timeo=10,retrans=3 192.168.106.1:${DIR} ${DIR}
+        #mount -t nfs -o nfsvers=3,tcp,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,hard,intr 192.168.106.1:/Users/admin/docs /Users/admin/docs
+        #mount -t nfs -o nfsvers=3,tcp,resvport,nolock,rsize=1048576,wsize=1048576,noatime,nodiratime,actimeo=3600,soft,timeo=10,retrans=3 192.168.106.1:/Users/admin/docs /Users/admin/docs
+
+        mount -t nfs -o $MOUNT_OPTS $EXPORT_SRC $MOUNT_POINT
+
+        sleep 1
+
+        # 需要持续对NFS读写以保持工作正常
+        # while true; do
+        #   date > $MOUNT_POINT/nfs_watchdog
+        #   sleep 10
+        # done
+
+        # 设置cron每分钟写一次nfw_watchdog文件时间戳来保持NFS
+        if ! crontab -l 2>/dev/null | grep -q "nfs_watchdog"; then
+           echo "* * * * * /usr/bin/date > $MOUNT_POINT/nfs_watchdog" | crontab -
+        fi
           
         echo "=== [Colima Provision] NFS 挂载成功！ ==="
       else
-        echo "=== [Colima Provision] ${DIR} 已存在挂载，跳过 ==="
+        echo "=== [Colima Provision] ${MOUNT_POINT} 已存在挂载，跳过 ==="
       fi
 
 # Modify ~/.ssh/config automatically to include a SSH config for the virtual machine.
