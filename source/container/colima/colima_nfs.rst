@@ -203,7 +203,7 @@ gemini推测(其实我觉得不准确):
 .. literalinclude:: colima_nfs/default_nfs.yaml
    :caption: 配置欺骗的空挂载
    :lines: 4-10
-   :emphasize-lines: 8,9
+   :emphasize-lines: 5,6
 
 则此时进入VM会看到一个特殊的 **缓存挂载** :
 

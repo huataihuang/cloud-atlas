@@ -66,6 +66,7 @@ macOS
    macos_spoken_content.rst
    oclp_macos.rst
    oclp_macos_firefox.rst
+   time_make_html.rst
 
 .. only::  subproject and html
 

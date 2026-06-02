@@ -19,9 +19,17 @@ COPY apt_proxy.conf /etc/apt/apt.conf.d/proxy.conf
     
 # 增加针对特定qemu的CPU模拟的编译设置
 # 必须使用 ENV 固化，否则容器运行时 JIT 编译器（如 Ruby YJIT）无法继承该参数
-ENV CFLAGS="-march=x86-64-v3 -O2" \
-    LANG="en_US.UTF-8" \
-    ALL_PROXY="socks5h://192.168.5.2:1080"
+#ENV CFLAGS="-march=x86-64-v3 -O2"
+
+ENV LANG="en_US.UTF-8" 
+ENV LC_ALL="en_US.UTF-8"
+
+ARG HTTP_PROXY="socks5h://192.168.5.2:1080"
+ARG HTTPS_PROXY="socks5h://192.168.5.2:1080"
+ARG ALL_PROXY="socks5h://192.168.5.2:1080"
+ENV http_proxy=${HTTP_PROXY}
+ENV https_proxy=${HTTPS_PROXY}
+ENV all_proxy=${ALL_PROXY}
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -52,6 +60,7 @@ RUN rm -rf /var/lib/apt/lists/*
 
 # 补全locales
 RUN echo "LC_ALL=en_US.UTF-8" >> /etc/environment
+RUN echo "LANG=en_US.UTF-8" >> /etc/environment
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 RUN echo "LANG=en_US.UTF-8" > /etc/locale.conf
 RUN locale-gen en_US.UTF-8
@@ -122,7 +131,34 @@ RUN git clone -c http.proxy="socks5h://192.168.5.2:1080" \
     https://github.com/LazyVim/starter /home/admin/.config/nvim && \
     rm -rf /home/admin/.config/nvim/.git
 # 通过无头模式（Headless）在构建期将插件和 LSP 彻底刷入镜像中
+# 这会将所有的 LSP、Treesitter、关键插件在 Docker 构建期就物理下载到镜像的 /home/admin/.local/share/nvim 中
 RUN nvim --headless "+Lazy! sync" +qa
+# 预编译 Treesitter 语法树解析器（可选，防止启动时现场编译卡顿）
+# 高频使用 Markdown (用于知识库) 或 Go/C++
+RUN nvim --headless "+TSUpdateSync markdown python go cpp" +qa
+# Mason 强行同步安装LSP，注意需要网络畅通
+RUN nvim --headless -c ' \
+  local registry = require("mason-registry"); \
+  local lsp_list = { "clangd", "rust-analyzer", "gopls", "pyright", "ruff", "ruby-lsp" }; \
+  \
+  registry.refresh(function() \
+    for _, name in ipairs(lsp_list) do \
+      local p = registry.get_package(name); \
+      if not p:is_installed() then \
+        print("▶ [Mason Build-time] 正在物理拉取并编译: " .. name); \
+        p:install(); \
+      end \
+    end \
+  end); \
+  \
+  vim.wait(300000, function() \
+    for _, name in ipairs(lsp_list) do \
+      if not registry.is_installed(name) then return false end \
+    end \
+    return true \
+  end, 500); \
+  print("🎉 [Mason Build-time] 恭喜！所有多语言 LSP 语义专家已成功硬焊进镜像层！"); \
+' +qa
 
 # python program: virtualenv
 RUN bash -c 'cd /home/admin && python3 -m venv venv3'
