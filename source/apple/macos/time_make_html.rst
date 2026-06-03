@@ -44,12 +44,12 @@ macOS环境下time make html
 .. literalinclude:: time_make_html/make_j
    :caption: 尝试make -j
 
-但是发现python进程依然只使用一个cpu，结果计时几乎完全不变:
+但似乎并没有提高编译性能(甚至速度更慢?不合理)
 
 .. literalinclude:: time_make_html/make_j_output
    :caption: 尝试make -j
 
-这是因为 ``make -j$(sysctl -n hw.ncpu)`` 要求 **Makefile 文件中必须存在多个可以同时并行的独立 target（目标文件）**
+gemini解释说 ``make -j $(sysctl -n hw.ncpu)`` 要求 **Makefile 文件中必须存在多个可以同时并行的独立 target（目标文件）**
 
 但对于Sphinx只有一个Makefile
 
@@ -64,10 +64,10 @@ macOS环境下time make html
    :caption: 修订 Makefile 添加 ``-j auto`` 参数
    :emphasize-lines: 5
 
-果然这种方法可以看到系统中并发出现多个 ``mdworker_shared`` 进程，并且编译时间缩短了一半:
+目前看这个方法确实似乎有效(在Activity Monitor中看到的CPU使用部分阶段Python进程只使用了2个cpu，耗时确实缩短，但也要考虑缓存机制影响以及当时主机上是否有其他任务)
 
 .. literalinclude:: time_make_html/Makefile_output
-   :caption: 使用 ``-j auto`` 编译参数使得编译时间缩短一半
+   :caption: 使用 ``-j auto`` 编译参数使得编译时间缩短
 
 
 参考

@@ -1,0 +1,23 @@
+version: "3"
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    network_mode: host # 推荐使用 host 模式，方便局域网发现和高吞吐
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - /path/to/jellyfin/config:/config
+      - /path/to/jellyfin/cache:/cache
+      - /your/media/movies:/media/movies # 挂载你的电影目录
+    # 核心配置：透传 GPU 
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all # 或者指定特定卡的 UUID，比如指定你的 P10 专门负责转码
+              capabilities: [gpu, video] # 必须包含 video 权限，否则无法硬解
+    restart: unless-stopped

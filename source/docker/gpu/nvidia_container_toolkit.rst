@@ -10,6 +10,21 @@ NVIDIA Container Toolkit
 
    在Host主机上只需要 :ref:`install_nvidia_linux_driver_ubuntu` ，不需要完整安装 :ref:`cuda`
 
+NVIDIA Container Toolkit概要
+===============================
+
+NVIDIA Container Toolkit是一系列拥有构建和运行GPU加速容器的库和工具包括:
+
+- The NVIDIA Container Runtime (nvidia-container-runtime)
+- The NVIDIA Container Toolkit CLI (nvidia-ctk)
+- The NVIDIA CDI Hooks (nvidia-cdi-hook)
+- The NVIDIA Container Runtime Hook (nvidia-container-runtime-hook)
+
+  - NVIDIA的 **经典方案** ，基于 OCI(Open Container Initative，开放容器倡议)规范中的 ``prestart`` (预启动)阶段工作
+
+- The NVIDIA Container CLI (nvidia-container-cli)
+- The NVIDIA Container Library (libnvidia-container1)
+
 Ubuntu/Debian系统安装
 ========================
 
@@ -122,3 +137,4 @@ Ubuntu/Debian系统安装
 =======
 
 - `GitHub: NVIDIA/nvidia-container-toolkit <https://github.com/NVIDIA/nvidia-container-toolkit>`_
+- `Installing the NVIDIA Container Toolkit <https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html>`_

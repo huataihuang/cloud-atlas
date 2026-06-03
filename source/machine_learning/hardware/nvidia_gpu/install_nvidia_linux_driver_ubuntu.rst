@@ -4,6 +4,9 @@
 安装NVIDIA Linux驱动(Ubuntu)
 ======================================
 
+安装590驱动
+=============
+
 我之前 :ref:`install_nvidia_linux_driver` 实践中采用了官方仓库方式安装。Ubuntu提供了一个简单工具来查看最适合自己显卡的驱动器版本:
 
 .. literalinclude:: install_nvidia_linux_driver_ubuntu/devices
@@ -50,6 +53,25 @@
 
 .. literalinclude:: install_nvidia_linux_driver_ubuntu/nvidia-smi_output
    :caption: 输出显示初始状态
+
+卸载590驱动
+=============
+
+当我准备在台式机上准备同时使用 :ref:`tesla_a2` 和 :ref:`tesla_p10` 时候，系统提示当前安装的590版本驱动和P10不兼容，需要回退到580版本。所以执行
+
+- 清理nvidia和cuda相关软件包:
+
+.. literalinclude:: install_nvidia_linux_driver_ubuntu/purge_nvidia
+   :caption: 清理nvidia和cuda相关包
+
+安装580驱动
+================
+
+- 如果执行 ``sudo ubuntu-drivers devices`` 出现报错提示 ``ERROR:root:aplay command not found`` 则表明刚才清理时候删除了 ``alsa-utils`` 软件包，该软件包提供了 ``aplay`` 播放工具(NVIDIA高清音频驱动和系统音频工具链存在依赖级联，强力清理是autoremove掉alsa-utils)，当使用 ``ubuntu-drivers devices`` 时会调用这个工具，所以可以通过补安装 ``alsa-utils`` 来恢复
+
+.. literalinclude:: install_nvidia_linux_driver_ubuntu/install_580
+   :caption: 安装指定nvidia-580 server版本
+
 
 参考
 ======

@@ -28,3 +28,26 @@ mise代理
 ==========
 
 mise的代理设置才用了类似 :ref:`curl` 的环境变量方式，我在 :ref:`colima_images` 构建时是用了socks5h代理
+
+.. _mise_tmux:
+
+在tmux中使用mise
+===================
+
+我在 :ref:`macos_studio` 中设置好 ``mise`` 之后，确实通过这个环境能够使用不同的开发工具，非常惬意。但是我发现一个奇怪的现象，就是当我使用 :ref:`tmux` 时，突然间 :ref:`ruby` 程序就回落到操作系统默认安装的 ``/usr/bin/ruby`` 而不是我通过 ``mise`` 安装的 ``~/.local/share/mise/installs/ruby/3/bin/ruby``
+
+询问了gemini说明是:  **Tmux 默认的行为是启动一个“登录 Shell（Login Shell）”，而不是“交互式非登录 Shell（Interactive Non-login Shell）”**
+
+也就是说 ``tmux`` 新建一个会话时，会在后台fork 出一个新的 Zsh 进程。为了保证环境的“纯净”，tmux 默认会把它当作 Login Shell 来初始化。
+
+解决的方法: 修改 ``~/.tmux.conf`` ，迫使tmux表现得像一个规规矩矩的普通终端子窗口，不要每次都去拉取 Login Shell
+
+.. literalinclude:: mise/tmux.conf
+   :caption: ``~/.tmux.conf`` 配置启用普通交互式non-login shell
+
+需要注意的时，此时即使重启终端，重新进入 ``tmux`` 该设置也 :strike:`不一定` 很可能不生效，原因是 **虽然重启了终端窗口，但 Tmux 的后台守护进程（Server）在 macOS 内存里其实根本没有退出** 执行tmux 时，它只是拉起了一个新的客户端（Client），去连接那个依然携带着旧配置、旧环境中旧 $PATH 的后台老进程。
+
+解决方法是彻底杀掉系统中 ``tmux`` 服务进程:
+
+.. literalinclude:: mise/restart_tmux
+   :caption: 彻底重启tmux

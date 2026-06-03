@@ -4,6 +4,18 @@
 Ubuntu AIC8800驱动(Tenda无线网卡AX300)
 ========================================
 
+.. warning::
+
+   强烈反对购买这款所谓的免驱无线网卡，我当时不了解踩了一个大坑:
+
+   - 所谓 "AX" 确实代表WiFi 6(802.11ax)，但是这种超小型号称WiFi6却只有300Mbps速率的廉价网卡(20块钱)只有 **2.4GHz 单频** ，且单天线，实际电磁环境干扰下，真实吞吐量可能只有 20-40 Mbps
+   - 采用了廉价的 **瑞昱（Realtek）的残血芯片（例如 RTL8851BU 或类似的低端单频芯片）** 
+   - "免驱动"是谎言: 网卡内部固化了一个极小的虚拟光驱（内置了 Windows 的 .exe 驱动安装包），所以网卡插入Windows时，系统会把它识别为光驱自动运行安装包；但是对于Linux则安装非常麻烦，本文就是折腾的血泪史 - 需要通过 :ref:`dkms` 编译第三方魔改的源码，一旦Linux更新，则需要再次编译
+
+.. note::
+
+   强烈推荐 :ref:`mediatek_mt7921au` 无线网卡，Linux内核5.18+内置支持即插即用，支持监听模式/抓包注入，为后续学习 :ref:`kali_linux` 带来极大方便，并且满血支持WiFi 6
+
 在 :ref:`gentoo_mba_wifi` 实践中，我使用了 ``aic8800`` 芯片的 ``AX300`` 免驱动WiFi6无线网卡，现在我需要在我的 :ref:`priv_cloud_infra` 的底座 ``zcloud`` 使用同款WiFi6 USB无线网卡。
 
 ``zcloud`` 使用了 :ref:`ubuntu_linux` ，根据 `Tenda官网: 免驱USB无线网卡系列安装指南 <https://www.tenda.com.cn/download/detail-3706.html>`_ 提供信息，这款AX300官方提供了Linux系统驱
