@@ -58,9 +58,9 @@
 使用wpa_supplicant连接无线
 ============================
 
-- 安装 ``wpa_supplicant`` ::
+- 安装 ``wpa_supplicant`` (Ubuntu新版本已经改名为 ``wpasupplicant`` )::
 
-   sudo apt install wpa_supplicant
+   sudo apt install wpasupplicant
 
 - 创建初始配置:
 

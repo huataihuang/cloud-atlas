@@ -83,6 +83,10 @@ proxy.conf
 
 此外，你可以可以通过 `Ubuntu Packages Search <http://packages.ubuntu.com/>`_ 网站来查找软件包。
 
+.. note::
+
+   我最近在 :ref:`mediatek_mt7921au` 实践时，居然找不到以前安装 :ref:`wpa_supplicant` 的软件包 ``wpa_supplicant`` 了，通过 ``apt-file`` 验证发现，原来现在软件包名已经修订为 ``wpasupplicant`` 了
+
 ``apt-add-repository``
 ============================
 
