@@ -4,6 +4,9 @@
 lazy.nvim Lua Treesitter
 ===========================
 
+编译安装
+=============
+
 现在Neovim已经集成了lua treesitter parser，我在最近的 :ref:`compile_nvim_debian` 源代码是最新版本
 
 .. literalinclude:: ../compile_nvim_debian/build_nvim
@@ -29,7 +32,19 @@ lazy.nvim Lua Treesitter
 .. literalinclude:: ../compile_nvim_debian/build_nvim_source
    :caption: 编译nvim安装到用户目录
 
+ruby程序中自动缩进冲突处理
+=============================
+
+我现在使用 :ref:`debian_tini_image` 采用了lazy.nvim来配置，但是发现在 :ref:`ruby` 开发过程中，有些编辑时候应该缩进的时候却没有缩进。gemini提示: lazyVim 默认使用 Treesitter 来做代码高亮和动态缩进。虽然 Treesitter 的高亮无敌，但它的 Ruby 自动缩进（Indent）功能在某些版本中并不完美，偶尔会导致回车不缩进或者缩进错乱。可以尝试关闭 Treesitter 的 Ruby 缩进，让 Vim 内置的、非常成熟的原生 Ruby 缩进引擎来接管。
+
+.. literalinclude:: lazy.nvim_lua_treesitter/treesitter.lua
+   :caption: 关闭treesitter对ruby程序代码的缩进管理
+
+我实际验证，确实能够解决ruby源代码编辑时的缩进问题
+
 参考
 =======
 
 - `bug: Encountered Error detected while processing BufReadPost Autocommands for "*": while loading a Lua file failing in Neovim nightly #1343 <https://github.com/folke/lazy.nvim/issues/1343>`_
+
+

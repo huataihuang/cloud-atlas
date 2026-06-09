@@ -19,6 +19,7 @@ Linux LVM逻辑卷管理
    extend_ext4_on_lvm.rst
    bhyve_ubuntu_extend_ext4_on_lvm.rst
    lvm_device_excluded_by_filter.rst
+   shrink_lv_root_in_recovery_mode.rst
    
 .. only::  subproject and html
 
