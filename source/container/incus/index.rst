@@ -5,7 +5,7 @@ Incus
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    intro_incus.rst
    incus_startup.rst

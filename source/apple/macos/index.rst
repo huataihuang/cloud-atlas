@@ -66,6 +66,7 @@ macOS
    macos_shared_library.rst
    macos_spoken_content.rst
    oclp_macos.rst
+   oclp_macos_clear_silent_update.rst
    oclp_macos_firefox.rst
    time_make_html.rst
 
