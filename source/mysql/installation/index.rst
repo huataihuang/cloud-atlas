@@ -11,6 +11,7 @@ MySQL 安装
    upgrade_mariadb.rst
    macos_install_mysql.rst
    centos7_install_mysql.rst
+   debian12_install_mariadb.rst
 
 .. only::  subproject and html
 

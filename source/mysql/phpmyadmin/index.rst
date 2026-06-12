@@ -1,17 +1,15 @@
-.. _incus:
+.. _phpmyadmin:
 
 =================================
-Incus
+phpMyAdmin
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_incus.rst
-   incus_startup.rst
-   incus_zfs.rst
-   incus_lvm.rst
-   incus_network.rst
+   intro_phpmyadmin.rst
+   install_phpmyadmin.rst
+   install_phpmyadmin_lnmp.rst
 
 .. only::  subproject and html
 
