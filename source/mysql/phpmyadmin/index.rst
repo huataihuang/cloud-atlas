@@ -10,6 +10,7 @@ phpMyAdmin
    intro_phpmyadmin.rst
    install_phpmyadmin.rst
    install_phpmyadmin_lnmp.rst
+   migrate_phpmyadmin.rst
 
 .. only::  subproject and html
 

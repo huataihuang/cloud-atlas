@@ -109,6 +109,7 @@
 - 还没有配置 :ref:`apache_ssl` ，所以目前还是HTTP并且关闭了 ``session.cookie_secure``
 - 默认配置是允许直接房分 http://127.0.0.1/ 根目录，也就是外部能够直接看到WEB服务器的状态信息，如果要更为安全需要关闭这个访问
 - 如果要兼顾其他应用，或许采用 :ref:`nginx` 统一的WEB服务器更为常用，则需要 :ref:`install_phpmyadmin_lnmp` 单独手动设置配置而不是依赖发行版的配置
+- 默认配置访问路径是 http://127.0.0.1/phpmyadmin/ 这个路径如果在互联网上暴露可能会有大量的扫描，最好的方式是修订Apache/Nginx配置，将该访问URL修改成一个更为隐秘的路径，例如 http://x.x.x.x/pma-secure-2026 或其他自己的特定目录。
 
 参考
 =======
