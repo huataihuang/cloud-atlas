@@ -45,7 +45,7 @@ standardrb结合nvim
 
 - 针对 :ref:`lazy.nvim` 不需要手工下载插件，只需要 **要给现有的格式化和语法检查插件增加对 standard 的支持** : 在 ``~/.config/vim/lua/plugins/`` 目录下创建 ``standard.lua`` 配置
 
-.. literalinclude:: standard_ruby/standard_init_fix.lua
+.. literalinclude:: standard_ruby/standard_simple.lua
    :caption: 配置 ``~/.config/vim/lua/plugins/standard.lua``
 
 - 重新打开 :ref:`nvim` ，此时 LazyVim 会自动读取新配置并在后台通过 Mason 安装 ``standardrb`` 相关支持，通过 ``:Mason`` 可以查看 ``standardrb`` 是否安装成功
@@ -70,6 +70,10 @@ standardrb结合nvim
 standard.lua改进过程
 ----------------------
 
+.. warning::
+
+   我这段折腾最后发现没有什么改进效果，gemini太兜圈子了(幻觉?)，最终放弃，还是回到最简单的配置
+
 我最初采用gemini提供的 standard.lua
 
 .. literalinclude:: standard_ruby/standard.lua
@@ -92,7 +96,30 @@ standard.lua改进过程
 .. literalinclude:: standard_ruby/standard_init_fix.lua
    :caption: 修改 ``standard.lua`` 回内置 ``standard`` 但增加一个空表防止初始化未完成
 
+这次修改以后，虽然右下角显示Ruby 语言服务（LSP）索引是正常进行的，但是在索引之前，可以看到系统似乎停顿了一下，右上角一闪而过显示 ``/Users/admin/.local/share/nvim/lazy/nvim-lint/lua/lint.lua:278: attempt to index local 'parse…``
 
+gemini解释是打开Ruby问见时会触发一次静态检查，此时nvim-lint 的内部原生 standard 工具对象还只是一个“空壳”或者还没被框架完全实例化，它的 parser 属性此时处于 nil 状态。虽然在 opts 函数里通过 ``opts.linters.standard.cmd = "standardrb"`` 进行了局部赋值，但在赋值的瞬间，原厂的 ``parser`` 还没有准备好，随后的检查逻辑直接在底层代码的第 ``278`` 行因为触碰了 ``nil`` 的 ``parser`` 而引发了这一瞬间的弹窗。
+
+解决的方法是延迟替换: 当 Neovim 启动时， ``standard.lua`` 保持绝对纯净，零干扰；只有当 ``ruby-lsp`` 彻底就绪、右下角的 ``indexing files`` 开始滚动、整个 ``nvim-lint`` 已经 ``100%`` 物理实例化完毕之后，才动态地把 ``standard`` 的底层执行命令替换为 ``standardrb`` 。
+
+.. literalinclude:: standard_ruby/standard_trig_fix.lua
+   :caption: 修改 ``standard.lua`` 等parser就绪之后再修改standard为standardrb
+
+现在编辑 ruby 文件时候，确实能够正确索引，并且也不再出现 ``/Users/admin/.local/share/nvim/lazy/nvim-lint/lua/lint.lua:278: attempt to index local 'parse…`` ，但是一闪而过改成了 ``Linter not found: standard`` ，虽然看起来没有影响，但是还是有点逼死强迫症。原因是打开Ruby文件的瞬间，LazyVim 极其高效的核心框架会瞬间扫描插件声明。此时 ``ruby = { "standard" }`` 会使得 ``nvim-lint`` 在系统中寻找名为 ``standard`` 的可执行文件。但是由于历史原因，这个执行名字是 ``standardrb`` 。这要等待后面的自动命令(Autocmd)触发订正为 ``standardrb`` 才会解决。
+
+太折腾了，既然无法解决初始化一开始时候找不到standard命令(虽然可以通过后续补丁来修正，但是无法消除开始时候一闪而过的找不到standard的报错)，那不如回退到最简单的方式，为 ``standardrb`` 建立一个软链接:
+
+.. literalinclude:: standard_ruby/ln
+   :caption: 建立 ``standardrb`` 软链接
+
+这就从根本上解决了自动找到 ``standard`` 快捷方式指向 ``standardrb`` 
+
+那么我们前面复杂的hack脚本已经不再需要，改回最初最简单的模式:
+
+.. literalinclude:: standard_ruby/standard_simple.lua
+   :caption: 采用最简单干净的 ``~/.config/nvim/lua/plugins/standard.lua``
+
+我发现这个简单配置其实就足够了，这里要注意的是 ``nvim-lint`` 使用的是命令行工具，所以要使用实际的安装命令 ``standardrb`` ，否则就会报错 ``Linter not found: standard`` 。现在已经实现了目标，唯一的小遗憾是有不规范的语法时 ``standardrb`` 返回的值是 ``1`` 会导致屏幕上一闪而过 ``Linter command standardrb exited with code: 1`` ，不过不影响使用，我尝试了多次也改变不了，就只能这样了。 
 
 参考
 =======
