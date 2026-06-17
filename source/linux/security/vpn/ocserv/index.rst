@@ -8,6 +8,8 @@ ocserv VPN
 
 `IPsec VPN Server Auto Setup Scripts <https://github.com/hwdsl2/setup-ipsec-vpn>`_ 是一个快速构建IPsec VPN服务器的脚本，并且提供了相关技术索引，将作为本章节学习实践的起步。
 
+`ocserv-dashboard <https://github.com/mmtaee/ocserv-dashboard>`_ 提供了易于安装的ocserv dashboard，可以方便管理，后续可以实践。
+
 .. toctree::
    :maxdepth: 1
 

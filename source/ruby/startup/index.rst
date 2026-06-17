@@ -10,6 +10,7 @@ Ruby起步
    macos_install_ruby.rst
    gentoo_install_ruby.rst
    ruby_version_manager.rst
+   standard_ruby.rst
    ruby_gem.rst
    rubygems_proxy.rst
    bundler.rst

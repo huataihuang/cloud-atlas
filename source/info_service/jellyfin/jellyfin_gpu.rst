@@ -56,12 +56,12 @@ Jellyfin支持采用GPU进行视频转换，这里我采用容器来运行Jellyf
 
 .. literalinclude:: running_jellyfin_in_docker/nvidia-smi
    :caption: 执行容器内 ``nvidia-smi``
-   :emphasize-lines: 10
 
 输出显示容器内其实是可以正常使用GPU的，有输出:
 
 .. literalinclude:: running_jellyfin_in_docker/nvidia-smi_output
    :caption: 执行容器内 ``nvidia-smi`` 显示GPU的 :ref:`nvidia_container_toolkit` 配置正确
+   :emphasize-lines: 10
 
 - 登录到 Jellyfin 平台，检查转码日志(Jellyfin 每一次转码失败，都会生成一个独立的 FFmpeg.Transcode.xxx.log 运行日志)
 
@@ -75,3 +75,27 @@ Jellyfin支持采用GPU进行视频转换，这里我采用容器来运行Jellyf
 为什么 Jellyfin 不传 GPU 参数？
 
 **乌龙了：原来我上一次配置GPU加速设置忘记点击save按钮**
+
+实践体验
+===========
+
+使用Jellyfin的一个优势是充分利用服务器端的 :ref:`tesla_p10` 进行视频转换，这对于客户端减轻压力非常有帮助。举例而言，我的 :ref:`mbp15_late_2013` 使用的是非常古老的 :ref:`intel_core_i7_4850hq` 并且内置的显卡NVIDIA GeForce GT 750M 和 Intel Iris Pro 只支持H.264 (AVC) 的 8bit 硬件解码，所以在观看我在网上下载的 《蓝》 ``Trois.Couleurs.Bleu.AKA.Three.Colors.Blue.1993.CC.Bluray.2160p.DTS-HDMA5.1.DoVi.HDR.x265.10bit-DreamHD.mkv`` 非常吃力，整个CPU核心全部被消耗殆尽，且没有GPU工作。
+
+通过将视频文件导入Jellyfin中，通过浏览器客户端播放，就可以看到服务器端 :ref:`tesla_p10` 承担了视频转换(自动根据客户端适配)，此时观察到服务器的 ``top`` 输出:
+
+.. literalinclude:: jellyfin_gup/top
+   :caption: 视频转换时top输出
+   :emphasize-lines: 7
+
+可以看到占用了CPU 3个核心
+
+而NVIDIA也消耗了70%计算能力进行视频转换:
+
+.. literalinclude:: jellyfin_gup/nvidia-smi
+   :caption: 使用 ``nvidia-smi`` 观察可以看到视频转码进程
+   :emphasize-lines: 10,19
+
+此时从浏览器客户端观察视频的  ``Playback Info`` 可以观察到视频播放的是转换后的 ``H264`` 格式:
+
+.. literalinclude:: jellyfin_gup/playback_info
+   :caption: 转换后播放的视频信息

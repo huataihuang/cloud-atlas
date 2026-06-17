@@ -123,13 +123,50 @@ RUN --mount=type=bind,source=mise_proxy.env,target=/home/admin/mise_proxy.env \
     mise use --global neovim@stable
 
 # gem不支持socks代理，如果访问阻塞则改为国内源
-RUN gem install --no-document rails
+RUN gem install --no-document rails standard
 
 # LazyVim
 # git 原生参数 -c http.proxy=，临时覆盖全局网络代理
 RUN git clone -c http.proxy="socks5h://192.168.5.2:1080" \
     https://github.com/LazyVim/starter /home/admin/.config/nvim && \
     rm -rf /home/admin/.config/nvim/.git
+
+# 动态将 standard.lua 配置写入 LazyVim 插件目录
+RUN mkdir -p /home/admin/.config/nvim/lua/plugins && \
+    cat << 'EOF' > /home/admin/.config/nvim/lua/plugins/standard.lua
+return {
+  -- 1. 配置代码格式化：保存时自动用 standard fix 修复代码
+  {
+    "stevearc/conform.nvim",
+    opts = {
+      formatters_by_ft = {
+        ruby = { "standard" },
+      },
+    },
+  },
+
+  -- 2. 配置代码静态检查：动态提示不符合 standard 规范的地方
+  {
+    "mfussenegger/nvim-lint",
+    opts = {
+      linters_by_ft = {
+        ruby = { "standard" },
+      },
+    },
+  },
+
+  -- 3. 让 Mason 自动追踪管理 standardrb
+  {
+    "williamboman/mason.nvim",
+    opts = function(_, opts)
+      if type(opts.ensure_installed) == "table" then
+        table.insert(opts.ensure_installed, "standardrb")
+      end
+    end,
+  },
+}
+EOF
+
 # 通过无头模式（Headless）在构建期将插件和 LSP 彻底刷入镜像中
 # 这会将所有的 LSP、Treesitter、关键插件在 Docker 构建期就物理下载到镜像的 /home/admin/.local/share/nvim 中
 RUN nvim --headless "+Lazy! sync" +qa
@@ -139,7 +176,7 @@ RUN nvim --headless "+TSUpdateSync markdown python go cpp" +qa
 # Mason 强行同步安装LSP，注意需要网络畅通
 RUN nvim --headless -c ' \
   local registry = require("mason-registry"); \
-  local lsp_list = { "clangd", "rust-analyzer", "gopls", "pyright", "ruff", "ruby-lsp" }; \
+  local lsp_list = { "clangd", "rust-analyzer", "gopls", "pyright", "ruff", "ruby-lsp", "standardrb" }; \
   \
   registry.refresh(function() \
     for _, name in ipairs(lsp_list) do \
