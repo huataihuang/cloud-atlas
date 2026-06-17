@@ -45,7 +45,7 @@ standardrb结合nvim
 
 - 针对 :ref:`lazy.nvim` 不需要手工下载插件，只需要 **要给现有的格式化和语法检查插件增加对 standard 的支持** : 在 ``~/.config/vim/lua/plugins/`` 目录下创建 ``standard.lua`` 配置
 
-.. literalinclude:: standard_ruby/standard.lua
+.. literalinclude:: standard_ruby/standard_init_fix.lua
    :caption: 配置 ``~/.config/vim/lua/plugins/standard.lua``
 
 - 重新打开 :ref:`nvim` ，此时 LazyVim 会自动读取新配置并在后台通过 Mason 安装 ``standardrb`` 相关支持，通过 ``:Mason`` 可以查看 ``standardrb`` 是否安装成功
@@ -60,7 +60,39 @@ standardrb结合nvim
 .. literalinclude:: standard_ruby/demo_fix.rb
    :caption: 自动修订的demo.rb
 
-注意还会一些提示需要手工修改 ``Style/StringConcatenation: Prefer string interpolation to string concatenation.`` 原因是风格更期望采用内嵌表达式( ``#{}`` )而不是通过 ``+`` 连接字符串和变量。这里没有自动修复是因为我在 :ref:`macos_studio` 和 :ref:`debian_tini_image` 中使用了微软和Shopify联合开发的 ``ruby-lsp`` 语言服务器，特点是极快、轻量级，但是目前自带的Code Actions(代码重构动作)比老牌的 ``solargraph`` 克制和保守得多，所以没有包含"字符串拼接转内嵌" 的自动重构。 
+注意还会一些提示需要手工修改 ``Style/StringConcatenation: Prefer string interpolation to string concatenation.`` 原因是风格更期望采用内嵌表达式( ``#{}`` )而不是通过 ``+`` 连接字符串和变量。这里没有自动修复是因为我在 :ref:`macos_studio` 和 :ref:`debian_tini_image` 中使用了微软和Shopify联合开发的 ``ruby-lsp`` 语言服务器，特点是极快、轻量级，但是目前自带的Code Actions(代码重构动作)比老牌的 ``solargraph`` 克制和保守得多，所以没有包含"字符串拼接转内嵌" 的自动重构。最佳实践应该是:
+
+.. literalinclude:: standard_ruby/string_var.rb
+   :caption: 内嵌表达式的字符串风格
+
+另外，现代ruby应该在开头加上注释 ``# frozen_string_literal: true`` 可以在处理大量重复的字符串(例如循环)指向同一个内存地址，极大节省了内存并减轻GC的负担
+
+standard.lua改进过程
+----------------------
+
+我最初采用gemini提供的 standard.lua
+
+.. literalinclude:: standard_ruby/standard.lua
+   :caption: 配置 ``~/.config/vim/lua/plugins/standard.lua``
+
+这个配置中有一点小问题，每次编辑ruby文件，会一闪而过 ``/Users/admin/.local/share/nvim/lazy/nvim-lint/lua/lint.lua:278: attempt to index local 'parse…`` ，但是实际上没有进行 ``ruby_lsp`` 索引。gemini解释是因为当 ``nvim-lint`` 尝试合并传入的自定义属性是，因为某些更深层的加载顺序问题，它自己内部的完整对象还没有构造完。 这里通过声明式 ``opts`` 轻微改动依然会触发内部源码的断层。
+
+改进方法: 重构平替方案：彻底把 nvim-lint 里的 standard 拆解出来，作为一个全新的、完全由你一手掌控的独立自定义 Linter。也就是 **不覆写它官方内置的 standard 槽位，而是定义一个全新的 mystandard 名字，这样就绕过了原生插件底层的初始化冲突。**
+
+.. literalinclude:: standard_ruby/mystandard.lua
+   :caption: 定义 ``mystandard`` 名字避免 ``standard.lua`` 影响官方内置 ``standard``
+   :emphasize-lines: 19
+
+果然，这样修改之后nvim编辑ruby文件就会看到右下角有索引的行为 ``"% completed  (72%) ⠙ Ruby LSP: indexing files ruby_lsp"``
+
+不过，以前检查完成后，右上角有一个一闪而过的 ``Linter command standardrb exited with code: 1`` ，gemini解释是因为把静态检查的名字修改成了完全自定义的 ``mystandard`` ，这对于 ``nvim-lint`` 内部处理中，只有原生的Linter才会自动读取配置 ``ignore_exit_code = true`` 属性，导致忽略了传入的防崩参数
+
+再次改回使用内置的 ``standard`` 利用一个空对象将推出状态安全吞掉
+
+.. literalinclude:: standard_ruby/standard_init_fix.lua
+   :caption: 修改 ``standard.lua`` 回内置 ``standard`` 但增加一个空表防止初始化未完成
+
+
 
 参考
 =======

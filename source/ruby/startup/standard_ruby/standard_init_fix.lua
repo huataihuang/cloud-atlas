@@ -15,16 +15,17 @@ return {
     opts = function(_, opts)
       -- A. 安全地注入你的语言映射
       opts.linters_by_ft = opts.linters_by_ft or {}
+      -- 重新用回内置的 "standard" 槽位，但是采用 LazyVim 的非破坏性局部赋值，保证既不丢原生的 parser，又能继承安全参数
       opts.linters_by_ft.ruby = { "standard" }
 
-      -- B. 核心安全防御：利用 LazyVim 的加载时机动态修改参数，绝不碰它的默认 parser
-      opts.linters = opts.linters or {}
-      opts.linters.standard = vim.tbl_deep_extend("force", opts.linters.standard or {}, {
-        cmd = "standardrb",
-        stdin = true,
-        args = { "--format", "json", "--stdin", "%:p" },
-        ignore_exit_code = true,
-      })
+      -- 如果原生的 standard 骨架未初始化，我们先给它一个空表
+      opts.linters.standard = opts.linters.standard or {}
+
+      -- 局部精准修正参数，绝不整块重写，确保原厂的 parser 函数完好无损
+      opts.linters.standard.cmd = "standardrb"
+      opts.linters.standard.stdin = true
+      opts.linters.standard.args = { "--format", "json", "--stdin", "%:p" }
+      opts.linters.standard.ignore_exit_code = true
     end,
   },
 

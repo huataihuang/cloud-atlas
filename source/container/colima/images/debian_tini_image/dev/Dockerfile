@@ -135,7 +135,6 @@ RUN git clone -c http.proxy="socks5h://192.168.5.2:1080" \
 RUN mkdir -p /home/admin/.config/nvim/lua/plugins && \
     cat << 'EOF' > /home/admin/.config/nvim/lua/plugins/standard.lua
 return {
-  -- 1. 配置代码格式化：保存时自动用 standard fix 修复代码
   {
     "stevearc/conform.nvim",
     opts = {
@@ -145,19 +144,23 @@ return {
     },
   },
 
-  -- 2. 配置代码静态检查：动态提示不符合 standard 规范的地方
   {
     "mfussenegger/nvim-lint",
-    opts = {
-      linters_by_ft = {
-        ruby = { "standard" },
-      },
-    },
+    opts = function(_, opts)
+      opts.linters_by_ft = opts.linters_by_ft or {}
+      opts.linters_by_ft.ruby = { "standard" }
+
+      opts.linters.standard = opts.linters.standard or {}
+
+      opts.linters.standard.cmd = "standardrb"
+      opts.linters.standard.stdin = true
+      opts.linters.standard.args = { "--format", "json", "--stdin", "%:p" }
+      opts.linters.standard.ignore_exit_code = true
+    end,
   },
 
-  -- 3. 让 Mason 自动追踪管理 standardrb
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     opts = function(_, opts)
       if type(opts.ensure_installed) == "table" then
         table.insert(opts.ensure_installed, "standardrb")
