@@ -1,0 +1,45 @@
+services:
+  # 🔒 新增的 Nginx 高性能反向代理
+  nginx-proxy:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "8080:443"  # 物理映射：让你依然通过服务器的 8080 端口访问，但走的是 HTTPS！
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    depends_on:
+      - calibre-backend
+    restart: unless-stopped
+
+  # 后台转换/管理核心（替代本地客户端）
+  calibre-backend:
+    image: lscr.io/linuxserver/calibre:latest
+    container_name: calibre-backend
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./calibre-config:/config
+      - ./library:/library       # 关键：全量图书库和自动生成的 metadata.db 都在这里
+      - ./import:/import         # 💡 书籍自动导入目录
+    # 💡 运维重点：这里删除了原先的 ports 暴露，防止绕过 Nginx 直连纯净 HTTP
+    restart: unless-stopped
+
+  # 精美前端与 Kobo 同步引擎
+  calibre-web:
+    image: lscr.io/linuxserver/calibre-web:latest
+    container_name: calibre-web
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./web-config:/config
+      - ./library:/books         # 关键：像素级对齐并读取同一个 library 目录
+    ports:
+      - 8083:8083                # 访问 Kobo 同步前端
+    depends_on:
+      - calibre-backend          # 确保后端先启动并初始化数据库
+    restart: unless-stopped

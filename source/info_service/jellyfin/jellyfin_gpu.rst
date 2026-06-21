@@ -89,6 +89,10 @@ Jellyfin支持采用GPU进行视频转换，这里我采用容器来运行Jellyf
 
 可以看到占用了CPU 3个核心
 
+.. note::
+
+   虽然 :ref:`tesla_p10` 支持 x265 解码，但是只支持8bit深度格式，所以如果遇到 ``10bit`` 格式，会同时消耗GPU和CPU进行解码。
+
 而NVIDIA也消耗了70%计算能力进行视频转换:
 
 .. literalinclude:: jellyfin_gup/nvidia-smi

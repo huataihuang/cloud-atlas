@@ -15,6 +15,7 @@ Ruby起步
    rubygems_proxy.rst
    bundler.rst
    ruby_quickstart.rst
+   ruby_symbol.rst
    ruby_in_browser.rst
    ruby_object.rst
    ruby_number.rst

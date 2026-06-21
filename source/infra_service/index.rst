@@ -29,6 +29,7 @@ Infra-Service
    rclone/index
    asciinema/index
    guacamole/index
+   selkies/index
    web_terminal/index
 
 .. only::  subproject and html
