@@ -2,20 +2,31 @@ services:
   # 🔒 新增的 Nginx 高性能反向代理
   nginx-proxy:
     image: nginx:alpine
-    container_name: nginx-proxy
+    container_name: nginx-ingress
+    restart: unless-stopped
     ports:
-      - "8080:443"  # 物理映射：让你依然通过服务器的 8080 端口访问，但走的是 HTTPS！
+      - "8080:8080"  # 👈 暴露 8080 给后端管理界面 (HTTPS)
+      - "8083:8083" # 👈 暴露 8083 给前端 Web 和 Kobo 同步 (HTTPS)
+      - "80:80"     # 👈 留着 80 做普通的 HTTP 跳转（可选）
+    networks:
+      - calibre-network
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/certs:/etc/nginx/certs:ro
     depends_on:
       - calibre-backend
-    restart: unless-stopped
+      - calibre-web
 
   # 后台转换/管理核心（替代本地客户端）
   calibre-backend:
     image: lscr.io/linuxserver/calibre:latest
     container_name: calibre-backend
+    restart: always
+    # ports: # 👈 注意：这里绝对不要再把 8080 映射到宿主机了！由 Nginx 独占宿主机 8080
+    expose:
+      - "8080"
+    networks:
+      - calibre-network
     environment:
       - PUID=1000
       - PGID=1000
@@ -23,14 +34,18 @@ services:
     volumes:
       - ./calibre-config:/config
       - ./library:/library       # 关键：全量图书库和自动生成的 metadata.db 都在这里
-      - ./import:/import         # 💡 书籍自动导入目录
-    # 💡 运维重点：这里删除了原先的 ports 暴露，防止绕过 Nginx 直连纯净 HTTP
-    restart: unless-stopped
+      - ./import:/import         # 独立的书籍自动导入目录
 
   # 精美前端与 Kobo 同步引擎
   calibre-web:
     image: lscr.io/linuxserver/calibre-web:latest
     container_name: calibre-web
+    restart: always
+    # ports: # 👈 注意：这里绝对不要再把 8083 映射到宿主机了！由 Nginx 独占宿主机 8083
+    expose:
+      - "8083"
+    networks:
+      - calibre-network
     environment:
       - PUID=1000
       - PGID=1000
@@ -38,8 +53,9 @@ services:
     volumes:
       - ./web-config:/config
       - ./library:/books         # 关键：像素级对齐并读取同一个 library 目录
-    ports:
-      - 8083:8083                # 访问 Kobo 同步前端
     depends_on:
       - calibre-backend          # 确保后端先启动并初始化数据库
-    restart: unless-stopped
+
+networks:
+  calibre-network:
+    driver: bridge

@@ -17,6 +17,7 @@ Kobo电子阅读器
    embed_fonts_into_pdf.rst
    kepubify.rst
    calibre_kobo.rst
+   calibre-web_kobo.rst
 
 
 .. only::  subproject and html

@@ -11,6 +11,7 @@ Chrome
    chrome_sync_extensions_themes.rst
    read_pdf_in_chromium.rst
    read_epub_in_chromium.rst
+   ai_exporter_in_chrome.rst
 
 .. only::  subproject and html
 
