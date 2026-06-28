@@ -22,9 +22,16 @@ services:
     image: lscr.io/linuxserver/calibre:latest
     container_name: calibre-backend
     restart: always
-    privileged: true # 👈 关键：物理放开内核特权，允许容器在内部执行 mount/umount 挂载操作
+    #privileged: true # 👈 关键：物理放开内核特权，允许容器在内部执行 mount/umount 挂载操作(不过这个权限过宽所以最终取消)
+    ipc: host         # 👈 核心修正 1：与宿主机共享 IPC 内存总线
+    cap_add:
+      - SYS_ADMIN     # 👈 核心修正 2：允许容器在内部执行 mount/umount 挂载物理 Kobo 设备
+      - SYS_RAWIO     # 👈 核心修正 3: 允许容器直接对透传的 /dev/sda 块设备进行原始 I/O 读写
     devices:
-      - "/dev/sda:/dev/sda" # 👈 核心：将物理主机的整个 Kobo 磁盘透传给容器内部 
+      - "/dev/sda:/dev/sda" # 👈 核心：将物理主机的整个 Kobo 磁盘透传给容器内部
+      # 🪐 精准透传：只把 Intel 核显节点透传容器，并在容器内将其伪装成主卡
+      - "/dev/dri/card0:/dev/dri/card0" # 👈 核心修正 4：透传宿主机集成/独立显卡的图形核心（即使软解也极需此通道建立 DRM 会话）
+      - "/dev/dri/renderD128:/dev/dri/renderD128"
     # ports: # 👈 注意：这里绝对不要再把 8080 映射到宿主机了！由 Nginx 独占宿主机 8080
     expose:
       - "8080"
@@ -34,6 +41,18 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
+      # 🪐 核心注入 1：强制锁定现代 Intel 媒体驱动（防止容器盲目降级到老旧的 i965 驱动）
+      - LIBVA_DRIVER_NAME=iHD
+      # 🪐 核心注入 2：显式指定渲染节点（确保 Selkies 图形层准确绑定你分配的设备）
+      - render_node=/dev/dri/renderD128
+      # 🪐 核心注入 3：关闭不兼容的低功耗/部分编码 entrypoint（强制使用标准的硬件全量编码 Profile）
+      - KASMVNC_FORCE_VAAPI_NON_LP=1
+      # 🪐 核心注入 4：强制视频流采用兼容性最佳的 H264 模式，规避色彩空间转换带来的 Profile 拒绝
+      - WEBRTC_ENCODER_PREFERENCE=VAAPI
+      # 🪐 核心注入 5：强制客户端屏幕分辨率向16 像素物理对齐（2560x1256 会被约束为标准硬件规格）
+      - force_aligned_resolution=true
+      # 🪐 核心注入 6：强制开启 H.264 的全色彩范围编码，避免Intel驱动不支持I420缩放
+      - h264_fullcolor=true
     volumes:
       - ./calibre-config:/config
       - ./library:/library       # 关键：全量图书库和自动生成的 metadata.db 都在这里

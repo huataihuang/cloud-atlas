@@ -22,14 +22,18 @@ services:
     image: lscr.io/linuxserver/calibre:latest
     container_name: calibre-backend
     restart: always
+
     #privileged: true # 👈 关键：物理放开内核特权，允许容器在内部执行 mount/umount 挂载操作(不过这个权限过宽所以最终取消)
-    ipc: host         # 👈 核心修正 1：与宿主机共享 IPC 内存总线
-    cap_add:
-      - SYS_ADMIN     # 👈 核心修正 2：允许容器在内部执行 mount/umount 挂载物理 Kobo 设备
-      - SYS_RAWIO     # 👈 核心修正 3: 允许容器直接对透传的 /dev/sda 块设备进行原始 I/O 读写
-    devices:
-      - "/dev/sda:/dev/sda" # 👈 核心：将物理主机的整个 Kobo 磁盘透传给容器内部
-      - "/dev/dri:/dev/dri" # 👈 核心修正 4：透传宿主机集成/独立显卡的图形核心（即使软解也极需此通道建立 DRM 会话）
+    #
+    # **我现在取消 /dev/sda 映射进容器，改为在Host主机挂载sda到 /mnt/kobo ，然后映射目录，可避免容器高危权限
+    #ipc: host         # 👈 核心修正 1：与宿主机共享 IPC 内存总线
+    #cap_add:
+    #  - SYS_ADMIN     # 👈 核心修正 2：允许容器在内部执行 mount/umount 挂载物理 Kobo 设备
+    #  - SYS_RAWIO     # 👈 核心修正 3: 允许容器直接对透传的 /dev/sda 块设备进行原始 I/O 读写
+    #devices:
+    #  - "/dev/sda:/dev/sda" # 👈 核心：将物理主机的整个 Kobo 磁盘透传给容器内部
+    # ************
+
     # ports: # 👈 注意：这里绝对不要再把 8080 映射到宿主机了！由 Nginx 独占宿主机 8080
     expose:
       - "8080"
@@ -39,10 +43,25 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
+      # 🪐 核心注入 1：NVIDIA 全量可见性
+      - NVIDIA_VISIBLE_DEVICES=GPU-794d1de5-b8c7-9b49-6fe3-f96f8fd98a19 # 通过 nvidia-smi --query-gpu=index,name,uuid --format=csv 查询出GPU设备的uuid
+      - NVIDIA_DRIVER_CAPABILITIES=all,graphics,utility,video
+      # 🪐 核心注入 2：直接通知 Selkies 渲染节点切到 Tesla P10 对应的渲染端（通常是 renderD129）
+      - DRI_NODE=/dev/dri/renderD129
+    # 🪐 核心注入 3：调用 NVIDIA 官方 Runtime 渲染引擎
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              # 🪐 核心修正 3：精准划拨设备，只将指定的 UUID 硬件资源注入容器空间
+              device_ids: ['GPU-794d1de5-b8c7-9b49-6fe3-f96f8fd98a19']
+              capabilities: [gpu, graphics, video]
     volumes:
       - ./calibre-config:/config
       - ./library:/library       # 关键：全量图书库和自动生成的 metadata.db 都在这里
       - ./import:/import         # 独立的书籍自动导入目录
+      - /mnt/kobo:/media/kobo:shared # 直接把宿主机已经挂载好的 Kobo 目录，映射进容器的 /media/kobo
 
   # 精美前端与 Kobo 同步引擎
   calibre-web:

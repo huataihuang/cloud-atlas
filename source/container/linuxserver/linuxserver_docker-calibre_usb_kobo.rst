@@ -32,6 +32,19 @@ linuxserver/calibre容器通过USB同步kobo
 
 另外，虽然 ``privileged: true`` 是一种简单粗暴的开启容器特权的方法，但是这个方法使得容器能够完全访问物理主机的资源，破坏性极大非常不安全。所以，建议关闭 ``privileged: true`` ，而采用单独添加 ``cap_add`` 添加必要的权限。
 
+.. warning::
+
+   不过，我的实践 关闭 ``privileged: true`` ，而采用单独添加 ``cap_add`` 添加必要的权限 似乎遇到问题::
+
+      mount: /media/kobo: cannot mount /dev/sda read-only.
+      dmesg(1) may have more information after failed mount system call.
+
+   检查 dmesg ::
+
+      printk: dmesg (106582): Attempt to access syslog with CAP_SYS_ADMIN but no CAP_SYSLOG (deprecated).
+
+   所以我还是回滚使用 ``privileged: true``
+
 - 由于 ``linuxserver/calibre`` 容器内桌面环境不会想常规Ubuntu自动挂载磁盘，所以需要进入容器内部手工创建挂载点:
 
 进入容器内部:
@@ -75,3 +88,20 @@ linuxserver/calibre容器通过USB同步kobo
 
 .. literalinclude:: linuxserver_docker-calibre_usb_kobo/alias
    :caption: 建立alias
+
+改进: 采用host挂载kobo，然后映射进容器
+==========================================
+
+上述在容器内部直接挂载目录有一个非常大的缺陷是需要将磁盘设备透传进容器，并且赋予容器极大的权限，这不仅存在安全隐患，而且一旦物理上kobo被拔出，容器内的挂载点会直接变成死锁状态(D状态进程)，整个 ``calibre-backend`` 会卡死，甚至无法终止。
+
+更好的办法是在Host物理主机上挂载目录 ``/mnt/kobo`` ，然后映射到容器内部使用，这就不必给容器赋予危险的权限
+
+- 在Host主机上执行目录挂载设置 ``mount-kobo`` alias:
+
+.. literalinclude:: linuxserver_docker-calibre_usb_kobo/mount_host
+   :caption: 目录挂载设置 ``~/.bashrc``
+
+挂载完成后，修订 ``docker-compose.yml`` 只需要映射目录就可以:
+
+.. literalinclude:: linuxserver_docker-calibre_usb_kobo/volumes.yml
+   :caption: 映射目录
