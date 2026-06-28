@@ -12,6 +12,9 @@ Docker LinuxServer.io
    s6.rst
    linuxserver_docker-calibre.rst
    linuxserver_docker-calibre-web.rst
+   linuxserver_docker-calibre_usb_kobo.rst
+   linuxserver_docker-calibre_gpu.rst
+   linuxserver_docker-calibre_http2_safari_cache.rst
 
 .. only::  subproject and html
 

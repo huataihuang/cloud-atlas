@@ -60,7 +60,9 @@ dedrm-ebook-tools
 `noDRM/DeDRM_tools (GitHub) <https://github.com/noDRM/DeDRM_tools>`_
 ---------------------------------------------------------------------------
 
-安装方法和 `apprenticeharper/DeDRM_tools <https://github.com/apprenticeharper/DeDRM_tools>`_ ，不再重复
+安装方法和 `apprenticeharper/DeDRM_tools <https://github.com/apprenticeharper/DeDRM_tools>`_ ，注意，下载的 ``DeDRM_tools_10.0.3.zip`` 也需要先用 ``unzip`` 解压缩，安装其中的一个 ``DeDRM_plugin.zip`` 文件。不要直接安装网站下载的 ``DeDRM_tools_10.0.3.zip`` ，否则会报错::
+
+   InvalidPlugin: The plugin in '/import/DeDRM_tools_10.0.3.zip' is invalid.It does not contain a top-level __init__.py file
 
 配置Calibre使用DeDRM
 ------------------------

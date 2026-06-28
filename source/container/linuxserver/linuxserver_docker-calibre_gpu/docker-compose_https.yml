@@ -22,14 +22,9 @@ services:
     image: lscr.io/linuxserver/calibre:latest
     container_name: calibre-backend
     restart: always
-    #privileged: true # 👈 关键：物理放开内核特权，允许容器在内部执行 mount/umount 挂载操作(不过这个权限过宽所以最终取消)
-    ipc: host         # 👈 核心修正 1：与宿主机共享 IPC 内存总线
-    cap_add:
-      - SYS_ADMIN     # 👈 核心修正 2：允许容器在内部执行 mount/umount 挂载物理 Kobo 设备
-      - SYS_RAWIO     # 👈 核心修正 3: 允许容器直接对透传的 /dev/sda 块设备进行原始 I/O 读写
+    privileged: true # 👈 关键：物理放开内核特权，允许容器在内部执行 mount/umount 挂载操作
     devices:
-      - "/dev/sda:/dev/sda" # 👈 核心：将物理主机的整个 Kobo 磁盘透传给容器内部
-      - "/dev/dri:/dev/dri" # 👈 核心修正 4：透传宿主机集成/独立显卡的图形核心（即使软解也极需此通道建立 DRM 会话）
+      - "/dev/sda:/dev/sda" # 👈 核心：将物理主机的整个 Kobo 磁盘透传给容器内部 
     # ports: # 👈 注意：这里绝对不要再把 8080 映射到宿主机了！由 Nginx 独占宿主机 8080
     expose:
       - "8080"

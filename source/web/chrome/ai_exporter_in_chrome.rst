@@ -8,7 +8,7 @@ Chrome插件AI Exporter
 
 一种比较土的解决方法是自己手工滚动浏览器窗口，达到最高位置，这样完整的页面就能提供Obsidian抓取。但是这个过程非常乏味，并且加载内容非常缓慢，几乎就是不可能的任务。
 
-好在  `AI Exporter: Save Claude,ChatGPT,Gemini to PDF, Docs, MD and More <https://chromewebstore.google.com/detail/ai-exporter-save-claudech/kagjkiiecagemklhmhkabbalfpbianbe>`_ 插件非常强悍，提供了一个 ``Custom Export`` 功能，点击以后就会启动一个新的插件页面并加载当前chat中所有的会话来回，该插件的 **底层 DOM 抓取引擎会** 强迫浏览器后台去唤醒和加载那些因为懒加载（Lazy Loading）而被隐藏的历史节点。
+好在  `AI Exporter: Save Claude,ChatGPT,Gemini to PDF, Docs, MD and More <https://chromewebstore.google.com/detail/ai-exporter-save-claudech/kagjkiiecagemklhmhkabbalfpbianbe>`_ 插件非常强悍，提供了一个 ``Custom Export`` 功能，点击以后就会启动一个新的插件页面并加载当前chat中所有的会话来回，该插件的 **底层 DOM 抓取引擎** 会强迫浏览器后台去唤醒和加载那些因为懒加载（Lazy Loading）而被隐藏的历史节点。
 
 这样就能够完整下载chat内容，并进行review和整理。
 

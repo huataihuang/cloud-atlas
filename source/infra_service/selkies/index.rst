@@ -8,6 +8,7 @@ Selkies(基于WebRTC视频流的桌面)
    :maxdepth: 1
 
    intro_selkies.rst
+   selkies_scaling.rst
    
 .. only::  subproject and html
 
