@@ -37,6 +37,7 @@ Linux桌面
    netsurf.rst
    synergy.rst
    hidclient.rst
+   bt-keyboard-switcher.rst
    terminal_emulator.rst
    uxvrt_ch_font.rst
    keepassxc.rst

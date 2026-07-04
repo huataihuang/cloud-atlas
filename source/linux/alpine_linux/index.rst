@@ -32,6 +32,7 @@ Alpine Linux
    alpine_apk.rst
    alpine_apk_certificates_error.rst
    alpine_ssh_docker.rst
+   alpine_ssh_macos_locale.rst
    busybox.rst
    openrc/index
    uefi/index
