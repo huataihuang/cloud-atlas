@@ -37,4 +37,4 @@ Docker Compose使用较为简易，使用如下 ``docker-compose.yml`` 配置:
 
 .. note::
 
-   后续设置和使用参考 :ref:`jellyfin_practice`
+   后续设置和使用参考 :ref:`jellyfin_subtitle` / :ref:`jellyfin_gpu`

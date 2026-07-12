@@ -112,6 +112,10 @@ macOS工作室
    :language: bash
    :caption: 在macOS新系统必装的brew软件
 
+.. note::
+
+   我最初因为想要轻量级运行环境，所以我短暂放弃了iTerm想以macOS内置的Terminal来替代。但是我发现实际上运行效率两者相差不大，而iTerm带来了更多的开箱即用的优化以及美观的微调，使得我认为还是选择iTerm更值得。
+
 - 切换python3版本:
 
 .. literalinclude:: homebrew/switch_python3_to_homebrew_version
@@ -140,6 +144,21 @@ macOS工作室
 .. literalinclude:: ../../devops/docs/write_doc/install_sphinx_doc
    :language: bash
    :caption: 通过virtualenv的Python环境安装sphinx doc
+
+iTerm微调
+==============
+
+.. note::
+
+   稍微花费几分钟，这个微调设置会让工作环境舒适很多
+
+- 字体
+
+前述的 :ref:`nvim` 安装设置 :ref:`lazy.nvim` 包含了对内置字体的要求，需要安装设置好字体，否则部分字符图标会显示为方框。我现在选择 ``JetBrainsMono NF Regular 12`` 字体，非常美观
+
+- Appearance
+
+iTerm的设置中 ``Apperance => General`` 中有一个选择 ``Theme`` ，默认是 ``Regular`` ，建议调整为 ``Compact`` 能够最大化工作区(Tab会缩减到标题栏)
 
 
 :ref:`lima` 虚拟化

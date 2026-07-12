@@ -1,23 +1,48 @@
-version: "3"
+version: '3.8'
+
 services:
   jellyfin:
-    image: jellyfin/jellyfin
+    image: jellyfin/jellyfin:latest
     container_name: jellyfin
-    network_mode: host # 推荐使用 host 模式，方便局域网发现和高吞吐
+    network_mode: host
+    restart: unless-stopped
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Asia/Shanghai
     volumes:
-      - /path/to/jellyfin/config:/config
-      - /path/to/jellyfin/cache:/cache
-      - /your/media/movies:/media/movies # 挂载你的电影目录
-    # 核心配置：透传 GPU 
+      - /home/admin/docs/jellyfin/config:/config
+      - /home/admin/docs/jellyfin/cache:/cache
+      - /home/admin/docs/jellyfin/media:/media
+    # 我的主机硬件采用NVIDIA Tesla P10，安装了NVIDIA Container SDK
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: all # 或者指定特定卡的 UUID，比如指定你的 P10 专门负责转码
-              capabilities: [gpu, video] # 必须包含 video 权限，否则无法硬解
+              count: all    # 或者指定特定卡的 UUID，比如指定你的 P10 专门负责转码
+              capabilities: [gpu, video]  # 必须包含 video 权限，否则无法硬解
+
+  chinesesubfinder:
+    image: allanpk716/chinesesubfinder:latest
+    container_name: chinesesubfinder
     restart: unless-stopped
+    network_mode: host  # 使用 host 模式这样无需端口映射
+    environment:
+      - PUID=1000       # 和Jellyfin容器以及Host主机admin用户账号ID对齐
+      - PGID=1000       # 对齐 admin 用户的 GID
+      - TZ=Asia/Shanghai
+      - PERMS=false     # 优化：强制关闭容器内自动批量赋权，避免 I/O 阻塞(media文件过多会导致服务启动前修订目录属主时间过长，服务启动缓慢)
+      # 如果你的网络确实不稳定，可以在这里直接解除下面两行的注释，强制让 CSF 走你的内网代理总线
+      # - HTTP_PROXY=http://192.168.1.X:7890 
+      # - HTTPS_PROXY=http://192.168.1.X:7890
+    volumes:
+      # 让 CSF 读写媒体库以塞入字幕，保持与 Jellyfin 绝对对齐
+      - /home/admin/docs/jellyfin/media:/media
+      # 缓存与配置存储，防止容器重启后配置丢失
+      - /home/admin/docs/jellyfin/chinesesubfinder/config:/config
+      - /home/admin/docs/jellyfin/chinesesubfinder/cache:/cache
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m" # 防止深夜刷日志把你的 Xeon 宿主机磁盘塞满
