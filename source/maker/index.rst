@@ -1,15 +1,16 @@
-.. _drone:
+.. _maker:
 
 =================================
-Drone
+创客
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   awesome_drones.rst
+   3d_printing/index
    cad/index
    blender/index
+   drone/index
 
 .. only::  subproject and html
 

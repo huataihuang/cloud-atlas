@@ -7,6 +7,7 @@ Intel CPU架构
 .. toctree::
    :maxdepth: 1
 
+   my_intel_cpu.rst
    cpufreq/index
    intel_rdt/index
    intel_qat/index
