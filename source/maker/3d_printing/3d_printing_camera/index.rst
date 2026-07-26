@@ -1,16 +1,13 @@
-.. _maker:
+.. _3d_printing_camera:
 
 =================================
-Maker
+3D打印相机
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   3d_printing/index
-   cad/index
-   blender/index
-   drone/index
+   intro_3d_printing_camera.rst
 
 .. only::  subproject and html
 

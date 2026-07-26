@@ -23,6 +23,7 @@ Alpine Linux
    alpine_pi_usb_boot_clone.rst
    alpine_local_backup.rst
    alpine_static_ip.rst
+   alpine_dhcp.rst
    alpine_setup_disk.rst
    alpine_wireless.rst
    alpine_wireless_broadcom-wl.rst
@@ -43,6 +44,8 @@ Alpine Linux
    alpine_syslog.rst
    alpine_distrobox.rst
    alpine_nfs.rst
+   alpine_lvm.rst
+   alpine_zfs.rst
    alpine_dev.rst
    alpine_swift.rst
    alpine_install_calibre.rst

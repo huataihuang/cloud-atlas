@@ -16,6 +16,7 @@ ARM
    hardware/index
    architecture/index
    power_manage/index
+   nintendo_switch/index
    blackberry/index
    nanopi/index
    pine64/index

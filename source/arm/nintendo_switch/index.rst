@@ -1,16 +1,13 @@
-.. _maker:
+.. _nintendo_switch:
 
 =================================
-Maker
+任天堂Switch
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   3d_printing/index
-   cad/index
-   blender/index
-   drone/index
+   intro_nintendo_switch.rst
 
 .. only::  subproject and html
 

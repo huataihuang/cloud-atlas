@@ -6,6 +6,10 @@ Dell T5820通过ReBarUEFI工具强制修改BAR
 
 Dell T5820这款早期工作站的主板有一个巨大缺陷是不支持 :ref:`tesla_a2` 和 :ref:`amd_mi50` 这样的服务器GPU计算卡的大规格BAR，导致无法启动主机。我在反复折腾 :ref:`amd_mi50_change_vbios_bar_size` 失败之后，gemini终于推荐了使用开源工具 `xCuri0/ReBarUEFI <https://github.com/xCuri0/ReBarUEFI>`_ 来为主板BIOS注入一个 UEFI 驱动（DXE Driver），这样可以将显卡的 BAR 强制限制在 256MB、512MB 或 1GB，即使显卡固件请求32GB，主板也只会给他分配一个小窗口，从而允许顺利开机。
 
+.. warning::
+
+   本文在Dell T5820上实践没有成功，即使我从源代码编译 :ref:`dell_t5820_rebaruefi_again` 也失败了。不过，我正在尝试 :ref:`dell_t5820_smbbus_tape_mod_rebar` ，请稍候...
+
 .. note::
 
    和AI对话就像即时战略游戏中的无尽地图，通过不断的排列组合试探，才能在某一个瞬间触发发现新大陆!!!

@@ -22,7 +22,7 @@
 
 - 单核性能（Single-Core）: :ref:`xeon_w-2225` > :ref:`xeon_e-2274g` >>> :ref:`intel_core_i7_4850hq` > :ref:`xeon_e5-2670_v3`
 
-2014年的 :ref:`xeon_e5-2670_v3` 因为Haswell架构极古老，单核性能只有2019年Cascade Lake架构的 :ref:`xeon_w-2225` 1/2多一点，所以在 **编译单个复杂文件、运行 Python/Node.js 单线程脚本、以及进行数据库单连接查询时** 采用 :ref:`xeon_w-2225` 和 :ref:`xeon_e-2274g` 要明显快语 :ref:`hpe_dl380_gen9` 的 :ref:`xeon_e5-2670_v3`
+2014年的 :ref:`xeon_e5-2670_v3` 因为Haswell架构极古老，单核性能只有2019年Cascade Lake架构的 :ref:`xeon_w-2225` 1/2多一点，所以在 **编译单个复杂文件、运行 Python/Node.js 单线程脚本、以及进行数据库单连接查询时** 采用 :ref:`xeon_w-2225` 和 :ref:`xeon_e-2274g` 要明显快于 :ref:`hpe_dl380_gen9` 的 :ref:`xeon_e5-2670_v3`
 
 - 多核并发（Multi-Core）: :ref:`xeon_e5-2670_v3` >>> :ref:`xeon_w-2225` > :ref:`xeon_e-2274g` > :ref:`xeon_e5-2670_v3`
 

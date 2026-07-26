@@ -41,6 +41,14 @@
    :language: bash
    :caption: nvme分区
 
+安装工具包
+==============
+
+LVM管理工具包名是 ``lvm2`` ，例如在 :ref:`alpine_linux` 中通过如下命令安装:
+
+.. literalinclude:: ../../alpine_linux/alpine_lvm/apk
+   :caption: 在alpine linux中使用apk安装lvm2
+
 LVM物理卷
 ===========
 
