@@ -77,6 +77,26 @@ NVIDIA的数据中心计算卡通过 ``nvflash64.exe --gpumode graphics`` 可以
 
 在验证我的想法之前，我先测试 :ref:`nvflash` 调整Tesla计算卡模式(没有成功， :ref:`tesla_a2` 不支持切换graphics模式)，然后尝试 :ref:`amd_mi50_change_vbios_bar_size`
 
+一些可能的尝试方向(但看起来没有希望!!!)
+============================================
+
+- `Building llama.cpp from source on a Dell Precision T5820 with an RTX 3090 Ti (after seven power cycles) <https://ianlpaterson.com/blog/llama-cpp-3090-ti-dell-t5820/>`_ 关于RTX 3090 Ti显卡的安装经验，非常详细，可惜我是Tesla数据中心卡
+
+- `I recently tested NVIDIA Tesla compatibility in a bunch of Dell Precision Tower PCs <https://www.reddit.com/r/homelab/comments/1gz0ryn/i_recently_tested_nvidia_tesla_compatibility_in_a/>`_
+
+  - 老款 Precision 工作站（T3610 / T5810 / T7810 / T7610 等）和 Tesla GPU 完美兼容:  **在 DDR3/DDR4 早期架构的 Dell Tx610 和 Tx810（如 T5810 / T7810）上，Tesla 卡完全可以原生正常工作** 。只要在 BIOS 中开启 :ref:`above_4g_decoding` 、确保电源功率足够（如 685W/825W/1300W），系统就能顺畅引导并驱动 Tesla 卡。
+  - Precision 5820 / 7820 属于 **“不兼容”** 区（Not Compatible）：帖子作者特意针对 Tower 5820 进行测试，结论是：在标准配置下，Tesla 卡无法在 T5820 上正常工作（表现为无法通过 POST 自检、bootloop 无限重启或直接黄灯关机）。
+  - 帖子中提到的“潜在解决方案（Suggested Solution）” : 帖主在列表中补充提到，有人建议将 Tesla 计算卡刷写（Flash）固件改变其工作模式（"flashing the card into GPU mode"），或者结合特定的 PCIe 显示分配方式尝试绕过，但他本人在卖掉 T5820 之前未能在该机型上验证成功。
+
+.. note::
+
+   Dell 在 5820 / 7820 这代新主板上改变了底层的 PCIe 训练（PCIe Training）与 EC 管理逻辑，导致像 Tesla A2、P100、M40 等服务器架构计算卡（Non-Consumer GPU）会在 POST 自检阶段与主板固件发生死锁，即使屏蔽 SMBus (B5/B6) (我尝试了 :ref:`dell_t5820_smbbus_tape_mod_rebar` 确实失败) 也无法越过底层硬件校验。
+
+- `The Dell Precision 5820 does not have NVIDIA Tesla support (See pinned post for caveat) <https://www.youtube.com/watch?v=WNv40WMOHv0>`_
+
+  - Precision 5820 与 Tesla 架构卡存在原生兼容性限制: 测试了多种 Tesla 卡、更换了不同的 PCIe 插槽、更新到了最新的 BIOS，甚至使用专门制作的供电线，系统在检测到插入 Tesla 卡后，都会陷入无限重启（Boot Loop）或开机后瞬间断电保护，无法通过 POST 自检亮屏。
+  - 屏蔽 SMBus (B5/B6) 依然无效(和我的 :ref:`dell_t5820_smbbus_tape_mod_rebar` 实验相印证)：尝试了屏蔽 SMBus 引脚（Tape the SMBus pins），但同样无法让 Precision 5820 识别开机。 **这说明 5820 的固件/EC 层对 Tesla 系列服务器架构卡（Non-Consumer GPU）有更底层的硬性阻断机制（例如特定的 PCIe Vendor/Device ID 判定、或者对 PCIe 带外 Option ROM 固件加载机制的拦截），并非单纯的 SMBus 信号拉低。**
+
 参考
 =======
 

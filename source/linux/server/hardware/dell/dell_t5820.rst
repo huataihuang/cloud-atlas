@@ -8,6 +8,10 @@ Dell Precision T5820 工作站
 
    踩坑了: Dell Precision T5820的BIOS有一个缺陷，不支持 Resizable BAR，虽然常规消费级显卡没有问题，但是安装 :ref:`tesla_a2` 或 :ref:`amd_mi50` 这样数据中心计算卡是无法开机的。我反复折腾 :ref:`dell_t5820_rebaruefi` 还没有解决问题。
 
+   我也反复验证 :ref:`dell_t5820_gpu` 以及修订BIOS和SMBus屏蔽，都无法解决T5820使用数据中心GPU计算卡，所以如果你看到这个WARNING，请不要购买它用于驱动 :ref:`tesla_p10` / :ref:`tesla_a2` 以及 :ref:`amd_mi50` 这样的数据中心GPU卡!!!
+
+   这是我用一千多元买来的血泪教训...
+
    总之，价格低廉总有不为人知的坑在里面，市场是最好的试金石!
 
 2026年3月底剁手了二手的 Dell Precision T5820工作站，950W电源的准系统(有2个U.2位的背板)只需要1100元，是目前感觉能够承担的较为经济实惠的主机:

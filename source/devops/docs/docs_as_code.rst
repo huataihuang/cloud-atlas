@@ -39,7 +39,7 @@ Docs-as-Code
 
   - ``Docusaurus`` Facebook开源的基于 React+Node.js 静态网站生成器，基于MDX框架
   - :ref:`nextra` 是 :ref:`nextjs` 开发的同样基于MDX的静态网站
-  - ``Astro`` 支持多种前端框架的文档工具 - `Astro integrations <https://docs.astro.build/en/guides/integrations-guide/#official-integrations>`_ (看文档架构可选多种前端框架，感觉是在太繁杂了)
+  - :ref:`astro` 支持多种前端框架的文档工具 - `Astro integrations <https://docs.astro.build/en/guides/integrations-guide/#official-integrations>`_ (看文档架构可选多种前端框架，感觉是在太繁杂了)
   - :ref:`mkdocs`
   - :ref:`hugo`
   - :ref:`jekyll`
