@@ -10,6 +10,7 @@ Python网络编程
    paramiko.rst
    youtube-dl.rst
    yt-dlp.rst
+   yt-dlp_bilibili.rst
    python_http_https_server.rst
 
 .. only::  subproject and html

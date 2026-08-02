@@ -63,10 +63,9 @@ PCIe插槽
 
 我选择 T5820 的一个重要原因是PCIe扩展能力，该主机提供了5个 ``PCIe`` 和 1个 ``PCI`` 插槽:
 
-.. csv-table:: Dell T5820 PCIe (使用 :ref:`xeon_w-2225` )
-   :file: dell_t5820/pcie.csv
-   :widths: 20,20,30,30
-   :header-rows: 1
+.. figure:: ../../../../_static/linux/server/hardware/dell/t5820_slot.jpg
+
+.. figure:: ../../../../_static/linux/server/hardware/dell/t5820_slot_detail.jpg
 
 U.2背板和NVMe
 ===============

@@ -9,6 +9,11 @@
 有趣的3D打印项目
 =================
 
+我非常喜欢自然形成的古生物化石:
+
+- `pikaia: ancient sea life 3D Models <https://sketchfab.com/pikaia2/collections/ancient-sea-life-7c32c4f89a6745beb405f1b252fcb66b>`_
+- `Nautilus Shell <https://www.printables.com/model/1373004-nautilus-shell>`_
+
 我关注并准备实践以下开源3D printing项目:
 
 - :ref:`3d_printing_camera`

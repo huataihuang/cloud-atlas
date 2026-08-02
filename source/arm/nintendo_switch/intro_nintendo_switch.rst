@@ -24,6 +24,9 @@ Switch使用了英伟达 Tegra X1 的定制系统芯片，是一种ARM架构芯�
 
 `Nintendo Switch主机使用Ubuntu系统教程一：安装系统 <https://bowen.games/archives/ePnmOzbN>`_ 这位博主详细介绍了如何在进入Recovery Mode的Nintendo Switch主机上安装Linux，但是前提条件是 **基于芯片改装进入Recovery Mode的Nintendo Switch主机**
 
+`hekate - Nyx <https://github.com/CTCaer/hekate>`_ 图形化Nintendo Switch bootloader, firmware patcher, tools and many more.
+
+`switchroot wiki: Android <https://wiki.switchroot.org/wiki/android>`_ 通过switchroot不仅能够安装Linux，也能够安装Android，可以方便地使用很多必要的移动软件(不过参考 `适用于 Nintendo Switch 的最佳 L4T Ubuntu（Vulkan + Citra + Cemu） <https://www.reddit.com/r/switchroot/comments/1mhnyb2/the_best_l4t_ubuntu_for_nintendo_switch_vulkan/?tl=zh-hans>`_ 提到Android系统运行有些卡顿不如Linux)
 
 
 参考
