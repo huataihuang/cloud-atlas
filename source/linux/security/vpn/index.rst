@@ -13,6 +13,7 @@ Linux VPN
 
    ocserv/index
    wireguard/index
+   tailscale/index
    shadowsocks/index
    polipo_proxy_yum.rst
 

@@ -36,9 +36,81 @@ Azure的人工智能（AI）生成地球特征的三维表示，使用其云计�
     - ``Looking Glass`` 使用 SPICE 协议驱动实现的虚拟桌面的键盘/鼠标/音频，见 `Looking Glass Installation <https://looking-glass.io/docs/B6/install/>`_ ，具体工作原理见YouTube视频 `How Looking Glass works and why it was invented <https://www.youtube.com/watch?v=U44lihtNVVM>`_ ，但是其视频性能优于原生 SPICE video (待验证)，所以建议使用 ``Looking Glass`` (参考 `Im geting so tired (mxgpu, sr-iov) <https://forum.level1techs.com/t/im-geting-so-tired-mxgpu-sr-iov/155195>`_ 讨论)
     - 另一种模式是使用 RDP client ，例如 ``Remmina`` Linux 客户端访问Windows桌面，但不知道哪种性能更好更稳定，待实践对比
 
-- 飞行摇杆: 待调研
-
 - 操作系统: :ref:`win10` KVM虚拟机
+
+外设
+=======
+
+- 传统飞行摇杆 (Joystick / HOTAS)
+
+  - 外观形态：单手摇杆，或升级为“左手节流阀（控制油门）+ 右手摇杆”的双手操作组合（HOTAS）。
+
+- 民航飞行方向盘 (Yoke)
+
+  - 外观形态：模仿真实客机（波音、Cessna等）的双手 U 型方向盘，需固定在桌边，通常搭配多联轴节流阀模块。
+
+- 游戏手柄 (Controller)
+
+  - 外观形态：普通的 Xbox 或 PS5 游戏手柄。
+
+.. note::
+
+   私人飞行员执照（一般简称为 PPL，Private Pilot License）时，绝大多数学员和航校使用的经典初教机是 塞斯纳 172 (Cessna 172) 或 派珀 PA-28 (Piper PA-28)，这些飞机全部采用的是 双手民航方向盘 (Yoke)，而不是单手操作的飞行摇杆 (Joystick)。
+
+   如果你想体验 100% 真实的学飞过程，民航方向盘 (Yoke) 系统 是唯一正确的选购目标。
+
+核心选购
+------------
+
+**Yoke（方向盘）+ Throttle（油门）+ Rudder（脚舵）**
+
+在真实的飞机里，需要全方位联动。想要最真实的体验，需要以下三件套:
+
+- 双手拉推盘 (Yoke)：控制飞机的上下俯仰（推拉）和左右滚转（旋转盘面）。
+- 推拉式油门 (Throttle Quadrant)：塞斯纳 172 的油门不是推杆，而是像针管一样的推拉式黑色拉杆。
+- 飞行脚舵 (Rudder Pedals)：在地面上用脚控制飞机前轮转向，在空中控制方向舵（偏航），并且用来踩刹车。
+
+硬件推荐
+===========
+
+Honeycomb (蜂窝) 组合 + 独立脚舵
+-------------------------------------
+
+**终极仿真推荐：Honeycomb (蜂窝) 组合 + 独立脚舵** （总价约 ¥5,000 - ¥6,500）
+
+这是目前全球模拟飞行玩家和准飞行员公认最接近真机质感的组合。
+
+- 蜂窝 Alpha 方向盘 (Honeycomb Alpha Flight Controls)
+
+内部采用了高强度弹力绳和机械结构，完美模拟了真机那种带有韧性、需要一点力量才能拉动或推入的阻尼感。盘面上还自带了航校真机上必备的开/关灯和点火钥匙开关。
+
+- 蜂窝 Bravo 油门座 (Honeycomb Bravo Throttle Quadrant)
+
+不仅可以组装成多引擎大客机的推杆，更附带了一套专为塞斯纳设计的推拉式游标控制手柄（黑色油门、蓝色螺旋桨、红色混合比），与真机一模一样。
+
+- 图马思特 TFRP 或 罗技飞行脚舵
+
+脚舵放在桌下配合使用，因为真实开飞机在起飞、降落和风中修正时，必须靠双脚不断踩舵。
+
+Turtle Beach VelocityOne Flight（乌龟海岸）
+-----------------------------------------------
+
+**一体化解决真机体验的最佳方案**
+
+- 全集成面板：不仅包含一个 Yoke 方向盘，右侧直接做进去了两种油门模式（客机推杆模式和塞斯纳式的三色推拉游标模式）。
+- 自带配平轮：右侧有一个很大的配平轮（Trim Wheel）。
+
+罗技 G 飞行方向盘三件套 (Logitech G Flight System)
+------------------------------------------------------
+
+基础款 Yoke：罗技的 Yoke 内部是弹簧结构，正中央有一个机械卡位（Deadzone），手感虽然没有蜂窝那么细腻，但它的外形和操作逻辑与航校真机完全一致，价格更加平易近人。
+
+搭配建议：购买罗技 Yoke 方向盘（自带一个普通三轴油门），再额外加购一个罗技飞行脚舵，即可组成低成本的“个人驾照三件套”。
+
+软件使用
+==============
+
+`微软飞行模拟~新手向入门指引 <https://steamcommunity.com/sharedfiles/filedetails/?l=german&id=3369432394>`_ 非常详细的游戏指南
 
 参考
 ======
