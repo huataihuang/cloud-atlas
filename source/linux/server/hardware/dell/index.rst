@@ -14,6 +14,7 @@ Dell服务器
    dell_t5820_crash_debug.rst
    dell_t5820_nvme.rst
    dell_t5820_gpu.rst
+   dell_t5820_mainboard.rst
    dell_t5820_sff-8654_tesla_a2.rst
    dell_t5820_config_aperture_size.rst
    dell_t5820_rebaruefi.rst

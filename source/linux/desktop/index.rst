@@ -12,6 +12,7 @@ Linux桌面
    rdp/index
    xpra/index
    vnc/index
+   sunshine/index
    wayland/index
    sway/index
    suckless/index

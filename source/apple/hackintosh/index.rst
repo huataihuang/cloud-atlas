@@ -1,17 +1,13 @@
-.. _3d_printing:
+.. _ckintosh:
 
 =================================
-3D打印
+Hackintosh (黑苹果)
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_3d_printing.rst
-   bambu_p1s.rst
-   3d_printer_experience.rst
-   3d_printing_camera/index
-   3d_printing_drone/index
+   intro_hackintosh.rst
 
 .. only::  subproject and html
 
