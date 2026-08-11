@@ -47,4 +47,4 @@
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=huataihuang/cloud-atlas&type=Date)](https://star-history.com/#huataihuang/cloud-atlas&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=huataihuang/cloud-atlas&type=Date)](https://star-history.dera.page/#huataihuang/cloud-atlas&Date)
