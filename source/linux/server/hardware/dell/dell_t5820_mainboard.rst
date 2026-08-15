@@ -16,7 +16,7 @@ Dell T5820 主板
 辨析
 ======
 
-我忽然想到了我之前反复折腾 :ref:`dell_t5820_gpu` 事情，gemini提示我各种BIOS配置调整，特别是 :ref:`above_4g_decoding` 甚至尝试 ref:`dell_t5820_rebaruefi` 也不成功。会不会就是因为T5820的主板实际有代际区别导致的呢？
+我忽然想到了我之前反复折腾 :ref:`dell_t5820_gpu` 事情，gemini提示我各种BIOS配置调整，特别是 :ref:`above_4g_decoding` 甚至尝试 :ref:`dell_t5820_rebaruefi` 也不成功。会不会就是因为T5820的主板实际有代际区别导致的呢？
 
 再次咨询gemini "在T5820上成功使用Tesla A2以及AMD MI50是不是指特定型号的T5820主板，例如支持大功率CPU的主板"，终于触发了gemini回复了解决之道:
 

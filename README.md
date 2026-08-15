@@ -44,7 +44,3 @@
 想法一直在变，但是我无法再等，所以我决定即使没有准备好，我也出发了: 包括我自己构建的这个网站 [docs.cloud-atlas.dev](https://docs.cloud-atlas.dev)
 
 2025年9月1日
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=huataihuang/cloud-atlas&type=Date)](https://star-history.com/#huataihuang/cloud-atlas&Date)
