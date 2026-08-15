@@ -20,6 +20,7 @@ Linux文件系统
    ext/index
    quota/index
    exfat.rst
+   configfs/index
 
 .. only::  subproject and html
 

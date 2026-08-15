@@ -8,7 +8,15 @@
 
 实际上，Android也支持通过USB连接共享网络，这种技术称为 ``USB Tethering`` ，设置方法： ``Settings => Network & internet => Hotspot & tethering => USB tethering`` 。
 
-但是，很不幸，此时将Android手机通过USB数据线连接到Mac电脑上没有任何反应，完全不像iPhone开启"个人热点"的USB共享后连接到Mac电脑上即插即用。这是因为macOS没有内置 `HoRNDIS(the USB tethering driver for Mac OS X) <https://github.com/jwise/horndis>`_ 。
+但是，很不幸，此时  :strike:`将Android手机通过USB数据线连接到Mac电脑上没有任何反应，完全不像iPhone开启"个人热点"的USB共享后连接到Mac电脑上即插即用` 。这是因为macOS没有内置 `HoRNDIS(the USB tethering driver for Mac OS X) <https://github.com/jwise/horndis>`_ 。
+
+早期的Android系统，开启USB共享时， :ref:`usb_gadget` 对应的Linux Gadget框架会加载 ``usb_f_rndis`` 驱动。 ``RNDIS`` 协议是微软主导，所以在Windows主机能够立即"免驱"识别出一个以太网卡。但是该协议较为陈旧且安全缺陷多，所以macOS没有内置 ``RNDIS`` 驱动，Linux虽然支持但不推荐使用。
+
+从Pixel 6开始，Google彻底抛弃了老旧的RNDIS，转而全面使用标准的 ``CDC-NCM`` 协议，内核 :ref:`usb_gadget` 会虚拟出一个更先进的 ``NCM虚拟以太网卡`` 。并且由于 Windows 11, Linux 和 macOS都原生内置了 NCM 驱动，所以该方法是跨平台全免驱的"即插即用以太网卡"。同时，它的CPU占用率比以前更低，手机发热更小、网速也更快。
+
+.. note::
+
+   `Lineage OS > Google Pixel 4 <https://wiki.lineageos.org/devices/flame/>`_ 已经原生提供了 ``23.2 (Android 16)`` 理论上应该完全采用了最新的 ``NCM虚拟以太网卡`` ，应该能够免驱在 Windows11，Linux和 macOS上顺畅使用。 
 
 .. note::
 

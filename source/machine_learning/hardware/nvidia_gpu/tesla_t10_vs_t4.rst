@@ -42,6 +42,8 @@ TU102图形处理器芯片面积为 754 mm²，包含18600 million(186亿)晶体
 - :ref:`vgpu` 方式将 :ref:`tesla_p10` 和 :ref:`tesla_t10` 划分为多块vGPU，分别提供给不同虚拟机
 - 构建 :ref:`kubernetes` 集群，实现规模化部署以及监控维护
 
+.. _tesla_t4:
+
 Tesla T4
 ===========
 

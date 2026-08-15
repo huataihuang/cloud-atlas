@@ -4,10 +4,57 @@
 树莓派Zero设置USB网络通讯(Ethernet Gadget)
 ==========================================
 
+树莓派不同型号的各代产品提供了 :ref:`usb_gadget` 功能，通过将树莓派的USB接口配置为 **USB Gadget模式** (网络设备/虚拟网卡，即RNDIS或CDC-ECM)，直接用普通的USB数据线连接，就能在两台树莓派上各自识别出一个虚拟网卡( ``usb0`` )。
+
+通过这个虚拟网卡，可以在USB线上跑全套的TCP/IP网络协议(包括 :ref:`ssh` HTTP MQTT ping 等)，完全能够替代传统的以太网线连接。
+
+但是并不是所有树莓派的所有USB接口都能设置 :ref:`usb_gadget` :
+
+- **Raspberry Pi Zero / Zero W / Zero 2 W** : 使用标记为 ``USB`` 的 Micro-USB 接口（非 PWR 供电口）
+- **Raspberry Pi 4B / 5** : 使用原生的 ``Type-C`` **供电/数据接口** （带有 OTG/Gadget 功能）
+- **Raspberry Pi A+ / 3A+** : 使用标准的 USB ``Type-A`` 接口（同样支持 OTG）
+
+.. warning::
+
+   :ref:`pi_5` 只有Type-C 口能跑 Gadget 模式:
+
+   - **板载 4 个 Type-A 接口（蓝色/黑色）** 在硬件电路层面上 **仅支持 Host（主机）模式** ，无法作为 Gadget（从设备）模拟虚拟网卡: 
+   - **线材质量（最关键）** : 如果使用的是普通手机充电线或廉价 Type-C 线，内芯通常只有 ``D+/D- 两根 USB 2.0`` 数据线，会自动降级到 ``300+ Mbps`` 的速率；只有换成标有 ``5Gbps/10Gbps`` 的 **全功能 Type-C 数据线** ，才能握手到 USB 3.0 速率。
+
+.. warning::
+
+   树莓派 Zero（包括 Zero W 和 Zero 2 W）配备了两个 Micro-USB 接口，它们在功能上有明确的分工:
+
+   - **电源接口（PWR IN）** : 标有 ``PWR`` 或 ``PWR IN`` 的 Micro-USB 接口专门用于输入电源（5V供电）。
+   - **数据接口（USB）** : 一个 Micro-USB 接口是 **USB 2.0 OTG** 数据口，用于连接鼠标、键盘、U盘等外设，或通过 USB Gadget 模式连接电脑。
+
+Gadget 驱动协议
+=====================
+
+``CDC-ECM`` （以太网控制模型）和 ``CDC-NCM`` （网络控制模型）是标准的 USB 设备类，用于在 Linux USB 设备设计中通过 USB 连接模拟有线以太网适配器。
+
+- ``CDC-ECM`` (Ethernet Control Model) 
+
+  - 比较古老和简单的协议
+  - 每次USB传输处理一个以太网帧
+  - CPU开销较高，吞吐量效率较低
+  - 对多种操作系统有广泛的兼容性
+
+- ``CDC-NCM``  (Network Control Model) 
+
+  - 现代的先进协议，为高速宽带优化
+  - 支持帧聚合(将多个以太网数据包捆绑到单个USB传输中)
+  - 显著提高吞吐量，降低延迟并提升能效
+  - 在现代移动和嵌入设备(如 :ref:`android` )中取代了RNDIS等传统协议
+  
+.. warning::
+
+   本文实践是早期完成的，没有对最新的 :ref:`usb_gadget` 协议 ``CDC-NCM`` 进行实践，所以性能优化有限。后续再找机会进行对比测试。
+
 树莓派Zero专用的USB扩展板
 ==========================
 
-``Ethernet Gadget`` 是一个可以用于树莓派通过USB micro-B线连接到主机的方法，可以实现网络，VNC，ssh以及scp等操作。
+``Ethernet Gadget`` 是一个可以用于树莓派通过 :ref:`usb_gadget` 线连接到主机的方法，可以实现网络，VNC，ssh以及scp等操作。
 
 虽然名为 ``Ethernet Gadget`` ，实际上并不使用以太网线，而只需要使用USB micro-B连线连接主机和Raspberry Pi Zero。此时 ``Pi`` 就像一个以太网设备。
 
@@ -80,3 +127,5 @@
 =======
 
 - `Ethernet Gadget <https://learn.adafruit.com/turning-your-raspberry-pi-zero-into-a-usb-gadget/ethernet-gadget>`_
+- `USB gadget mode in Raspberry Pi OS: SSH over USB <https://www.raspberrypi.com/news/usb-gadget-mode-in-raspberry-pi-os-ssh-over-usb/>`_ 2026年较新的介绍文章
+- gemini

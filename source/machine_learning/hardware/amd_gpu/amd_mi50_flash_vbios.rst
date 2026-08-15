@@ -1,7 +1,7 @@
 .. _amd_mi50_flash_vbios:
 
 ======================================================
-AMD Radeon Instinct MI50 刷VBIOS 改成 Radeon Pro VII
+AMD Radeon Instinct MI50 刷VBIOS 改成 Radeon Pro 显卡
 ======================================================
 
 准备
@@ -41,6 +41,10 @@ TechPowerUp提供的Radeon Pro VII 16 GB Video BIOS版本是2020-08-18发布的 
 
 初次尝试 ``失败``
 =====================
+
+.. note::
+
+   我第一次实践时没有注意到VBIOS不仅需要针对设备型号，而且还必须完全匹配内存规格
 
 - 检查VBIOS版本(从显卡的 EEPROM 芯片读取信息，不依赖操作系统驱动的映射):
 
@@ -145,13 +149,19 @@ TechPowerUp提供的Radeon Pro VII 16 GB Video BIOS版本是2020-08-18发布的 
    :caption: 刷入Pro V420的VBIOS之后参数
    :emphasize-lines: 6
 
-这里最大的变化是TDP下降到 **178W** ，这对于安装在 :ref:`dell_t5820` 工作站有很大帮助，另外提供了mini HDMI输出，🈶️可以省却一块P400占用的PCIe插槽，
+这里最大的变化是TDP下降到 **178W** ，这对于安装在 :ref:`dell_t5820` 工作站有很大帮助，另外提供了mini HDMI输出，可以省却一块P400占用的PCIe插槽，
 
 对比 ``amdvbflash -i`` 输出:
 
 .. literalinclude:: amd_mi50_flash_vbios/amdvbflash_v420_mi50
    :caption: 对比 ``amdvbflash -i`` 输出信息
    :emphasize-lines: 6
+
+.. note::
+
+   这里显示的 ``113-D1640200-043`` **BIOS P/N** 就代表了 **Radeon Pro V420 32 GB**
+
+   令人惊喜的是，MI50通过刷入Pro V420 VBIOS之后，包含 EFI Image (GOP)，已验证可以在 :ref:`dell_t5820_mainboard` 上使用，成功输出了Dell Logo。这样我就能够在T5820上部署我的 :ref:`hackintosh`
 
 对比 ``amdvbflash -ai`` 输出
 
@@ -165,7 +175,12 @@ TechPowerUp提供的Radeon Pro VII 16 GB Video BIOS版本是2020-08-18发布的 
 
 但是很不幸，虽然这次实践刷入 Pro V420的 VBIOS成功，但是我将 :ref:`amd_mi50` 安装到 :ref:`dell_t5820` 却依然无法启动。Google了一下，AI确实提示 **AMD Radeon Pro V420不在T5820支持列表** ，原因可能是Pro V420是一个特殊的服务器端虚拟化卡。我怀疑Dell T5820只接受workstation graphics (WX/W series)
 
+.. warning::
+
+   这里实践验证刷了 Pro V420 的VBIOS之后在 :ref:`dell_t5820` 依然无法启动，并不是因为更改VBIOS导致的，而是我当前使用的T5820的主板是第一代早期版本，在 **VRM 供电相数、供电芯片以及 PCIe 12V 供电轨分配** 存在限制，根据网上经验，能够支持 MI50 的主板是第二代改进版本的 :ref:`dell_t5820_mainboard`
+
 不过我看到 `Reddit:32GB Mi50, but llama.cpp Vulkan sees only 16GB <https://www.reddit.com/r/LocalLLaMA/comments/1m389gi/comment/n5y7d3d/>`_ 提到有人根据闲鱼上的帖子 `MI50 32G 非卖品 仅限交流 <https://www.goofish.com/item?id=911401293793&ut_sk=1.aEKY6o04+hEDAEU7HhCRBCsM_21407387_1751919723331.copy.detail.911401293793.2207405348468>`_ 提供的2个VBIOS，该贴提到部分主板要关闭CSM
+
 
 再次尝试
 ===========

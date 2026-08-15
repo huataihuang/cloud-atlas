@@ -8,7 +8,8 @@ Dell T5820通过ReBarUEFI工具强制修改BAR(Again)
 
    本文是我再次尝试 :ref:`dell_t5820_rebaruefi` ，但是由于Dell T5820主机内置Boot Guard，对BIOS进行校验，所以修订ReBarUEFI之后的BIOS无法启动主机，本次尝试失败。如果你使用的和我一样的Dell T5820工作站，本文的实践记录仅能提供参考，但无法解决大规格显存的数据中心GPU在T5820上的使用问题。
 
-   不过，根据gemini提示，我正在尝试 :ref:`dell_t5820_smbbus_tape_mod_rebar` ，请稍候我实践分享...
+   最终的解决方法(折腾了好久)其实是更换 :ref:`dell_t5820_mainboard` ，我付出了718元的代价更换第二代主板来解决 :ref:`dell_t5820_gpu` 的异常，非常痛的代价!
+
 
 准备工作
 ===========

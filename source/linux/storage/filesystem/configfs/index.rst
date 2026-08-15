@@ -1,13 +1,14 @@
-.. _hackintosh:
+.. _configfs:
 
 =================================
-Hackintosh (黑苹果)
+Linux configfs虚拟文件系统
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_hackintosh.rst
+   usb_gadget.rst
+
 
 .. only::  subproject and html
 

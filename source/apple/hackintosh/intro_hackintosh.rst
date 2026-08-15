@@ -41,6 +41,13 @@ Hackintosh(黑苹果)简介
   - 模拟身份: 可以在 ``OpenCore`` 中将其 ``SMBIOS`` 仿冒为 ``MacPro7,1`` (即 **2019款 Mac Pro** )，因为真实的MacPro7.1本身就是使用Intel Xeon W-32xx 处理器(与T5820使用的W-21xx/22xx同属Skylake-X/Cascade Lake-X架构)，所以指令集和PCIe通道映射高度一致。
   - Xcode 兼容性： macOS 15 完全能够运行 Xcode 16，能够满足 2026/2027 年绝大多数 iOS 18 / iOS 19/20 的开发与编译需求。
 
+关键点:显卡
+==============
+
+最终选择
+--------------
+
+:ref:`amd_mi50` 在完成 :ref:`amd_mi50_flash_vbios` 刷入Pro V420 VBIOS之后，具备了 EFI Image (GOP)，已验证能够点亮。所以我能够充分使用我的双 :ref:`amd_mi50` 来实现我的梦想。
 
 参考
 =======

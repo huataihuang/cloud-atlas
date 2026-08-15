@@ -8,7 +8,11 @@ Dell T5820这款早期工作站的主板有一个巨大缺陷是不支持 :ref:`
 
 .. warning::
 
-   本文在Dell T5820上实践没有成功，即使我从源代码编译 :ref:`dell_t5820_rebaruefi_again` 也失败了。不过，我正在尝试 :ref:`dell_t5820_smbbus_tape_mod_rebar` ，请稍候...
+   本文在Dell T5820上实践没有成功，即使我从源代码编译 :ref:`dell_t5820_rebaruefi_again` 也失败了。我尝试 :ref:`dell_t5820_smbbus_tape_mod_rebar` 也失败了...
+
+   但是峰回路转，我最终发现，原来 :ref:`dell_t5820_mainboard` 存在 **两代产品** ，只有二代硬件才 **官方 BIOS 内置了完善的 Above 4G Decoding 机制** ，才能在开机POST阶段支持 :ref:`tesla_a2` 和 :ref:`amd_mi50` PCIe Memory Base Address 资源分配，可以直接顺利点亮机器并进入系统。
+
+   **本文仅提供一个ReBarUEFI的思路和方法参考** ，实际解决 :ref:`dell_t5820_gpu` 问题的唯一方法是 **更换T5820二代主板**
 
 .. note::
 

@@ -58,6 +58,10 @@ Dell Precision T5820 工作站
 
    **内存速度取决于系统中的CPU**
 
+需要注意，T5820的DIMM slot分布的规律如下，在插内存条时需要按顺序插入:
+
+.. figure:: ../../../../_static/linux/server/hardware/dell/t5820_memory_slot.jpg
+
 PCIe插槽
 ---------
 

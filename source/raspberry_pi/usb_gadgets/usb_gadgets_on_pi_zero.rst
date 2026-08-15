@@ -37,4 +37,3 @@
 - `Raspberry Pi Zero as Multiple USB Gadgets Dec22 <https://irq5.io/2016/12/22/raspberry-pi-zero-as-multiple-usb-gadgets/>`_
 - `GitHub: Flowm/Etherkey <https://github.com/Flowm/etherkey>`_
 - `How to simulate USB keyboard from machine? <https://superuser.com/questions/1128365/how-to-simulate-usb-keyboard-from-machine>`_
-
