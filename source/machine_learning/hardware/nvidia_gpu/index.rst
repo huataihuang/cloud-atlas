@@ -22,6 +22,7 @@ NVIDIA GPU
    tesla_p100.rst
    tesla_t10_vs_t4.rst
    tesla_a2.rst
+   tesla_a2_display_mode_switch.rst
    nvidia_a100.rst
    nvidia_h100.rst
    nvidia_sxm_socket.rst
