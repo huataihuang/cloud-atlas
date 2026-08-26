@@ -10,7 +10,9 @@ Tesla A2显示模式切换
 
 .. warning::
 
-   我的实践最终没有成功实现 :ref:`tesla_a2` 切换Graphics模式，推测是这块计算卡可能做了硬件限制。不过，本文可以作为一个技术参考，对于NVIDIA显卡或数据中心卡模式切换有参考价值。
+   我的实践 ``displaymodeselector`` 没有成功实现 :ref:`tesla_a2` 切换Graphics模式， :strike:`推测是这块计算卡可能做了硬件限制` 。本文可以作为一个对于NVIDIA显卡或数据中心卡模式切换技术参考。
+
+   我感觉 **本文的思路可能是错误的** ，因为我google到 **NVIDIA Tesla A2要激活WDDM (Windows Display Driver Model)图形模式需要一个NVIDIA vGPU/GRID license** ，也就是说，和常规游戏、工作站显卡不同，数据中心GPU激活显示功能(也就是作为虚拟桌面)，需要通过 :ref:`install_vgpu_manager` 或者 **开源虚拟许可服务器** 来实现 :ref:`tesla_a2_wddm` 。这个方案我准备等后续机会再实践。
 
 我在排查 :ref:`dell_t5820_gpu` 异常问题时，发现解决的方法是升级 :ref:`dell_t5820_mainboard` 二代。不过，升级了硬件之后，通过 :ref:`amd_mi50_flash_vbios` 改成 Radeon Pro V420 就能够作为显卡在T5820上使用。
 
