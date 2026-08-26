@@ -11,6 +11,9 @@ Maker
    cad/index
    blender/index
    drone/index
+   flight_simulator/index
+   cessna_172/index
+   radio/index
 
 .. only::  subproject and html
 

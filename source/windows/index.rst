@@ -14,7 +14,6 @@ Windows是主流商业操作系统，虽然我进入IT行业以后，特别是�
    winpe.rst
    service/index
    desktop/index
-   flight_simulator/index
 
 .. only::  subproject and html
 

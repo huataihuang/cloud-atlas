@@ -1,15 +1,16 @@
-.. _3d_printing_camera:
+.. _flight_simulator:
 
 =================================
-3D打印相机
+飞行模拟
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_3d_printing_camera.rst
-   fat_shot_617.rst
-   4x5_large_format.rst
+   ms_flight_simulator.rst
+   x-plane.rst
+   flightgear.rst
+   flight_simulator_devices.rst
 
 .. only::  subproject and html
 

@@ -1,13 +1,18 @@
-.. _flight_simulator:
+.. _radio:
 
 =================================
-微软飞行模拟
+无线电
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_flight_simulator.rst
+   play_radio.rst
+   learn_radio.rst
+   radio_tools.rst
+   rtl-sdr_v4.rst
+   ham.rst
+   crac_amateur_radio_operator_certificate.rst
 
 .. only::  subproject and html
 
