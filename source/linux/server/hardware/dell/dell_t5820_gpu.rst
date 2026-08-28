@@ -1,12 +1,12 @@
 .. _dell_t5820_gpu:
 
-=========================
-Dell T5820 GPU异常排查
-=========================
+=============================
+Dell T5820 GPU异常问题解决
+=============================
 
 .. warning::
 
-   本文不用往下看了，简单来说，第一代T5820主板存在无法支持W-2235以上的CPU，也存在对LargeBAR支持的缺陷。更换到 :ref:`dell_t5820_mainboard` 二代，则解决了上述问题。并且需要注意，GPU计算卡需要刷包含EFI Image (GOP)的VBIOS，例如 :ref:``
+   本文不用往下看了，简单来说，第一代T5820主板存在无法支持W-2235以上的CPU，也存在对LargeBAR支持的缺陷。更换到 :ref:`dell_t5820_mainboard` 二代，则解决了上述问题。并且需要注意，GPU计算卡需要刷包含EFI Image (GOP)的VBIOS， :ref:`amd_mi50_flash_vbios` 或者 :ref:`tesla_a2_wddm` 。
 
 由于我想要能够7x24在家中使用服务器，考虑到 :ref:`hpe_dl380_gen9` 涡轮风扇的噪音，我尝试选购静音工作站来运行 :ref:`machine_learning` 硬件( :ref:`tesla_a2` 和 :ref:`amd_mi50` )。虽然最初选择 :ref:`hp_z8_g4` ，但由于二手硬件异常以及高昂的总体成本，我退而求其次选择了 Dell T5820。
 
