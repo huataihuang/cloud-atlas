@@ -543,12 +543,27 @@ UEFI 顶层关键设置: ``ConnectDrivers : True`` 强制加载 UEFI -> Drivers 
   - 退出磁盘工具，选择 安装 macOS，选中刚才抹好的硬盘，等待系统自动安装（中间会自动重启 2~3 次，每次重启都在 OpenCore 菜单选择名字带 macOS Installer 或目标硬盘名称的选项）。
 
 完善后处理
-===========
+-------------
 
 成功进桌面后:
 
 - 使用工具（如 ESP Mounter Pro 或终端命令）将 U 盘中的 EFI 文件夹完整复制到本地硬盘的 EFI 分区中，以后即可脱离 U 盘独立开机。
 - 确认 MI50 显卡驱动加速、网卡、声音和电源管理是否全部工作正常。
+
+引导启动和系统迁移
+===================
+
+实际上，我的 :ref:`mbp15_late_2013` 已经 :ref:`oclp_macos` ，也就是说操作系统已经安装过了。我现在是把Macbook Pro的NVMe盘拆下来，然后拿到我的C246台式机上使用，操作系统不需要重装，所以上述步骤需要做一些调整:
+
+- 调整 BIOS：按照之前列出的 C246 BIOS 要求（开启 4G Decoding、关闭 Secure Boot/Fast Boot 等）设置台式机主板。
+- 插盘引导：接入 MBP 拆下来的 NVMe 硬盘和 U 盘，开机 Boot Menu 选择 UEFI U 盘启动。
+- 清理 OCLP：顺利进桌面后，运行 OCLP 执行 Revert Root Patches。
+
+  - 运行 ``OpenCore Legacy Patcher``
+  - 点击 ``Post-Install Root Patch => Revert Root Patches`` 还原系统根目录补丁
+  - 还原完成后不要立即重启，打开终端（Terminal）运行一次 NVRAM 清理命令或重启时在 OC 菜单执行 Reset NVRAM，让系统加载 C246 EFI 提供的原生/伪装驱动。
+
+- 固化 EFI：将 U 盘中的 EFI 复制到 NVMe 硬盘的 EFI 分区，拔掉 U 盘，完成迁移！
 
 参考
 ======

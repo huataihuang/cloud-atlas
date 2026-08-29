@@ -16,6 +16,13 @@ OS X Mavericks 10.9.5
 
 互联网档案 `OS X Mavericks 10.9.5 <https://archive.org/details/os-x-mavericks-10.9.5>`_
 
+- 下载的 ``OS_X_Mavericks_10.9.5.iso`` 通过 ``dd`` 命令写入U盘(注意，在写U盘之前先卸载掉自动挂载的分区，并确保不要搞错磁盘)
+
+.. literalinclude:: mavericks_mba11_late_2010/dd
+   :caption: 制作启动U盘
+
+
+
 Microsoft Office 2011 for Mac 14.7.7 Final
 ============================================
 
