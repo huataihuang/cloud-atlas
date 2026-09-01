@@ -194,7 +194,7 @@ macOS 原生仅支持 Broadcom（博通）部分芯片以及苹果自家的无�
 - 最廉价/现成方案：使用 Intel PCIe/M.2 网卡（如 AX200 / AX210 / AC9260），通过社区开源的 ``itlwm.kext`` （配合  ``AirportItlwm`` 或 ``HeliPort`` 客户端）
 - 完美白苹果体验方案：使用 Broadcom（博通）拆机卡 + PCIe 转接卡，推荐 ``BCM943602CS`` 或 ``BCM94360CD`` （免驱卡/拆机卡）。这样能够在 macOS 14/15 上配合 OCLP 注入现代 Wireless 驱动后，可以开启完全原生的 Wi-Fi、蓝牙、AirDrop、隔空播放和苹果生态接力功能。
 
-由于我的台式机PCIe插槽非常宝贵，需要用于GPU和万兆网卡，所以我暂时放弃在黑苹果中体验WiFi和蓝牙。不过，这种 :ref:`hackintosh_wifi_bluetooth` 方案很有趣，也许以后有机会可以玩一玩:
+这种 :ref:`hackintosh_wifi_bluetooth` 方案很有趣，我入手了一块 ``BCM94360CD`` 尝试 :ref:`hackintosh_wifi_bluetooth` :
 
 - `AirportBrcmFixup <https://github.com/acidanthera/AirportBrcmFixup/releases>`_ 用于Broadcom卡
 - `BrcmPatchRAM <https://github.com/acidanthera/BrcmPatchRAM/releases>`_ 更新Broadcom蓝牙芯片的firmware
@@ -519,6 +519,41 @@ UEFI 顶层关键设置: ``ConnectDrivers : True`` 强制加载 UEFI -> Drivers 
 
 引导启动并正式安装
 =====================
+
+制作安装盘
+--------------
+
+黑苹果的安装启动过程，本质上是 OpenCore（OC）扮演了一个“中介”与“翻译官”的角色，把普通的 PC 硬件伪装成一台真正的 Apple Mac，然后欺骗并引导苹果官方的 macOS 安装程序。
+
+以下是启动过程概述:
+
+- 读取 U 盘分区：主板的 UEFI 固件扫描 U 盘，找到格式化为 FAT32 的 EFI 系统分区（ESP）
+- 加载 OpenCore 引导器：主板加载 U 盘中的 ``/EFI/BOOT/BOOTx64.efi`` ，进而启动 ``/EFI/OC/OpenCore.efi``
+- 当 OpenCore 运行的瞬间，开始读取 ``config.plist`` 文件，在内存中动态完成以下欺骗与改造:
+
+  - ACPI 补丁（硬件伪装）: 加载 ``SSDT-AWAC.aml`` 、 ``SSDT-EC-USBX.aml`` 等补丁，向 macOS 注入苹果设备特有的嵌入式控制器（EC）和电源管理设备，解决 PC 主板与 Mac 设备树不一致的问题。
+  - Kext 驱动注入: 将 ``Lilu`` 、 ``VirtualSMC`` （伪装 Apple SMC 芯片）、 ``IntelMausi`` （网卡驱动）等 Kext 预先加载到内存中。
+  - NVRAM 参数注入: 注入 **Boot-args** （如 ``-v`` 显示详细日志、 ``-amfi_get_out_of_my_way=1`` 关闭 AMFI 校验、 ``csr-active-config`` 关闭 SIP 保护）。
+  - SMBIOS 伪装（赋予“Mac 身份”）: 告诉系统内核自己是 iMac19,1（或 MacPro7,1）
+
+- OpenCore 完成内存初始化后，会向屏幕输出 OpenCore Picker 界面（图形化或文本菜单）:
+
+  - 提供启动项 ``Install macOS Sonoma (External)`` (U 盘里的 macOS 安装镜像)
+
+.. note::
+
+   只之前的步骤中，如果想要模拟macOS的本地安装，应该先用 :ref:`create_boot_usb_from_iso_in_mac` ，然后执行前面的UEFI system分区部署OpenCore的UEFI内容
+
+   另外一种模拟苹果的Net Install方式是采用 :ref:`opencore_macos_basesystem_install`
+
+- 选择 ``Install macOS Sonoma (External)`` 后，OpenCore将控制权移交给U盘镜像中苹果官方引导文件:
+
+  - 加载BaseSystem: OpenCore 指向 U 盘中的 /macOS Install Data/ 或 BaseSystem.dmg（苹果官方的基础系统镜像）
+  - XNU 内核启动: 苹果的 XNU 内核开始初始化，加载刚才由 OpenCore 注入在内存中的 Kexts。
+  - 最终呈现出标准的苹果安装面板——包含 “磁盘工具” (Disk Utility) 和 “安装 macOS” (Install macOS) 选项。
+
+操作
+-------
 
 - 插入 U 盘，开机按 F12（或对应主板的 Boot Menu 快捷键）选择 UEFI U 盘引导
 - 进入 OpenCore 引导菜单

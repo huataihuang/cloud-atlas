@@ -4,6 +4,10 @@
 shadow模式运行xpra访问macOS/Windows
 =====================================
 
+.. warning::
+
+   现在(2026年)我再次在Mavericks(10.9.5)中尝试安装Xpra，发现Xpra官方提供的编译版本 ｀Xpra for macOS <https://xpra.org/dists/osx/x86_64/>`_  最低要求是 macOS 10.12 。也就是说我尝试在拟物桌面环境Mavericks上是无法直接使用Xpra的。
+
 macOS shadow方式访问
 =====================
 

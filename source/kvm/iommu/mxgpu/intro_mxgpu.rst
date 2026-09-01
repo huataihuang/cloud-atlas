@@ -35,7 +35,7 @@ AMD MxGPU( :ref:`sr-iov` )支持多种操作系统以及虚拟化技术:
 - 通过 MxGPU 来分配 :ref:`amd_firepro_s7150x2` 的一个GPU作为2个VF(vGPU)分别提供给2个虚拟机(我期望一个是 :ref:`macos` 一个是 :ref:`windows` ) ，另一个GPU则用于推理(不过性能可能很差)
 
   - 虚拟化运行 :ref:`macos`
-  - 虚拟化运行 :ref:`windows` 玩 :ref:`flight_simulator` (思路整理在 :ref:`intro_flight_simulator` )
+  - 虚拟化运行 :ref:`windows` 玩 :ref:`flight_simulator` (思路整理在 :ref:`ms_flight_simulator` )
 
 参考
 ========

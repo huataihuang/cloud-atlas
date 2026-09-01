@@ -45,7 +45,6 @@ Alpine Linux
    alpine_distrobox.rst
    alpine_nfs.rst
    alpine_lvm.rst
-   alpine_zfs.rst
    alpine_dev.rst
    alpine_swift.rst
    alpine_install_calibre.rst

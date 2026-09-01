@@ -38,6 +38,9 @@ macOS
    homebrew_old_qemu.rst
    macports.rst
    macports_old_qemu.rst
+   macports_on_mavericks.rst
+   macports_mpv_on_mavericks.rst
+   macports_openssh_on_mavericks.rst
    install_disabled_homebrew_package.rst
    multi_jdk_on_macos.rst
    macos_keyboard_customize.rst
