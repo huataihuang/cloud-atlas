@@ -7,7 +7,12 @@ FreeBSD系统更新
 FreeBSD提供了两种更新系统方式:
 
 - ``freebsd-update`` 命令用于更新核心系统: :ref:`freebsd_update_upgrade` 详细记录 ``freebsd-update`` 工具完成系统更新步骤
-- 包管理器或ports系统( :ref:`freebsd_ports` ) 用于更新第三方软件
+- 包管理器 ``pkg`` 或 ports系统( :ref:`freebsd_ports` ) 用于更新第三方软件
+
+.. csv-table:: FreeBSD更新工具的区别和使用场景
+   :file: freebsd_update/compare_update.csv
+   :widths: 10,30,30,30
+   :header-rows: 1
 
 更新FreeBSD Core OS
 =======================

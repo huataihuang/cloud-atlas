@@ -10,7 +10,7 @@
    play_radio.rst
    learn_radio.rst
    radio_tools.rst
-   rtl-sdr_v4.rst
+   rtl-sdr_v4/index
    ham.rst
    crac_amateur_radio_operator_certificate.rst
 

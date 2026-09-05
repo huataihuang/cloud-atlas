@@ -38,3 +38,5 @@ V4L 和 V4 的优化和区别:
 
 - gemini
 - `RTL-SDR BLOG V4 USERS GUIDE <https://www.rtl-sdr.com/V4/>`_
+- `The Cheapest Radio Receiver For Beginners / RTLSDR v4 <https://www.youtube.com/watch?v=pjoUpIlQEXk>`_ 入门简介，让你知道RTL-SDR能做什么
+- `SIGINT - SDR How To using the RTL-SDR v4 and SDR++ <https://www.youtube.com/watch?v=7U8bUcQfX1E>`_ youtube视频介绍如何使用

@@ -8,6 +8,14 @@ Linux轻量级浏览器
 
 当前浏览器市场主要被google的chrome占领，很多公司网站应用甚至只针对chrome优化和测试，使用其他浏览器存在很多障碍。这和多年以前微软的IE统治无甚差别，也是垄断带来的恶果。不过，对于我这样的技术工作者，依然寻求轻量级的浏览器来完成大多数工作，尽量避免依赖chrome这样庞大臃肿的巨无霸。
 
+.. note::
+
+   2026年9月，我意外发现一个非常轻量级且比我想象中更好(更兼容)的浏览器 :ref:`luakit` 。当然，这很可能是因为底层依赖的 ``Webkit2GTK`` 有了长足的进步导致的，所以其他依赖Webkit的轻量级浏览器应该也有很大的进步，会比我在2021年时观察对比要好很多。
+
+.. warning::
+
+   我已经好久没有更新这个文档了，实际上轻量级浏览器对比数据已经不准确。请自行参考google
+
 根据 `wikipedia: Comparison of lightweight web browsers <https://en.wikipedia.org/wiki/Comparison_of_lightweight_web_browsers>`_ 可以了解目前依然活跃开发的主要有:
 
 .. csv-table:: 活跃开发的轻量级浏览器

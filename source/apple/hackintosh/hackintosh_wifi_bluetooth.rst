@@ -35,7 +35,44 @@ gemini推荐的方法 **使用 Broadcom（博通）拆机卡 + PCIe 转接卡** 
 
 我的选择: ``BCM94360CD（4 天线版）`` - 常年挂载多个蓝牙音频/外设，且不在意机箱内部空间和额外的 1 根天线，它的独立蓝牙天线设计在多设备并发时最稳固
 
+OpenCore设置
+===============
+
+在 OS X 10.9 Mavericks 到 macOS 13 Ventura 期间， ``BCM94360CD`` 是苹果官方的原生白名单免驱网卡，它的 Wi-Fi 和蓝牙驱动本来就内置在 macOS 的 Kext 库中。
+
+但在 **macOS 14 Sonoma 及更新的系统（包括 macOS 26 Tahoe）** 中，苹果彻底废弃了古老的 PCIe Wi-Fi 驱动架构（IO80211Family）。因此，要想在全新的 macOS 上继续驱动这块网卡，必须通过 **OpenCore Legacy Patcher (OCLP) 的 Root Patches 机制** ，配合特定的 Kexts 将旧版驱动补丁"注入"回系统内核中。
+
+驱动 BCM94360CD 的蓝牙与 Wi-Fi 镜像需要以下 Kext 驱动:
+
+- ``Lilu`` 已经在 :ref:`c246_mi50_hackintosh` 完成
+- `BlueToolFixup <https://github.com/acidanthera/BrcmPatchRAM/releases>`_ 包含在 `BrcmPatchRAM <https://github.com/acidanthera/BrcmPatchRAM/releases>`_ 里面，这个补丁是为了在macOS 12+蓝牙堆栈打补丁来支持第三方卡
+- `AirportBrcmFixup <https://github.com/acidanthera/AirportBrcmFixup/releases>`_ 用于non-Apple/non-Fenvi的Broadcom网卡，对于OS X 10.10及更新版本都需要
+－ `BrcmPatchRAM <https://github.com/acidanthera/BrcmPatchRAM/releases>`_ 用于更新Broadcom蓝牙firmware，对于所有non-Apple/non-Fenvi Airport卡都需要。需要注意，这个kext是和 ``BrcmFirmwareData.kext`` 配对使用的，并且针对不同macOS需要使用不同的 ``BrcmPatchRAM`` :
+
+  - 对于macOS 10.15+，必须配对 ``BrcmBluetoothInjector`` 使用 ``BrcmPatchRAM3``
+  - 对于macOS 10.11-10.14 ，使用 ``BrcmPatchRAM2``
+  - 对于macOS 10.8-10.10，使用 ``BrcmPatchRAM``
+  - 对于macOS 10.11 到 macOS 11，还需要 ``BrcmBluetoothInjector``
+
+- ``BrcmFirmwareData.kext`` (见上文 ``BrcmPatchRAM`` )
+- ``BrcmBluetoothInjector`` (见上文 ``BrcmPatchRAM`` )
+
+.. note::
+
+   实际上上述kexts分别来自2个包:
+
+   - `BrcmPatchRAM <https://github.com/acidanthera/BrcmPatchRAM/releases>`_
+   - `AirportBrcmFixup <https://github.com/acidanthera/AirportBrcmFixup/releases>`_
+
+修订config.plist
+==================
+
+打开了配置文件以后，按下 ``Cmd/Ctrl + Shift + R`` 然后指向 ``EFI/OC`` 来执行一个 ``Clean Snapshot`` ，此时会移除 ``config.plist`` 中所有对象，然后添加所有前面配置的 ``SSDTs`` ， ``Kexts`` 和 Firmware驱动。
+
+这个过程自动完成，并且会自动排列 ``Lilu`` 在BlueToolFixup等扩展前面(表示依赖关系)
+
 参考
 =======
 
 - gemini
+- `dortania: Wireless Buyers Guide <https://dortania.github.io/Wireless-Buyers-Guide/>`_ 官方文档说明了应该选择哪种无线网卡来安装黑苹果

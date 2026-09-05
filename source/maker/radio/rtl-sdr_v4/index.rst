@@ -1,14 +1,13 @@
-.. _sunshine:
+.. _rtl-sdr_v4:
 
 =================================
-Sunshine
+RTL-SDR v4
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_sunshine.rst
-   moonlight/index
+   intro_rtl-sdr_v4.rst
 
 .. only::  subproject and html
 

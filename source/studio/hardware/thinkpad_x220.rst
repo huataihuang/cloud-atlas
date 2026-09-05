@@ -64,6 +64,8 @@ ExpressCard
 
 ThinkPad X220提供了一个非常有意思的 **ExpressCard 54** 插槽，是实现 :ref:`expresscard_egpu` 最佳途径
 
+- `eGPU Series: Episode 1: Setup and Linux Mint (ThinkPad X220) <https://www.youtube.com/watch?v=7UzdMgc9MUI>`_
+
 BIOS微码
 ===========
 

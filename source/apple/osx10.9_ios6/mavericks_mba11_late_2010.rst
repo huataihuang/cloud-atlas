@@ -51,9 +51,7 @@ OS X Mavericks 10.9.5
 系统证书
 ==========
 
-由于Mavericks已经非常古早，并且已经停止更新很长时间，所以系统缺乏很多现在互联网网站使用的证书，需要手工下载并导入:
-
-- 
+由于Mavericks已经非常古早，并且已经停止更新很长时间，所以系统缺乏很多现在互联网网站使用的证书，需要手工下载并导入
 
 翻墙
 ======
@@ -73,3 +71,16 @@ Microsoft Office 2011 for Mac 14.7.7 Final
 ===========
 
 轻量级最节约资源 `mpv <https://mpv.io/>`_ 提供了各种平台编译二进制 `mpv installation <https://mpv.io/installation/>`_ 我采用了 `macOS builds by stolendata <https://laboratory.stolendata.net/~djinn/mpv_osx/>`_ 针对 10.9 编译的早期版本 `mpv 0.20.0 for OS X 10.9 (mavericks) <https://laboratory.stolendata.net/~djinn/mpv_osx/mpv-0.29.0-mavericks.tar.gz>`_
+
+体验
+======
+
+:ref:`mba11_late_2010` 确实是十六年前极致工程美学的代表，直到今天依然是能够通过变通方式复活使用。但是，我不得不说，需要忍受的缺陷太多，以至于我不得不放弃这个"怀旧之旅":
+
+``1.4GHz Intel Core 2 Duo processor`` 加上 ``4GB`` 内存的硬件限制实在太苛刻了，而被时代抛弃的Mavericks系统受限于年代很多现代化(能够进一步压榨硬件)的软件非常匮乏，或者说反向移植非常消耗精力。
+
+孱弱的硬件导致现代化浏览器无法使用，即使社区提供了几年前的 ``chromium-classic`` 依然在一些激进的网站上举步维艰。而能够使用浏览器仅仅是第一步，缓慢的加载和输入法的延迟让人抓狂，时间不知不觉消耗在无谓的等待中。
+
+还有一个最终压垮我的稻草是这款十六年前的触摸板已经不太正常，时而过于灵敏飘忽不定，时而老迈迟缓让人心情奔溃。
+
+在挣扎了一周后，我觉得还是及时放弃较好，把时间用在更有价值的技术上。我觉得 :ref:`thinkpad_x220` 在怀旧和现代技术上达到一个更好的平衡，特别是能够流畅无阻地运行 :ref:`freebsd` ，轻快而高效的输入，使得我准备将折腾迁移到Thinkpad上继续。

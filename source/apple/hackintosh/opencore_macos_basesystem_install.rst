@@ -11,7 +11,21 @@ OpenCore采用macOS BaseSystem安装
 下载
 ======
 
-OpenCore软件包中提供了一个
+OpenCore软件包中提供了一个工具 ``macrecovery`` 位于 ``Utilities/macrecovery`` 目录下，在该目录下有一个 ``recovery_urls.txt`` 针对每个不同的macOS版本提供了相应的命令说明:
+
+.. literalinclude:: opencore_macos_basesystem_install/macrecovery
+   :caption: 执行recovery_urls.txt中提供的针对不同版本macOS下载命令
+
+如果一切正常，并且最后checksum也检查正确，那么就会在当前目录的 ``com.apple.recovery.boot`` 子目录下存放了 ``BaseSystem.dmg``
+
+.. note::
+
+   如果下载过程有中断，可能需要删除掉 ``com.apple.recovery.boot`` 目录然后重新下载，否则会一直报下载镜像checksum错误。
+
+文件存放
+==========
+
+在U盘的数据分区中创建一个 ``com.apple.recovery.boot`` 目录，然后将下载的 ``BaseSystem.dmg`` 和 ``BaseSystem.chunklist`` 存放进去 
 
 参考
 ======

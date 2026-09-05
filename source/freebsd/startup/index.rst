@@ -7,6 +7,7 @@ FreeBSD起步
 .. toctree::
    :maxdepth: 1
 
+   freebsd_hardware.rst
    freebsd_on_intel_mac.rst
    freebsd_on_thinkpad_x220.rst
    freebsd_root_on_zfs_using_gpt.rst

@@ -30,6 +30,13 @@ FreeBSD版本
 
    参见 `FreeBSD Manual Pages freebsd-update <https://man.freebsd.org/cgi/man.cgi?freebsd-update>`_
 
+FreeBSD 15在安装过程中可以选择是否采用最新的 :ref:`freebsd_pkgbase` 包管理技术，一旦选择pkgbase管理模式，则后续如果使用 ``freebsd-update fetch install`` 会提示报错:
+
+.. literalinclude:: freebsd_update_upgrade/freebsd-update_error
+   :caption: pkgbase系统不能使用freebsd-update
+
+上述提示其实就是说明后续系统更新应该完全采用 ``pkg`` 进行更新，而不再使用 ``freebsd-update`` 命令
+
 FreeBSD update
 =================
 

@@ -1,14 +1,15 @@
-.. _sunshine:
+.. _moonlight:
 
 =================================
-Sunshine
+Moonlight
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_sunshine.rst
-   moonlight/index
+   intro_moonlight.rst
+   moonlight-embedded.rst
+   moonlight-embedded_freebsd.rst
 
 .. only::  subproject and html
 

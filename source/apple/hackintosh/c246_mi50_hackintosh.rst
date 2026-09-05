@@ -31,7 +31,7 @@ macOS的补丁改造
 - 核心 Kexts 驱动:
 
   - 主板 (C246 芯片组): 需要配置针对 Coffee Lake 芯片组的标准 Kexts（如 AWAC 补丁、USB 映射准备）
-  - 网卡 (Intel I226-V 2.5G x4): 必须加载 AppleIGC.kext（针对 Intel I225-V/I226-V 2.5G 网卡原生驱动的开源 Kext），并配置 Boot-args 参数 e2000=0 以确保 2.5G 网卡正常工作。
+  - 网卡 (Intel I226-V 2.5G x4): 必须加载 AppleIGC.kext（针对 Intel I225-V/I226-V 2.5G 网卡原生驱动的开源 Kext） :strike:`并配置 Boot-args 参数 e2000=0 以确保 2.5G 网卡正常工作` (只要加载了AppleIGC.kext就能自动使用I226-V网卡，不需要内核参数，如果遇到主板还有 I225-V 网卡为避免冲突，则加 ``e2000=0`` 来禁止I225-V网卡，如果主板有Intel千兆网卡，则添加 ``e1000=0`` 来禁止千兆网卡。总之，添加 e1000,e2000 参数是为了避免其他Intel网卡冲突)
   - 显卡 (AMD MI50 32GB / V420): 继承之前的配置，在 DeviceProperties 中将该 PCIe 槽位的 device-id 伪装为  ``AF660000`` (Radeon VII)，并添加 boot-args ``agdpmod=pikera`` 。
 
 EFI 重构
@@ -194,7 +194,7 @@ macOS 原生仅支持 Broadcom（博通）部分芯片以及苹果自家的无�
 - 最廉价/现成方案：使用 Intel PCIe/M.2 网卡（如 AX200 / AX210 / AC9260），通过社区开源的 ``itlwm.kext`` （配合  ``AirportItlwm`` 或 ``HeliPort`` 客户端）
 - 完美白苹果体验方案：使用 Broadcom（博通）拆机卡 + PCIe 转接卡，推荐 ``BCM943602CS`` 或 ``BCM94360CD`` （免驱卡/拆机卡）。这样能够在 macOS 14/15 上配合 OCLP 注入现代 Wireless 驱动后，可以开启完全原生的 Wi-Fi、蓝牙、AirDrop、隔空播放和苹果生态接力功能。
 
-这种 :ref:`hackintosh_wifi_bluetooth` 方案很有趣，我入手了一块 ``BCM94360CD`` 尝试 :ref:`hackintosh_wifi_bluetooth` :
+这种 :ref:`hackintosh_wifi_bluetooth` 方案很有趣，我入手了一块 ``BCM94360CD`` 详细实践见 :ref:`hackintosh_wifi_bluetooth` :
 
 - `AirportBrcmFixup <https://github.com/acidanthera/AirportBrcmFixup/releases>`_ 用于Broadcom卡
 - `BrcmPatchRAM <https://github.com/acidanthera/BrcmPatchRAM/releases>`_ 更新Broadcom蓝牙芯片的firmware
@@ -402,7 +402,7 @@ ProperTree.py :
 
 - ``NVRAM -> Add -> 7C436110-... -> boot-args`` :
 
-  - 填入启动参数: ``-v keepsyms=1 debug=0x100 agdpmod=pikera e2000=0``
+  - 填入启动参数: ``-v keepsyms=1 debug=0x100 agdpmod=pikera``
 
 这里参数解释:
 
@@ -502,9 +502,22 @@ UEFI 顶层关键设置: ``ConnectDrivers : True`` 强制加载 UEFI -> Drivers 
 
 - Fast Boot（快速启动）
 - Secure Boot（安全启动）
+- Serial/COM Port(串口)
+- Parallel Port(并口)
 - VT-d（如果无法关闭，确保 Kernel -> Quirks -> DisableIoMapper -> True）
-- CFG Lock / MSR 0xE2 Lock（如果 BIOS 无法关闭，确保 Kernel -> Quirks -> AppleXcpmCfgLock -> True）
+- Compatibility Support Module (CSM) 多数情况下必须关闭CSM，如果激活CSM通常类似gI0的GPU会出现报错或卡住
+- Thunderbolt(如果设置不正确，初始化安装时Thunderbolt会导致问题)
 - Intel SGX / Intel Platform Trust Technology (PTT)
+
+.. note::
+
+   这里gemini建议我关闭Intel Platform Trust Technology (PTT)，不过我的BIOS中找到的配置项有点不同:
+
+   ``PCH-FW Configuration => PTT Configuration`` 默认是 ``PTT`` ，gemini建议我改称 ``dTPM`` : PTT（Platform Trust Technology）是 Intel 集成在 PCH 芯片组里的硬件级 TPM 2.0 虚拟模块。
+
+   macOS 运行完全不需要 TPM 2.0（这是 Windows 11 的硬性要求）。相反，在某些 C246 企业级主板上，开启 PTT 会导致主板 UEFI 固件在引导 OpenCore 阶段对内存空间和引导文件实施更严格的安全度量校验，进而触发 ``Invalid Parameter`` 或 ``start_image()`` 挂起报错
+
+- CFG Lock / MSR 0xE2 Lock（如果 BIOS 无法关闭，确保 Kernel -> Quirks -> AppleXcpmCfgLock -> True）
 
 必须开启（Enable）
 --------------------
@@ -512,10 +525,13 @@ UEFI 顶层关键设置: ``ConnectDrivers : True`` 强制加载 UEFI -> Drivers 
 - VT-x（虚拟化技术）
 - Above 4G Decoding（4G 以上解码，这对 MI50 计算卡/大显存独显非常关键！）
 - Hyper-Threading（超线程）
-- Execute Disable Bit
+- Execute Disable Bit (?)
 - EHCI/XHCI Hand-off（接管 USB 控制权）
 - SATA Mode 设为 AHCI（严禁使用 RAID 模式）
-- Primary Display 设为 PEG / PCIe 独显（让 MI50 或独显优先输出）
+- Primary Display 设为 PEG / PCIe 独显（让 MI50 或独显优先输出） **这条是gemini建议** 为了能够使用 :ref:`amd_mi50` 作为显示输出，具体我设置如下: - ``Chipset => Graphics Configuration`` 
+
+  －``Internal Graphics`` 保持 ``Enabled`` 这样不禁止iGPU，可以提供Intel QuickSync视频硬解加速(也防止拿掉独立显卡时没有显示输出)
+  - ``Primary Display`` 将默认的 ``IGFX`` (CPU内置显卡) 改为 ``PEG`` (PCI Express Graphics) 表示优先使用插在PCIe插槽上的独立显卡
 
 引导启动并正式安装
 =====================
@@ -599,6 +615,231 @@ UEFI 顶层关键设置: ``ConnectDrivers : True`` 强制加载 UEFI -> Drivers 
   - 还原完成后不要立即重启，打开终端（Terminal）运行一次 NVRAM 清理命令或重启时在 OC 菜单执行 Reset NVRAM，让系统加载 C246 EFI 提供的原生/伪装驱动。
 
 - 固化 EFI：将 U 盘中的 EFI 复制到 NVMe 硬盘的 EFI 分区，拔掉 U 盘，完成迁移！
+
+异常排查
+=========
+
+.. note::
+
+   原先 ``OpenCore Boot Menu`` 只有2项内容:
+
+   .. literalinclude:: c246_mi50_hackintosh/opencore_boot_menu
+      :caption: OpenCore Boot Menu
+
+   按下空格键就会看到隐藏选项:
+
+   .. literalinclude:: c246_mi50_hackintosh/opencore_boot_menu_1
+      :caption: OpenCore Boot Menu 隐藏选项
+      :emphasize-lines: 5-19
+
+Invalid Parameter
+---------------------
+
+首次U盘启动，在出现 OpenCore Boot Menu 后出现了如下错误 :
+
+.. literalinclude:: c246_mi50_hackintosh/invalid_parameter
+   :caption: 提示参数错误
+
+我发现我的AMI BIOS 默认有些隐藏非常深的设置不符合文档:
+
+**需要关闭**
+
+- ``chipset => Memory Configuration => Fast Boot`` 默认是 ``Enabled`` 需要改为 ``Disabled``
+
+- ``PCH-FW Configuration => PTT Configuration`` 默认是 ``PTT`` ，gemini建议我改称 ``dTPM`` : PTT（Platform Trust Technology）是 Intel 集成在 PCH 芯片组里的硬件级 TPM 2.0 虚拟模块。
+
+macOS 运行完全不需要 TPM 2.0（这是 Windows 11 的硬性要求）。相反，在某些 C246 企业级主板上，开启 PTT 会导致主板 UEFI 固件在引导 OpenCore 阶段对内存空间和引导文件实施更严格的安全度量校验，进而触发 Invalid Parameter 或 start_image() 挂起报错。
+
+**PTT Configuration / Firmware TPM** 如果无法直接禁止，则寻找 ``TPM Device Selection`` 改为 ``dTPM`` (我的BIOS现在改成这个设置)且不插物理 TPM 卡，或直接将 TPM State 关掉
+
+**需要激活**
+
+- ``Advanced => USB Configuration => XHCI Hand-off`` 默认时 ``Disabled`` 需要改为 ``Enabled``
+
+.. note::
+
+   **ME State（默认 Enabled）—— 保持默认为 Enabled**
+
+   原理：ME (Management Engine) 是 Intel 芯片组底层的管理引擎。
+
+   黑苹果兼容性：如果关闭/禁用 Intel ME，会导致 CPU 的变频（Power Management）、睡眠唤醒以及部分 PCIe 总线设备的列举出现严重异常（macOS 极其依赖 Intel ME 提供的硬件变频接口）。
+
+日志排查
+----------
+
+我发现OpenCore其实提供了一个错误日志:
+
+.. literalinclude:: c246_mi50_hackintosh/opencore.log
+   :caption: 报错日志
+
+可以看到，报错的关键是 ``This version of Mac OS X is not supported on this platform!``
+
+这里显示的 ``Reason: Mac-7BA5B2D9E42DDD94`` 实际上就是我在 ``config.plist`` 配置的 ``Board ID``
+
+因为我安装的 **macOS 26 Tahoe** 已经 **完全删除了对 iMacPro1,1 (Mac-7BA5B2D9E42DDD94) 的支持**
+
+解决的方法: 更换伪装机型（SMBIOS）
+
+C246 芯片组搭载的是 Intel 8/9 代 CPU（Coffee Lake），原生的 iMacPro1,1 已经过于古老，无法被 macOS 26 支持，所以需要SMBIOS 切换为更高世代的机型。
+
+- ``PlatformInfo -> Generic`` (机型信息):
+
+  - ``SystemProductName -> iMac19,1`` :strike:`修改成2019 年搭载 8/9 代 Intel CPU 的 iMac，匹配度最高` ``<= 注意，实测下来这个机型伪装也失败了，改为 MacPro7,1重新测试``
+  - 执行以下命令生成符合黑苹果机型全新的 Serial Number、MLB 和 SystemUUID(该工具位于OpenCore 官方提供的 macserial)
+
+.. literalinclude:: c246_mi50_hackintosh/macserial_macpro
+   :caption: 运行macserial生成信息(MacPro7,1)
+
+.. note::
+
+   macOS 在启动和运行过程中，会把许多关键的系统配置（例如：SIP 状态 csr-active-config、上一次的引导参数 boot-args、显示器分辨率、甚至是机型 SMBIOS 缓存）实时写入主板的 NVRAM 存储芯片中。
+
+   修改了 U 盘里的 config.plist（比如把机型从 iMacPro1,1 改成了 iMac19,1），如果不重置 NVRAM，主板芯片里依然残留着旧的 iMacPro1,1 缓存。这会导致 OpenCore 启动时继续读取旧变量，从而再次触发 This version of Mac OS X is not supported 报错。
+
+   所以启动OpenCore菜单后，需要首先选择菜单中的 ``ResetNvramEntry.efi`` 然后再重启一次主机，已确保修订的 config.plist 生效。
+
+**经过上述调整机型伪装，果然能够开始启动**
+
+PCI configuration begin 1阶段卡住
+----------------------------------
+
+接下来选择启动后，发现屏幕开始日志滚动，卡在:
+
+.. literalinclude:: c246_mi50_hackintosh/pci_error
+   :caption: 启动时PCI配置阶段卡住
+
+gemini提示: 卡在 PCI Configuration（PCI 配置阶段）是黑苹果安装中非常经典的一个阻塞点。这通常是由于 BIOS 中的 4G 以上解码（Above 4G Decoding） 未配置正确，或者 OpenCore 的 Booter Quirks 冲突导致的。
+
+gemini提示:
+
+ProperTree 打开 config.plist，核对以下项
+
+- ``Booter -> Quirks`` :
+
+  - DevirtualiseMmio: True (YES) （对于 300 系列 / C246 芯片组非常重要）
+  - EnableWriteUnprotector: True (YES) ``我的配置这步需要修改``
+  - RebuildAppleMemoryMap: False (NO) ``我的配置这步需要修改``
+  - SyncRuntimePermissions: True (YES)
+
+- ``Kernel -> Quirks`` :
+
+  - DisableIOMapper: True (YES)（或者直接在 BIOS 中关闭 Intel VT-d，这样能避免 DMA 设备冲突）
+  - LapicKernelPanic: False (NO)
+
+**还是没有解决**
+
+gemini提示: 如果开启后依然卡在相同位置，在 boot-args 中加入 npci=0x2000
+
+:strike:`我添加了 npci=0x2000 内核参数以后，确实通过了 PCI configuration begin 卡死点` 后来我发现gemini提示是错误的，加了 ``npci=0x2000`` 实际上更退步了，直接卡在PCI之前的USB初始化部分。见下文，导致我又去fix掉USB部分。虽然能fix USB，但是继续推进又卡在PCI部分了。所以，我重新 **去除** "boot-args 中加入 npci=0x2000"
+
+.. note::
+
+   在 BIOS 已开启 Above 4G Decoding 的情况下，系统依然卡在 PCI configuration begin，说明 macOS 内核在映射 PCIe 设备内存地址（MMIO）时与主板 BIOS 的内存分配方案产生了冲突。
+
+   npci=0x2000 或 npci=0x3000 是专门用来解决这种 PCIe 资源分配死锁的内核启动参数。
+
+   ``npci=0x2000`` : 告诉 macOS 内核忽略 PCIe 设备的 PCIe 1.0b/2.0 规范限制，强制跳过部分冲突的地址空间分配。
+
+   ``npci=0x3000`` : 告诉内核忽略 PCIe 3.0 规范限制。
+
+   当开启 Above 4G Decoding 后仍然卡在 PCI 配置阶段，追加 npci=0x2000 可以强行让 macOS 绕过主板硬性指定的某些 PCI 映射地址，交由内核重新分配，从而跳过这个死锁点。
+
+``ACPI: sleep states S3 S4 S5``
+---------------------------------
+
+接下来遇到新的卡点: 成功加载了 ACPI 表、初始化了逻辑 CPU，并完成了大量的系统安全策略和内核配置。但是日志显示:
+
+.. literalinclude:: c246_mi50_hackintosh/usb_error
+   :caption: USB驱动/端口映射卡死
+
+卡在 ``ACPI: sleep states S3 S4 S5`` 并且紧接着出现 ``USB`` 相关的参数打印，是 macOS 安装阶段最经典的 USB 驱动/端口映射卡死（俗称“卡 USB”或“卡图形界面准备阶段”）
+
+原因分析:
+
+- USB 驱动缺失或冲突：macOS 内核在准备转入图形安装界面之前，需要枚举并接管主板上的 USB 控制器（XHCI）。如果控制器未被正确驱动，或者 USB 端口配置混乱，系统就会在这里无限等待 USB 设备响应。
+- EC（嵌入式控制器）缺失：macOS 26/Sequoia/Sonoma 对 ACPI 中的 EC 设备要求极严，缺少 SSDT-EC 补丁会导致电源管理与 USB 初始化直接卡死。
+
+.. note::
+
+   这部分解决方案可以参考 `OpenCore Post-install: USB Fixes System Preparation <https://dortania.github.io/OpenCore-Post-Install/usb/system-preparation.html>`_ 看起来似乎要通过这种方式来修复启动时的USB问题。
+
+解决步骤:
+
+- 检查并添加必要的 USB 驱动及补丁
+
+C246 芯片组的 USB 控制器 ID 较特殊，需要确保:
+
+  - `USBInjectAll.kext <https://github.com/Sniki/OS-X-USB-Inject-All/releases>`_  (或专门针对 Intel 300 系列芯片组的 ``XhciPortLimit`` 补丁)
+  - 开启 USB 限制解除补丁（XhciPortLimit）: 在 ``Kernel -> Quirks`` 中，将 ``XhciPortLimit`` 设为 ``True (YES)`` 。（注：在安装阶段开启此项能防止 USB 端口被裁切掉）。
+  - config.plist -> ACPI -> Patch -> EHCI and XHCI ACPI renames (官方原文这句是什么意思)
+
+- 补全关键 ACPI 驱动补丁（SSDTs）
+
+检查 EFI/OC/ACPI/ 目录下是否包含以下两个对 Coffee Lake (8/9代) / C246 主板必不可少的编译补丁(如果文件夹里没有，务必从 OpenCore 官方包或快捷工具中补全，并在 config.plist 的 ACPI -> Add 中勾选启用) **我前面已经做过** :
+
+  - ``SSDT-EC-USBX.aml`` : 提供虚拟 EC 设备并配置 USB 供电（解决卡死在 Sleep States / USB 的核心）。
+  - ``SSDT-PLUG.aml`` : 启用原生的 CPU 电源管理。
+
+- 换到插槽合适的 USB 接口: U 盘插在主板后置最基础的 USB 2.0 接口（通常是黑色接口）上(安装引导阶段 USB 3.0 驱动极易崩溃)
+
+- 确认 BIOS USB 设置:
+
+  - XHCI Hand-off：必须设为 Enabled（让 macOS 接管 USB 控制器）。
+  - EHCI Hand-off：如果 BIOS 中有此项，设为 Enabled。
+
+.. note::
+
+   虽然判断错误，但是这部分USB修复还是需要保留的，因为后续还会遇到USB问题依然要修复
+
+继续解决PCI卡住初始化问题
+----------------------------
+
+- 去掉前面误添加的 ``boot-args`` 参数 ``npci=0x2000``
+
+- 修复 MMIO 内存映射（最关键）
+
+C246 / 300 系列主板在开启 Above 4G 后卡 PCI，很可能是因为 MMIO 地址空间有冲突
+
+- ``Booter -> Quirks`` :
+
+  - DevirtualiseMmio：设为 True (YES)
+  - ResizeAppleGpuBars：设为 -1 
+
+- 构建 / 导入 MMIO Whitelist（若上述开启后仍卡死） <= 没搞懂
+
+－ 调整 Booter Memory Quirks：
+
+在 macOS 26 / 近期版本中，Coffee Lake (8/9代) 配合 C246 芯片组需要严格的 Booter Quirks 组合:
+
+``config.plist -> Booter -> Quirks`` :
+
+  - EnableWriteUnprotector: True (YES)
+  - RebuildAppleMemoryMap: False (NO)
+  - SyncRuntimePermissions: True (YES)
+  - ProvideCustomSlide: True (YES)
+  - ProtectUefiServices: False (NO) <= 我这个配置原先和gemini建议不同，现在修订
+
+.. note::
+
+   EnableWriteUnprotector 与 RebuildAppleMemoryMap+SyncRuntimePermissions 互斥，请务必保证 RebuildAppleMemoryMap 为 False，EnableWriteUnprotector 为 True
+
+- 关闭 VT-d (IOMapper) 冲突
+
+  - 进入 BIOS，找到 Intel VT-d，将其设为 Disabled
+  - 在 config.plist -> Kernel -> Quirks 中: DisableIOMapper：设为 True (YES)
+
+.. warning::
+
+   在我的C246主板上，上述调整配置没有解决PCI初始化问题，所以我继续尝试
+
+MmioWhitelist（MMIO 白名单）
+-----------------------------
+
+gemini提到 **MmioWhitelist（MMIO 白名单）** 是指"OpenCore 中用来解决 DevirtualiseMmio 开启后依然卡 PCI configuration / MMIO 冲突 的终极手段。"
+
+当开启 ``DevirtualiseMmio`` 后，OpenCore 会尝试从内存映射中移除绝大部分不必要的 ``MMIO`` 区域，把空间留给 macOS。但在某些 PCIe 设备极多（比如板载了 4 个 I226 2.5G 网卡）的主板上，OpenCore有可能处理错误，例如多清理了必要关键的MMIO地址或者遗漏清理，都会导致启动卡住。
+
+``MmioWhitelist`` 的作用就是精准干预：告诉 OpenCore 哪些 MMIO 地址段应该清理或保留。
 
 参考
 ======

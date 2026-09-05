@@ -36,6 +36,7 @@ Linux桌面
    remote_linux_desktop.rst
    light_browser.rst
    netsurf.rst
+   luakit.rst
    synergy.rst
    hidclient.rst
    bt-keyboard-switcher.rst
