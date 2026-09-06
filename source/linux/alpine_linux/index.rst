@@ -14,6 +14,7 @@ Alpine Linux
    alpine_install_pi.rst
    alpine_install_pi_1.rst
    alpine_install_pi_5.rst
+   alpine_install_mba11_late_2010.rst
    alpine_init.rst
    alpine_pi_clock_skew.rst
    alpine_chrony.rst

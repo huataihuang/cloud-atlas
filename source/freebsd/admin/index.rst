@@ -10,6 +10,7 @@ FreeBSD管理
    freebsd_packages_ports.rst
    freebsd_update.rst
    freebsd_update_upgrade.rst
+   freebsd_ports_proxy.rst
    freebsd_15_alpha_update_upgrade.rst
    freebsd_pkgbase.rst
    freebsd_15_stable_upgrade_release.rst
