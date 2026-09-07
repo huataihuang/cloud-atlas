@@ -43,6 +43,7 @@ Linux桌面
    terminal_emulator.rst
    uxvrt_ch_font.rst
    keepassxc.rst
+   linux_apple_usb_superdrive.rst
 
 .. only::  subproject and html
 
