@@ -11,69 +11,113 @@ MacBook Air 11" Late 2010安装Alpine Linux
 - Alpine Linux作为始终持续开发和进步的Linux发行版，能够用最先进的技术来充分发掘我这台古老设备的能力: 没错， :ref:`moonlight-embedded` 能够用服务器端部署端 :ref:`linux` , :ref:`macos` 和 :ref:`windows` 来运行高负载极度复杂端软件，相当于我通过类似 ``chromebook`` 调用超级计算机或集群。
 - 本地只运行轻量级的 :ref:`vim` 配合纯C+ :ref:`python` 开发，以及良好配置的文本编辑能力，让我能够随时编辑 :ref:`devops_docs` 并通过CI/CD推送自动部署
 
-准备工作
+启动
+======
+
+:ref:`mba11_late_2010` 对于现代的 ``iso-hybrid`` 镜像直接 ``dd`` 创建的启动U盘，会触发BUG导致屏幕完全灰色卡死( :ref:`alpine_install_mba11_late_2010_detail` )，所以我最终采用 :ref:`linux_apple_usb_superdrive` 刻录标准CD-ROM来启动安装。
+
+初始设置
 ==========
+
+通过光盘启动Alpine Linux安装，首先执行 ``setup-alpine`` 命令设置环境
+
+.. literalinclude:: alpine_install_mba11_late_2010/setup-alpine
+   :caption: 设置安装环境
+
+磁盘分区
+==========
+
+请注意，我已经 :ref:`mavericks_mba11_late_2010` ，所以在安装alpine linux之前，磁盘分区如下:
+
+.. literalinclude:: alpine_install_mba11_late_2010/fdisk_macos
+   :caption: 已经安装了Mavericks系统的磁盘分区
+
+如上所述，为了workround :ref:`mba11_late_2010` EFI启动第三方64位efi死机问题，我在alpine linux分区采用了传统CSM分区，也就是整个磁盘混合了 "GPT + CSM分区"，以便 ``rEFInd`` 能够根据分区标记 ``bios_grub`` 来启动Linux所使用的Grub:
 
 .. note::
 
-   这次启动安装U盘比我预期的要折腾
+   在标准的 UEFI 机器上，将 ESP 分区（ ``/dev/sda1`` ， **FAT32** ）挂载到 ``/mnt/boot`` 或 ``/mnt/boot/efi`` ，然后运行 ``setup-disk -m sys /mnt`` ，Alpine 的自动化脚本会自动调用 ``grub-install --target=x86_64-efi`` ，将 **64 位** 纯 UEFI 版的 GRUB ( ``grubx64.efi`` ) 直接写入 ESP 分区。
 
-我首先用 ``dd`` 命令将下载的alpine linux ISO文件写入U盘:
+   但是，Alpine 自动化脚本 ( ``setup-disk -m sys`` ) 默认安装的是 UEFI 模式的 GRUB，而不是 Legacy CSM 模式的 GRUB: ``setup-disk`` 探测到系统处于 **64 位 EFI 环境** ，会自动安装 ``x86_64-efi`` 版本的 GRUB 到 ``/dev/sda1`` 。
 
-.. literalinclude:: alpine_install_mba11_late_2010/dd
-   :caption: 制作启动U盘
+   触发 GPU 致命 Bug：一旦通过 ``/dev/sda1`` 里的 ``grubx64.efi`` 启动，Apple 固件就会以 **纯 64 位 EFI 模式** 初始化 NVIDIA 320M 显卡，就会遇到启动直接灰屏死机。
 
-但是，出乎我的意料，很久以前的这种制作启动Linux U盘的经验，现在居然失效了: 启动 :ref:`mba11_late_2010` 时按住 ``option`` 键选择启动U盘，现在居然毫无反应，只看到屏幕上一片灰色。
+.. warning::
 
-我以为是U盘写入时错误，但是发现重新制作U盘启动依然是相同情况。而且，我发现U盘是好的，这个Alpine Linux启动U盘在 :ref:`thinkpad_x220` 使用完全正常，能够启动Alpine Linux安装。
+   为解决 :ref:`mba11_late_2010` 兼容问题，在执行 ``setup-disk`` 指令前指定 ``BOOTLOADER=none`` 来禁止自动安装GRUB，并采用手工方式安装 ``i386-pc`` （BIOS/CSM）模式的 GRUB 到 MBR。
 
-gemini提示: Alpine Linux 官方 ISO 在部分老款 Mac 的 EFI 引导上有一个 Known Issue（已知问题）：Alpine 默认的 ISO 采用了 iso-hybrid 格式，有时 Mac 固件会将其误识别为光盘驱动，导致卡在初始化阶段。
+.. csv-table:: GPT + CSM 分区方案
+   :file: alpine_install_mba11_late_2010/csm_partitions.csv
+   :widths: 20,10,20,10,40
+   :header-rows: 1
 
-解决的方法是采用 :ref:`ventoy` ，Ventoy 对老旧 Mac 固件的 EFI 兼容性比原始 dd 模式要强得多。
+.. literalinclude:: alpine_install_mba11_late_2010/parted
+   :caption: 分区
 
-在使用 Ventoy 之前我也尝试了手动解压方法: 直接将 U 盘格式化为 FAT32，然后把 ISO 里的内容解压进去
+完成分区以后，执行 ``doas parted /dev/sda print`` 检查确认分区:
 
-.. literalinclude:: alpine_install_mba11_late_2010/tar
-   :caption: 通过 tar 解压ISO文件到U盘
+.. literalinclude:: alpine_install_mba11_late_2010/parted_print
+   :caption: 分区检查
+   :emphasize-lines: 11-13
 
-不过实践发现还是解决不了启动问题，虽然屏幕不再灰色，而且Macbook Air的BIOS也将这个U盘视为一个可启动磁盘，但是启动后Alpine Linux报错显示无法挂载分区。看来启动问题是可以解决，但是Linux安装程序预设的启动分区存在问题。
+这里有一个异常显示 ``/dev/sda4`` 显示为 ``xfs`` ，这是因为之前我创建过一个 ``/dev/sda4`` 分区并格式化成xfs。虽然在这里分区之前删除了旧分区，但是旧文件系统签名还在，这会导致后续GRUB写入该分区裸代码时导致引导工具混淆。所以需要擦除旧签名！
 
-我又尝试 :ref:`ventoy` 来解决老旧Mac系统启动Linux安装ISO镜像转启动U盘问题，没有想到之前还能启动的ventoy居然也无法启动了: 要么是灰色屏幕，要么嵌套在rEFInd里面作为一个分区来启动，但是依然在mount media卡住。
+- 使用 ``wipefs`` 工具检查和清理签名:
 
-现在问题回归到 ``rEFInd`` ，看来这个修订EFI到软件触发了 :ref:`mba11_late_2010` 无法按照常规方式启动用ISO转换到U盘。我尝试删除 ``rEFInd`` :
+.. literalinclude:: alpine_install_mba11_late_2010/wipefs
+   :caption: 检查sda4额文件系统签名
 
-.. literalinclude:: alpine_install_mba11_late_2010/uninstall_refind
-   :caption: 删除rEFInd
+输出显示:
 
-不过，删除rEFInd并没有解决 ``dd`` 直接制作的U盘启动"灰色屏幕"卡住问题，所以我结合删除rEFInd和 :ref:`ventoy` 来尝试启动U盘: 即先回复默认的Mac标准启动，然后用 :ref:`ventoy` 启动U盘来启动Alpine Linux的ISO镜像。然而，这条路也失败了。
+.. literalinclude:: alpine_install_mba11_late_2010/wipefs_output
+   :caption: 检查sda4额文件系统签名显示残留了xfs签名
 
-那么，根据上述排查，我推测:
+彻底擦除签名:
 
-- 我的 :ref:`mba11_late_2010` 太古老了，EFI协议应该是早期版本，无法处理现代Linux发行版的 ``iso-hybrid`` 格式启动，甚至也无法启动 :ref:`ventoy` 现在提供的启动ISO镜像
-- 我在去年的时候，在 :ref:`mba13_early_2014` 是成功完成  :ref:`alpine_install` 的，通过U盘启动完全没有问题。但是今天，这个 Alpine Linux 3.24.1 的安装U盘也无法在 :ref:`mba13_early_2014` 启动。
+.. literalinclude:: alpine_install_mba11_late_2010/wipefs_clean
+   :caption: 擦除xfs签名
 
-我考虑用一个旧版本Alpine Linux镜像ISO来启动安装，然后通过滚动升级来追平最新版本。另一种可能是真实地刻录一张CD光盘来进行安装。
+- 安装磁盘工具
 
-i3.14.x release
--------------------
+.. literalinclude:: alpine_install_mba11_late_2010/install_mkfs
+   :caption: 安装 mkfs.ext4 和 mkfs.xf
 
-考虑到很久很久以前曾经在 :ref:`alpine_install` 使用过 ``3.14.1`` ，这个release是2021年发布的，所以我想尝试一下:
+- 格式化磁盘分区:
 
-.. literalinclude:: alpine_install_mba11_late_2010/dd_3.14
-   :caption: 制作3.14系列启动U盘
+.. literalinclude:: alpine_install_mba11_late_2010/mkfs
+   :caption: 将sda5格式化为ext4, sda6格式化为xfs
 
-果然，有进展: 回退到2021年发布的 ``3.14.9`` ISO制作的启动U盘，就能够成功引导启动 :ref:`mba13_early_2014` ，但是很不幸，2010年的 :ref:`mba11_late_2010` 还是无法启动。
+- 最后再次检查 ``parted`` 输出:
 
-这说明回滚早期Alpine Linux发行版ISO是有效果的，苹果的各代Macbook看来确实支持的是不同格式的Linux ``iso-hybrid`` ，按照这个思路，采用更早发行版ISO应该能够启动2010年的古早 :ref:`mba11_late_2010` 。
+.. literalinclude:: alpine_install_mba11_late_2010/parted_print_finish
+   :caption: 最终的磁盘分区和文件系统
+   :emphasize-lines: 11-13
 
-考虑到2021年发行版ISO能够在2014年的Macbook工作，这种兼容支持一般都有几年持续。所以我可以尝试用2015年的v3.2版本Alpine Linux ISO来启动 :ref:`mba11_late_2010` - 这里选择了 ``3.2.3`` :
+- 挂载文件系统:
 
-.. literalinclude:: alpine_install_mba11_late_2010/dd_3.2
-   :caption: 制作3.2系列启动U盘
+.. literalinclude:: alpine_install_mba11_late_2010/mount
+   :caption: 挂载文件系统
 
-但是，我发现回滚到2015年的ISO之后，已经不再是 ``iso-hybrid`` 格式了，而是纯粹的CD－ROM镜像格式。直接用 ``dd`` 命令写入U盘是无法启动的，在OS X 10.9中，这个直接dd生成的U盘显示就是一个CDROM，但是无法在开机时使用 ``option`` 选择启动。
+完成以后，执行 ``df -h`` 可以看到文件系统挂载如下:
 
-那么，我想，是不是回过去用我在 :ref:`archlinux_on_mbp` (当时是2019年)的方法(先把iso转换成dmg再写入U盘)来制作启动U盘:
+.. literalinclude:: alpine_install_mba11_late_2010/df
+   :caption: 最后完成的磁盘挂载
+   :emphasize-lines: 8,9
 
-.. literalinclude:: alpine_install_mba11_late_2010/dd_dmg
-   :caption: 先把.iso转为.dmg再dd写入U盘
+安装alpine
+===========
+
+- 运行 Alpine 安装 (跳过默认 bootloader)
+
+.. literalinclude:: alpine_install_mba11_late_2010/setup-disk
+   :caption: 安装Alpine
+
+请注意，我采用了 ``BOOTLOADER=none`` ，跳过了bootloader安装，这是因为我需要解决 :ref:`mba11_late_2010` 的UEFI缺陷，需要采用手工方式安装grub的CSM兼容模式。
+
+安装grub
+===========
+
+由于 :ref:`mba11_late_2010` 对现代纯EFI启动支持存在缺陷，所以通过设置传统BIOS引导让 ``rEFInd`` 能够根据激活分区来查找启动项:
+
+.. literalinclude:: alpine_install_mba11_late_2010/grub
+   :caption: 安装grub
