@@ -1,0 +1,1 @@
+dbus-run-session sway
