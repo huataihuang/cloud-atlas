@@ -12,6 +12,7 @@
    :maxdepth: 1
 
    think_cloud_gaming.rst
+   game_streaming.rst
 
 .. only::  subproject and html
 

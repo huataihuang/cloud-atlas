@@ -12,6 +12,8 @@ sway - i3兼容Wayland compositor
    sway_config.rst
    sway_dpi.rst
    sway_status.rst
+   sway_status_alpine.rst
+   waybar.rst
    run_sway.rst
    use_sway.rst
    ../../gentoo_linux/gentoo_sway.rst 
@@ -20,7 +22,10 @@ sway - i3兼容Wayland compositor
    wayland_sway_video.rst
    sway_screen_sharing.rst
    sway_macbook_key.rst
+   sway_macbook_key_alpine.rst
+   swaylock_swayidle.rst
    foot.rst
+   foot_font.rst
    sway_screenshot.rst
    sway_dwt.rst
 

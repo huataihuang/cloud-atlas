@@ -6,12 +6,40 @@ MPD(Music Player Daemon)
 
 MPD(Music Player Daemon)是一个客户服务器架构的音频播放器，用于播放音频文件，管理播放列表以及维护一个音乐数据库。这些功能都使用非常少的资源，而且可以使用不同的独立客户端。
 
+MPD（Music Player Daemon）支持播放无损音乐以及绝大多数主流/非主流音频格式。
+
+MPD 自身是一个轻量的架构，其音频解码能力取决于编译时启用的后端插件库（通过 Linux 系统下的 FFmpeg、FLAC、libsndfile 等解码库支持）。在 Alpine Linux 下，默认包管理器安装的 MPD 已经内置了常用无损格式的支持。
+
+MPD 支持的主要无损与高码率格式:
+
+- FLAC (.flac)：完全原生支持，Linux 下最推荐的无损格式（支持 16bit/24bit 及高达 192kHz/DSD 采样率）。
+- APE (.ape)：Monkey's Audio，通过 FFmpeg 解码插件完整支持。
+- WAV / AIFF (.wav, .aiff)：未压缩无损音频，原生直接支持。
+- ALAC (.m4a)：Apple Lossless，苹果无损音频，完全支持。
+- WAVPACK (.wv)：高质量开源无损格式，完全支持。
+- DSD / DSF / DFF (.dsf, .dff)：支持 DSD 源码输出（DoP）或软解转化为 PCM 输出（需在 mpd.conf 中配置）。
+
 安装
 =======
 
 - 在 :ref:`ubuntu_linux` 上安装::
 
    sudo apt install mpd
+
+- 在Alpine 的 mpd 包通常已经包含了常规解码器:
+
+.. literalinclude:: mpd/alpine_install
+   :caption: 安装
+
+.. note::
+
+   MPD 主程序本身非常小巧（通常仅几 MB），但在 Alpine Linux 的官方打包中，为了保证它能“开箱即用”地支持各种音频格式、网络流媒体以及输出设备，打包者在编译时开启了大多数扩展特性:
+
+   - 音频解码：依赖 ffmpeg、libflac、libvorbis 等，而 ffmpeg 自身又依赖庞大的图像/视频处理库。
+   - 网络与协议：依赖 curl、smbclient 等（用于读取网络共享或 Web Radio）。
+   - 音效处理：依赖 libsamplerate、soxr（音频重采样库）。
+
+   这导致安装软件包数量非常庞大，对于轻量级使用非常浪费。所以，建议发挥MPD原生"服务器/客户端（Client/Server）架构"优势，部署 :ref:`mpd_stream`
 
 配置
 ======
@@ -182,3 +210,4 @@ QT5图形 ``cantata``
 
 - `MPD User's Manual <https://mpd.readthedocs.io/en/stable/user.html>`_
 - `arch linux: Music Player Daemon <https://wiki.archlinux.org/title/Music_Player_Daemon>`_
+- gemini

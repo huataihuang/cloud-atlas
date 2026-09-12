@@ -41,7 +41,7 @@ bt-keyboard-switcher
 配置
 =======
 
-BlueZ 默认的 input 插件会尝试作为一个“输入接收端”（去连接外部键盘），这会与“模拟发送端”发生冲突，所以必须在启东市禁用 ``input`` 。
+BlueZ 默认的 input 插件会尝试作为一个“输入接收端”（去连接外部键盘），这会与“模拟发送端”发生冲突，所以必须在启动时禁用 ``input`` 。
 
 - (放弃这步)修改 ``/etc/bluetooth/main.conf`` :
 
@@ -109,6 +109,12 @@ BlueZ 默认的 input 插件会尝试作为一个“输入接收端”（去连�
 
 .. literalinclude:: bt-keyboard-switcher/config.ini
    :caption: 配置 config.ini 填写输入设备的id
+
+.. warning::
+
+   这一步执行 ``keyboardswitcher.py`` 会导致本地无法使用键盘鼠标!!!
+
+   我现在有点记不清当时怎么搞的，所以这里要解决继续操作的方法可以采用ssh链接，来继续进行 ``bluetoothctl`` 操作，也就是进行配对操作。
 
 - 运行 ``keyboardswitcher.py`` :
 

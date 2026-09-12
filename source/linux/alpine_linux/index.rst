@@ -18,6 +18,7 @@ Alpine Linux
    alpine_install_mba11_late_2010_detail.rst
    alpine_sway_mba11_late_2010.rst
    alpine_moonlight_mba11_late_2010.rst
+   alpine_suspend.rst
    alpine_init.rst
    alpine_pi_clock_skew.rst
    alpine_chrony.rst

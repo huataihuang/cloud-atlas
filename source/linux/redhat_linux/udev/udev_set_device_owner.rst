@@ -50,6 +50,10 @@ udev配置块设备属主
 
    brw-rw---- 1 ceph ceph 259, 1 Nov 30 16:31 /dev/nvme0n1p1
 
+其他案例
+==========
+
+- :ref:`alpine_udev_set_devices_owner`
 
 参考
 =======
@@ -59,3 +63,4 @@ udev配置块设备属主
 - `Beginners Guide to Udev in Linux <https://www.thegeekdiary.com/beginners-guide-to-udev-in-linux/>`_
 - `CentOS / RHEL 7 : How to set udev rules for ASM on multipath disks <https://www.thegeekdiary.com/centos-rhel-7-how-to-set-udev-rules-for-asm-on-multipath-disks/>`_
 - `How to Configure Device File owner/group with udev rules <https://www.thegeekdiary.com/how-to-configure-device-file-owner-group-with-udev-rules/>`_
+- gemini

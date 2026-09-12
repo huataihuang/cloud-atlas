@@ -1,0 +1,1 @@
+brightnessctl set 5%-

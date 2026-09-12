@@ -8,6 +8,30 @@ foot轻量级终端
 
 foot支持CJK，也就是支持中文，但是由于 :ref:`wayland` 对输入法有特定要求，目前 :ref:`fcitx` 在 :ref:`archlinux_sway` 上通过安装 ``sway-im`` 补丁版本实现中文输入显示框。我的实践也验证 :ref:`arch_linux` 使用体验较好(sway环境可以非常方便实现 ``foot`` 中文输入)，而 :ref:`gentoo_sway` 则没有方便的解决方法(至少我还没有成功)。
 
+快速配置
+===========
+
+.. note::
+
+   这段快速配置根据下文"配置"综合而来，快速完成我在 :ref:`alpine_sway_mba11_late_2010` 完成后的设置终端工作
+
+- 复制模板
+
+.. literalinclude:: foot/cp_foot.ini
+   :caption: 复制 ``foot.ini`` 模板
+
+- 下载 `GitHub: catppuccin/foot <https://github.com/catppuccin/foot>`_ 配色:
+
+.. literalinclude:: foot/download_theme
+   :caption: 下载配色
+
+- 修订 ``~/.config/foot/foot.ini`` 在配置最后添加 ``[main]`` 段落:
+
+.. literalinclude:: foot/foot.ini
+   :caption: 配色和字体
+
+**详细说明见下文**
+
 配置
 =======
 
@@ -55,7 +79,7 @@ foot支持CJK，也就是支持中文，但是由于 :ref:`wayland` 对输入法
 
 解决方法就是修订 ``$HOME/.config/foot/foot.ini`` :
 
-.. literalinclude:: foot/foot.ini
+.. literalinclude:: foot/foot_term.ini
    :caption: 配置 ``foot.ini`` 设置终端类型 ``xterm-256color``
 
 这样，再次运行foot就能正确使用 :ref:`tmux`

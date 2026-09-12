@@ -1,8 +1,8 @@
 .. _luakit:
 
-==================
-luakit
-==================
+====================
+luakit轻量级浏览器
+====================
 
 Luakit、Badwolf、Midori 和 Surf 这类轻量浏览器，本质上都是基于 WebKit Engine (WebKitGTK) 开发的 UI 外壳。它们与 :ref:`firefox` 的根本区别在于内核架构与设计哲学。
 

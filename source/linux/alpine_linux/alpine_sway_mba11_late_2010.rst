@@ -299,7 +299,12 @@ gemini推荐组合各种字体来获得更舒适的视觉体验:
 检查系统默认 monospace（等宽）和 sans-serif 是否成功指向思源字体:
 
 .. literalinclude:: alpine_sway_mba11_late_2010/fc-match
-   :caption: 验证
+   :caption: 验证字体
+
+显示输出应该是:
+
+.. literalinclude:: alpine_sway_mba11_late_2010/fc-match_output
+   :caption: 验证字体输出显示
 
 fcitx5中文输入法
 -------------------
@@ -320,6 +325,28 @@ fcitx5中文输入法
 .. literalinclude:: alpine_sway_mba11_late_2010/profile_sway
    :caption: 添加fcitx配置
    :emphasize-lines: 9-11,14
+
+- 修订 ``~/.config/sway/config`` :
+
+.. literalinclude:: alpine_sway/sway_config
+   :caption: 在 ~/.config/sway/config 中 **最后** 添加运行 fcitx5 的配置
+
+进一步配置
+=============
+
+- :ref:`sway_config` 调整窗体使得sway更美观紧凑
+- :ref:`sway_status_alpine`
+- :ref:`foot` 配置
+- :ref:`sway_dwt`
+- :ref:`alpine_suspend` 休眠
+- :ref:`swaylock_swayidle`
+- :ref:`sway_macbook_key_alpine`
+- :ref:`mpd_playerctl`
+- :ref:`luakit` 轻量级浏览器替代chrome/firefox
+- :ref:`sway_screenshot`
+- :ref:`bt-keyboard-switcher`
+- :ref:`sing-box` ss客户端
+- :ref:`luakit_proxy` 设置代理
 
 参考
 ======

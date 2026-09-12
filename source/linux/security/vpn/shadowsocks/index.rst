@@ -8,8 +8,10 @@ Shadowssocks(SS)
    :maxdepth: 1
 
    intro_shadowsocks.rst
-   shadowrocket_ssh.rst
-   shadowrocket_ss.rst
+   shadowrocks_ss.rst
+   shadowsocks-libev.rst
+   shadowsocks-rust.rst
+   sing-box.rst
 
 .. only::  subproject and html
 
