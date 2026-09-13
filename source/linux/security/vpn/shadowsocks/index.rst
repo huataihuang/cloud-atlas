@@ -8,7 +8,7 @@ Shadowssocks(SS)
    :maxdepth: 1
 
    intro_shadowsocks.rst
-   shadowrocks_ss.rst
+   shadowrocket_ss.rst
    shadowsocks-libev.rst
    shadowsocks-rust.rst
    sing-box.rst

@@ -29,7 +29,7 @@ OS X Mavericks 10.9.5
 
 启动U盘，进入安装时，会提示错误:
 
-.. literalinclude:: mvericks_mba11_late_2010/verify_error
+.. literalinclude:: mavericks_mba11_late_2010/verify_error
    :caption: 安装过程提示无法验证Install
 
 这个报错原因是Apple官方安装包中的安全证书过期了，导致验证失败，并不是镜像损坏或被篡改。
@@ -84,3 +84,9 @@ Microsoft Office 2011 for Mac 14.7.7 Final
 还有一个最终压垮我的稻草是这款十六年前的触摸板已经不太正常，时而过于灵敏飘忽不定，时而老迈迟缓让人心情奔溃。
 
 在挣扎了一周后，我觉得还是及时放弃较好，把时间用在更有价值的技术上。我觉得 :ref:`thinkpad_x220` 在怀旧和现代技术上达到一个更好的平衡，特别是能够流畅无阻地运行 :ref:`freebsd` ，轻快而高效的输入，使得我准备将折腾迁移到Thinkpad上继续。
+
+.. note::
+
+   如果要复活 :ref:`mba11_late_2010` 硬件，那么更好的软件组合选择是 :ref:`alpine_sway_mba11_late_2010` :
+
+   在现代化的轻量级 :ref:`alpine_linux` 加持下，精心选择将重量级WEB访问和大型软件运行都迁移到 :ref:`dell_t5820` 服务器上运行，本地进运行 :ref:`xrdp` 这样轻量级远程访问，结合 :ref:`foot` 和 :ref:`luakit` 来完成日常编辑和轻量级克发是足够的。也就是说，我甚至可以在sailing的时候，拿出 **仅1kg的十六年前古早设备** 完成所有的工作。

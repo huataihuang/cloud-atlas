@@ -12,6 +12,7 @@ Python网络编程
    yt-dlp.rst
    yt-dlp_bilibili.rst
    python_http_https_server.rst
+   python_http_clip_server.rst
 
 .. only::  subproject and html
 
