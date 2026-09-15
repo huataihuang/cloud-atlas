@@ -77,16 +77,33 @@ BetterDisplay 能够直接通过菜单栏掌控 Mac 的显示器: 可以配置�
 
 .. figure:: ../../../../_static/linux/desktop/sunshine/moonlight/betterdisplay_display_resolution.png
 
+moonlight经验
+----------------
+
+我最初按照gemini的提示，将BetterDisplay的虚拟屏幕设置为 ``Extension`` 模式，但是我发现太搞了: 应用程序有可能开在笔记本物理屏幕上，而当前却显示为虚拟屏幕，无法操作。
+
+最终回退会Mirror模式，也就是将Virtual屏幕作为主屏幕，Build-in Display设置为 ``Mirror for Vitual 16:12`` ，这样在MacBook Pro的显示屏幕上看屏幕有两边黑边，但是完美显示为Virtual屏幕的显示分辨率。
+
+.. figure:: ../../../../_static/linux/desktop/sunshine/moonlight/betterdisplay_virtual_display.png
+
+.. figure:: ../../../../_static/linux/desktop/sunshine/moonlight/betterdisplay_build-in_display.png
+   
+   物理屏幕作为虚拟屏幕的镜像，这样能够获得自定义的屏幕分辨率来契合iPad mini 5显示分辨率
+
+由于BetterDisplay的显示分辨率能够自定义，前文建议的 ``1344x1008`` 分辨率完美按比率缩放了 :ref:`ipad_mini5` 屏幕的 ``2048x1536`` 分辨率，所以字体非常清晰。但是，这个字体在iPad mini 5上比系统默认的字体小不少，看起来有点费力。
+
+所以，最佳方式是在BetterDisplay中再按 ``4:3`` 比例添加几个分辨率，其中 ``1152x864`` 分辨率就是和现有 :ref:`ipad_mini5` 系统默认字体大小相当，非常完美!
+
+.. figure:: ../../../../_static/linux/desktop/sunshine/moonlight/betterdisplay_resolutions.png
+
 sunshine设置
 --------------------
 
 - 打开 Sunshine 管理后台（https://localhost:47990）
 - 进入 ``Configuration -> Audio/Video`` 
-- 将 ``Dispaly Id`` 从默认的 ``0`` 改为 ``1`` : **通常主屏是 0，虚拟屏是 1**
+- 将 ``Dispaly Id`` 从默认的 ``0`` 改为虚拟屏的名字
 - 保存配置并重启 Sunshine
 
 .. note::
 
-   具体使用哪个 ``Display Id`` 请查询 Virtual Screen 的设置页面，有一个 ``Tag ID`` 有可能就是对应Sunshine的 ``Display Id``
-
-   **但是我不能确定，我现在设置有点混乱，等下次再验证**
+   按照sunshine的提示，虚拟屏幕的名字实际上是从``Troubleshooting`` Log日志中查看的，在Log日志中搜索 ``display`` 关键字，可以看到一个是主物理屏幕名字，另外一个就是BetterDisplay虚拟屏幕的名字。
