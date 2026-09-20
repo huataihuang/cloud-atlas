@@ -4,7 +4,7 @@
 Shadowrocket使用SS
 ============================
 
-既然 :ref:`shadowrocket_ssh` 无法 :ref:`across_the_great_wall` ，并且对 :ref:`ios` 不友好。那么，放弃直接使用SSH Tunnel，改用 **shadowsocks** (SS)。
+Shadowrocket支持 :ref:`ssh_tunneling` 但是因为特性很明显所以无法 :ref:`across_the_great_wall` ，并且对 :ref:`ios` 不友好。那么，放弃直接使用SSH Tunnel，改用 **shadowsocks** (SS)。
 
 .. note::
 

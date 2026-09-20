@@ -42,3 +42,8 @@ docker compose运行
 .. literalinclude:: alpine_podman_image/alpine-dev/docker_compose
    :language: bash
    :caption: 运行 ``docker compose```
+
+参考
+=======
+
+- gemini

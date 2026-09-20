@@ -15,6 +15,7 @@ Distrobox
    distrobox_vscode.rst
    distrobox_swift.rst
    distrobox_sshd.rst
+   distrobox_waypipe.rst
 
 .. only::  subproject and html
 

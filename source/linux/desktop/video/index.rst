@@ -10,6 +10,7 @@ Linux视频
    mpv.rst
    mpv_intel_gpu.rst
    mpv_script.rst
+   mpv_mba11_late_2010.rst
 
 .. only::  subproject and html
 

@@ -81,6 +81,8 @@ MacBook Air (11-inch, Mid 2011)
 - 现代WEB技术实在太复杂沉重了，所以安装的 :ref:`luakit` 仅用于简单代码页面的浏览，而把复杂的渲染页面(WEB开发)全部迁移到 :ref:`dell_t5820` 运行的容器中实现
 - 为这台MBA配备 :ref:`ipad_mini5` 作为sidecar显示，通过 :ref:`bt-keyboard-switcher` 为iPad提供便捷的输入
 
+根据淘宝二手电脑售价，这台2010年代Macbook Air 11"售价是877元，也就是说我这台笔记本依然有大约800元的残值。不过，我更换的512G SATA SSD硬盘以及损坏的键盘和电池，实际成本已经增加了592元(245+58+289)。
+
 参考
 ======
 

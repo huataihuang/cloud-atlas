@@ -49,6 +49,14 @@ rootless容器内 ``root`` 用户
 
 建议 ``rootless`` 容器采用服务使用 ``1024`` 以上端口，同时在 Host 主机上 ``-p <HOST_PORT>:<CONTAINER_PORT>`` 将容器内服务端口映射到Host主机，然后在Host主机上使用 :ref:`nginx_reverse_proxy` 对外提供服务。
 
+我遇到执行 ``podman build -t alpine-dev .`` 报错:
+
+.. literalinclude:: alpine_podman/build_error
+   :caption: 提示权限报错
+   :emphasize-lines: 7
+
+既然我已经配置过了 ``/etc/subuid`` 和 ``/etc/subgid`` ，那么按照提示执行一次 ``podman system migrate`` 上述报错就会消失
+
 rootless容器用户uid/gid映射
 -----------------------------
 
@@ -86,6 +94,10 @@ rootless容器用户uid/gid映射
 
 .. literalinclude:: alpine_podman/build
    :caption: 构建镜像
+
+.. note::
+
+   首先要解决 :ref:`podman_proxy`
 
 运行容器
 =============

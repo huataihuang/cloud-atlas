@@ -10,6 +10,16 @@ Distrobox简介
 
 ``Distrobox`` 完全采用shell编写，是 :ref:`podman` , :ref:`docker` 或 lilipod 的一个fancy wrapper(高级封装)，用于创建和启动 **与主机高度集成的容器** 。
 
+为什么要用Distrobox
+======================
+
+我在 :ref:`alpine_install_mba11_late_2010` 思考一个问题: 如何轻量化地运行系统，尽可能充分发挥 :ref:`mba11_late_2010` 的硬件性能。
+
+我之所以选择 :ref:`alpine_linux` 就是看重系统的轻量化，但是如果每次安装部署都重复安装应用软件，特别是各种应用软件，不仅浪费精力，而且难以迁移(例如我有时候想把应用迁移到服务器上运行，本地仅做页面渲染)。那么我觉得Distrobox是一个解决方案:
+
+- 容器化运行桌面应用，在完善调试之后，可以将容器推送到registry中保存，随时部署到任何已经安装好podman系统
+- Host主机系统最小化，只保留 Base 系统和 :ref:`sway` ，应用既可以通过Distrobox部署在本地容器环境，也可以通过 :ref:`distrobox_waypipe` (服务器承担主要压力)
+
 快速起步
 =============
 

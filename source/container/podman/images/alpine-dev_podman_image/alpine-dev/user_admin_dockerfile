@@ -1,0 +1,26 @@
+...
+# <== 前面部分都是root身份
+# WorkSpace
+WORKDIR /workspace
+RUN chown ${USER}:${GROUP} /workspace
+
+# <== 这里开始切换到admin
+USER admin
+
+# develop enviroment
+# Go PATH
+ENV HOME=/home/${USER}
+ENV GOPATH=$HOME/go
+...
+# - Go: gopls
+RUN go install golang.org/x/tools/gopls@latest
+...
+# sphinx doc for My "Cloud-Atlas"
+RUN bash -c 'source $HOME/venv/dev/bin/activate && pip install sphinx sphinx_rtd_theme sphinxnotes-strike sphinxcontrib-video sphinxcontrib-youtube myst-parser jieba'
+...
+# 确保最后层是admin，避免启动时storage-chown-by-maps
+USER admin
+
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
+
+CMD ["/bin/bash"]
