@@ -24,6 +24,7 @@ sway窗口管理器使用fcitx5
 .. literalinclude:: fcitx/environment
    :language: bash
    :caption: 启用fcitx5环境变量配置 /etc/environment
+   :emphasize-lines: 1-3
 
 - 按照 :ref:`sway` 配置标准方法，先复制全局配置到个人配置目录下:
 

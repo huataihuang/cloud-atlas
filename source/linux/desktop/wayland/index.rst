@@ -15,7 +15,8 @@ wayland显示服务器协议
    wayland_vnc.rst
    wl-clipboard.rst
    wev.rst
-   waypipe.rst
+   waypipe_freebsd.rst
+   waypipe_pi.rst
 
 .. only::  subproject and html
 

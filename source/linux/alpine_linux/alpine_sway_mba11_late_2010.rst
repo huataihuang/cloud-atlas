@@ -276,7 +276,12 @@ alpine linux 提供了2个 ``Noto Sans CJK（思源黑体）`` 字体软件包: 
 
    我现在安装 思源黑体 和 思源等宽黑体
 
-gemini推荐组合各种字体来获得更舒适的视觉体验:
+由于后续 :ref:`alpine-dev_podman_image` 中采用了 :ref:`nvim_lightweight_ide` 引用了符号字体，所以需要补充安装:
+
+.. literalinclude:: alpine_sway/install_font-symbols-emoji
+   :caption: 安装 symbols 和 emoji 字体
+
+( **可选** )gemini推荐组合各种字体来获得更舒适的视觉体验(备用参考，我实际进采用上文简单安装 思源黑体 和 思源等宽黑体):
 
 - **UI 与网页（无衬线黑体）** : ``Noto Sans CJK SC`` 或 ``wqy-zenhei`` （文泉驿正黑，极致体积）。
 - **终端/代码/Rime 输入法（等宽字体）** : ``font-sarasa-gothic`` (撒拉沙黑体 / 更砂黑体) ，不过 更砂黑体（Sarasa Gothic）被打包在 Testing 仓库(安装有点麻烦) ，或者安装 ``font-noto-cjk-extra`` (思源等宽黑体（Noto Sans Mono CJK）)
@@ -347,6 +352,8 @@ fcitx5中文输入法
 - :ref:`bt-keyboard-switcher`
 - :ref:`sing-box` ss客户端
 - :ref:`luakit_proxy` 设置代理
+- :ref:`alpine-dev_podman_image` 通过 :ref:`podman` 运行一个轻量级开发环境
+- :ref:`waypipe_pi` 通过 :ref:`pi_5` 运行 :ref:`waypipe` 来补充 :ref:`mba11_late_2010` 的性能
 
 参考
 ======

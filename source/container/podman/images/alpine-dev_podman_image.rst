@@ -21,6 +21,10 @@
    :language: bash
    :caption: entrypoint.sh 提供对Docker环境进行修正
 
+.. note::
+
+   在上述Dockerfile中引入了 :ref:`nvim_lightweight_ide` 配置 ``init.lua`` 方便一次性构建开发环境。
+
 构建镜像:
 
 .. literalinclude:: alpine-dev_podman_image/alpine-dev/build
