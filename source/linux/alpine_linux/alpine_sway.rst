@@ -131,8 +131,12 @@ sway配置
    :language: bash
    :caption: sway配置touchpad
 
-PipeWire配置(可能不需要)
+PipeWire配置(建议安装)
 -------------------------
+
+.. note::
+
+   我最初在 :ref:`alpine_sway_mba11_late_2010` 采用了更为精简的安装方式，没有安装 PipeWire相关软件，而是采用直接使用 :ref:`alsa` 来处理音频。这种方式确实可以进一步降低系统负载，但是也带来的应用配置的限制，特别是 :ref:`xwayland_remote_audio` 使用 :ref:`alsa` 配置复杂笨拙，而不如采用 :ref:`pipewire` 标准化服务部署。所以，还是建议按照官方手册安装PipeWire。
 
 Sway compositor 不参与音频播放，并且屏幕共享功能需要 PipeWire，所以为了实现音频播放，建议同时安装PipeWire。Alpine Linux v3.22版本开始，提供了脚本可以在OpenRC中将PipeWire作为用户服务启动。
 
@@ -142,6 +146,17 @@ Sway compositor 不参与音频播放，并且屏幕共享功能需要 PipeWire�
 - 使用 Flatpak xdg-desktop-portal API 的应用程序（原生非 Flatpak 应用程序也使用这个portal）
 
 第一类应用无需额外设置，第二类应用程序(包括Firefox和chromium)除了PipeWire，还需要设置 ``xdg portal``
+
+.. note::
+
+   在传统的X11桌面下，任何程序都可以直接与X Server沟通，随意获取全屏截图、捕获按键或读取剪贴板，这带来了极大的安全隐患。
+
+   而在Wayland架构中，Sway(合成器)处于安全考虑，禁止普通图形应用直接访问底层硬件或获取其他窗口的数据。应用程序如果需要进行以下操作，必须通过 ``xdg-desktop-portal`` 这一层统一的"安全网关/标准接口"向Sway申请:
+
+   - 屏幕共享/录屏: 在Wayland环境下，Chromium, OBS 或 WebRTC 想要录屏或分享屏幕，必须通过 ``xdg-desktop-portal-wlr`` 调用 PipeWire 建立视频数据流通道(PipeWire在这里不仅处理音频，还处理Wayland下视频流传输)
+   - 原生文件选择器(File Chooser): 在浏览器中点击"上传文件"或"另存为"，Flatpak或现代Wayland应用需要通过Portal唤起本机的原生文件选择窗口
+   - OpenURI/打开外部练级: 应用请求用系统默认浏览器打开某个网址
+   - 桌面通知(Notifications)与暗黑模式切换
 
 我这里按照 `Alpine Linux wiki: Sway <https://wiki.alpinelinux.org/wiki/Sway>`_ 文档设置
 
@@ -278,3 +293,4 @@ rime候选字框
 - `Alpine Linux wiki: Sway <https://wiki.alpinelinux.org/wiki/Sway>`_
 - `Alpine Linux wiki: Seatd <https://wiki.alpinelinux.org/wiki/Seatd>`_
 - `arch linux wiki: Rime <https://wiki.archlinuxcn.org/wiki/Rime>`_
+- gemini

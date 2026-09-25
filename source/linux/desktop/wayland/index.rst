@@ -17,6 +17,8 @@ wayland显示服务器协议
    wev.rst
    waypipe_freebsd.rst
    waypipe_pi.rst
+   xwayland_remote_app.rst
+   xwayland_remote_audio.rst
 
 .. only::  subproject and html
 

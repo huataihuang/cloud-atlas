@@ -76,5 +76,5 @@ MGEG-4 AAC
 参考
 ======
 
-- `Arcl Linux社区文档 - Advanced Linux Sound Architecture <https://wiki.archlinux.org/index.php/Advanced_Linux_Sound_Architecture>`_
-- `Arcl Linux社区文档 - Codecs and containers <https://wiki.archlinux.org/index.php/Codecs_and_containers>`_
+- `Arch Linux社区文档 - Advanced Linux Sound Architecture <https://wiki.archlinux.org/index.php/Advanced_Linux_Sound_Architecture>`_
+- `Arch Linux社区文档 - Codecs and containers <https://wiki.archlinux.org/index.php/Codecs_and_containers>`_

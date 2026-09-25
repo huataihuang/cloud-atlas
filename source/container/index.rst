@@ -14,6 +14,7 @@ Container
    linuxserver/index
    distrobox/index
    toolbox/index
+   flatpak/index
 
 .. only::  subproject and html
 
