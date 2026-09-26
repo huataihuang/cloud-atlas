@@ -9,6 +9,7 @@ vim.opt.shiftwidth = 4             -- 缩进空格数
 vim.opt.tabstop = 4
 vim.opt.expandtab = true           -- Tab 转空格
 vim.opt.signcolumn = "yes"         -- 始终显示左侧警告/报错标记列
+vim.opt.mouse = ""                 -- 禁用VISUAL模式方便鼠标选择复制
 
 -- =============================================================================
 -- 2. 健壮的 lazy.nvim 自动安装逻辑
