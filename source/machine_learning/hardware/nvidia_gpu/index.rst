@@ -24,6 +24,7 @@ NVIDIA GPU
    tesla_a2.rst
    tesla_a2_display_mode_switch.rst
    tesla_a2_wddm.rst
+   tesla_a2_structural_sparsity.rst
    nvidia_a100.rst
    nvidia_h100.rst
    nvidia_sxm_socket.rst
