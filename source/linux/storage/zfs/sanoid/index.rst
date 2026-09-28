@@ -1,19 +1,13 @@
-.. _zfs:
+.. _sanoid:
 
 =================================
-ZFS
+Sanoid
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   introduce_zfs.rst
-   install/index
-   infra/index
-   admin/index
-   tunning/index
-   zrep/index
-   sanoid/index
+   sanoid_arch.rst
 
 .. only::  subproject and html
 

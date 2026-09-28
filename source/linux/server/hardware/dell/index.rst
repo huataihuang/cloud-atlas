@@ -22,6 +22,7 @@ Dell服务器
    build_rebaruefi.rst
    dell_t5820_smbbus_tape_mod_rebar.rst
    dell_t5820_flash_modified_bios.rst
+   dell_t5820_fancotrol.rst
    
 .. only::  subproject and html
 

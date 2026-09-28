@@ -26,7 +26,9 @@ Dell T5820主板CPU旁边有 ``PCIe 0`` 和 ``PCIe 1`` 两个接口，该接口�
 
    HDD FlexBay转PCIe SSD FlexBay套件(750-ABDF)
 
-安装有点小复杂，需要参考 `如何为 Precision 5820 和 7820 塔式机切换 NVMe <https://www.dell.com/support/kbdoc/zh-cn/000185631/%E5%A6%82%E4%BD%95%E4%B8%BA-precision-5820-%E5%92%8C-7820-%E5%A1%94%E5%BC%8F%E6%9C%BA%E5%88%87%E6%8D%A2-nvme>`_
+:strike:`安装有点小复杂，` 需要参考 `如何为 Precision 5820 和 7820 塔式机切换 NVMe <https://www.dell.com/support/kbdoc/zh-cn/000185631/%E5%A6%82%E4%BD%95%E4%B8%BA-precision-5820-%E5%92%8C-7820-%E5%A1%94%E5%BC%8F%E6%9C%BA%E5%88%87%E6%8D%A2-nvme>`_
+
+注意，安装NVMe FlexBay之后的拆卸有一个小技巧， **3.5"外壳是通过回形针戳弹出孔来实现卸载的** ，详见 `Dell Precision 5820:拆卸/安装 <https://www.bilibili.com/video/BV1SY4y1U7sn>`_ 千万不要蛮干拆机(我差点走了弯路)。
 
 优点
 ======
