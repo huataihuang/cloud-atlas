@@ -19,6 +19,7 @@ FreeBSD管理
    add_lib32_after_install_freebsd.rst
    freebsd_kernel_source.rst
    freebsd_cpu_temperature.rst
+   local-unbound.rst
 
 .. only::  subproject and html
 

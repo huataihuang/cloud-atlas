@@ -86,13 +86,13 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
    kvm/index
    ceph/index
    gluster/index
-   ovirt/index
    openstack/index
    docker/index
    container/index
    kubernetes/index
    k8s_dev/index
    rancher/index
+   harvester/index
    openshift/index
    sql/index
    sqlite/index
