@@ -229,7 +229,7 @@ LVM卷作为libvirt存储
 
    - Ubuntu 20.04.3 - 主要虚拟机操作系统，用于部署 :ref:`openstack` 以及 :ref:`kubernetes` 运行环境
    - Fedora 35 - 开发用途的操作系统
-   - CentOS 8 - 用于Red Hat系列应用部署，例如 :ref:`ovirt` 和 :ref:`gluster` 运行环境
+   - CentOS 8 - 用于Red Hat系列应用部署，例如 :strike:`oVirt` 和 :ref:`gluster` 运行环境
 
 Fedora35虚拟机模板
 --------------------

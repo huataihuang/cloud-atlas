@@ -241,7 +241,7 @@ Gluster存储池提供了原生的Gluster访问。 :ref:`gluster` 是一个分�
 
 .. note::
 
-   我计划在 :ref:`hpe_dl360_gen9` 上使用2块HDD构建disk pool，提供给两个虚拟机使用，并使用虚拟机构建一个 :ref:`gluster` 集群，输出给 :ref:`ovirt` 虚拟化集群。这个集群将作为和 :ref:`openstack` 对比的虚拟化解决方案。
+   我计划在 :ref:`hpe_dl360_gen9` 上使用2块HDD构建disk pool，提供给两个虚拟机使用，并使用虚拟机构建一个 :ref:`gluster` 集群。这个集群将作为和 :ref:`openstack` 对比的虚拟化解决方案。
 
 - 输入卷案例
 

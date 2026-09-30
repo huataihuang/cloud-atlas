@@ -38,7 +38,7 @@
 
 **后来我想了一下，其实选择UX框架并不重要** 因为实际底层还是 ``Augular`` 和 ``React`` ，再底层其实还是 :ref:`javascript` 。真正技术核心还是以 ``Augular`` 和 ``React`` 为主，所以只要能够掌握 ``Augular`` 或者 ``React`` ，那么切换UX框架也是比较容易的。这样我也就不再纠结Design System的选择了，选择符合自己工作需求为主。目前我选择 ``PatternFly`` 主要原因是:
 
-- 目前开源软件巨头Red Hat主要采用自己开的 ``PatternFly`` ，例如 :ref:`openshift` 和 :ref:`ovirt` 等。所以熟悉这个UX框架，也方便比较深入学习Red Hat系列的软件
+- 目前开源软件巨头Red Hat主要采用自己开的 ``PatternFly`` ，例如 :ref:`openshift` 。所以熟悉这个UX框架，也方便比较深入学习Red Hat系列的软件
 - 如 `Hacker News: PatternFly – a web UI framework by RedHat (patternfly.org) <https://news.ycombinator.com/item?id=17161536>`_ 中有一位使用了两年PatternFly的用户说道: 使用PatternFly框架主要是该框架针对企业应用的快速构建，虽然有很多限制但是对于利基市场(狭小)有一定竞争力，特别是对于后端开发人员不太关注前端的开发，使用较为便利。该用户现在也转向其他UX框架( `Semantic UI <https://semantic-ui.com>`_ )
 - ``PattenFly`` 底层使用了 TypeScript ，并且基于 ``React`` ，这两个技术都是目前非常主流的 :ref:`javascript` 开发框架
 - 后端可以采用 :ref:`golang` 或者 :ref:`rust` 来实现，方便开发基础软件

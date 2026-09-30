@@ -17,7 +17,7 @@
 
 - 通过 :ref:`kvm_nested_virtual` 运行大量的一级KVM虚拟机，一级KVM虚拟机作为运行 :ref:`openstack` 的物理机，部署一个完整的OpenStack集群
 
-  - 物理服务器运行 :ref:`cockpit` 可以集成 :ref:`stratis` 存储，以及 :ref:`ovirt` ，所以在第一层虚拟化上，可以不用自己手工部署 :ref:`kvm` ，而是集成到 oVirt
+  - 物理服务器运行 :ref:`cockpit` 可以集成 :ref:`stratis` 存储，以及 ``oVirt`` ，所以在第一层虚拟化上，可以不用自己手工部署 :ref:`kvm` ，而是集成到 oVirt
   - 通过oVirt来管理第一层虚拟机，虚拟机开启嵌套虚拟化，这样可以同时学习oVirt的管理，体验不同于OpenStack的轻量级虚拟化管理平台
     
     - oVirt支持 :ref:`gluster` 管理，可以方便在底层部署 GlusterFS
@@ -159,7 +159,7 @@
       - :ref:`m3` 采用 :ref:`etcd` 存储数据，构建分布式 :ref:`prometheus` metrics 存储
       - :ref:`kubernetes` 采用 :ref:`etcd` 存储数据
 
-- ``z-b-store-1`` / ``z-b-store-2`` / ``z-b-store-3`` 是直接访问服务器上3块 2.5" SSD，基于 :ref:`gluster` 的 :ref:`stratis` 存储，运行 :ref:`ovirt` 同时提供 :ref:`ceph` 的 geo-replication
+- ``z-b-store-1`` / ``z-b-store-2`` / ``z-b-store-3`` 是直接访问服务器上3块 2.5" SSD，基于 :ref:`gluster` 的 :ref:`stratis` 存储，运行 :strike:`oVirt` 同时提供 :ref:`ceph` 的 geo-replication
 
   - 数据备份和恢复
   - 近线数据存储，后续考虑实现一个容灾系统模拟
@@ -179,7 +179,7 @@
   - 采用 :ref:`ubuntu_linux` :strike:`20.04` 22.04 部署
   - 启用 :ref:`kvm_nested_virtual` 实现第二层虚拟化
 
-- ``z-o3t`` 系列构建 :ref:`ovirt` 集群
+- ``z-o3t`` 系列构建 :strike:`oVirt` 集群
 
   - 采用 :ref:`centos` 8 部署
   - 启用 :ref:`kvm_nested_virtual` 实现第二层虚拟化
@@ -196,7 +196,7 @@
 第二层虚拟化
 --------------
 
-- 基于第一层虚拟化部署的 :ref:`openstack` 和 :ref:`ovirt` 实现自动化部署
+- 基于第一层虚拟化部署的 :ref:`openstack` 和 :strike:`oVirt` 实现自动化部署
 
 Kubernetes私有云
 ==================
@@ -229,7 +229,7 @@ Kubernetes私有云
 
   - 裸物理服务器运行Docker容器，可以充分发挥物理硬件性能
   - Ceph (:ref:`ceph`) 直接运行在物理服务器，提供OpenStack对象存储和Kubernetes卷存储，最大化存储性能
-  - Gluster (:ref:`gluster`)直接运行在物理服务器，提供oVirt(:ref:`ovirt`)的虚拟化存储以及虚拟机和Kubernetes的NFS文件存储、数据归档
+  - Gluster (:ref:`gluster`)直接运行在物理服务器，提供oVirt的虚拟化存储以及虚拟机和Kubernetes的NFS文件存储、数据归档
   - 网络直通，最大化网络性能
 
 .. note::

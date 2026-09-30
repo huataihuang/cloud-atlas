@@ -20,7 +20,7 @@
 - XFS ( :ref:`stratis`  )
 - :ref:`gluster`
 
-目前我在 :ref:`hpe_dl360_gen9` 配置了1块SSD，另外准备再购买3块HDD，来构建一种混合存储的 :ref:`gluster` 。后续， :strike:`可以采购3块小规格的SSD` 再购买3块SSD磁盘，通过SSD磁盘(划分一个缓存分区或卷)，来加速使用HDD的GlusterFS的性能。 - 我准备构建2个GlusterFS集群，一个采用全SSD，运行 :ref:`ovirt` 构建虚拟化和在线存储，另一个使用HDD混合SSD，构建 :ref:`gluster_geo-replication` ，模拟远程灾备。此外，第二个HDD混合SSD的集群，也运行 :ref:`ceph_geo-replication` 模式模拟远程灾备。
+目前我在 :ref:`hpe_dl360_gen9` 配置了1块SSD，另外准备再购买3块HDD，来构建一种混合存储的 :ref:`gluster` 。后续， :strike:`可以采购3块小规格的SSD` 再购买3块SSD磁盘，通过SSD磁盘(划分一个缓存分区或卷)，来加速使用HDD的GlusterFS的性能。 - 我准备构建2个GlusterFS集群，一个采用全SSD在线存储，另一个使用HDD混合SSD，构建 :ref:`gluster_geo-replication` ，模拟远程灾备。此外，第二个HDD混合SSD的集群，也运行 :ref:`ceph_geo-replication` 模式模拟远程灾备。
 
 参考
 =========
