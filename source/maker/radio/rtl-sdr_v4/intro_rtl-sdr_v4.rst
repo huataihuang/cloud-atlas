@@ -1,4 +1,4 @@
-.. _rtl-sdr_v4:
+.. _intro_rtl-sdr_v4:
 
 ===================
 RTL-SDR Blog V4

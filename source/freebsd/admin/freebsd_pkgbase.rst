@@ -72,7 +72,6 @@ Upgrading with Base System Packages
 
 .. literalinclude:: freebsd_pkgbase/upgrade
    :caption: 首先确保更新系统up to date
-   :emphasize-lines: 11
 
 - 更新Base系统:
 
@@ -123,7 +122,11 @@ AArch64系统已经使用了UEFI boot loader，要检查AMD64系统使用的boot
 
 .. literalinclude:: freebsd_pkgbase/efibootmgr
    :caption: 检查ESP分区
-   :emphasize-lines: 5,6
+
+输出案例
+
+.. literalinclude:: freebsd_pkgbase/efibootmgr_output
+   :caption: 检查ESP分区案例
 
 当前激活的boot loader项目的前面会有一个 ``+`` 符号
 

@@ -47,7 +47,7 @@ OpenCore设置
 - ``Lilu`` 已经在 :ref:`c246_mi50_hackintosh` 完成
 - `BlueToolFixup <https://github.com/acidanthera/BrcmPatchRAM/releases>`_ 包含在 `BrcmPatchRAM <https://github.com/acidanthera/BrcmPatchRAM/releases>`_ 里面，这个补丁是为了在macOS 12+蓝牙堆栈打补丁来支持第三方卡
 - `AirportBrcmFixup <https://github.com/acidanthera/AirportBrcmFixup/releases>`_ 用于non-Apple/non-Fenvi的Broadcom网卡，对于OS X 10.10及更新版本都需要
-－ `BrcmPatchRAM <https://github.com/acidanthera/BrcmPatchRAM/releases>`_ 用于更新Broadcom蓝牙firmware，对于所有non-Apple/non-Fenvi Airport卡都需要。需要注意，这个kext是和 ``BrcmFirmwareData.kext`` 配对使用的，并且针对不同macOS需要使用不同的 ``BrcmPatchRAM`` :
+- `BrcmPatchRAM <https://github.com/acidanthera/BrcmPatchRAM/releases>`_ 用于更新Broadcom蓝牙firmware，对于所有non-Apple/non-Fenvi Airport卡都需要。需要注意，这个kext是和 ``BrcmFirmwareData.kext`` 配对使用的，并且针对不同macOS需要使用不同的 ``BrcmPatchRAM`` :
 
   - 对于macOS 10.15+，必须配对 ``BrcmBluetoothInjector`` 使用 ``BrcmPatchRAM3``
   - 对于macOS 10.11-10.14 ，使用 ``BrcmPatchRAM2``
