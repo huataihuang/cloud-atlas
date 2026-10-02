@@ -22,12 +22,36 @@ Docker环境不建议使用mise
 
 在MacBook Pro 本地系统上，项目五花八门，每个项目可能使用了不同的 Go / Python 版本，此时利用 ``mise`` 的 ``.mise.toml`` 能够控制随着项目目录自动、无感地切换环境版本，对于多项目并行开发非常优雅。
 
+.. literalinclude:: mise/brew
+   :caption: 在macOS环境通过brew安装mise(参考Rails官方文档)
+
 .. _mise_proxy:
 
 mise代理
 ==========
 
-mise的代理设置才用了类似 :ref:`curl` 的环境变量方式，我在 :ref:`colima_images` 构建时是用了socks5h代理
+mise的代理设置才用了类似 :ref:`curl` 的环境变量方式，我在 :ref:`colima_images` 构建时是用了socks5h代理，所以可以采用环境变量来控制mise代理:
+
+.. literalinclude:: ../container/colima/images/debian_tini_image/dev/mise_proxy.env
+   :caption: 环境变量设置socks5h代理
+
+快速使用mise
+==============
+
+执行以下命令快速完成 ``c/c++`` , ``rust`` , ``go`` , ``python`` , ``ruby`` 以及 ``neovim`` 安装:
+
+.. literalinclude:: mise/install
+   :caption: 安装开发环境
+
+为了快速完成 :ref:`nvim` 的开发环境设置，参考 :ref:`alpine-dev_podman_image` 自动完成:
+
+.. literalinclude:: ../container/podman/images/alpine-dev_podman_image/alpine-dev/config/nvim/init.lua
+   :caption: 设置 ``~/.config/nvim/init.lua``
+
+并运行以下无头命令完成配置nvim:
+
+.. literalinclude:: mise/nvim_headless
+   :caption: 执行nvim无头命令完成配置
 
 .. _mise_tmux:
 
@@ -51,3 +75,42 @@ mise的代理设置才用了类似 :ref:`curl` 的环境变量方式，我在 :r
 
 .. literalinclude:: mise/restart_tmux
    :caption: 彻底重启tmux
+
+升级mise
+==========
+
+- 在检查或安装最新版本前，先更新 mise 的本地插件和工具版本索引:
+
+.. literalinclude:: mise/mise_plugin_update
+   :caption: 更新 mise 的本地插件和工具版本索引
+
+- 查看当前已安装工具的最新可用版本:
+
+.. literalinclude:: mise/mise_outdated
+   :caption: 查看最新可用版本
+
+以下是输出举例:
+
+.. literalinclude:: mise/mise_outdated_output
+   :caption: 查看最新可用版本的输出案例
+
+- 升级工作其实很简单，就是再次运行前面的安装命令，会自动升级，举例安装指定版本，或最新版本
+
+.. literalinclude:: mise/update
+   :caption: mise升级
+
+- 清理旧版本:
+
+查看所有已安装的版本
+
+.. literalinclude:: mise/ls
+   :caption: 查看已经安装版本
+
+清理不使用的旧版本:
+
+.. literalinclude:: mise/prune
+   :caption: 清理旧版本
+
+.. note::
+
+   :ref:`reconfig_nvim`

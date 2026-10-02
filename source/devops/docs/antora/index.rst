@@ -8,6 +8,8 @@ Antora文档
    :maxdepth: 1
 
    intro_antora.rst
+   antora_quickstart.rst
+   antora_container.rst
 
 .. only::  subproject and html
 

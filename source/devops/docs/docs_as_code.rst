@@ -12,6 +12,10 @@ Docs-as-Code
 
 虽然我已经撰写 ``「云图 -- 云计算图纸: 探索」`` 好些年了，但是很少关注和调研整个文档工具生态。搜集和整理一些资料以后，对于最近几年涌现出大量文档工具以及 ``Docs-as-Code`` 理念，有了一些了解和想法，也为后续自己选择工具规划网站做了一些准备。
 
+.. note::
+
+   2026年和gemini探讨后续个人网站的选型，对本文做一些修订
+
 概念
 =======
 
@@ -37,7 +41,7 @@ Docs-as-Code
 
 - Markdown: 很多大型组织用来构建文档库
 
-  - ``Docusaurus`` Facebook开源的基于 React+Node.js 静态网站生成器，基于MDX框架
+  - :ref:`docusaurus` Facebook开源的基于 React+Node.js 静态网站生成器，基于MDX框架
   - :ref:`nextra` 是 :ref:`nextjs` 开发的同样基于MDX的静态网站
   - :ref:`astro` 支持多种前端框架的文档工具 - `Astro integrations <https://docs.astro.build/en/guides/integrations-guide/#official-integrations>`_ (看文档架构可选多种前端框架，感觉是在太繁杂了)
   - :ref:`mkdocs`
@@ -53,27 +57,46 @@ Docs-as-Code
 - Asciidoc: 很多开源项目使用的文档系统，适合电子书输出，例如 FreeBSD doc
 
   - ``docToolchain``
-  - ``Asciidoctor`` GitHub开发的Asciidoc生成器
+ 
+    - 基于 Gradle，目标是整合一切: 试图把 AsciiDoc、Arc42（架构文档模板）、各种图表工具（PlantUML 等）全部打包
+    - 非常重，主要面向企业级的 Java 开发环境，维护成本太高
+
+  - ``Asciidoctor``
+
+    - GitHub开发的Asciidoc事实上的标准解析器( 用 :ref:`ruby` 开发)，Antora 的底层核心就是 Asciidoctor
+    - 只负责把 ``.adoc`` 文件转成 ``.html`` : Asciidoctor只是一个基础工具，不负责多仓库管理和版本切换、没有导航栏生成
+
   - :ref:`antora`
+
+    - Antora 并不是一个简单的渲染引擎，它更像是一个 **文档构建系统**
+    - 支持 :ref:`gitlab` CLI对多仓库代码和文档"抓取"，合并成一个带索索、带版本切换、带多语言的统一门户
+    - 能感知 :ref:`git` 分支，可以同时展示 v1.0和v2.0的文档，用户可以在页面一键切换
 
 - reStructuredText: Python社区主要使用的文档系统，也是偏重技术文档内容但不care外观的选择，例如 kernel.org
 
   - :ref:`sphinx_doc`
 
 对比和思考
-------------
+=============
 
-从电子书角度来看， ``Asciidoc`` 和 ``reStructuredText`` 是主要的文档格式，被很多严肃、核心的开源项目，例如FreeBSD和Kernel选为文档基础。我感觉主要原因是这些开源团队更侧重于后台技术，需要严谨的文档格式，同时不希望太过花哨的展示形式冲淡了作为核心技术的稳健风格。
+从 :strike:`电子书` 技术文档角度来看， ``Asciidoc`` 和 ``reStructuredText`` 是主要的文档格式，被很多严肃、核心的开源项目，例如FreeBSD和Kernel选为文档基础。 :strike:`我感觉主要原因是这些开源团队更侧重于后台技术，需要严谨的文档格式，同时不希望太过花哨的展示形式冲淡了作为核心技术的稳健风格。` :
 
-从市场工具来看， ``Markdown`` 显然是更为流行的网站工具，并不局限于电子书，而是通过WEB对外展示公司和组织的技术。围绕 ``Markdown`` 的工具更是层出不穷，构建了大量美轮美奂的文档网站。
+- reStructuredText (reST): 如果是 Python 项目的 API 文档，reST 配合 Sphinx 依然是统治地位。但 reST 的语法由于过于严谨（甚至有些晦涩），且对非 Python 生态的支持稍弱，其增长已经放缓。
+- AsciiDoc (企业与工业标准): 在操作系统（FreeBSD）、大型企业（Red Hat, VMware）和 Java 生态中，AsciiDoc 已经超越了 reST。
+
+  - AsciiDoc语法比reST更直观，功能比 Markdown 更强大。它原生支持交叉引用、条件包含、宏命令，且能轻易转换成 PDF、ePub 和 HTML。
+
+从市场工具来看， ``Markdown`` 显然是更为流行的 ``轻文档`` 网站工具，并不局限于电子书，而是通过WEB对外展示公司和组织的技术。围绕 ``Markdown`` 的工具更是层出不穷，构建了大量美轮美奂的文档网站:
 
 从核心技术角度来看， ``Markdown`` 工具技术都是 :ref:`javascript` 流派的，最流行的文档工具其实核心技术都是基于 ``DMX`` + :ref:`nodejs` + :ref:`typescript` + :ref:`react` (或者还有支持 ``vue`` 等前端框架)。所以我感觉区别不是很大，主要是掌握核心技术，也就是底层的 :ref:`javascript` 系列前端技术，切换工具也应该不难。
 
-``Asciidoc`` 和 ``reStructuredText`` 更适合后端技术领域。
+:strike:`目前我想学习一些前端技术，所以我在选型时会选择Markdown流派，同时我会结合自己近期的学习路线来最终选择一个平台。`
 
-目前我想学习一些前端技术，所以我在选型时会选择 ``Markdown`` 流派，同时我会结合自己近期的学习路线来最终选择一个平台。可能选择基于 :ref:`nextjs` 的 :ref:`nextra` 。
+在2026年我重新开始构建 **个人技术文档网站** ，最终选择是 :ref:`antora` :
 
-不过，在2026年我重新开始构建 
+- 由于是技术文档，需要对源代码进行交叉引用，所以基于AsciiDoc的语法工具比Markdown更为适合
+- 我的目标是构建多仓库、多版本、多语言的个人技术文档，Antora能够内置满足这些要求(之前使用过 :ref:`docusaurus` 但是实现太复杂了)
+- 独立开源项目，不依附于商业公司，架构设计更加 **中立且模块化**
 
 设计图表
 ==========
@@ -99,3 +122,4 @@ CI/CD
 - `Docs-as-code: A Brief Introduction <https://medium.com/@ezinneanne/docs-as-code-a-brief-introduction-4fe15b7f0b4c>`_
 - `Five fast facts about docs as code at GitLab <https://about.gitlab.com/blog/2022/10/12/five-fast-facts-about-docs-as-code-at-gitlab/>`_
 - `4 个推荐的开源系统设计图表工具 <https://www.explainthis.io/zh-hans/pinthis/blog/system-design-tools>`_
+- gemini

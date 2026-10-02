@@ -19,6 +19,7 @@ neovim
    nvim_ide.rst
    nvim_ide_fix.rst
    nvim_lightweight_ide.rst
+   reconfig_nvim.rst
    nvim_escope.rst
    nvim_clangd_arm.rst
    nvim_ansible.rst
