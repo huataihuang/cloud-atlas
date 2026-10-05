@@ -21,6 +21,10 @@ NeoVim轻量级IDE(我的选择)
 安装LSP
 ==========
 
+.. note::
+
+   这里安装LSP的步骤从 :ref:`alpine-dev_podman_image` 的Dockerfile中分离出来
+
 - 当在 :ref:`macos` 中，完成安装 ``clangd`` (即安装 Xcode Command Line Tools 后系统会自带 ``clangd`` )
 
 - 直接使用 :ref:`mise` 当前生效的 Ruby 版本安装 Gem 包 ``solargraph`` :

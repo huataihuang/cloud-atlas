@@ -23,6 +23,7 @@ Dell服务器
    dell_t5820_smbbus_tape_mod_rebar.rst
    dell_t5820_flash_modified_bios.rst
    dell_t5820_fancotrol.rst
+   dell_t5820_ubuntu_26.04.rst
    
 .. only::  subproject and html
 

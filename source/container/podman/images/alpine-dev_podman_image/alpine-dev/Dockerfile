@@ -96,7 +96,7 @@ USER admin
 ENV HOME=/home/${USER}
 ENV GOPATH=$HOME/go
 ENV GEM_HOME=$HOME/.gem/ruby/3.4.0
-ENV PATH=$GOPATH/bin:$GEM_HOME/bin:$HOME/.cargo/bin:$HOME/venv/dev/bin:/usr/local/go/bin:$PATH
+ENV PATH=$GOPATH/bin:$GEM_HOME/bin:$HOME/.cargo/bin:$HOME/.local/bin:$HOME/venv/dev/bin:/usr/local/go/bin:$PATH
 
 # - Go: gopls
 RUN go install golang.org/x/tools/gopls@latest
@@ -119,10 +119,10 @@ RUN gem install --no-document solargraph
 RUN gem install --no-document asciidoctor asciidoctor-diagram
 
 # - Markdown / Astro MDX: marksman (Markdown LSP write by Rust)
-RUN mkdir -p $HOME/.cargo/bin && \
+RUN mkdir -p $HOME/.local/bin && \
     http_proxy=socks5://127.0.0.1:1082 https_proxy=socks5://127.0.0.1:1082 \
-    curl -fsSL https://github.com/artempyanykh/marksman/releases/latest/download/marksman-linux-x64 -o $HOME/.cargo/bin/marksman && \
-    chmod +x $HOME/.cargo/bin/marksman
+    curl -fsSL https://github.com/artempyanykh/marksman/releases/latest/download/marksman-linux-x64 -o $HOME/.local/bin/marksman && \
+    chmod +x $HOME/.local/bin/marksman
 
 # -----------------------------------------------------------------------------
 # 配置 Neovim 开发环境 (单文件 init.lua + 插件离线预热)

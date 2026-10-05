@@ -15,6 +15,7 @@ git
    git_merge_fix_conflicts.rst
    git_config.rst
    git_ignorecase.rst
+   gitignore.rst
    git_proxy.rst
    git_ssh_script.rst
    git-openssl.rst
