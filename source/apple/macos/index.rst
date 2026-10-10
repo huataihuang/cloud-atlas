@@ -31,6 +31,7 @@ macOS
    macos_studio.rst
    macos_studio_as_chromebook.rst
    macos_share_file.rst
+   macos_linux_locale_align.rst
    homebrew.rst
    homebrew_init.rst
    homebrew_python.rst
