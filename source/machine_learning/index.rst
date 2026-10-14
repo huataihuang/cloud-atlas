@@ -14,6 +14,7 @@ Machine Learning
    :maxdepth: 1
 
    become_a_machine_learning_practitioner.rst
+   machine_learning_learning_roadmap.rst
    basic/index
    startup/index
    concept/index
@@ -23,6 +24,7 @@ Machine Learning
    gpt/index
    llm/index
    studio/index
+   jupyter/index
    hardware/index
    jetson/index
    cuda/index

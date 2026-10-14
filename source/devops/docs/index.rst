@@ -27,6 +27,7 @@ DevOps 文档
    docusaurus/index
    astro/index
    antora/index
+   quarto/index
    fossflow.rst
    excalidraw.rst
    tldraw.rst

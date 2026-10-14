@@ -10,7 +10,7 @@ slideshow
 `RISE <https://github.com/damianavila/RISE>`_ 可以将Jupyter Notebook转换成slideshow，并且能耦在浏览器
 中执行代码加护演示。以下是一个演示gif:
 
-.. image:: ../../_static/big_data/jupyter/jupyter_slideshow.gif
+.. image:: ../../_static/machine_learning/jupyter/jupyter_slideshow.gif
 
 安装
 ------

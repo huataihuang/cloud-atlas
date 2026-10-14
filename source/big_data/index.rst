@@ -33,7 +33,6 @@ Big Data
    tsdb.rst
    influxdb/index
    balena.rst
-   jupyter/index
 
 .. only::  subproject and html
 

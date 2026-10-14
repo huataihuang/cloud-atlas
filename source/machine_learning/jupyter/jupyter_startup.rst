@@ -12,7 +12,7 @@ JupyterLab的初始界面类似一个开发IDE:
 - 可以打开远程服务器的终端(就好像ssh登陆到服务器上)
 - 左方导航栏提供了远程服务器上文件系统目录浏览，方便打开进行编辑
 
-.. figure:: ../../_static/big_data/jupyter/jupyter_startup-1.png
+.. figure:: ../../_static/machine_learning/jupyter/jupyter_startup-1.png
    :scale: 40
 
 - 点击 ``+`` 按钮启动一个 ``Launcher`` 界面，可以选择常见的功能，例如:
@@ -25,7 +25,7 @@ JupyterLab的初始界面类似一个开发IDE:
 
 非常适合测试一些代码片段
 
-.. figure:: ../../_static/big_data/jupyter/jupyter_startup-2.png
+.. figure:: ../../_static/machine_learning/jupyter/jupyter_startup-2.png
    :scale: 40
 
 代码和绘图
@@ -45,7 +45,7 @@ JupyterLab的初始界面类似一个开发IDE:
 
 点击 ``Run`` 按钮可以看到绘制出抛物线:
 
-.. figure:: ../../_static/big_data/jupyter/jupyter_startup-3.png
+.. figure:: ../../_static/machine_learning/jupyter/jupyter_startup-3.png
    :scale: 40
 
 .. note::

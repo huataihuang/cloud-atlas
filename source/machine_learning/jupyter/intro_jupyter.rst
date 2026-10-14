@@ -8,7 +8,7 @@ Jupyter简介
 
 Jupyter这个名字是它要服务的三种语言的缩写：Julia，PYThon和R，这个名字与“木星（jupiter）”谐音。
 
-.. image:: ../../_static/big_data/jupyter/jupyter.png
+.. figure:: ../../_static/machine_learning/jupyter/jupyter.png
    :scale: 75
 
 Jupyter Note
@@ -21,7 +21,7 @@ Jupyter Note
 - Jupyter代码可以输出为 HTML, images, videos, LaTeX, 和自定义 MIME 类型
 - 可以集成多种大数据: 例如通过Python, R,和Scala使用Apache Spark, 并且可以使用 pandas, scikit-learn, ggplot2, 和 TensorFlow 来探索同一数据集
 
-.. figure:: ../../_static/big_data/jupyter/juypter_notes.png
+.. figure:: ../../_static/machine_learning/jupyter/juypter_notes.png
    :scale: 50
 
 Jupyter Notebook WEB环境中，可以编写程序、运行代码查看输出和可视化结果，而且提供了编排文本和撰写查看复杂数学公式功能。通过强大的REPL交互开发环境(Read-Eval-Pring-Loop, 读取用户输入-执行代码-输出结果-循环上述操作)，用户可以非常方便实现交互式开发以及丰富的文档功能。
@@ -33,7 +33,7 @@ Jupyter Lab
 
 Jupyter Lab是下一代Notebook界面，提供了最新的基于web的交互开发环境，用于notebooks, 代码和数据。它的灵活的界面允许用户配置和编排数据科学工作流，科学计算，计算报导(computational journalism)以及 :ref:`machine_learning` 。模块化设计提供了扩展和丰富功能。
 
-.. figure:: ../../_static/big_data/jupyter/juypterlab.png
+.. figure:: ../../_static/machine_learning/jupyter/juypterlab.png
    :scale: 50
 
 Jupyter Hub
@@ -51,7 +51,7 @@ Voila
 
 ``Voilà`` 可以将notebooks转换成安全的、独立的web应用，以便定制和共享
 
-.. figure:: ../../_static/big_data/jupyter/voila.png
+.. figure:: ../../_static/machine_learning/jupyter/voila.png
    :scale: 50
 
 

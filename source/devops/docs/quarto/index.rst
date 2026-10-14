@@ -1,17 +1,13 @@
-.. _jupyter:
+.. _quarto:
 
 =================================
-Jupyter - 数据科学开发平台
+Quarto文档
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   intro_jupyter.rst
-   install_jupyter.rst
-   jupyter_slideshow.rst
-   jupyter_startup.rst
-   jupyter_remote.rst
+   intro_quarto.rst
 
 .. only::  subproject and html
 
