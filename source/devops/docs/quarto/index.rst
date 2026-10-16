@@ -8,6 +8,7 @@ Quarto文档
    :maxdepth: 1
 
    intro_quarto.rst
+   quarto_startup.rst
 
 .. only::  subproject and html
 

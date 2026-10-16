@@ -1,7 +1,7 @@
 .. _install_jupyter:
 
 ================
-Jupyter安装
+安装Jupyter
 ================
 
 安装
