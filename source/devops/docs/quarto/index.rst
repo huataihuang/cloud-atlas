@@ -9,6 +9,7 @@ Quarto文档
 
    intro_quarto.rst
    quarto_startup.rst
+   quarto_multi_language.rst
 
 .. only::  subproject and html
 

@@ -22,6 +22,15 @@ GPU相关BIOS设置
    :file: nasse_c246/pci.csv
    :widths: 20,40,40
    :header-rows: 1
+
+**默认出厂配置，上述开关都是Disabled状态，此时安装了NVIDIA驱动会出现无法加载驱动报错** :
+
+.. literalinclude:: nasse_c246/dmesg
+   :caption: 当BIOS没有正确开启Above 4G Decoding时系统报错日志
+
+.. warning::
+
+   当 ``SR-IOV Support`` 启用后，物理显卡（PF）会尝试预留大量的虚拟功能（VF）所需的地址空间。此时，如果主机安装了多块支持 ``SR-IOV`` 设备，例如 :ref:`tesla_a2` ，就可能出现 ``PCI I/O region assigned`` 失败(见下文)。当然，如果只安装少量 ``SR-IOV`` 设备则可能还兼容支持。
    
 异常排查
 -----------

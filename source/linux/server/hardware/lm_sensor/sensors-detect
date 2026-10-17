@@ -1,0 +1,1 @@
+sudo sensors-detect
