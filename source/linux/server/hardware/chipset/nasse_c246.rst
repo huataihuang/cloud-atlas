@@ -65,6 +65,14 @@ GPU相关BIOS设置
 共存解决方案
 -------------
 
+.. warning::
+
+   之前我验证关闭CSM时是使用2块A2还能够同时开启 ``Re-Size BAR`` 和 ``SR-IOV`` 。
+
+   但是，现在我测试使用3块A2，即使关闭了CSM也无法同时开启 ``Re-Size BAR`` 和 ``SR-IOV`` ，所以我最终还是关闭了 ``SR-IOV`` 只使用 ``Re-Size BAR`` 。
+
+   总之，这个实验实际上还是和主板BIOS以及使用多少类似 :ref:`tesla_a2` 这样大BAR的GPU相关。我后续可能考虑尝试在连接PCH通道的nvme接口上使用外部PCIe方式看看能否同时开启 ``Re-Size BAR`` 和 ``SR-IOV`` (如果我要实践 :ref:`share_gpu_with_cuda_mps` )。
+
 gemini提示: BIOS必须关闭 ``CSM (Compatibility Support Module)`` ，如果开启了CSM，则 ``Re-Size BAR`` 绝对无法正常工作!!!
 
 我检查了BIOS，确实发现在 ``Advanced > CSM Configuration`` 设置页面中，默认就是 ``CSM Support: Enabled`` 。不过，这个参数关闭的前提条件是 ``Video policy`` 设置为 ``UEFI`` ，然后重启才能关闭 ``CSM Support`` :
@@ -77,7 +85,8 @@ gemini提示: BIOS必须关闭 ``CSM (Compatibility Support Module)`` ，如果�
 - Other PCI devices
 
 然后保存重启，再次进入BIOS，将 ``CSM Support`` 设置为 ``Disabled`` (不过，实际上当我在 ``Advanced > CSM Configuration`` 中设置了 ``Video: UEFI`` 之后，上述 ``Re-Size BAR`` 激活设置就不再导致报错了。)，此时，该页面 ``Advanced > CSM Configuration`` 下所有选项都会消失，表示彻底关闭CSM。
-.. _think_server_hardware:
+
+.. _think_little_server_hardware:
 
 警告: 不推荐组装服务器
 ===========================
