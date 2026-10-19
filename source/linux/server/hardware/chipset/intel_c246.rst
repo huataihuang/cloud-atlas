@@ -8,7 +8,7 @@ Intel C246主板芯片组
 
 我在为 :ref:`pi_cluster` 选购ITX机箱时，为了不浪费昂贵的PC金牌电源，选购了一款 :ref:`nasse_c246` :
 
-- 支持 ECC 校验内存(因为是针对 :ref:`xeon_e` 的入门级服务器主板)，这样可以充分利旧我在 :ref:`hpe_dl360_gen9` 替换下的ECC DDR-4内存(可以节约大约500元RMB)
+- 支持 ECC 校验内存(因为是针对 :ref:`xeon_e` 的入门级服务器主板，实际上是非寄存器ECC内存，和 :ref:`hpe_dl360_gen9` 所使用的RegECC内存不同) :strike:`这样可以充分利旧我在HP DL360/380 gen9 替换下的ECC DDR-4内存(可以节约大约500元RMB)`
 - 支持第八代和第九代Intel Core处理器以及 :ref:`xeon_e` 系列处理器(Coffee Lake)
 
 C246芯片组是2018年Q3推出的入门级服务器主板芯片:
