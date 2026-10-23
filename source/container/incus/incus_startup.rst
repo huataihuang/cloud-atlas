@@ -4,6 +4,9 @@
 Incus快速起步
 =======================
 
+安装
+======
+
 Ubuntu 24.04 LTS以及后续版本都默认包含了 ``incus`` 软件包，可以非常轻松直接安装：
 
 .. literalinclude:: incus_startup/install
@@ -29,6 +32,19 @@ Ubuntu 24.04 LTS以及后续版本都默认包含了 ``incus`` 软件包，可�
 .. note::
 
    这里使用了 :ref:`incus_zfs` 实践构建的ZFS存储
+
+Incus和KVM
+===========
+
+Incus提供了一个 `Image server for Incus and LXC <https://images.linuxcontainers.org/>`_ 提供常见发行版的镜像
+
+我最初选择在 :ref:`ubuntu_linux` 中使用 :ref:`incus` 是因为希望通过容器化取代虚拟化来轻量级运行 :ref:`k3s` (简化 :ref:`kubernetes` )，但逐步发现Incus和早期的LXC还是有很大的区别，已经演进为一个统一的"实例(Instance)"管理平台——既支持系统容器(System Containers)，也支持全虚拟化虚拟机（Virtual Machines, VM）。
+
+当Incus通过 :ref:`qemu` / :ref:`kvm` 启动独立的硬件虚拟机，能提供独立的CPU、内存和完整的操作系统内核，适合进行操作系统级别的内核开发。
+
+.. note::
+
+   Incus官方镜像仓库提供了 :ref:`freebsd` 镜像，底层通过 :ref:`kvm` 可以实现 :ref:`incus_freebsd`
 
 - 启动运行 :ref:`debian` 12:
 

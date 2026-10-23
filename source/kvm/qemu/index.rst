@@ -14,6 +14,7 @@ QEMU
    run_debian_gpu_passthrough_in_qemu.rst
    gpu_passthrough_in_qemu_install_nvidia_cuda.rst
    qemu_docker_tesla_t10.rst
+   qemu-img_convert_qcow2_zvol.rst
 
 .. only::  subproject and html
 

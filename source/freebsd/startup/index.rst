@@ -15,6 +15,8 @@ FreeBSD起步
    freebsd_static_ip.rst
    freebsd_init.rst
    freebsd_vm_init.rst
+   freebsd_top.rst
+   freebsd_monitor.rst
 
 .. only::  subproject and html
 

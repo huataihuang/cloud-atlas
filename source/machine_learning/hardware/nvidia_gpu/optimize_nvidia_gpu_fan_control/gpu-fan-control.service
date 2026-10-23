@@ -7,8 +7,12 @@ Type=simple
 # 强制使用 root 权限运行，以便能够写入 /sys/class/hwmon/... 节点
 User=root
 WorkingDirectory=/usr/local/bin
-# 强制 Python 实时输出日志不缓存
+# 关键：强制 Python 实时输出日志不缓存
 Environment=PYTHONUNBUFFERED=1
+# 关键：在启动 Python 主程序之前，由 systemd (root权限) 提前把风扇切到手动控制模式 (1)
+ExecStartPre=/bin/sh -c 'echo 1 > /sys/class/hwmon/hwmon2/pwm3_enable'
+ExecStartPre=/bin/sh -c 'echo 1 > /sys/class/hwmon/hwmon2/pwm4_enable'
+# 启动 Python 温控脚本
 ExecStart=/usr/bin/python3 /usr/local/bin/gpu_fan_control.py
 # 如果程序异常崩溃，自动在 5 秒后尝试重启
 Restart=always

@@ -41,6 +41,7 @@ ZFS管理的主要手册可以参考:
    zfs_replication.rst
    zrepl.rst
    zfs_pool_restore.rst
+   zfs-stats.rst
 
 .. only::  subproject and html
 

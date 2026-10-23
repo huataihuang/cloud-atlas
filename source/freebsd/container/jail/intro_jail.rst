@@ -10,8 +10,8 @@ Jail是基于 ``chroot`` 原理来构建，用于更改一组进程的根目录(
 
 Jail改进了 ``chroot`` 的安全性:
 
-- 通过虚拟化低文件系统、用户集和网络子系统来增强扩展 ``chroot`` 的简单模型
-- 使用更精细的控制来控制Jail环境的访问权限
+- 通过虚拟化访问(virtualizing access)文件系统、用户集和网络子系统
+- 更多细粒度控制(fine-grained controls)来优化jailed环境的访问
 
 Jail类型
 ==========
