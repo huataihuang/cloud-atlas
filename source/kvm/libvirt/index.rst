@@ -12,6 +12,7 @@ Libvirt虚拟机管理器
    storage/index
    agent/index
    graphics/index
+   hooks/index
    virsh_dompmsuspend.rst
    libvirt_non-root.rst
    virt-install_location_iso_image.rst

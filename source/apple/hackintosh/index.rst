@@ -13,6 +13,7 @@ Hackintosh (黑苹果)
    hackintosh_wifi_bluetooth.rst
    opencore_macos_basesystem_install.rst
    opencore_macos_installer_install.rst
+   osx-kvm.rst
 
 .. only::  subproject and html
 

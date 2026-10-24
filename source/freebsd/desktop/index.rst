@@ -7,6 +7,7 @@ FreeBSD桌面
 .. toctree::
    :maxdepth: 1
 
+   freebsd_suspend.rst
    freebsd_nvidia-driver.rst
    freebsd_nvidia.rst
    freebsd_wayland_sway.rst

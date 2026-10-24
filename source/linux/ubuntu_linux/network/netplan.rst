@@ -11,6 +11,14 @@ netplan简介
 
 .. figure:: ../../../_static/linux/ubuntu_linux/network/netplan_design_overview.svg
 
+.. warning::
+
+   ``gateway4`` 已经被废弃，本文中涉及到网关的配置应该调整为:
+
+   .. literalinclude:: netplan/defaut_route.yaml
+      :caption: 设置默认路由
+      :language: yaml
+
 .. _netplan_static_ip:
 
 激活netplan
