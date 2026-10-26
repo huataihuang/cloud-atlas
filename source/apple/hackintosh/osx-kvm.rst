@@ -92,7 +92,9 @@ OSX-KVM 是目前虚拟化运行macOS非常方便成熟的方案。
 
 重启后执行 ``lspci -nnk -s 0000:19:00.0`` ，确认 Kernel driver in use: 显示为 vfio-pci 即代表隔离成功 **不过，我这里实践发现不行，还是显示为 amdgpu** 这说明host主机没有屏蔽掉vfio，我之前实践 :ref:`ovmf_gpu_nvme` ，是需要配置内核参数屏蔽掉: ``配置/etc/default/grub加载vfio-pci.ids来隔离PCI直通设备``
 
-不过，我考虑到后续还是要采用 :ref:`libvirt_hooks_qemu_gpu` ，以便能够更好动态使用GPU
+.. note::
+
+   考虑到后续还是要采用 :ref:`libvirt_hooks_qemu_gpu` ，以便能够更好动态使用GPU。我在实践和记录这这段内容之后，调整了方法，将上述固定配置 ``vfio`` 改造成 :ref:`libvirt_hooks_qemu_gpu` 以便能够在日常中灵活切换。
 
 OSX-KVM搭建 macOS 虚拟机环境
 =============================
@@ -101,6 +103,57 @@ OSX-KVM搭建 macOS 虚拟机环境
 
 .. literalinclude:: osx-kvm/osx-kvm
    :caption: 下载osx-kvm以及安装基础依赖
+
+.. note::
+
+   精简安装参考 :ref:`ubuntu_deploy_kvm`
+
+- 设置调优kvm:
+
+.. literalinclude:: osx-kvm/kvm
+   :caption: 设置当前服务器kvm以及调优
+
+持久化配置:
+
+.. literalinclude:: osx-kvm/kvm_config
+   :caption: 持久化kvm配置
+
+- 将用户添加到 ``kvm`` 和 ``libvirt`` 组:
+
+.. literalinclude:: osx-kvm/usermod
+   :caption: 当前用户添加组
+
+- 重新登录，然后执行:
+
+.. literalinclude:: osx-kvm/fetch
+   :caption: 下载
+
+必须看到下载验证成功:
+
+.. literalinclude:: osx-kvm/fetch_output
+   :caption: 下载成功
+   :emphasize-lines: 11,21
+
+有时候网络抖动会导致镜像下载中断，此时校验失败会提示 ``Image verification failed. (Invalid chunk 1 size: expected 10485760, read 1048576)`` ，则清理缓存重新下载:
+
+.. literalinclude:: osx-kvm/fetch_clean
+   :caption: 清理失败的下载
+
+- 转换下载的 ``BaseSystem.dmg`` 文件成为 ``BaseSystem.img`` :
+
+.. literalinclude:: osx-kvm/dmg2img
+   :caption: 转换dmg文件
+
+- 启动安装:
+
+.. literalinclude:: osx-kvm/boot
+   :caption: 启动安装
+
+.. note::
+
+   这里可以看出安装的脚本是默认你在桌面环境运行的，所以会启动qemu时附加 :ref:`alsa` 库要求以及 ``gtk`` 要求。不过，我是在纯字符终端的无头安装模式，所以参考gemini建议做一些调整，以便能够从字符模式完成这个安装过程。
+
+   待续...
 
 参考
 ======

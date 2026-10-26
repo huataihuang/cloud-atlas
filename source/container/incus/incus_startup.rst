@@ -79,6 +79,20 @@ Incus提供了一个 `Image server for Incus and LXC <https://images.linuxcontai
 .. literalinclude:: incus_startup/exec_command
    :caption: 执行单条命令
 
+- 断开console方式采用 ``ctrl+a,q``
+
+清理容器
+==========
+
+- (强行)停止并删除现有容器
+
+.. literalinclude:: incus_startup/delete
+   :caption: 删除容器
+
+- (可选)清理本地旧镜像缓存(如果想确保incus重新从远程服务器下载最新的镜像)
+
+.. literalinclude:: incus_startup/image_delete
+   :caption: 删除镜像
 
 参考
 ======

@@ -71,9 +71,22 @@ Ubuntu部署KVM
 
 .. note::
 
-   当前Ubuntu对KVM相关的虚拟化软件包进行了 **解耦和重命名** 以前使用 ``qemu-kvm`` 安装软件包现在改名为 ``qemu-system-x86`` 或 ``qemu-system-arm`` 等。如果你直接安装 ``qemu-system`` 则会安装大量不同架构的执行包，如 ``qemu-system qemu-system-arm qemu-system-common qemu-system-data qemu-system-gui qemu-system-mips qemu-system-misc qemu-system-modules-opengl qemu-system-modules-spice qemu-system-ppc qemu-system-s390x qemu-system-sparc qemu-system-x86``
+   当前Ubuntu对KVM相关的虚拟化软件包进行了 **解耦和重命名** 以前使用 ``qemu-kvm`` 安装软件包现在改名为 ``qemu-system-x86`` 或 ``qemu-system-arm`` 等。
+
+   如果你直接安装 ``qemu-system`` 则会安装大量不同架构的执行包，如 ``qemu-system qemu-system-arm qemu-system-common qemu-system-data qemu-system-gui qemu-system-mips qemu-system-misc qemu-system-modules-opengl qemu-system-modules-spice qemu-system-ppc qemu-system-s390x qemu-system-sparc qemu-system-x86``
 
    所以建议直接安装 ``qemu-system-x86``
+
+.. note::
+
+   - ``qemu-kvm`` 仅安装核心的kvm加速的qemu而不是全套 :ref:`qemu` 模拟， **注意** debian 12提供了真实的qemu-kvm软件包，但是ubuntu做了拆分定制:
+
+     - ``qemu-system-x86`` 整个LTS生命周期保持固定的主版本，仅进行安全和缺陷修复，适合稳定和生产环境使用
+     - ``qemu-system-x86-hwe`` 在 LTS 发布后的前 2 年内，每 6 个月升级一次大版本，引入最新功能和新硬件支持
+
+   - ``libvirt-daemon-system`` 是libvirt的核心服务
+   - ``libvirt-clients`` 提供 ``virsh`` 的管理客户端，可远程管理 :ref:`libvirt`
+   - ``bridge-utils`` 提供虚拟交换机管理实现 :ref:`libvirt_network`
 
 - Ubuntu 18.10及以上版本::
 

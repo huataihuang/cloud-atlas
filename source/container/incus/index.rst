@@ -15,6 +15,8 @@ Incus
    incus_network.rst
    incus_freebsd.rst
    incus_freebsd_tunning.rst
+   incus_container_systemd_debug.rst
+   incus_nvidia_gpu.rst
 
 .. only::  subproject and html
 
