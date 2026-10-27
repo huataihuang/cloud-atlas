@@ -15,7 +15,7 @@ Incus使用ZFS作为存储(xcloud)
 
 - 安装 ``zfsutils-linux`` :
 
-.. literalinclude:: ../../linux/storage/zfs/install/ubuntu_zfs/install_zfsutils
+.. literalinclude:: ../../../linux/storage/zfs/install/ubuntu_zfs/install_zfsutils
    :caption: 在Ubuntu环境安装 ``zfsutils-linux``
 
 - 为Incus配置zpool:

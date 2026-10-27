@@ -26,7 +26,7 @@ Ubuntu 24.04 LTS以及后续版本都默认包含了 ``incus`` 软件包，可�
 
 - incus初始化:
 
-.. literalinclude:: incus_zfs/incus_admin_init
+.. literalinclude:: storage/incus_zfs/incus_admin_init
    :caption: 初始化incus
 
 .. note::

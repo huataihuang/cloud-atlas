@@ -22,7 +22,7 @@ Host主机准备
 
 **物理主机** 需要安装 NVIDIA driver:
 
-.. literalinclude:: ../..//machine_learning/hardware/nvidia_gpu/install_nvidia_linux_driver_ubuntu/install_595
+.. literalinclude:: ../../../machine_learning/hardware/nvidia_gpu/install_nvidia_linux_driver_ubuntu/install_595
    :caption: 安装 ``nvidia-driver-595-server-open`` 驱动
 
 :ref:`nvidia_container_toolkit`
@@ -32,23 +32,23 @@ Host主机准备
 
 - 安装必要的工具:
 
-.. literalinclude:: ../../docker/gpu/nvidia_container_toolkit/prepare
+.. literalinclude:: ../../../docker/gpu/nvidia_container_toolkit/prepare
    :caption: 安装工具
 
 - 配置仓库:
 
-.. literalinclude:: ../../docker/gpu/nvidia_container_toolkit/repo
+.. literalinclude:: ../../../docker/gpu/nvidia_container_toolkit/repo
    :caption: 仓库
 
 
 - 更新仓库:
 
-.. literalinclude:: ../../docker/gpu/nvidia_container_toolkit/update_repo
+.. literalinclude:: ../../../docker/gpu/nvidia_container_toolkit/update_repo
    :caption: 更新仓库
 
 - 安装 ``NVIDIA Container Toolkit`` 软件包:
 
-.. literalinclude:: ../../docker/gpu/nvidia_container_toolkit/install
+.. literalinclude:: ../../../docker/gpu/nvidia_container_toolkit/install
    :caption: 安装 ``NVIDIA Container Toolkit``
 
 部署使用GPU的LXC容器
@@ -58,7 +58,7 @@ Host主机准备
 
 - 首先检查系统中NVIDIA显卡，在Host主机执行 ``nvidia-smi`` 命令可以看到我的主机上安装了3块 :ref:`tesla_a2` :
 
-.. literalinclude:: ../../machine_learning/hardware/nvidia_gpu/install_nvidia_linux_driver_ubuntu/nvidia-smi_output_a2
+.. literalinclude:: ../../../machine_learning/hardware/nvidia_gpu/install_nvidia_linux_driver_ubuntu/nvidia-smi_output_a2
    :caption: 在Host主机上检查 ``nvidia-smi`` 输出(pci)
    :emphasize-lines: 10,14,18
 
@@ -98,4 +98,3 @@ Host主机准备
 .. literalinclude:: incus_nvidia_gpu/nvidia-smi_output_again
    :caption: 容器内部执行 ``nvidia-smi`` 看到添加的 **3块** GPU
    :emphasize-lines: 9,13,17
-

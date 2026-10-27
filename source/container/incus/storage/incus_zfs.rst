@@ -142,17 +142,17 @@ LVM是一个非常高效、极其轻量化的设备映射器(Device Mapper)抽�
 
 在采用上述方法二实现了ZFS存储池来提供 ``incus`` 存储后端后，并且完成了初始化，就可以创建运行容器:
 
-.. literalinclude:: incus_startup/debian12
+.. literalinclude:: ../incus_startup/debian12
    :caption: 运行debian 12容器
 
 当运行容器后，在Host主机上检查 ``df -h`` 就会看到，这个容器的数据是存储在 ``icus-zpool`` 的一个数据集中，具体就是 ``incus-zpool/containers/debian12-dev`` :
 
-.. literalinclude:: incus_startup/zfs_containers
+.. literalinclude:: ../incus_startup/zfs_containers
    :caption: ZFS存储的容器
 
 实际上incus对ZFS的存储做了精细的划分，使用 ``zfs list`` 可以看到:
 
-.. literalinclude:: incus_startup/zfs_list
+.. literalinclude:: ../incus_startup/zfs_list
    :caption: incus对ZFS的数据集做了精细划分
 
 补充存储

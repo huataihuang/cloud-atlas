@@ -23,7 +23,7 @@ Incus自从2023年从 :ref:`lxd` fork出来以后，社区进行了重构，砍�
 - **底层技术的精简** : 在最新的 Incus 7.0 LTS 中，社区彻底砍掉了落后的 CGroup v1 支持（全面拥抱 v2）以及老旧的 xtables（全面转向 nftables），甚至移除了对外部 MinIO 的依赖，在内部自研了轻量级原生 S3 存储对象接口。这使得 Incus 的内核要求更高，但运行效率和代码极其干净。
 - **老旧大厂特性的移除** : Incus 砍掉了 Canonical 特有的一些商业绑定，例如 MAAS（Canonical 的裸机部署工具）集成，以及老旧的 Ubuntu FAN 网络。
 
-"嵌套模拟 Kubernetes（K8s）"场景
+"嵌套模拟 Kubernetes"场景
 ==================================
 
 由于 K8s 节点（如 kubelet）需要接管底层的 Cgroup 层次结构，而 Snap 版的 LXD 自身就受到 snapd 施加的独立 Cgroup 和命名空间限制。这很可能导致 ``kubeadm init`` 时出现 ``Permisssion Denied`` 报错。

@@ -9,14 +9,10 @@ Incus
 
    intro_incus.rst
    incus_startup.rst
-   incus_zfs.rst
-   incus_zfs_xcloud.rst
-   incus_lvm.rst
-   incus_network.rst
-   incus_freebsd.rst
-   incus_freebsd_tunning.rst
-   incus_container_systemd_debug.rst
-   incus_nvidia_gpu.rst
+   instances/index
+   network/index
+   storage/index
+   gpu/index
 
 .. only::  subproject and html
 
