@@ -1,0 +1,1 @@
+podman-compose up -d

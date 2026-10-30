@@ -13,6 +13,7 @@ FreeBSD管理
    freebsd_ports_proxy.rst
    freebsd_15_alpha_update_upgrade.rst
    freebsd_pkgbase.rst
+   upgrade_freebsd_pkgbase.rst
    freebsd_15_stable_upgrade_release.rst
    freebsd_check.rst
    freebsd_user_group.rst

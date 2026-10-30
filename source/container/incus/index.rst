@@ -10,8 +10,9 @@ Incus
    intro_incus.rst
    incus_startup.rst
    instances/index
-   network/index
    storage/index
+   network/index
+   images/index
    gpu/index
 
 .. only::  subproject and html

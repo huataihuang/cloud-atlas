@@ -32,14 +32,20 @@ Jail目录树
 
    Jail文件的位置没有规定，在FreeBSD Handbook中采用的是 ``/usr/local/jails`` 目录。
 
-   我为了方便管理和数据存储最大化，使用了 ``stripe 模式 ZFS`` 存储池 ``zdata`` 下的 ``/zdata/jails``
+   在部署时可以采用独立的存储池，也可以使用FreeBSD安装时默认的 ``zroot`` 存储池，可根据自己实际部署选择:
+   
+   - 对于生产环境，我建议是用独立存储池: 例如采用 :ref:`zfs_raidz` 存储池 ``zdata`` 下的 ``/zdata/jails``
+   - :ref:`freebsd_on_thinkpad_x220` 采用了默认根ZFS存储池是 ``zroot`` ，所以采用 ``/zroot/jails``
 
    注意，我使用了 ``jail_zfs`` 环境变量来指定ZFS位置，对应目录就是 ``/$jail_zfs``
 
 - 设置环境变量:
 
 .. literalinclude:: vnet_thin_jail/env
-   :caption: 设置 jail目录和release版本环境变量
+   :caption: 设置 jail目录和release版本环境变量(zdata存储池)
+
+.. literalinclude:: vnet_thin_jail/env_zroot
+   :caption: 设置 jial目录(取消了release版本)环境变量(zroot存储池)
 
 - 创建jail目录结构
 
@@ -50,6 +56,9 @@ Jail目录树
 
 .. literalinclude:: vnet_thin_jail/df
    :caption: jail目录的zfs形式
+
+.. literalinclude:: vnet_thin_jail/df_zroot
+   :caption: jail目录的zfs形式(zroot)
 
 .. note::
 
@@ -81,20 +90,37 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 .. literalinclude:: vnet_thin_jail/templates_base
    :caption: 创建 **读写模式** 的 ``14.3-RELEASE-base``
 
+.. literalinclude:: vnet_thin_jail/templates_base_zroot
+   :caption: 创建 **续写模式** 的 ``RELEASE-base`` (不包含版本号)
+
+.. note::
+
+   我现在感觉在创建 ``-base`` 可读写数据集的时候，引入RELEASE版本号存在一个矛盾: 当升级系统RELEASE之后，这个版本号是变化的。那么我升级系统之后，这个版本号就变化了，而数据集的命名依然停留在旧版本号，似乎不太合理。
+
 - 下载用户空间:
 
 .. literalinclude:: vnet_thin_jail/fetch
    :caption: 下载用户空间
 
-- 将下载内容解压缩到模版目录: **内容解压缩到模板目录( 14.3-RELEASE-base 后续不需要创建快照，直接使用)**
+- 将下载内容解压缩到模版目录:
+  
+**内容解压缩到模板目录( 14.3-RELEASE-base 后续不需要创建快照，直接使用)**
 
 .. literalinclude:: vnet_thin_jail/tar
    :caption: 解压缩
+  
+**内容解压缩到模板目录( 15.1-RELEASE-base 后续不需要创建快照，直接使用)**
+
+.. literalinclude:: vnet_thin_jail/tar_zroot
+   :caption: 解压缩(zroot)
 
 - 将时区和DNS配置复制到模板目录:
 
 .. literalinclude:: vnet_thin_jail/cp
    :caption: 将时区和DNS配置复制到模板目录
+
+.. literalinclude:: vnet_thin_jail/cp_zroot
+   :caption: 将时区和DNS配置复制到模板目录(zroot)
 
 - 更新模板补丁:
 
@@ -109,15 +135,34 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 
 可以看到host主机对模版更新是自动按照 ``14.3-RELEASE`` 的元数据进行，而不是模版的 ``14.3-RELEASE`` 。那么jail模版现在是 ``14.3-RELEASE`` 么？
 
+.. note::
+
+   上文是针对传统的模式升级，但是对于 :ref:`freebsd_pkgbase` 系统需要使用下文方法
+
+现在FreeBSD 15.1我使用了 :ref:`freebsd_pkgbase` ，所以采用下面这条命令更新(这个更新会作用到所有使用这个BASE系统的Nullfs Jail:
+
+.. literalinclude:: vnet_thin_jail/update_zroot
+   :caption: 更新模板补丁(zroot)
+
 - 创建一个特定数据集 ``skeleton`` (**骨骼**) ，这个 "骨骼" ``skeleton`` 命名非常形象，用意就是构建特殊的支持大量thin jial的框架底座
 
 .. literalinclude:: vnet_thin_jail/zfs_create
    :caption: 创建特定数据集 ``skeleton`` (骨骼)
 
+针对15.1(zroot) ``skeleton`` :
+
+.. literalinclude:: vnet_thin_jail/zfs_create_zroot
+   :caption: 创建特定数据集 ``skeleton`` (骨骼,zroot)
+
 - 执行以下命令，将特定目录移入 ``skeleton`` 数据集，并构建 ``base`` 和 ``skeleton`` 必要目录的软连接关系
 
 .. literalinclude:: vnet_thin_jail/skeleton_link
    :caption: 特定目录移入 ``skeleton`` 数据集
+
+针对15.1(zroot)的特定目录移入 ``skeleton`` 数据集(和上面稍微改变一点):
+
+.. literalinclude:: vnet_thin_jail/skeleton_link_root
+   :caption: 特定目录移入 ``skeleton`` 数据集(zroot)
 
 .. note::
 
@@ -140,6 +185,11 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 .. literalinclude:: vnet_thin_jail/link
    :caption: 创建软连接
 
+针对15.1(zroot)的创建软链接(和上面稍微改变一点):
+
+.. literalinclude:: vnet_thin_jail/link_zroot
+   :caption: 创建软连接(zroot)
+
 .. warning::
 
    我在实践NullFS的Thin Jails，发现移动到 ``skeleton`` 目录下的 ``/etc`` 目录有一个子目录 ``/etc/ssl/certs`` 。这个证书目录下的文件是软链接到 ``../../../usr/share/certs/trusted/`` 目录下的证书文件。由于 ``/etc`` 目录移动后会导致这些相对链接失效，所以需要有一个修复软链接的步骤。
@@ -153,6 +203,10 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 
 .. literalinclude:: vnet_thin_jail/fix_link.sh
    :caption: 修复软链接
+
+.. note::
+
+   RELEASE 15.1 已经不需要这个软链接修复，因为在 /etc/ssl/certs 目录下是实际文件而不是软链接
 
 .. note::
 
@@ -183,8 +237,15 @@ FreeBSD Thin Jail是基于 ZFS ``快照(snapshot)`` 或 ``模板和NullFS`` 来�
 .. literalinclude:: vnet_thin_jail/jail_name
    :caption: 为了能够灵活创建jail，这里定义一个 ``jail_name`` 环境变量，方便后续调整jail命名
 
+以前14.3版本创建快照和clone:
+
 .. literalinclude:: vnet_thin_jail/snapshot
    :caption: 创建skeleton快照,然后再创建快照的clone(jail)
+
+现在15.1版本创建快照和clone:
+
+.. literalinclude:: vnet_thin_jail/snapshot_zroot
+   :caption: 创建skeleton快照,然后再创建快照的clone(jail)(zroot)
 
 - 现在可以看到相关ZFS数据集如下:
 

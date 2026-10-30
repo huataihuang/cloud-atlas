@@ -35,8 +35,17 @@ FreeBSD默认提供 :ref:`clang` ``llvm`` ，所以不需要 ``gcc`` 就可以�
 .. literalinclude:: freebsd_programming_tools/install
    :caption: 安装开发工具
 
+现在统一采用 :ref:`nvim_lightweight_ide` 构建开发环境，所以安装开发工具如下:
+
+.. literalinclude:: freebsd_programming_tools/install_dev
+   :caption: 安装开发环境
+
 构建 :ref:`nvim` 开发环境
 ===========================
+
+.. note::
+
+   本段废弃，太折腾了... 我现在全面转为采用 :ref:`nvim_lightweight_ide` (多平台通用)
 
 - 下载我自己的 :ref:`nvim_ide` 配置仓库:
 
@@ -104,7 +113,7 @@ FreeBSD默认提供 :ref:`clang` ``llvm`` ，所以不需要 ``gcc`` 就可以�
 
 .. warning::
 
-   暂时没有时间继续，后续再研究
+   :strike:`暂时没有时间继续，后续再研究` 本段折腾感觉走上了死路，现在我根据自己的实践经验，采用 :ref:`nvim_lightweight_ide` 实现通用的开发环境。
 
 参考
 ======

@@ -1,0 +1,1 @@
+fc-cache -f -v

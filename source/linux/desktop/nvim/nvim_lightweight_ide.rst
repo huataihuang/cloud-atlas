@@ -10,16 +10,38 @@ NeoVim轻量级IDE(我的选择)
 
    **这是我目前使用的最佳实践**
 
-安装开发语言
-=============
+nvim配置采用了 :ref:`lua` 编写的 ``init.lua`` ，是标准的Neovim插件管理逻辑(通过 :ref:`lazy.nvim` )，所以并不强依赖于特定的Linux系统发行版，可以在不同的Linux系统、 :ref:`macos` 和 :ref:`freebsd` 通用。
+
+区别在于执行nvim配置前，需要在操作系统上安装必要的开发语言和底层依赖工具
+
+安装开发语言和底层依赖工具
+=============================
+
+macOS
+-------
 
 在 :ref:`macos` 中使用 :ref:`mise` 完成安装开发语言以及 ``nvim`` 和 ``tmux`` :
 
 .. literalinclude:: ../../../rust/mise/install
    :caption: 安装开发语言
 
+FreeBSD
+---------
+
+.. note::
+
+   在FreeBSD系统中，不建议使用 :ref:`mise` : mise（以及类似的 asdf、nvm、rvm 等工具）的核心原理是去远端下载针对 Linux（glibc）或 macOS 编译好的预编译二进制文件。由于 FreeBSD 拥有自己独立的内核、系统调用和二进制接口（ABI），这些 Linux/macOS 的二进制程序无法直接在 FreeBSD 上原生运行（除非开启复杂的 Linux 兼容层，但这对于开发工具链来说极其不稳定且性能低下）。
+
+- 使用FreeBSD原生 :ref:`freebsd_pkg` 安装开发环境:
+
+.. literalinclude:: ../../../freebsd/program/freebsd_programming_tools/install_dev
+   :caption: 安装软件
+
 安装LSP
 ==========
+
+macOS
+-------
 
 .. note::
 
@@ -66,8 +88,59 @@ NeoVim轻量级IDE(我的选择)
 .. literalinclude:: nvim_lightweight_ide/check_cmd
    :caption: 检查工具是否都已经安装到位
 
+FreeBSD
+----------
+
+.. note::
+
+   FreeBSD平台安装LSP类似于macOS，不过做一些目录调整，安装到用户HOME目录并设置好路径以便nvim能够找到执行程序
+
+- 安装 Gem 包 ``solargraph`` :
+
+.. literalinclude:: nvim_lightweight_ide/solargraph
+   :caption: 安装 ``solargraph``
+
+- 通过 pip ( :ref:`virtualenv` ) 安装 ``jedi-language-server`` 和 ``ruff`` 到当前 Python 的 ``site-packages/bin`` 中
+
+.. literalinclude:: nvim_lightweight_ide/python_lsp
+   :caption: 安装Python LSP
+
+- FreeBSD发行版提供了 ``rust-analyzer`` 插件包，所以我直接通过pkg安装方便维护
+
+.. literalinclude:: nvim_lightweight_ide/rust-analyzer_freebsd
+   :caption: 通过pkg安装 ``rust-analyzer``
+
+- FreeBSD发行版也提供了 ``gopls`` ，所以同样通过pkg安装:
+
+.. literalinclude:: nvim_lightweight_ide/gogls_freebsd
+   :caption: 通过pkg安装 ``gogls``
+
+- 由于 ``marksman`` 是 C#(.net) 编写的 Markdown LSP 分析器，在FreeBSD平台没有很好支持.NET运行时，所以改为:
+
+  - ``obsidian.nvim`` 插件: 纯Lua便携，内置的 :ref:`obsidian` 交互，快捷键创建Daily Note、 ``[[双链]]`` 支持以及 ``gf`` 快捷转跳等，非常适合编辑Obsidian知识库文档
+  - ``markdown-oxide`` : 标准 Markdown / PKM 语言服务器 (LSP)，Rust编写的跨平台工具，采用标准LSP机制来实现自动补全双链 ``[[`` 、代码悬停预览（Hover）、提取与安全的标题重命名(Refactor/Rename)，甚至可以配合 Helix、Zed 等其他支持 LSP 的编辑器
+
+.. literalinclude:: nvim_lightweight_ide/markdown-oxide
+   :caption: 安装 ``markdown-oxide``
+
+- 补齐辅助工具（Asciidoctor & Python 文档工具）
+
+.. literalinclude:: nvim_lightweight_ide/tools_freebsd
+   :caption: 补齐工具
+
+- 配置 :ref:`foot` 配置文件 ``~/.config/foot/foot.ini`` :
+
+.. literalinclude:: nvim_lightweight_ide/foot.ini
+   :caption: foot字体配置文件 ``~/.config/foot/foot.ini``
+
 配置nvim
 ==========
+
+配置
+------
+
+macOS
+~~~~~~~
 
 我在构建 :ref:`mba11_late_2010` 上使用的 :ref:`alpine-dev_podman_image` ，采用了gemini提供的一个快速构建nvim的IDE的 ``init.lua`` 
 
@@ -79,6 +152,19 @@ NeoVim轻量级IDE(我的选择)
    :caption: ~/.config/nvim/init.lua
 
 这个独立的 ``~/.config/nvim/init.lua`` 采用单文件架构，涵盖了从插件管理、主题UI、代码高亮、侧边栏文件树到 LSP 自动补全的核心开发体验
+
+FreeBSD
+~~~~~~~~
+
+因为FreeBSD平台不同修改了LSP以及markdown插件，所以配置文件 ``~/.config/nvim/init.lua`` 调整为:
+
+.. literalinclude:: nvim_lightweight_ide/init_freebsd.lua
+   :language: lua
+   :linenos:
+   :caption: ~/.config/nvim/init.lua (FreeBSD)
+
+安装
+------
 
 - 执行以下无头命令安装好所有 ``nvim`` 插件:
 
@@ -135,6 +221,21 @@ NeoVim轻量级IDE(我的选择)
 
   - 自动连接 Dockerfile 内置的 6 个系统级 LSP/Tools（clangd, solargraph, jedi_language_server, ruff, rust_analyzer, marksman）。
   - 适配 Neovim 0.11+ 的原生 ``vim.lsp.config`` API，同时兼容旧版 lspconfig 语法。
+
+字体
+-----
+
+在状态栏使用了 **Font Awesome** ，通常需要安装"Nerd Fonts"打补丁的字体(它把 Font Awesome、Devicons 等各种图标合到了同一个字体的私有 PUA 编码区里)
+
+- 在 FreeBSD 中安装 Nerd Fonts:
+
+.. literalinclude:: nvim_lightweight_ide/font-nerd
+   :caption: 安装JetBrainsMono字体
+
+- 执行以下命令刷新系统的字体缓存，让系统和终端能够识别到新字体:
+
+.. literalinclude:: nvim_lightweight_ide/fc-cache
+   :caption: 刷新字体缓存
 
 常用开发技巧与快捷键指南
 ==========================

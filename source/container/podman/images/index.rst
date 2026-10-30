@@ -9,6 +9,7 @@ podman images
 
    alpine_podman_image.rst
    alpine-dev_podman_image.rst
+   debian-dev_podman_image.rst
 
 .. only::  subproject and html
 
