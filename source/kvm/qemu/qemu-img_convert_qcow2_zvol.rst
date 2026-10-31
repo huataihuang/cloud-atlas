@@ -27,24 +27,24 @@ qemu-img工具转换qcow2镜像文件到ZFS的zvol
 
    ``qemu-img convert`` 在转换为raw格式写入zvol是，写入的是 **虚拟大小** 的完整解压数据流。
 
-.. literinclude:: qemu-img_convert_qcow2_zvol/qemu-img_info
+.. literalinclude:: qemu-img_convert_qcow2_zvol/qemu-img_info
    :caption: 获取qcow2镜像标称的虚拟大小
 
 在输出结果中看以下内容:
 
-.. literinclude:: qemu-img_convert_qcow2_zvol/qemu-img_info_output
+.. literalinclude:: qemu-img_convert_qcow2_zvol/qemu-img_info_output
    :caption: 获取qcow2镜像标称的虚拟大小
 
 - 按照上述显示大小在ZFS中创建zvol
 
-.. literinclude:: qemu-img_convert_qcow2_zvol/zfs_create_zvol
+.. literalinclude:: qemu-img_convert_qcow2_zvol/zfs_create_zvol
    :caption: 创建ZVol
 
 如果不放心zvol精确大小，可以直接使用精确数字 ``-V 10737418240``
 
 - 执行转换:
 
-.. literinclude:: qemu-img_convert_qcow2_zvol/qemu-img_convert
+.. literalinclude:: qemu-img_convert_qcow2_zvol/qemu-img_convert
    :caption: qcow2转换zvol
 
 关于zvol太大
