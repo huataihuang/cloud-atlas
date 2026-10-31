@@ -1,8 +1,8 @@
 .. _docker_compose_ollama:
 
-=============================
-Docker compose组合运行Ollama
-=============================
+==========================================
+Docker compose组合运行Ollama(AMD GPU)
+==========================================
 
 在 :ref:`ollama_amd_gpu_docker` 能够很轻松地运行起Ollama，不过需要手工一一去启动不同用途的容器，例如 :ref:`grafana` :ref:`prometheus` 。所以，选择 :ref:`docker_compose` 来调度和启动容器组合，则会方便很多。
 

@@ -18,6 +18,7 @@ Linux系统管理
    linux_file_descriptor.rst
    check_shared_libray_is_used.rst
    process/index
+   move_home_to_lvm.rst
 
 .. only::  subproject and html
 
