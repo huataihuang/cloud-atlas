@@ -197,6 +197,28 @@ apt源代码安装和编译
 .. literalinclude:: ../../../devops/git/git-openssl/pkg_install_git_with_openssl
    :caption: 安装编译后的deb包
 
+apt-get 和 apt
+==================
+
+在 Dockerfile 中，官方推荐使用 ``apt-get`` 而不是 ``apt`` 。
+
+虽然平时在终端交互式操作时， ``apt`` 的彩色进度条和人性化提示更好用，但在编写 Dockerfile 时， ``apt-get`` 具有压倒性的优势:
+
+- **更稳定、向后兼容性更好** : ``apt`` 是为交互式终端设计的命令行前端，它的输出格式和行为在不同 Debian/Ubuntu 版本间可能会发生变化。而 ``apt-get`` 是更底层的命令行工具，其接口和行为极其稳定，非常适合写在脚本或 Dockerfile 中，避免构建过程因前端工具的微小变动而报错。
+- **避免不必要的警告提示** : 使用 ``apt`` 时，经常会看到形如 ``WARNING: apt does not have a stable CLI interface.`` 的警告信息，这会污染构建日志。而 ``apt-get`` 则不会有这个警告。
+
+在 Dockerfile 中使用 ``apt-get`` 时，通常需要组合几个关键参数来确保镜像干净、无缓存残留
+
+.. literalinclude:: apt/dockerfile
+   :caption: 在Dockerfile使用atp-get的案例
+   :language: dockerfile
+
+关键参数解析:
+
+- ``DEBIAN_FRONTEND=noninteractive`` ：防止某些软件包在安装时弹出需要用户手动确认的交互界面，导致 Docker 构建卡死。
+- ``--no-install-recommends`` ：只安装核心依赖，不安装推荐的附加软件包，能显著减小最终生成的镜像体积。
+- ``&& rm -rf /var/lib/apt/lists/*`` ：清理本地的软件包索引缓存。因为这些缓存文件在镜像构建完成后就不再需要了，清理它们可以大幅瘦身镜像。
+
 参考
 ========
 
@@ -204,3 +226,4 @@ apt源代码安装和编译
 - `How do I find the package that provides a file? <https://askubuntu.com/questions/481/how-do-i-find-the-package-that-provides-a-file>`_
 - `How to Fix 'add-apt-repository command not found' on Ubuntu & Debian <https://phoenixnap.com/kb/add-apt-repository-command-not-found-ubuntu>`_
 - `apt-get hold back packages on Ubuntu / Debian Linux <https://www.cyberciti.biz/faq/apt-get-hold-back-packages-command/>`_ 有多种hold软件包的方法，不过常用的 ``apt-mark`` 已经足够
+- gemini

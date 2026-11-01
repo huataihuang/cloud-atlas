@@ -30,4 +30,19 @@
 
 按照提示执行一次迁移命令 ``podman system migrate`` 之后就能正常下载镜像了
 
+Dockerfile
+==============
 
+.. note::
+
+   在 :ref:`alpine-dev_podman_image` 的Dockerfile中，执行 :ref:`alpine_apk` 时使用了 ``--no-cache`` 参数，更改到 :ref:`debian` 系统后， :ref:`apt` 没有内置类似 ``--no-cache`` 参数，但是可以通过结合 ``rm -rf /var/lib/apt/lists/*`` 来实现类似效果。
+
+   同时使用 ``--no-install-recommends`` 防止 ``apt-get`` 自动安装非必要的推荐软件包，以便为镜像瘦身。
+
+.. warning::
+
+   暂时还没有时间完整验证和修复Dockerfile，待续...
+
+.. literalinclude:: debian-dev_podman_image/debian-dev/Dockerfile
+   :language: dockerfile
+   :caption: ``debian-dev`` Dockerfile

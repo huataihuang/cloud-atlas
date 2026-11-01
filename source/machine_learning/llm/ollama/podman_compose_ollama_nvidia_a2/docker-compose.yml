@@ -1,0 +1,113 @@
+version: '3.8'
+
+networks:
+  ai-network:
+    driver: bridge
+    name: ai-network
+
+services:
+  # 1. Ollama 服务
+  ollama:
+    image: docker.io/ollama/ollama:latest
+    container_name: ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - /home/admin/podman/ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_KEEP_ALIVE=24h
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - ai-network
+
+  # 2. Open-WebUI 服务
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: always
+    ports:
+      - "3000:8080"
+    volumes:
+      - /home/admin/podman/open-webui_data:/app/backend/data
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - HF_HUB_OFFLINE=1
+      - RAG_EMBEDDING_ENGINE=ollama
+      - RAG_OLLAMA_BASE_URL=http://ollama:11434
+    depends_on:
+      - ollama
+    networks:
+      - ai-network
+
+  # 3. NVIDIA DCGM Exporter (GPU 监控数据抓取)
+  nvidia-exporter:
+    image: docker.io/nvidia/dcgm-exporter:latest
+    container_name: nvidia-exporter
+    restart: always
+    ports:
+      - "9400:9400"
+    cap_add:
+      - SYS_ADMIN
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - ai-network
+
+  # 4. Prometheus 服务
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - /home/admin/podman/prometheus_data:/etc/prometheus
+    depends_on:
+      - nvidia-exporter
+      - ollama
+    networks:
+      - ai-network
+
+  # 5. Grafana 服务
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    ports:
+      - "3001:3000"
+    volumes:
+      - /home/admin/podman/grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - ai-network
+
+  # 6. Node Exporter (物理主机系统指标抓取：CPU、内存、磁盘等)
+  node-exporter:
+    image: docker.io/prom/node-exporter:latest
+    container_name: node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - ai-network

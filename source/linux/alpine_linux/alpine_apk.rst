@@ -214,6 +214,13 @@ apk搜索软件包
    # 下载工具
    apk add curl axel
 
+Dockerfile
+=============
+
+和 :ref:`apt` 在Dockerfile中类似，制作镜像的时候需要尽可能保持本地清理干净，Alpine Linux为 ``apk`` 提供了一个编写 Dockerfile 和进行容器轻量化时非常经典且核心的参数 ``apk add --no-cache`` :
+
+- **跳过本地缓存存储** : 默认情况下，Alpine 的包管理器 ``apk`` 会将下载的软件包索引(index)以及 ``.apk`` 安装包缓存在本地的 ``/var/cache/apk/`` 目录下。
+- **极致压缩镜像体积** : 在 Docker 构建镜像时，如果使用 ``--no-cache`` ，它会直接从远程仓库下载并安装软件，但不会在本地保留任何缓存文件。这相当于把 ``apk add ...`` 和 ``rm -rf /var/cache/apk/*`` 合并为一步原子操作，避免无用的缓存占用宝贵的镜像层空间。
 
 参考
 ========
