@@ -1,0 +1,133 @@
+version: '3.8'
+
+networks:
+  ai-network:
+    driver: bridge
+    name: ai-network
+
+services:
+  # 1. Ollama 服务 (AMD ROCm)
+  ollama-amd:
+    image: docker.io/ollama/ollama:rocm
+    container_name: ollama-amd
+    restart: unless-stopped
+    ports:
+      - "11435:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+      # MI50 (gfx906) 
+      - HSA_OVERRIDE_GFX_VERSION=9.0.6
+      # 确保双卡同时向 Ollama 暴露，配合 OLLAMA_SCHED_SPREAD=true 实现双卡负载均摊
+      - HIP_VISIBLE_DEVICES=0,1
+      - ROCR_VISIBLE_DEVICES=0,1
+      # --- 关键新增参数 ---
+      - OLLAMA_SCHED_SPREAD=true        # 强制将模型分布在两块 MI50 上
+      - OLLAMA_MAX_LOADED_MODELS=1      # 针对大模型，限制同时加载的模型数，防止抢显存
+      - OLLAMA_FLASH_ATTENTION=true     # 建议：AMD 显卡开启可节省大量显存
+      - OLLAMA_KEEP_ALIVE=24h
+      # 先不设 VISIBLE_DEVICES，让它扫全量
+      - OLLAMA_DEBUG=1 # 开启详细调试日志
+    ulimits:                            # 允许容器锁定内存，防止 GPU 驱动初始化失败
+      memlock: -1
+      stack: 67108864
+    # --- 必须保留，否则新内核会拦截 GFX906 的底层指令 ---
+    privileged: true
+    devices:
+      # --- 显式映射计算端口和渲染节点，防止容器内驱动扫描不存在的显示设备 ---
+      - /dev/kfd:/dev/kfd
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri/renderD129:/dev/dri/renderD129
+    volumes:
+      - /home/admin/podman/ollama_data:/root/.ollama
+    networks:
+      - ai-network
+
+  # 2. Open WebUI (集成 Ollama RAG 向量化引擎)
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama-amd:11434
+      - HF_HUB_OFFLINE=1
+      - RAG_EMBEDDING_ENGINE=ollama
+      - RAG_OLLAMA_BASE_URL=http://ollama-amd:11434
+    volumes:
+      - /home/admin/podman/open-webui_data:/app/backend/data
+    depends_on:
+      - ollama-amd
+    networks:
+      - ai-network
+
+  # 3. AMD GPU Exporter (监控核心)
+  # 注意：这需要宿主机安装了 ROCm 驱动，因为它要读取物理 GPU 数据
+  amdgpu-exporter:
+    image: docker.io/rocm/device-metrics-exporter:v1.4.2
+    container_name: amdgpu-exporter
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    privileged: true                  # 赋予特权，允许访问底层硬件性能计数器
+    security_opt:
+      - label=disable                 # 关闭 Podman SELinux 限制
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/kfd:/dev/kfd
+    networks:
+      - ai-network
+
+  # 4. Prometheus (时序数据库)
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - /home/admin/podman/prometheus_data:/etc/prometheus
+    depends_on:
+      - amdgpu-exporter
+      - ollama-amd
+      - node-exporter
+    networks:
+      - ai-network
+
+  # 5. Grafana (可视化面板)
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    volumes:
+      - /home/admin/podman/grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - ai-network
+
+  # Node Exporter (监控物理机 CPU、内存、磁盘等核心指标)
+  node-exporter:
+    image: docker.io/prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+      - '--no-collector.thermal_zone'    # Dell T5820: 读取宿主机内核的 thermal_zone（热区/温度传感器）数据失败
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - ai-network
+
+volumes:
+  ollama_data:
+  open-webui_data:
+  prometheus_data:
+  grafana_data:

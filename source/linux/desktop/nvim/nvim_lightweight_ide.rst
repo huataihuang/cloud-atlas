@@ -162,7 +162,7 @@ FreeBSD
 
 因为FreeBSD平台不同修改了LSP以及markdown插件，所以配置文件 ``~/.config/nvim/init.lua`` 调整为:
 
-.. literalinclude:: nvim_lightweight_ide/init_freebsd.lua
+.. literalinclude:: ../../../container/podman/images/debian-dev_podman_image/debian-dev/config/nvim/init.lua
    :language: lua
    :linenos:
    :caption: ~/.config/nvim/init.lua (FreeBSD)
@@ -207,6 +207,7 @@ FreeBSD
 
   - ``vim.g.mapleader = " "`` : 将空格键（Space）设为 Leader 键，符合现代 Neovim 快捷键习惯。
   - 开启行号、相对行号、24位真彩色（termguicolors）与默认 4 空格缩进。
+  - 自动定位光标到上次关闭文件的行
 
 - 插件管理器( ``lazy.nvim`` )自动初始化:
 

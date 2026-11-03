@@ -84,6 +84,16 @@ AMDGPU驱动安装
 .. literalinclude:: rocm_quickstart/amdgpu_driver_install_24.04_lts_hwe
    :caption: 在 Ubuntu 24.04.4 LTS (HWE) 安装最新版本ROCm 7.2.1
 
+.. literalinclude:: rocm_quickstart/amdgpu_driver_install_26.04_lts
+   :caption: 在 Ubuntu 26.04.1 LTS 安装最新版本ROCm 7.2.4( ``失败了`` )
+
+.. warning::
+
+   我尝试在 :ref:`ubuntu_linux` 26.04.1 LTS上安装 ROCm 7.2.4 的 AMD GPU驱动失败:
+
+   .. literalinclude:: rocm_quickstart/amdgpu_driver_install_26.04_lts_output
+      :caption: 失败
+
 - 驱动安装完成后，在host主机上可以看到加载了 ``amdgpu`` 内核模块( ``lsmod | grep amd`` ):
 
 .. literalinclude:: rocm_quickstart/lsmod
@@ -229,6 +239,7 @@ AMDGPU驱动安装
 参考
 ======
 
+- `ROCm™ Software 7.2.4: Quick start installation guide <https://rocm.docs.amd.com/projects/install-on-linux/en/docs-7.2.4/install/quick-start.html>`_
 - `ROCm™ Software 7.2.1 > Quick start installation guide <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html>`_
 - `ROCm™ Software 6.3.2 > Quick start installation guide <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/quick-start.html#rocm-install-quick>`_
 - `ROCm™ Software 6.3.2 > Post-installation instructions <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/post-install.html>`_

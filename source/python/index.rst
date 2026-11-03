@@ -13,6 +13,7 @@ Python
 
    intro_python.rst
    startup/index
+   var/index
    os/index
    dictionary/index
    network/index

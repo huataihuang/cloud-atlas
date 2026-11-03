@@ -12,6 +12,8 @@ Ubuntu Podman
 .. literalinclude:: ubuntu_podman/install
    :caption: 安装podman
 
+.. _podman_compose:
+
 podman compose
 -----------------
 

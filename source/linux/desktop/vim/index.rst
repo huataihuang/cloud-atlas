@@ -12,6 +12,7 @@ Vim
    install_vim.rst
    install_vim_centos6.rst
    vimrc/index
+   vim_basic/index
    vim_autocompletion.rst
    vim_auto_indent.rst
    vim_indentline.rst
@@ -19,7 +20,6 @@ Vim
    vim-go.rst
    light_vim.rst
    vim_native_package_loading.rst
-   vim_basic.rst
    vim_gz.rst
    vim_ctags.rst
    vim_hex_edit.rst

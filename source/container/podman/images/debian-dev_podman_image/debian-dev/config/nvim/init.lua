@@ -11,6 +11,17 @@ vim.opt.expandtab = true           -- Tab 转空格
 vim.opt.signcolumn = "yes"         -- 始终显示左侧警告/报错标记列
 vim.opt.mouse = ""                 -- 禁用VISUAL模式方便鼠标选择复制
 
+-- 自动记忆并恢复上次文件光标位置
+vim.api.nvim_create_autocmd("BufReadPost", {
+  callback = function()
+    local mark = vim.api.nvim_buf_get_mark(0, '"')
+    local lcount = vim.api.nvim_buf_line_count(0)
+    if mark[1] > 0 and mark[1] <= lcount then
+      pcall(vim.api.nvim_win_set_cursor, 0, mark)
+    end
+  end,
+})
+
 -- =============================================================================
 -- 2. 健壮的 lazy.nvim 自动安装逻辑
 -- =============================================================================
@@ -187,6 +198,19 @@ local on_attach = function(client, bufnr)
   vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)       -- 查找引用
   vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)   -- 变量重命名
   vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts) -- 代码修复
+
+  -- 诊断相关快捷键
+  vim.keymap.set("n", "<leader>d", function()
+    vim.diagnostic.open_float()
+  end, opts)
+  
+  vim.keymap.set("n", "[d", function()
+    vim.diagnostic.jump({ count = -1, float = true })
+  end, opts)
+  
+  vim.keymap.set("n", "]d", function()
+    vim.diagnostic.jump({ count = 1, float = true })
+  end, opts)
 end
 
 local servers = { "clangd", "solargraph", "jedi_language_server", "ruff", "rust_analyzer", "markdown_oxide" }
