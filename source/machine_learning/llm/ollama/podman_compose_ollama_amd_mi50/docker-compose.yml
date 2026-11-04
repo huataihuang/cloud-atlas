@@ -7,25 +7,34 @@ networks:
 
 services:
   # 1. Ollama 服务 (AMD ROCm)
-  ollama-amd:
-    image: docker.io/ollama/ollama:rocm
-    container_name: ollama-amd
+  ollama-mi50:
+    image: docker.io/xxdoman/ollama-mi50:latest
+    container_name: ollama-mi50
     restart: unless-stopped
+    shm_size: 16g
+    #device_cgroup_rules:              # rootless不支持: device cgroup rules are not supported in rootless mode or in a user namespace
+    #  - 'c 226:* rmw'
     ports:
       - "11435:11434"
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_ORIGINS=*
+      - OLLAMA_MODELS=/models
+      - OLLAMA_NUM_PARALLEL=1           # 制单实例的最大并发请求数为 1，串行处理可以有效防止多并发抢占显存引发 OOM
+      - OLLAMA_KV_CACHE_TYPE=q8_0       # 将 KV Cache量化为 8 比特，处理超长上下文时，能节省近一半的显存占用，且几乎不损失模型精度
+      - OLLAMA_FLASH_ATTENTION=1        # Flash Attention 加速，大幅减少显存带宽瓶颈，显著提升长文本推理的速度并节省显存
+      #- OLLAMA_LLM_LIBRARY=rocm         # 强制 Ollama 显式加载 ROCm 计算后端，确保所有矩阵运算直接下发到显卡硬件执行
       # MI50 (gfx906) 
       - HSA_OVERRIDE_GFX_VERSION=9.0.6
+      - LD_LIBRARY_PATH=/usr/lib/ollama/rocm
       # 确保双卡同时向 Ollama 暴露，配合 OLLAMA_SCHED_SPREAD=true 实现双卡负载均摊
-      - HIP_VISIBLE_DEVICES=0,1
-      - ROCR_VISIBLE_DEVICES=0,1
+      #- HIP_VISIBLE_DEVICES=0,1         # 默认自动扫描并调用所有可用的显卡设备，可不加
+      #- ROCR_VISIBLE_DEVICES=0,1        # 默认自动扫描并调用所有可用的显卡设备，可不加
       # --- 关键新增参数 ---
-      - OLLAMA_SCHED_SPREAD=true        # 强制将模型分布在两块 MI50 上
-      - OLLAMA_MAX_LOADED_MODELS=1      # 针对大模型，限制同时加载的模型数，防止抢显存
-      - OLLAMA_FLASH_ATTENTION=true     # 建议：AMD 显卡开启可节省大量显存
-      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_SCHED_SPREAD=true        # Ollama 原生的多实例/多卡调度参数，强制将模型任务分布在两块 MI50 上
+      #- OLLAMA_MAX_LOADED_MODELS=1      # 针对大模型，限制同时加载的模型数，防止抢显存
+      #- OLLAMA_FLASH_ATTENTION=true     # 建议：AMD 显卡开启可节省大量显存
+      #- OLLAMA_KEEP_ALIVE=24h
       # 先不设 VISIBLE_DEVICES，让它扫全量
       - OLLAMA_DEBUG=1 # 开启详细调试日志
     ulimits:                            # 允许容器锁定内存，防止 GPU 驱动初始化失败
@@ -39,7 +48,9 @@ services:
       - /dev/dri/renderD128:/dev/dri/renderD128
       - /dev/dri/renderD129:/dev/dri/renderD129
     volumes:
-      - /home/admin/podman/ollama_data:/root/.ollama
+      - /home/admin/podman/ollama/:/models
+      - /home/admin/podman/ollama_data:/root
+      - /home/admin/podman/ai_work:/workspace
     networks:
       - ai-network
 
@@ -51,14 +62,14 @@ services:
     ports:
       - "3000:8080"
     environment:
-      - OLLAMA_BASE_URL=http://ollama-amd:11434
+      - OLLAMA_BASE_URL=http://ollama-mi50:11434
       - HF_HUB_OFFLINE=1
       - RAG_EMBEDDING_ENGINE=ollama
-      - RAG_OLLAMA_BASE_URL=http://ollama-amd:11434
+      - RAG_OLLAMA_BASE_URL=http://ollama-mi50:11434
     volumes:
       - /home/admin/podman/open-webui_data:/app/backend/data
     depends_on:
-      - ollama-amd
+      - ollama-mi50
     networks:
       - ai-network
 
@@ -76,6 +87,9 @@ services:
     devices:
       - /dev/dri:/dev/dri
       - /dev/kfd:/dev/kfd
+    volumes:
+      - /sys/class/drm:/sys/class/drm:ro      # 挂载显卡驱动目录
+      - /sys/devices:/sys/devices:ro          # 挂载硬件设备物理路径，用于读取温度和功耗 
     networks:
       - ai-network
 
@@ -90,7 +104,7 @@ services:
       - /home/admin/podman/prometheus_data:/etc/prometheus
     depends_on:
       - amdgpu-exporter
-      - ollama-amd
+      - ollama-mi50
       - node-exporter
     networks:
       - ai-network
