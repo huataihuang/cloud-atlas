@@ -1,0 +1,11 @@
+比较维度,Rootful 模式 (系统级),Rootless 模式 (无根级)
+守护进程身份,由系统级 ``root`` 用户运行和管理,由当前普通登录用户(如 ``admin`` )运行和管理
+命令执行方式,需要加 ``sudo`` (如 ``sudo podman`` / ``sudo podman compose`` ),绝对不能加 ``sudo`` (直接执行 ``podman`` )
+用户命名空间 (User Namespace),未隔离。容器内的 ``root`` 即是宿主机的真实 ``root`` ,已隔离。容器内虚拟的 ``root`` 映射到宿主机只是普通用户
+硬件与驱动直通 (如 GPU / ``/dev/kfd`` ),完美支持。配合 ``privileged: true`` 可直接穿透内核操作硬件驱动,受限。受用户命名空间限制，无法直接调用底层敏感设备节点
+存储路径 (镜像与容器卷),默认存放在系统全局目录： ``/var/lib/containers`` ,默认隔离在用户家目录： ``~/.local/share/containers``
+配置文件路径,系统全局配置：``/etc/containers`` ,用户私有配置：``~/.config/containers``
+Systemd 服务管理,由系统服务管理： ``sudo systemctl status podman`` ,由用户服务管理： ``systemctl --user status podman``
+网络栈实现,标准的 Linux 桥接网络(Bridge / CNI),依赖用户态网络工具(如 ``slirp4netns`` 或 ``pasta`` )
+安全性与隔离级别,较低。一旦容器被攻破，攻击者可能获得宿主机 root 权限,极高。即使容器被完全攻破，也仅限于该用户的普通权限范围
+适用场景,需要直接挂载异构硬件(GPU/ROCm/CUDA)、底层驱动的重度计算服务,常规 Web 应用、数据库、反向代理、监控 Exporter 等普通服务

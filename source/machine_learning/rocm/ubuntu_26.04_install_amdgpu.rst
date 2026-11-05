@@ -4,6 +4,10 @@
 Ubuntu 26.04安装AMDGPU驱动
 =========================================
 
+.. warning::
+
+   我实践下来在 Ubuntu 26.04上安装社区发行版的 ``amdgpu`` 并不能支持 :ref:`podman_compose_ollama_amd_mi50` ，也就是说，必须回退到Ubuntu 24.04使用官方的ROCm配套的 ``amdgpu`` 才能正常工作。本文只能作为一个经验教训，并不能实际用于机器学习环境搭建。
+
 我在准备 :ref:`podman_compose_ollama_amd_mi50` 前置工作， :ref:`install_amdgpu` 遇到一个问题:
 
 我原本以为和之前 :ref:`install_amdgpu` 一样，从官方下载 ``amdgpu_install`` 的deb包安装以后，通过执行安装会自动通过dkms完成内核模块安装。但是没有想到，根据 ``ollama/ollama:rocm`` 镜像中 :ref:`rocm` 7.2 版本选择安装 amdgpu 实际上是针对 Ubuntu 24.04 系列旧版本内核开发的，此时编译内核模块会报错。

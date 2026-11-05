@@ -57,6 +57,16 @@ RCOm安装
 AMDGPU驱动安装
 ------------------
 
+.. warning::
+
+   2026年11月重新部署，按照 `xxdoman/ollama-mi50 <https://hub.docker.com/r/xxdoman/ollama-mi50>`_ 镜像内置ROCm 7.2 :strike:`，所以在物理主机上也对应安装 ROCm 7.2 的 amdgpu 驱动`
+
+   仔细核对 `AMD ROCm™ 7.2 on Radeon™ and Ryzen™ for Linux® Release Notes <https://www.amd.com/en/resources/support-articles/release-notes/RN-AMDGPU-LINUX-ROCM-7-2.html>`_ 我发现官方文档写了:
+
+   ``AMD Ryzen™ processor users are recommended to use inbox graphics drivers of Ubuntu 24.04.3 along with AMD ROCm 7.2``
+
+   也就是说采用Ubuntu官方发行版内置的 ``amdgpu`` 驱动就可以满足ROCm 7.2运行要求了，所以不必单独安装(实际上安装私有驱动反而是编译失败的)
+
 .. note::
 
    AMD GPU驱动是ROCm的底层驱动和运行依赖
@@ -84,8 +94,8 @@ AMDGPU驱动安装
 .. literalinclude:: rocm_quickstart/amdgpu_driver_install_24.04_lts_hwe
    :caption: 在 Ubuntu 24.04.4 LTS (HWE) 安装最新版本ROCm 7.2.1
 
-.. literalinclude:: rocm_quickstart/amdgpu_driver_install_26.04_lts
-   :caption: 在 Ubuntu 26.04.1 LTS 安装最新版本ROCm 7.2.4( ``失败了`` )
+.. literalinclude:: rocm_quickstart/amdgpu_driver_install_24.04_lts
+   :caption: 在 Ubuntu 24.04.5 LTS (HWE) 安装最新版本ROCm 7.2.4
 
 .. warning::
 
@@ -93,6 +103,31 @@ AMDGPU驱动安装
 
    .. literalinclude:: rocm_quickstart/amdgpu_driver_install_26.04_lts_output
       :caption: 失败
+
+   可以看到实际上新版内核已经不再支持 ROCm 7.2.4 所使用的旧版dkms格式，所以无法编译成功
+
+.. warning::
+
+   我发现AMD的驱动对内核适配要求很苛刻，也就是社区内核升级会影响到 ``amdgpu`` 驱动的dkms编译，所以需要将发行版升级为 HWE 版本，以确保稳定兼容
+
+   我尝试直接在 Ubuntu 24.04.05 LTS版本上安装 ``amdgpu`` ，编译失败报错:
+
+   .. literalinclude:: rocm_quickstart/amdgpu_dkms_fail.log
+      :caption: ROCm 7.2 对应 ``amdgpu`` DKMS 驱动源码使用旧版函数参数导致编译失败
+      :emphasize-lines: 2
+
+   我想尝试将 Ubuntu 24.04.05 LTS 升级为 ``linux-generic-hwe-24.04`` : 注意Ubuntu 24.04 Desktop的HWE Stack默认使用了kernel 7.0，只有Ubuntu 24.04 Server版本HWE Stack默认的General Availability(GA) Kernel stack(Linux 6.8) ``linux-generic-hwe-24.04``
+
+   但是仔细看了 `AMD ROCm™ 7.2 on Radeon™ and Ryzen™ for Linux® Release Notes <https://www.amd.com/en/resources/support-articles/release-notes/RN-AMDGPU-LINUX-ROCM-7-2.html>`_ 我发现官方文档写了:
+
+   ``AMD Ryzen™ processor users are recommended to use inbox graphics drivers of Ubuntu 24.04.3 along with AMD ROCm 7.2``
+
+   也就是说实际上发行版的驱动就可以支持 ROCm 7.2，我完全不必要安装 ``amdgpu-install``
+
+   清理:
+
+   .. literalinclude:: rocm_quickstart/purge_amdgpu
+      :caption: 清理 ``amdgpu-install``
 
 - 驱动安装完成后，在host主机上可以看到加载了 ``amdgpu`` 内核模块( ``lsmod | grep amd`` ):
 
