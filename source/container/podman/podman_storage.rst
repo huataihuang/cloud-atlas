@@ -10,6 +10,8 @@ Podman存储
 
    :ref:`incus` 和 :ref:`podman` 非常类似，存储引擎(Storage Drivers)和存储位置也如本文类似，可以相互印证。
 
+   ``Rootfull`` vs. ``Rootless`` 参见 :ref:`intro_podman`
+
 位置
 ======
 

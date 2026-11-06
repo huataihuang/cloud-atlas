@@ -1,0 +1,79 @@
+version: '3.8'
+
+networks:
+  ai-network:
+    external: true                    # 已存在的外部网络，供跨域共享
+
+services:
+  # 1. Ollama 服务 (AMD ROCm)
+  ollama-mi50:
+    image: docker.io/xxdoman/ollama-mi50:latest
+    container_name: ollama-mi50
+    restart: unless-stopped
+    shm_size: 16g
+    device_cgroup_rules:              # rootfull模式
+      - 'c 226:* rmw'
+    privileged: true                  # 开启特权模式，允许底层访问
+    security_opt:
+      - label=disable                 # 关闭 SELinux 标签限制，放行硬件调用
+    ports:
+      # 由于运行在rootful模式下，需要让运行在rootless模式下容器访问，所以绑定物理主机所有端口提供访问
+      - "0.0.0.0:11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+      - OLLAMA_MODELS=/models
+      - OLLAMA_NUM_PARALLEL=1           # 制单实例的最大并发请求数为 1，串行处理可以有效防止多并发抢占显存引发 OOM
+      - OLLAMA_KV_CACHE_TYPE=q8_0       # 将 KV Cache量化为 8 比特，处理超长上下文时，能节省近一半的显存占用，且几乎不损失模型精度
+      - OLLAMA_FLASH_ATTENTION=1        # Flash Attention 加速，大幅减少显存带宽瓶颈，显著提升长文本推理的速度并节省显存
+      - OLLAMA_LLM_LIBRARY=rocm         # 强制 Ollama 显式加载 ROCm 计算后端，确保所有矩阵运算直接下发到显卡硬件执行
+      # MI50 (gfx906) 
+      - HSA_OVERRIDE_GFX_VERSION=9.0.6
+      - LD_LIBRARY_PATH=/usr/lib/ollama/rocm
+      # 确保双卡同时向 Ollama 暴露，配合 OLLAMA_SCHED_SPREAD=true 实现双卡负载均摊
+      - HIP_VISIBLE_DEVICES=0,1         # 默认自动扫描并调用所有可用的显卡设备，可不加
+      - ROCR_VISIBLE_DEVICES=0,1        # 默认自动扫描并调用所有可用的显卡设备，可不加
+      # --- 关键新增参数 ---
+      - OLLAMA_SCHED_SPREAD=true        # Ollama 原生的多实例/多卡调度参数，强制将模型任务分布在两块 MI50 上
+      - OLLAMA_MAX_LOADED_MODELS=1      # 针对大模型，限制同时加载的模型数，防止抢显存
+      - OLLAMA_KEEP_ALIVE=24h
+      # 先不设 VISIBLE_DEVICES，让它扫全量
+      - OLLAMA_DEBUG=1 # 开启详细调试日志
+    ulimits:                            # 允许容器锁定内存，防止 GPU 驱动初始化失败
+      memlock: -1
+      stack: 67108864
+    # --- 必须保留，否则新内核会拦截 GFX906 的底层指令 ---
+    privileged: true
+    devices:
+      # --- 显式映射计算端口和渲染节点，防止容器内驱动扫描不存在的显示设备 ---
+      - /dev/kfd:/dev/kfd
+      - /dev/dri/renderD128:/dev/dri/renderD128
+      - /dev/dri/renderD129:/dev/dri/renderD129
+    volumes:
+      - /home/admin/podman/ollama/:/models
+      - /home/admin/podman/ollama_data:/root
+      - /home/admin/podman/ai_work:/workspace
+    networks:
+      - ai-network
+
+  # AMD GPU Exporter (监控核心)
+  # 注意：这需要宿主机安装了 ROCm 驱动，因为它要读取物理 GPU 数据
+  amdgpu-exporter:
+    image: docker.io/rocm/device-metrics-exporter:v1.5.3
+    container_name: amdgpu-exporter
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:5000:5000"
+    privileged: true                  # 赋予特权，允许访问底层硬件性能计数器
+    security_opt:
+      - label=disable                 # 关闭 Podman SELinux 限制
+    devices:
+      - /dev/dri:/dev/dri             # 挂载全部 DRM 渲染与主节点
+      - /dev/kfd:/dev/kfd             # 挂载异构队列接口（满足 RSMI 初始化需求）
+    volumes:
+      - /sys:/sys:ro                  # 只读挂载宿主机内核 sysfs 遥测目录
+    networks:
+      - ai-network
+
+volumes:
+  ollama_data:

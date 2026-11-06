@@ -10,6 +10,7 @@ podman
    intro_podman.rst
    ../../linux/alpine_linux/alpine_podman.rst
    ubuntu_podman.rst
+   podman_combine_rootfull_rootless_mode.rst
    podman_storage.rst
    podman_proxy.rst
    podman_rootless_volumes.rst

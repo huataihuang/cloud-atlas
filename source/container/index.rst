@@ -7,6 +7,7 @@ Container
 .. toctree::
    :maxdepth: 2
 
+   secure_container_env.rst
    lxd/index
    incus/index
    podman/index

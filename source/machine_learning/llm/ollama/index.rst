@@ -20,6 +20,7 @@ ollama
    ollama_qwen3.5.rst
    docker_compose_ollama.rst
    podman_compose_ollama_amd_mi50.rst
+   podman_compose_ollama_amd_mi50_debug.rst
    podman_compose_ollama_nvidia_a2.rst
    ollama_d_crash.rst
    ollama_llm_plan.rst

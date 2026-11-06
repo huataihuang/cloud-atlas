@@ -1,0 +1,91 @@
+version: '3.8'
+
+networks:
+  ai-network:
+    external: true
+
+services:
+  # Open WebUI (集成 Ollama RAG 向量化引擎)
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    environment:
+      # 由于拆分了ollama-mi50运行在rootful环境，所以运行在rootless的容器要通过访问物理主机的实际IP地址来访问服务
+      #- OLLAMA_BASE_URL=http://ollama-mi50:11434
+      - OLLAMA_BASE_URL=http://host.containers.internal:11434
+      - HF_HUB_OFFLINE=1
+      - RAG_EMBEDDING_ENGINE=ollama
+      #- RAG_OLLAMA_BASE_URL=http://ollama-mi50:11434
+      - RAG_OLLAMA_BASE_URL=http://host.containers.internal:11434
+    volumes:
+      - /home/admin/podman/open-webui_data:/app/backend/data
+    depends_on:
+      - ollama-mi50
+    networks:
+      - ai-network
+
+  # Prometheus (时序数据库)
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - /home/admin/podman/prometheus_data:/etc/prometheus
+    depends_on:
+      #- amdgpu-exporter
+      #- ollama-mi50
+      - node-exporter
+    networks:
+      - ai-network
+
+  # Grafana (可视化面板)
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    volumes:
+      - /home/admin/podman/grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - ai-network
+
+  # Node Exporter (监控物理机 CPU、内存、磁盘等核心指标)
+  node-exporter:
+    image: docker.io/prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+      - '--no-collector.thermal_zone'    # Dell T5820: 读取宿主机内核的 thermal_zone（热区/温度传感器）数据失败
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - ai-network
+
+  # Ollama Exporter
+  ollama-exporter:
+    image: ghcr.io/norskhelsenett/ollama-metrics:latest
+    container_name: ollama-exporter
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=http://host.containers.internal:11434
+      - PORT=8080
+    networks:
+      - ai-network
+
+volumes:
+  open-webui_data:
+  prometheus_data:
+  grafana_data:
