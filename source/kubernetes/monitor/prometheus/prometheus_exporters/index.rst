@@ -19,7 +19,7 @@ Prometheus社区官方提供了大约十几种 `xxxx_exporters <https://github.c
    ../../../../performance/intel_pcm/pcm-grafana.rst
    ../../../gpu/dcgm-exporter.rst
    process-exporter.rst
-   amd_smi_exporter.rst
+   amd_device-metrics-exporter.rst
    blackbox_exporter.rst
    node_exporter_killed_by_sigpipe.rst
    ceph_exporter.rst

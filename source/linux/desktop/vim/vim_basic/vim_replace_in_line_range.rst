@@ -9,14 +9,14 @@ vim在指定行范围内替换
 .. literalinclude:: vim_replace_in_line_range/before.py
    :language: python
    :caption: 替换前的代码
-   :emphasize_lines: 4-6
+   :emphasize-lines: 4-6
 
 替换后:
 
 .. literalinclude:: vim_replace_in_line_range/after.py
    :language: python
    :caption: 替换后的代码
-   :emphasize_lines: 4-6
+   :emphasize-lines: 4-6
 
 使用指令:
 

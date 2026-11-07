@@ -9,15 +9,27 @@ IOMMU内核启动grub配置
 Intel
 ==========
 
-Intel处理器使用 ``IOMMU`` 只需要激活::
+Intel处理器使用 ``IOMMU`` 只需要激活:
 
-   intel_iommu=on
+.. literalinclude:: iommu_grub_config/intel_iommu
+   :caption: 内核参数激活Intel处理器 ``IOMMU``
 
-如果要使用 :ref:`sr-iov` ，为了最佳性能，应该再添加一个 ``pass-through`` 参数::
+如果要使用 :ref:`sr-iov` ，为了最佳性能，应该再添加一个 ``pass-through`` ( ``pt`` ) 参数:
 
-   iommu=pt
+.. literalinclude:: iommu_grub_config/iommu_pt
+   :caption: 激活IOMMU ``pass-through``
 
 当激活了 ``pass-through`` 模式，网卡就不需要使用DMA转换到内存，这就提高了处理性能。所以，对于hypervisor性能，这个 ``iommu=pt`` 参数是非常必要的
+
+综合上面两个参数，在 :ref:`ubuntu_linux` 系统中，配置上述2个参数的方法是修订 ``/etc/default/grub`` :
+
+.. literalinclude:: iommu_grub_config/grub
+   :caption: 修订 ``/etc/default/grub`` 添加 IOMMU 配置
+
+然后更新Grub并重启:
+
+.. literalinclude:: iommu_grub_config/update-grub
+   :caption: 更新grub
 
 参考
 ========

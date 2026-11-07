@@ -41,6 +41,7 @@ Podman compose组合运行Ollama(AMD MI50 GPU)
 
 - ``rootful`` 容器需要启用 ``privileged: true`` 特权模式，这样才能访问底层GPU设备(之前在 :ref:`podman_compose_ollama_amd_mi50_debug` 反复折腾的就是这个)
 - 端口绑定采用了 ``0.0.0.0:11434:11434`` 这是因为 ``ollama-mi50`` 和 ``amdgpu-exporter`` 是运行在 ``Rootful`` 模式下，而其他 openwebui, prometheus, grafana 容器是运行在 ``Rootless`` 模式下，相互间不能通过短域名访问。这里采用了变通模式，将 ``Rootful`` 容器的服务端口绑定到Host主机上，这样就能被 ``Rootless`` 容器访问到
+- Ollama相关设置请参考 :ref:`ollama_env`
 
 启动容器:
 
@@ -87,12 +88,15 @@ grafana
 当前从 ``podman logs -f ollama-mi50`` 观察日志来看:
 
 - Prompt 评估阶段：268.89 tokens per second
-- Token 生成阶段 (tg)：33.40 t/s 到 33.73 t/s
+- Token 生成阶段 (tg)：33.40 t/s 到 33.73 t/s (后期观察发现最稳定大约就是 30 t/s)
 
 gemini提示: 对于 50多GB 的大模型，双卡 MI50 能跑出每秒 30+ Token 的生成速度是非常正常的硬件表现
 
 异常排查
 ==========
+
+``amdgpu`` 的 ``page fault``
+-----------------------------
 
 运行 ``qwen3-coder-next:q4_K_M`` 模型，运行异常中断，从 ``ollama-mi50`` 容器日志看到:
 
@@ -105,4 +109,19 @@ gemini提示: 对于 50多GB 的大模型，双卡 MI50 能跑出每秒 30+ Toke
 .. literalinclude:: podman_compose_ollama_amd_mi50/llama-server_terminated_no-retry_page_fault.log
    :caption: 操作系统日志显示 ``no-retry page fault`` 错误
 
-这个问题和 ``Open-WebUI`` 的 ``num_ctx`` 设置项有关，我当前先调整为 ``4096`` ，运行暂时没有问题。后续再做优化
+这个问题可能和 ``Open-WebUI`` 的 ``num_ctx`` 设置项有关，我当前先调整为 ``4096`` ，运行暂时没有问题。
+
+kfd_process_wq_release [amdgpu] hogged CPU
+--------------------------------------------
+
+按照gemini建议，在我的双 :ref:`amd_mi50` 具有64GB显存，运行 ``qwen3-coder-next:q4_K_M`` 模型，大约可以开启上下文长度 ``num_ctx`` 约 ``8196`` 。我尝试了这个设置，发现确实没有出现 ``amdgpu`` 的 ``page fault`` 报错。但是，我的处理器性能不足，当推理时候CPU负载极高，系统dmesg日志中会出现:
+
+.. literalinclude:: podman_compose_ollama_amd_mi50/kfd_process_wq_release_hogged_cpu.log
+   :caption: 触发 hogged CPU for >10000us 警告
+
+:strike:`这个问题我准备通过升级操作系统到Ubuntu 26.04 LTS HWE来看看是否改善，目前将 num_ctx 降级到 6144 能明显改善，但是也会有偶然出现相同报错。看来4198比较保险，或者通过升级内核或者CPU硬件来解决？`
+
+这个问题和gemini讨论下来 :ref:`ollama_workqueue_optimize` 有两个影响因素需要优化:
+
+- 需要 :ref:`iommu_grub_config` (参见 :ref:`iommu_infra` )
+- 调整 :ref:`ollama_num_ctx` （启动的默认上下文长度是 ``256K`` )

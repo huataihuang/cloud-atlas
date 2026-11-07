@@ -26,6 +26,9 @@ ollama
    ollama_llm_plan.rst
    vscode_continue_ollama.rst
    ollama_webui.rst
+   ollama_env.rst
+   ollama_workqueue_optimize.rst
+   ollama_num_ctx.rst
 
 .. only::  subproject and html
 

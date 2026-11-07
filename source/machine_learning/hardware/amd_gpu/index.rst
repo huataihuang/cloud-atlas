@@ -15,6 +15,7 @@ AMD GPU
    amd_mi50_change_vbios_bar_size.rst
    amd_mi50_shroud.rst
    amd_gpu_monitor.rst
+   amd_mi50_hardware_errors.rst
 
 
 .. only::  subproject and html
