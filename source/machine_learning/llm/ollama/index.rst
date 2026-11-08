@@ -28,7 +28,10 @@ ollama
    ollama_webui.rst
    ollama_env.rst
    ollama_workqueue_optimize.rst
-   ollama_num_ctx.rst
+   ollama_init.rst
+   ollama_init_tunning.rst
+   open-webui_rrule.rst
+   open-webui_embedding_model.rst
 
 .. only::  subproject and html
 

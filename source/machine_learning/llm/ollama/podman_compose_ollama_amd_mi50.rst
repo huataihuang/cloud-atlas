@@ -56,8 +56,6 @@ Podman compose组合运行Ollama(AMD MI50 GPU)
 .. literalinclude:: podman_compose_ollama_amd_mi50/docker-compose.rootless.yml
    :caption: rootless模式运行 ``docker-compose.rootless.yml``
 
-在 ``
-
 启动容器:
 
 .. literalinclude:: podman_compose_ollama_amd_mi50/rootless_up
@@ -124,4 +122,4 @@ kfd_process_wq_release [amdgpu] hogged CPU
 这个问题和gemini讨论下来 :ref:`ollama_workqueue_optimize` 有两个影响因素需要优化:
 
 - 需要 :ref:`iommu_grub_config` (参见 :ref:`iommu_infra` )
-- 调整 :ref:`ollama_num_ctx` （启动的默认上下文长度是 ``256K`` )
+- 调整 :ref:`ollama_init_tunning` （启动的默认上下文长度是 ``256K`` ，批处理大小是 ``512`` )
