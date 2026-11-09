@@ -24,7 +24,7 @@ VS Code
    code-server_container.rst
    vscode_python.rst
    vscode_virtualenv.rst
-   vscode-neovim.rst
+   vscode_vim.rst
 
 .. only::  subproject and html
 

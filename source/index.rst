@@ -21,6 +21,20 @@ I have a dream!
 目标
 =======
 
+2026年底的目标更新
+--------------------
+
+到2027年1月1日初步完成 MLOps + Dev 的转型
+
+重点目标:
+
+- :ref:`machine_learning`
+- :ref:`kubernetes`
+- :ref:`python` + `golang`
+
+起源
+-------
+
 Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/subject/2070580/>`_ 」，译名为「列国图志」，我希望我的 Cloud Atlas 也能够简洁生动，为大家带来如同「图志」一般的展现云计算开源技术:
 
 - 分享是真实可复现的操作实践，没有隐瞒和遗漏(不是空洞的PPT分享)
@@ -35,7 +49,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
 
 :strike:`2024年底` 2025年6月，我将这部 「云图 -- 云计算图志」 修订命名为 「云图 -- 云计算图志: ``探索`` 」:
 
-- 正式启用了 :strike:`cloud-atlas.io` `cloud-atlas.dev <https://cloud-atlas.dev>`_ 域名，我将重新构建 `docs.cloud-atlas.dev <https://docs.cloud-atlas.dev>`_ :
+- 正式启用了 :strike:`cloud-atlas.io` (.io域名太贵放弃) `cloud-atlas.dev <https://cloud-atlas.dev>`_ 域名，我将重新构建 `infra.cloud-atlas.dev <https://infra.cloud-atlas.dev>`_ :
 
   - 本项目将作为其中的 ``Discovery`` 分册: 完全面向中文技术文档，继续探索云计算相关技术
   - 从2025年开始撰写一本新的实践指南，作为 「云图 -- 云计算图志」 的下一全新迭代:
@@ -51,7 +65,7 @@ Discovery曾经拍摄过系列纪录片 「 `Atlas <https://movie.douban.com/sub
 请访问:
 
 - `readthedocs平台上的云图 <https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html>`_ 第三方托管
-- `docs.cloud-atlas.dev <https://docs.cloud-atlas.dev>`_ 构建 `「云图 -- 云计算图志: 探索」 <https://docs.cloud-atlas.dev/discovery>`_ 自建网站，也就是本书的现实世界的实现
+- `infra.cloud-atlas.dev <https://infra.cloud-atlas.dev>`_ 构建 `「云图 -- 云计算图志: 探索」 <https://infra.cloud-atlas.dev/discovery>`_ 自建网站，也就是本书的现实世界的实现
 
 致谢
 =========

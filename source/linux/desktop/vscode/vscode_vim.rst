@@ -1,6 +1,20 @@
+.. _vscode_vim:
+
+=======================
+VSCode集成vim功能
+=======================
+
+.. _vscodevim:
+
+VSCodeVim
+===================
+
+VSCodeVim 是Visual Studio Code的一个Vim模拟器，可以通过VSCode Marketplace非常容易安装。
+
+这样在编辑代码文本时能够延续自己在Linux服务器上的开发体验，持续训练以保持肌肉记忆。
+
 .. _vscode-neovim:
 
-=====================
 vscode-neovim
 =====================
 

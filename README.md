@@ -4,8 +4,19 @@
 
 请访问:
 
+- `GitHub: huataihuang/cloud-atlas <https://github.com/huataihuang/cloud-atlas>`_ 本文档GitHub源码
 - [readthedocs平台上的云图](https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html) 以便获得最佳阅读体验。
-- [「云图 – 云计算图志: 探索 」](https://docs.cloud-atlas.dev/discovery) 我的自建网站，也就是云图在现实中的实现
+- (待上线) [「云图 – 云计算图志: 探索 」](https://infra.cloud-atlas.dev/discovery) 我的自建网站，也就是云图在现实中的实现
+
+## 主要技术
+
+- `AI/ML <>`_ 机器学习以及MLOps实践
+- `Kubernetes <>`_ 超大规模容器编排技术在生产环境的技术探索
+- `Ceph <>`_ 分布式存储，实践以及相关原理的学习研究
+- `Linux <>`_ 和 `Kernel <>`_ 重点研究系统管理以及内核性能优化
+- `FreeBSD <>`_ 个人的小众爱好
+
+我现在主要的目标是向MLOps和Dev转型，通过深入学习原理和实践来构建个人能够掌握的AI技术，加快自己的开发能力成长。
 
 ## 这本书的目标
 
@@ -32,15 +43,15 @@
 
 本书项目从 「云图 – 云计算图志」 修订命名为 「云图 – 云计算图志: 探索 」:
 
-- 从0开始构建 [cloud-atlas.dev](https://cloud-atlas.dev) 网站，「云图 – 云计算图志: 探索 」将作为 [docs.cloud-atlas.dev](https://docs.cloud-atlas.dev) 的一部分 [「云图 – 云计算图志: 探索 」](https://docs.cloud-atlas.dev/discovery)
+- 从0开始构建 [cloud-atlas.dev](https://cloud-atlas.dev) 网站，「云图 – 云计算图志: 探索 」将作为 [infra.cloud-atlas.dev](https://infra.cloud-atlas.dev) 的一部分 [「云图 – 云计算图志: 探索 」](https://infra.cloud-atlas.dev/discovery)
 - 在现实中完成一个Cloud Atlas项目
 
 2025年6月1日
 
-## [docs.cloud-atlas.dev](https://docs.cloud-atlas.dev) 上线
+## 上线
 
 我在不久前看到一个观点: 不要等所有条件都具备再出发，你永远不能计划所有的变化和做好所有的准备工作
 
-想法一直在变，但是我无法再等，所以我决定即使没有准备好，我也出发了: 包括我自己构建的这个网站 [docs.cloud-atlas.dev](https://docs.cloud-atlas.dev)
+想法一直在变，但是我无法再等，所以我决定即使没有准备好，我也出发了: 包括我自己构建的这个网站 [cloud-atlas.dev](https://cloud-atlas.dev)
 
-2025年9月1日
+2027年1月1日(计划时间点)
