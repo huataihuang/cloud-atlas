@@ -10,11 +10,11 @@
 
 ## 主要技术
 
-- `AI/ML <>`_ 机器学习以及MLOps实践
-- `Kubernetes <>`_ 超大规模容器编排技术在生产环境的技术探索
-- `Ceph <>`_ 分布式存储，实践以及相关原理的学习研究
-- `Linux <>`_ 和 `Kernel <>`_ 重点研究系统管理以及内核性能优化
-- `FreeBSD <>`_ 个人的小众爱好
+- [AI/ML](https://cloud-atlas.readthedocs.io/zh-cn/latest/machine_learning/index.html) 机器学习以及MLOps实践
+- [Kubernetes](https://cloud-atlas.readthedocs.io/zh-cn/latest/kubernetes/index.html) 超大规模容器编排技术在生产环境的技术探索
+- [Ceph](https://cloud-atlas.readthedocs.io/zh-cn/latest/ceph/index.html) 分布式存储，实践以及相关原理的学习研究
+- [Linux](https://cloud-atlas.readthedocs.io/zh-cn/latest/linux/index.html) 和 [Kernel](https://cloud-atlas.readthedocs.io/zh-cn/latest/kernel/index.html) 重点研究系统管理以及内核性能优化
+- [FreeBSD](https://cloud-atlas.readthedocs.io/zh-cn/latest/freebsd/index.html) 个人的小众爱好
 
 我现在主要的目标是向MLOps和Dev转型，通过深入学习原理和实践来构建个人能够掌握的AI技术，加快自己的开发能力成长。
 
