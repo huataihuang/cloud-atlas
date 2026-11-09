@@ -12,6 +12,8 @@ I have a dream!
 
 开源技术赋予我们站在巨人的肩膀上做到更高更强的可能，成长为 ``全栈工程师`` 。我想通过开源技术来构建 ``one personal cloud`` ，实现完整的数据中心的构建和运维，实现IaaS，PaaS，SaaS。从存储、网络、虚拟化，从操作系统到数据库，从Web服务到消息中间件，只要是基础的服务，结合DevOps的自动化能力来实现持续集成、持续交付。
 
+=> `GitHub: Cloud Atlas <https://github.com/huataihuang/cloud-atlas>`_
+
 「云图」- Cloud Atlas
 
 名字来源于一部关于自由的电影 「 `云图 <http://movie.douban.com/subject/3530403/>`_ 」

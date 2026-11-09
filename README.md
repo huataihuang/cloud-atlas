@@ -4,7 +4,7 @@
 
 请访问:
 
-- `GitHub: huataihuang/cloud-atlas <https://github.com/huataihuang/cloud-atlas>`_ 本文档GitHub源码
+- [GitHub: huataihuang/cloud-atlas](https://github.com/huataihuang/cloud-atlas) 本文档GitHub源码
 - [readthedocs平台上的云图](https://cloud-atlas.readthedocs.io/zh_CN/latest/index.html) 以便获得最佳阅读体验。
 - (待上线) [「云图 – 云计算图志: 探索 」](https://infra.cloud-atlas.dev/discovery) 我的自建网站，也就是云图在现实中的实现
 
