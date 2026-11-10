@@ -25,6 +25,7 @@ ollama
    ollama_d_crash.rst
    ollama_llm_plan.rst
    vscode_continue_ollama.rst
+   xcode_ollama.rst
    ollama_webui.rst
    ollama_env.rst
    ollama_workqueue_optimize.rst

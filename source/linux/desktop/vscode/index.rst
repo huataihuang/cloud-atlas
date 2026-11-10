@@ -22,6 +22,7 @@ VS Code
    vscode_remote_dev_kernel.rst
    code-server.rst
    code-server_container.rst
+   ../../../machine_learning/llm/ollama/vscode_continue_ollama.rst
    vscode_python.rst
    vscode_virtualenv.rst
    vscode_vim.rst

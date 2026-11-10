@@ -32,7 +32,7 @@ I have a dream!
 
 - :ref:`machine_learning`
 - :ref:`kubernetes`
-- :ref:`python` + `golang`
+- :ref:`python` + :ref:`golang`
 
 起源
 -------

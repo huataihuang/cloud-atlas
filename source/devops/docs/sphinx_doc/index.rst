@@ -20,6 +20,7 @@ Sphinx文档
 
    sphinx_docs-cloud-atlas-io.rst
    sphinx_openstackdocstheme.rst
+   sphinx_material_themes.rst
    sphinx-intl.rst
    sphinx_show_code.rst
    sphinx_table.rst
