@@ -25,11 +25,11 @@ WebSSH
 
 - 通过 :ref:`virtualenv` 准备 :ref:`python` 运行环境:
 
-.. literalinclude:: ../../python/startup/virtualenv/venv
+.. literalinclude:: ../../python/prepare/virtualenv/venv
    :language: bash
    :caption: venv初始化
 
-.. literalinclude:: ../../python/startup/virtualenv/venv_active
+.. literalinclude:: ../../python/prepare/virtualenv/venv_active
    :language: bash
    :caption: 激活venv
 

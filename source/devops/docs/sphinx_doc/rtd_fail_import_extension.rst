@@ -37,7 +37,7 @@ Read the Docs 类似问题在之前遇到过 :ref:`sphinx_typeerror` ，主要�
 
 - 更新 ``requirements.txt`` :
 
-.. literalinclude:: ../../../python/startup/rebuild_virtualenv/generate_requirements
+.. literalinclude:: ../../../python/prepare/rebuild_virtualenv/generate_requirements
    :language: bash
    :caption: 生成 :ref:`virtualenv` 所使用Python软件包依赖列表 ``requirements.txt``
 

@@ -27,7 +27,7 @@ Django开发环境(linux)
 
 - 在项目目录下重新恢复 
 
-.. literalinclude:: ../../python/startup/rebuild_virtualenv/pip_install_requirements
+.. literalinclude:: ../../python/prepare/rebuild_virtualenv/pip_install_requirements
    :language: bash
    :caption: 根据requirements.txt恢复virtualenv依赖模块包
 
@@ -38,12 +38,12 @@ Django开发环境(linux)
 
 - 通过 ``pip downlaod`` 命令下载指定软件包(版本)，这里举例 ``Babel-2.12.1-py3-none-any.whl`` :
 
-.. literalinclude:: ../../python/startup/pip_offline/pip_download
+.. literalinclude:: ../../python/prepare/pip_offline/pip_download
    :caption: ``pip download`` 可以下载指定版本python包
 
 - 将下载好的 ``.whl`` python包复制到目标主机，然后就可以直接离线安装:
 
-.. literalinclude:: ../../python/startup/pip_offline/pip_install_whl
+.. literalinclude:: ../../python/prepare/pip_offline/pip_install_whl
    :caption: ``pip install`` 可以安装下载好的 ``.whl`` python包
 
 :ref:`mysql` 数据连接

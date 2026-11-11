@@ -16,15 +16,15 @@ Kindle中国电子书店在2023年6月30日18店停止运营，留给我们只�
 
 - 准备 :ref:`virtualenv` ( :ref:`macos` ) :
 
-.. literalinclude:: ../../../python/startup/virtualenv/brew_install_pip3_venv
+.. literalinclude:: ../../../python/prepare/virtualenv/brew_install_pip3_venv
    :language: bash
    :caption: 在 :ref:`macos` 环境安装 ``pip3`` 以及 ``venv``
 
-.. literalinclude:: ../../../python/startup/virtualenv/venv
+.. literalinclude:: ../../../python/prepare/virtualenv/venv
    :language: bash
    :caption: venv初始化
 
-.. literalinclude:: ../../../python/startup/virtualenv/venv_active
+.. literalinclude:: ../../../python/prepare/virtualenv/venv_active
    :language: bash
    :caption: 激活venv
 

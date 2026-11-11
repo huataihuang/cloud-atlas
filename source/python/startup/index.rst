@@ -1,27 +1,20 @@
 .. _python_startup:
 
 =================================
-Python起步
+Python 快速起步
 =================================
 
 .. toctree::
    :maxdepth: 1
 
-   python_env_tools.rst
-   virtualenv.rst
-   rebuild_virtualenv.rst
-   pip.rst
-   upgrade_all_python_packages_with_pip.rst
-   python_in_rhel8.rst
-   python_in_kali.rst
-   python_in_archlinux.rst
-   install_python3_centos6.rst
-   build_python3_in_centos7.rst
-   python_doc.rst
-   pep_8.rst
-   run_python_in_browser.rst
-   pip_offline.rst
-   python_locale.rst
+   python_learning.rst
+   python_string.rst
+   python_number.rst
+   python_list.rst
+   python_tuple.rst
+   python_if.rst
+   python_dictionary.rst
+   python_nesting.rst
 
 .. only::  subproject and html
 

@@ -63,3 +63,25 @@ range()创建数值列表
 
 .. literalinclude:: python_list/square_numbers_one_line.py
    :caption: 使用 ``列表推导式`` 简化代码
+
+列表切片(slice)
+==================
+
+列表切片，可以指定要使用的第一个元素和最后一个元素的索引。与 ``range()`` 函数一样，Python在到达指定的第二个索引之前的元素时停止。所以要输出列表中的前3个元素，需要指定索引 ``0`` 和 ``3`` 。
+
+.. literalinclude:: python_list/list_slice.py
+   :caption: 列表切片 ``list_slice.py``
+
+输出是 ``['martina', 'michael', 'florence']`` 即，第2-4个元素(即索引 ``1~3`` )
+
+对于切片从开头开始，或者到结尾为止，都只需要
+
+复制列表
+==============
+
+如果要完整复制一个列表，那么同时省略起始索引和终止索引 ``[:]`` :
+
+.. literalinclude:: python_list/copy_list.py
+   :caption: 复制列表
+
+这里要注意，复制列表一定要给出索引 ``[:]`` ，否则会导致两个名字 ``my_foods`` 和 ``friend_foods`` 引用的是同一个里列表。

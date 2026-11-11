@@ -97,13 +97,13 @@ ssh登录(可选)
 .. literalinclude:: linux_jail_init/install_python
    :caption: 安装python
 
-.. literalinclude:: ../../../python/startup/virtualenv/venv
+.. literalinclude:: ../../../python/prepare/virtualenv/venv
    :language: bash
    :caption: venv初始化
 
 - 激活:
 
-.. literalinclude:: ../../../python/startup/virtualenv/venv_active
+.. literalinclude:: ../../../python/prepare/virtualenv/venv_active
    :language: bash
    :caption: 激活venv
 

@@ -25,7 +25,7 @@ Kinto.sh - 为Linux/Windows提供 ``Mac风格快捷键``
 
 ``kinto`` (Linux版本) 依赖 `github: mooz/xkeysnail <https://github.com/mooz/xkeysnail>`_ (一种使用Python编写的X环境键盘映射) ，需要有Python运行环境，最好的方法是使用 :ref:`virtualenv` 部署好环境，并且安装好 ``xkeysnail`` 模块在继续安装 ``kinto`` :
 
-.. literalinclude:: ../../python/startup/virtualenv/arch_pip_venv
+.. literalinclude:: ../../python/prepare/virtualenv/arch_pip_venv
    :caption: arch linux环境设置virtualenv
 
 另外，在后续运行 ``~/.config/kinto/gui/kinto-gui.py`` 会提示缺少 ``gi`` 模块::

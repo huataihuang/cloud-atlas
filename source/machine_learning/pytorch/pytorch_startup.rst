@@ -49,19 +49,19 @@ START LOCALLY
 
 - 安装 python3 / pip3 ( 采用 :ref:`virtualenv` ):
 
-.. literalinclude:: ../../python/startup/virtualenv/apt_install_pip3_venv
+.. literalinclude:: ../../python/prepare/virtualenv/apt_install_pip3_venv
    :language: bash
    :caption: 在 :ref:`ubuntu_linux` 22.04 LTS 安装 ``pip3`` 以及 ``venv``
 
 - 创建virtualenv:
 
-.. literalinclude:: ../../python/startup/virtualenv/venv
+.. literalinclude:: ../../python/prepare/virtualenv/venv
    :language: bash
    :caption: venv初始化
 
 - 激活:
 
-.. literalinclude:: ../../python/startup/virtualenv/venv_active
+.. literalinclude:: ../../python/prepare/virtualenv/venv_active
    :language: bash
    :caption: 激活venv
 

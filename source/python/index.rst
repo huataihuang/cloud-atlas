@@ -12,10 +12,9 @@ Python
    :maxdepth: 1
 
    intro_python.rst
+   prepare/index
    startup/index
-   var/index
    os/index
-   dictionary/index
    network/index
    database/index
    web/index

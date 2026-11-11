@@ -33,11 +33,11 @@ python
 
 ``a-shell`` 内置了 :ref:`python` ，所以对于我 :ref:`write_doc` 所使用的 :ref:`sphinx_doc` 非常方便:
 
-.. literalinclude:: ../../../python/startup/virtualenv/venv
+.. literalinclude:: ../../../python/prepare/virtualenv/venv
    :language: bash
    :caption: venv初始化
 
-.. literalinclude:: ../../../python/startup/virtualenv/venv_active
+.. literalinclude:: ../../../python/prepare/virtualenv/venv_active
    :language: bash
    :caption: 激活venv
 

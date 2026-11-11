@@ -129,13 +129,13 @@ macOS工作室
 
 虚拟沙箱环境非常简单:
 
-.. literalinclude:: ../../python/startup/virtualenv/venv
+.. literalinclude:: ../../python/prepare/virtualenv/venv
    :language: bash
    :caption: venv初始化
 
 - 激活:
 
-.. literalinclude:: ../../python/startup/virtualenv/venv_active
+.. literalinclude:: ../../python/prepare/virtualenv/venv_active
    :language: bash
    :caption: 激活venv
 
