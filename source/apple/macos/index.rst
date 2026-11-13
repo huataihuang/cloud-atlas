@@ -67,6 +67,7 @@ macOS
    fix_macbook_slow.rst
    xbar.rst
    kitty.rst
+   webex.rst
    macos_shared_library.rst
    macos_spoken_content.rst
    oclp_macos.rst

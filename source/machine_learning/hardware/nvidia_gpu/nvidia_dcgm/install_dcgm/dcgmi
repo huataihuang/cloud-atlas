@@ -1,0 +1,1 @@
+dcgmi discovery -l

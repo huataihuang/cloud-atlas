@@ -12,7 +12,7 @@ podman简介
 
 由于 ``podman`` 系列工具已经移植到 :ref:`freebsd` ，所以我现在也在实践 :ref:`run_containers_on_freebsd`
 
-podman和 :ref:`docker` 不同之处是默认就启用了 ``rootless`` 模式，这样 :ref:`podman_combine_rootfull_rootless_mode` 能够兼顾提高系统安全性以及特殊的底层硬件操作需求。
+podman和 :ref:`docker` 不同之处是默认就启用了 ``rootless`` 模式，这样 :ref:`podman_combine_rootful_rootless_mode` 能够兼顾提高系统安全性以及特殊的底层硬件操作需求。
 
 参考
 =======

@@ -6,6 +6,7 @@
 
 实践记录:
 
+- :ref:`install_nvidia_cuda` 完整的各个版本的CUDA堆栈安装前后的详细步骤
 - :ref:`install_nvidia_linux_driver` 物理主机安装CUDA driver
 - :ref:`install_nvidia_linux_driver_in_ovmf_vm` 虚拟机内部安装CUDA driver
 - :ref:`nvidia_p4_pi_docker` 树莓派ARM架构Ubuntu环境安装CUDA driver成功，但是实践也发现 :ref:`nvidia-driver_pi_os` (Raspberry Pi OS虽然是debian变种，但是实际上无法正常编译安装CUDA驱动) 失败

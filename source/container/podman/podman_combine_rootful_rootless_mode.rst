@@ -1,4 +1,4 @@
-.. _podman_combine_rootfull_rootless_mode:
+.. _podman_combine_rootful_rootless_mode:
 
 =======================================
 Rootful和Rootless模式结合运行Podman
@@ -30,3 +30,6 @@ Podman 的 ``Rootful`` (系统级有根模式) 与 ``Rootless`` (无根模式) �
 .. note::
 
    目前我在实验环境中使用了 ``admin`` 账号来运行 ``rootless`` 容器，但是 ``admin`` 账号实际上是特殊的具有 ``sudo`` 提权权限的账号，所以这 **不是一个生产环境的安全部署** 。正确且安全的部署方式应该采用 :ref:`secure_container_env`
+
+- :ref:`podman_rootless_nvidia_container_toolkit`
+- :ref:`podman_rootful_mode_dcgm-exporter`

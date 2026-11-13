@@ -11,6 +11,7 @@ ollama
    install_ollama.rst
    model_name_means.rst
    model_choice.rst
+   kv_cache_size.rst
    ollama_integrations/index
    ollama_run_deepseek.rst
    ollama_nvidia_gpu.rst

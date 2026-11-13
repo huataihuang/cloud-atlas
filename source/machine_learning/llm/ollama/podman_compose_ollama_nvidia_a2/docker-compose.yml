@@ -18,7 +18,13 @@ services:
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_KV_CACHE_TYPE=q8_0
+      - OLLAMA_SCHED_SPREAD=1
+      - OLLAMA_NUM_PARALLEL=1
+      - OLLAMA_MAX_LOADED_MODELS=1
       - OLLAMA_KEEP_ALIVE=24h
+      # 明确暴露三张卡（编号 0,1,2）
+      - NVIDIA_VISIBLE_DEVICES=0,1,2
     deploy:
       resources:
         reservations:
@@ -53,17 +59,20 @@ services:
     image: docker.io/nvidia/dcgm-exporter:latest
     container_name: nvidia-exporter
     restart: always
+    # nv-hostengine在物理主机上运行(nvidia-dcgm)，如果rootful模式可以不需要
+    command: ["-r", "host.containers.internal:5555"]
     ports:
       - "9400:9400"
-    cap_add:
-      - SYS_ADMIN
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    # Rootful模式运行需要以下配置
+    #cap_add:
+    #  - SYS_ADMIN
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: all
+    #          capabilities: [gpu]
     networks:
       - ai-network
 

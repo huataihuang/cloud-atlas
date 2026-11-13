@@ -115,9 +115,14 @@ MacBook Pro 15" Late 2013
 macOS Big Sur
 ===============
 
-2021年，苹果推出的macOS Monterey Version 12已经不再支持我这台古老的MacBook Pro Late 2013了，也就是说现在我能够在这台笔记上最高只安装 macOS Big Sur Version 11.6.8。
+2021年，苹果推出的macOS Monterey Version 12已经不再支持我这台古老的MacBook Pro Late 2013了，也就是说现在我能够在这台笔记上最高只安装 macOS Big Sur Version 11.7.10。
 
-这里会遇到一个问题，无法登陆Google账号: :ref:`macos_big_sur_gts_root_certificate`
+现在(2026年) macOS Big Sur已经失去了很多常用软件的支持(大多数软件的最低要求是 macOS 12):
+
+- 无法登陆Google账号: :ref:`macos_big_sur_gts_root_certificate`
+- 无法安装使用 :ref:`webex` 这导致日常工作沟通受阻
+
+
 
 参考
 ======

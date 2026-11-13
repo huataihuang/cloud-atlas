@@ -15,6 +15,7 @@ Python 快速起步
    python_if.rst
    python_dictionary.rst
    python_nesting.rst
+   python_input.rst
 
 .. only::  subproject and html
 

@@ -31,12 +31,17 @@ Podman compose
 .. literalinclude:: podman_compose_ollama_nvidia_a2/docker-compose.yml
    :language: yaml
    :caption: 带有 NVIDIA GPU 支持的 ``docker-compose.yml``
-   :emphasize-lines: 22-28
+   :emphasize-lines: 20-25
 
 说明:
 
   - ``deploy.resources.reservations.devices`` 将GPU导入容器
-  - 采用了特权提权 ``cap_add``
+  - 这里的 ``volumes`` 只设置了 ``/root/.ollama`` 的映射到Host主机，因为我发现 :ref:`nvidia_container_toolkit` 支持 ``rootlsess`` 模式运行，容器的模型似乎就存储在 ``/root/.ollama/models`` 目录下，而 :ref:`podman_compose_ollama_amd_mi50` 使用了 ``rootful`` 模式，容器模型似乎存在 ``/models`` 目录下，所以我映射了3个目录。
+  - ``注意`` : 由于 ``rootless`` 模式运行， :ref:`dcgm-exporter` 容器必须使用 ``-r host.containers.internal:5555`` 参数去访问物理主机上 :ref:`install_dcgm` 提供的 ``nv-hostengine`` 输出服务，才能实现监控数据采集
+
+.. note::
+
+   我最近在部署 :ref:`podman_compose_ollama_amd_mi50` 才体会到NVIDIA在驱动上的特殊优势: 在podman中可以使用 ``rootless`` 模式来运行容器，能够正常使用NVIDIA GPU。这表明NVIDIA的设备更适配容器运行环境 :ref:`nvidia_container_toolkit` 提供了标准的隔离型(名字空间、cgoups)，安全性更高(Rootless)。
 
 .. warning::
 

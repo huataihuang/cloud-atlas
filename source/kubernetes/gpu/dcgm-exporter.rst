@@ -10,7 +10,7 @@ DCGM-Exporter
 
 .. note::
 
-   物理主机需要安装 :ref:`nvidia_dcgm`
+   物理主机需要安装 :ref:`nvidia_dcgm` **这点非常重要**
 
 运行 ``dcgm-exporter``
 ========================

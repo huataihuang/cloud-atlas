@@ -91,6 +91,10 @@ Ubuntu
    :language: bash
    :caption: 在Ubuntu 22.04操作系统添加NVIDIA官方软件仓库配置
 
+.. literalinclude:: install_nvidia_cuda/cuda_toolkit_ubuntu_repo_24.04
+   :language: bash
+   :caption: 在Ubuntu 24.04操作系统添加NVIDIA官方软件仓库配置
+
 - 安装:
 
 .. literalinclude:: install_nvidia_cuda/cuda_toolkit_ubuntu_repo_install
