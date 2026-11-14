@@ -123,6 +123,12 @@ gemini建议在Ollama中拉取一个轻量 Embedding 模型:
 
   - 用来将 PDF、Markdown 和代码切片转换成向量，是知识库检索（RAG）必不可少的基础模型
 
+模型性能测试
+==============
+
+- Prompt阶段 550~580 token/s
+- 推理阶段   5.54 token/s
+
 Grafana配置
 =============
 

@@ -1,0 +1,20 @@
+FROM qwen3.8:27b-q8_0
+
+# 1. 代码开发专用参数：极低的温度确保语法严谨、逻辑确定性高，减少幻觉
+# temperature 不能过低，例如 0.1 会导致过度思考
+PARAMETER temperature 0.6
+PARAMETER top_p 0.95
+PARAMETER top_k 20
+# 关闭重复惩罚，否则(例如设置1.05)会强迫模型避开已出现的关键字而出现绕弯子重新推导
+PARAMETER repeat_penalty 1
+
+# 2. 超大上下文配置：支持 256k (262144) 源码级跨文件分析
+#PARAMETER num_ctx 262144
+# 将上下文从 256k 调整为 32k 或 64k，兼顾代码跨文件引用与显存安全
+PARAMETER num_ctx 32768
+
+# 3. 总线与内存优化：将 num_batch 降至 128，平抑 PCIe 瞬时带宽冲击，解决页错误 (Page Fault)
+PARAMETER num_batch 128
+
+# 4. 线程匹配：绑定宿主机物理 CPU 核心（根据实际情况调整，例如 8 核）
+PARAMETER num_thread 8

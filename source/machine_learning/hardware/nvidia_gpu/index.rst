@@ -33,6 +33,7 @@ NVIDIA GPU
    install_nvidia_linux_driver_ubuntu.rst
    nvidia_gpu_fan_control.rst
    optimize_nvidia_gpu_fan_control.rst
+   tesla_a2_performance_health_monitor.rst
    tesla_a2_lost_debug.rst
    tesla_a2_idle_power_fluctuation.rst
 

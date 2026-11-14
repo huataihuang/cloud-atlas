@@ -19,6 +19,7 @@ Linux系统管理
    check_shared_libray_is_used.rst
    process/index
    move_home_to_lvm.rst
+   agetty_issue.rst
 
 .. only::  subproject and html
 
