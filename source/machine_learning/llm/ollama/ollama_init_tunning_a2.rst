@@ -9,12 +9,12 @@ iommu优化
 
 在 :ref:`ollama_workqueue_optimize` 实践中，激活内核 :ref:`iommu` 能够增强内存复制性能:
 
-.. literalinclude:: ../../../kvm/iommu/iommu_grub_config/iommu_grub_config/grub
+.. literalinclude:: ../../../kvm/iommu/iommu_grub_config/grub
    :caption: 修订 ``/etc/default/grub`` 添加 IOMMU 配置
 
 更新Grub并重启:
 
-.. literalinclude:: ../../../kvm/iommu/iommu_grub_config/iommu_grub_config/update-grub
+.. literalinclude:: ../../../kvm/iommu/iommu_grub_config/update-grub
    :caption: 更新grub
 
 通过 Modelfile 优化
@@ -94,7 +94,7 @@ iommu优化
 
 - 测试性能: 推理速度大约 ``5.25 ~ 5.40 t/s`` (接近之前默认配置的速度 ``5.5 t/s`` )
 
-.. wanging::
+.. wanning::
 
    新问题出现: 上述参数组合导致了 ``过度思考`` ，整个推理过程时间暴涨数倍，甚至一直无法完成推理: 同样的问题，默认设置半小时完成，现在优化上述参数后已经思考了两个小时还没有结束迹象...
 

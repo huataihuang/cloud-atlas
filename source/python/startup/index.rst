@@ -16,6 +16,10 @@ Python 快速起步
    python_dictionary.rst
    python_nesting.rst
    python_input.rst
+   python_function.rst
+   python_class.rst
+   python_file.rst
+   python_test.rst
 
 .. only::  subproject and html
 

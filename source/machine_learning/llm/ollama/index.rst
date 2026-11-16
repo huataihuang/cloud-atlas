@@ -32,6 +32,7 @@ ollama
    ollama_workqueue_optimize.rst
    ollama_init.rst
    ollama_init_tunning.rst
+   ollama_init_tunning_a2.rst
    open-webui_rrule.rst
    open-webui_embedding_model.rst
 
