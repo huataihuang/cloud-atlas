@@ -11,6 +11,7 @@ ZFS架构
    zfs_arc.rst
    zfs_virtual_disks.rst
    zfs_enterprise.rst
+   zvol.rst
 
 .. only::  subproject and html
 

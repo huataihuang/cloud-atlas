@@ -7,6 +7,7 @@ Incus实例
 .. toctree::
    :maxdepth: 1
 
+   incus_debian_vm.rst
    incus_freebsd.rst
    incus_freebsd_tunning.rst
    incus_container_systemd_debug.rst

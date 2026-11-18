@@ -14,6 +14,11 @@ OpenEBS架构
   - :ref:`mysql` 和 :ref:`pgsql` 可以使用 :ref:`zfs` 引擎( :ref:`cstor` )进行恢复
   - :ref:`kafka` 这样的流媒体应用程序可以使用 :ref:`nvme` 引擎 :ref:`mayastor` (OpenEBS开发的NVMe-oF存储)
 
+其他解决方案
+================
+
+:ref:`k8s_zfs` 可以采用 `kubernetes-zfs-provisioner <https://github.com/ccremer/kubernetes-zfs-provisioner>`_ 来提供专注于 :ref:`zfs` 用于Kubernetes。
+
 参考
 =======
 

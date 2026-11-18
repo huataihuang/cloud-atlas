@@ -8,6 +8,7 @@ Python网络编程
    :maxdepth: 1
 
    paramiko.rst
+   ops_check.rst
    youtube-dl.rst
    yt-dlp.rst
    yt-dlp_bilibili.rst

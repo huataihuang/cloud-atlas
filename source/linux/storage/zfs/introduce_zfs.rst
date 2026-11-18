@@ -52,6 +52,22 @@ ZFS是 128 位文件系统，这个设计如此超前，以至于理论极限可
 - 轻量化文件系统创建
 - 透明加密
 
+企业级ZFS产品和方案
+========================
+
+- `High-Availability.com <https://www.high-availability.com>`_
+
+High-Availability公司基于ZFS系统构建了 ``RSF-1`` ，从 ``HAC documentation <https://docs.high-availability.com>`_ 来看， ``RSF-1`` 可能是采用了ZFS的 :ref:`zfs_replication` 实现了share null高可用存储，并且提供了自研的管理界面来帮助用户管理ZFS存储。
+
+- :ref:`openebs`
+
+OpenEBS是集成在 :ref:`kubernetes` 中的ZFS卷管理系统，为容器提供卷管理，也基于 :ref:`zfs_replication` 为pod迁移本地存储提供支持。
+
+ZFS相关信息和资料
+===================
+
+2026年，我发现一个 `Practical ZFS论坛 <https://discourse.practicalzfs.com/>`_ 很有意思，集中讨论和ZFS相关度技术和产品，可能对一些实践经验以及问题启发会有帮助。
+
 我的实践规划
 =============
 

@@ -8,6 +8,7 @@ Incus 存储
    :maxdepth: 1
 
    incus_disk_device_mapping.rst
+   incus_storage_volumes.rst
    incus_zfs.rst
    incus_zfs_xcloud.rst
    incus_lvm.rst

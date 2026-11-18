@@ -6,6 +6,10 @@
 
 在 :ref:`k8s_persistent_volumes` 支持iSCSI，本文构建基于ZFS卷的iSCSI LUN输出，为 :ref:`k8s_iscsi` 提供存储服务
 
+.. note::
+
+   ZFS卷，即 :ref:`zvol` 是一个复杂的多功能块设备数据集(dataset)，需要非常精心 :ref:`zfs_tuning`
+
 :ref:`zfs_admin_prepare`
 ===========================
 

@@ -16,6 +16,7 @@ Kubernetes存储
    k8s_iscsi.rst
    k8s_cephfs.rst
    k8s_rbd.rst
+   k8s_zfs.rst
    k8s_storage_platform.rst
    rook/index
    kadalu/index

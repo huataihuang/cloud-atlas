@@ -11,7 +11,7 @@ ZFS
    install/index
    infra/index
    admin/index
-   tunning/index
+   tuning/index
    zrep/index
    sanoid/index
 
