@@ -11,6 +11,8 @@ ZFS优化
 .. toctree::
    :maxdepth: 1
 
+   zfs_in_vm_over_zvol_tuning.rst
+
 .. only::  subproject and html
 
    Indices

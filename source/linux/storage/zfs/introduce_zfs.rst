@@ -66,7 +66,9 @@ OpenEBS是集成在 :ref:`kubernetes` 中的ZFS卷管理系统，为容器提供
 ZFS相关信息和资料
 ===================
 
-2026年，我发现一个 `Practical ZFS论坛 <https://discourse.practicalzfs.com/>`_ 很有意思，集中讨论和ZFS相关度技术和产品，可能对一些实践经验以及问题启发会有帮助。
+- 2026年，我发现一个 `Practical ZFS论坛 <https://discourse.practicalzfs.com/>`_ 很有意思，集中讨论和ZFS相关度技术和产品，可能对一些实践经验以及问题启发会有帮助。
+- YouTube上 `NextDoorNetAdmin: ZFS Explainers <https://www.youtube.com/watch?v=LM-A-RLCZ9U&list=PLt3a1pwnl3V94dmfV78YyetjR17iH86y9>`_ 解释了一些基本概念，特别是 :ref:`zvol`
+
 
 我的实践规划
 =============

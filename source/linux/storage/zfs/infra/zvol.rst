@@ -29,6 +29,7 @@ zvol的特性和性能
 举例:
 
 - :ref:`qemu-img_convert_qcow2_zvol` 为避免 ``qcow2`` 这种压缩的 **稀疏文件** 使用的 ``CoW`` 写时复制机制和 ZFS的 ``CoW`` 写时复制机制冲突(双重写时复制带来不必要的性能损耗)，需要将 ``qcow2`` 转换成 ``raw`` 磁盘存储到 zvol 上。
+- zvol和虚拟机内的ZFS: :ref:`zfs_in_vm_over_zvol_tuning`
 
 zvol实践
 =============
