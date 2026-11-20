@@ -202,7 +202,7 @@ Rootful模式运行使用GPU设备的容器
 
 .. note::
 
-   ``Rootfull`` vs. ``Rootless`` 参见 :ref:`podman_combine_rootfull_rootless_mode`
+   ``Rootfull`` vs. ``Rootless`` 参见 :ref:`podman_combine_rootful_rootless_mode`
 
 由于我前面已经采用 ``rootless`` 模式下载和运行了 ``xxdoman/ollama-mi50`` 和 ``rocm/device-metrics-exporter`` ，所以在当前 ``admin`` 账号下执行 ``podman images`` 可以看到这两个镜像已经下载(当前实际存储在admin的HOME目录下):
 
