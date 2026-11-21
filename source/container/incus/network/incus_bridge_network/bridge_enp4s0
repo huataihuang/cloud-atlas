@@ -1,0 +1,26 @@
+# 1. 创建 bridge 网络，绑定到物理网卡 enp4s0
+incus network create lan-bridge \
+  ipv4.address=192.168.6.200/24 \
+  ipv4.address.auto=true \
+  ipv4.nat=true \
+  projects=incus \
+  network=bridged \
+  bridge=br0 \
+  bridge.mtu=1500
+
+# 2. 把 enp4s0 加入 bridge（先断开 enp4s0 的 IP 配置，改由 bridge 承载）
+#    编辑 /etc/netplan/ 或 nmcli：
+sudo nmcli connection modify <enp4s0-conn> ipv4.method auto
+sudo nmcli connection down <enp4s0-conn>
+
+# 创建 Linux bridge
+sudo ip link add br0 type bridge
+sudo ip link set enp4s0 master br0
+sudo ip link set br0 up
+# sudo dhclient br0   # 或手动配置 192.168.6.200/24
+
+# 3. 将 VM 网络接口切换到新 bridge
+incus network attach lan-bridge <vm-name> enp5s0
+
+# 4. 重启 VM 网络
+incus restart <vm-name>

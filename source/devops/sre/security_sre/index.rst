@@ -12,6 +12,11 @@
    :maxdepth: 1
 
    security_sre_quickstart.rst
+   security_and_reliability.rst
+   safe_proxies.rst
+   design_tradeoffs.rst
+   design_for_least_privilege.rst
+   design_for_understandability.rst
    zero_trust_system.rst
 
 .. only::  subproject and html
