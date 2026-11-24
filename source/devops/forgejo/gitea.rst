@@ -1,7 +1,7 @@
-.. _intro_gitea:
+.. _gitea:
 
 ===============
-Gitea简介
+Gitea
 ===============
 
 `Gitea - Git with a cup of tea <https://gitea.io/>`_ 是一个社区开源的Git服务，实现了类似 github / gitlab 的代码管理服务。这个开源项目采用了Go语言开发，致力于实现轻量级的代码托管解决方案。
@@ -15,11 +15,13 @@ Gitea简介
    - Gogs是unknown(中文昵称:无闻 `无闻的博客unknwon.io <https://unknwon.io/>`_ )发起，且是主要代码贡献者和唯一维护人。无闻的博客是中英文双语，提供了一些开发和自我管理的见解，不过更新不多
    - Gitea是在Gogs基础上fork出的新开发分支，主要区别是由社区决定加入特性，所以新特性多一些
 
-   `从 Gogs vs Gitea 看中外文化差异 #16 <https://github.com/wolfogre/blog-utterances/issues/16>`_ 提供了两者对比的一些观点，有意思
+     - `从 Gogs vs Gitea 看中外文化差异 #16 <https://github.com/wolfogre/blog-utterances/issues/16>`_ 提供了两者对比的一些观点，有意思
+
+   - 在Gitea转为商业公司(MIT协议，商业公司主导)之后，社区又重新从Gitea Fork出了 :ref:`forgejo` 项目，采用GPLv3 / MIT (完全社区治理)
 
 .. note::
 
-   Gitea 以及 Gogs 没有提供完整的 CI/CD 功能，需要借助第三方持续集成。这点不如 GitLab 功能全面。不过，或许可以尝试结合 :ref:`jenkins` 来实现完整功能o
+   Gitea 以及 Gogs 没有提供完整的 CI/CD 功能，需要借助第三方持续集成。这点不如 GitLab 功能全面。不过，或许可以尝试结合 :ref:`jenkins` 来实现完整功能
 
    `[疑问] Gitea 和 GItlab 各自的优势是什么?大家更偏向于哪种代码仓库？ <https://v2ex.com/t/808391>`_ 讨论了选择，简单来说:
 

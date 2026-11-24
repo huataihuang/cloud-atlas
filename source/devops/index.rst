@@ -12,7 +12,7 @@ DevOps
    git/index
    gitlab/index
    jenkins/index
-   gitea/index
+   forgejo/index
    terraform/index
    heroku/index
    ansible/index
